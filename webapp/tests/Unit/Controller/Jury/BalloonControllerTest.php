@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Tests\Unit\BaseTestCase;
 use Generator;
 
@@ -11,9 +12,8 @@ class BalloonControllerTest extends BaseTestCase
 
     /**
      * Test that some roles can not access balloons page.
-     *
-     * @dataProvider provideRoleNoBalloonAccess
      */
+    #[DataProvider('provideRoleNoBalloonAccess')]
     public function testNoBalloonsAccessForRole(string $role): void
     {
         $this->roles = [$role];
@@ -24,9 +24,8 @@ class BalloonControllerTest extends BaseTestCase
 
     /**
      * Test that some roles can access balloons page.
-     *
-     * @dataProvider provideRoleBalloonAccess
      */
+    #[DataProvider('provideRoleBalloonAccess')]
     public function testBalloonsAccessForRole(string $role): void
     {
         $this->roles = [$role];
@@ -39,14 +38,14 @@ class BalloonControllerTest extends BaseTestCase
         self::assertSelectorExists('div.alert:contains("No balloons")');
     }
 
-    public function provideRoleNoBalloonAccess(): Generator
+    public static function provideRoleNoBalloonAccess(): Generator
     {
         yield ['team'];
         yield ['clarification_rw'];
         yield ['jury'];
     }
 
-    public function provideRoleBalloonAccess(): Generator
+    public static function provideRoleBalloonAccess(): Generator
     {
         yield ['balloon'];
         yield ['admin'];

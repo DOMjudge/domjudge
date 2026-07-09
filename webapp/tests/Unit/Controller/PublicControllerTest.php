@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\EnableSelfregisterFixture;
 use App\DataFixtures\Test\EnableSelfregisterSecondCategoryFixture;
 use App\DataFixtures\Test\SampleSubmissionsInBucketsFixture;
@@ -21,7 +22,7 @@ class PublicControllerTest extends BaseTestCase
     protected static string $urlTeams        = '/jury/teams';
     protected static string $urlAffil        = '/jury/affiliations';
     protected static array  $requiredFields  = ['teamName','affiliationName','affiliationShortName','existingAffiliation'];
-    protected static array  $formFields      = ['username','name','email','teamName','affiliation','affiliationName',
+    protected static array  $formFields      = ['username','name','teamName','affiliation','affiliationName',
                                                 'affiliationShortName','affiliationCountry','existingAffiliation'];
     protected static array  $duplicateFields = ['username'=>['input'=>'selfregister','error'=>'The username \'"selfregistered"\' is already in use.'],
                                                 'teamName'=>['input'=>'Example teamname','error'=>'This team name is already in use.'],
@@ -95,9 +96,7 @@ class PublicControllerTest extends BaseTestCase
         return $formFields;
     }
 
-    /**
-     * @dataProvider selfRegisterProvider
-     */
+    #[DataProvider('selfRegisterProvider')]
     public function testSelfRegister(array $inputs, string $password, array $fixtures, string $category): void
     {
         $formFields = $this->setupSelfRegisterForm($inputs, $fixtures, $password, $category);
@@ -133,9 +132,7 @@ class PublicControllerTest extends BaseTestCase
         }
     }
 
-    /**
-     * @dataProvider selfRegisterMissingFieldProvider
-     */
+    #[DataProvider('selfRegisterMissingFieldProvider')]
     public function testSelfRegisterMissingField(array $inputs, string $password, array $fixtures, string $category, string $rField): void
     {
         $formFields = $this->setupSelfRegisterForm($inputs, $fixtures, $password, $category);
@@ -148,9 +145,7 @@ class PublicControllerTest extends BaseTestCase
         }
     }
 
-    /**
-     * @dataProvider selfRegisterDuplicateValueProvider
-     */
+    #[DataProvider('selfRegisterDuplicateValueProvider')]
     public function testSelfRegisterDuplicateValue(array $inputs, string $password, array $fixtures, string $category, string $error): void
     {
         $formFields = $this->setupSelfRegisterForm($inputs, $fixtures, $password, $category);
@@ -160,9 +155,7 @@ class PublicControllerTest extends BaseTestCase
         self::assertSelectorExists('html:contains("'.$error.'")');
     }
 
-    /**
-     * @dataProvider selfRegisterNonExistingValuesProvider
-     */
+    #[DataProvider('selfRegisterNonExistingValuesProvider')]
     public function testSelfRegisterNonExistingValues(array $inputs, array $fixtures, string $category): void
     {
         $tmpInputs = $inputs;
@@ -181,9 +174,7 @@ class PublicControllerTest extends BaseTestCase
         self::assertSelectorExists($selector);
     }
 
-    /**
-     * @dataProvider selfRegisterWrongPasswordProvider
-     */
+    #[DataProvider('selfRegisterWrongPasswordProvider')]
     public function testSelfRegisterWrongPassword(
         array $inputs,
         string $password,
@@ -198,10 +189,10 @@ class PublicControllerTest extends BaseTestCase
         self::assertSelectorExists($selector);
     }
 
-    // username, name, email, teamName, affiliation, affiliationName
+    // username, name, teamName, affiliation, affiliationName
     // affiliationShortName, affiliationCountry, existingAffiliation
     // plainPassword
-    public function selfRegisterProvider(): Generator
+    public static function selfRegisterProvider(): Generator
     {
         foreach ([[EnableSelfregisterFixture::class],[EnableSelfregisterFixture::class,EnableSelfregisterSecondCategoryFixture::class]] as $fixtures) {
             foreach (['2','4'] as $index => $category) {
@@ -210,7 +201,7 @@ class PublicControllerTest extends BaseTestCase
                 }
                 yield[['username'=>'minimaluser', 'teamName'=>'NewTeam','affiliation'=>'none'],'shirt-recognize-bar-together', $fixtures, $category];
                 yield[['username'=>'bruteforce', 'teamName'=>'Fib(9)','affiliation'=>'none'],'01123581321', $fixtures, $category];
-                yield[['username'=>'fullUser', 'name'=>'Full User', 'email'=>'email@domain.com','teamName'=>'Trial','affiliation'=>'none'],'..........', $fixtures, $category];
+                yield[['username'=>'fullUser', 'name'=>'Full User', 'teamName'=>'Trial','affiliation'=>'none'],'..........', $fixtures, $category];
                 yield[['username'=>'student@', 'teamName'=>'Student@Uni',
                        'affiliation'=>'new','affiliationName'=>'NewUni','affiliationShortName'=>'nu'],'p@ssword_Is_long', $fixtures, $category];
                 yield[['username'=>'winner@', 'teamName'=>'FunnyTeamname',
@@ -219,13 +210,13 @@ class PublicControllerTest extends BaseTestCase
                 yield[['username'=>'newinstsamecountry', 'name'=>'CompetingDutchTeam', 'teamName'=>'SupperT3@m','affiliation'=>'new','affiliationName'=>'Vrije Universiteit',
                        'affiliationShortName'=>'vu','affiliationCountry'=>'NLD'],'demodemodemo', $fixtures, $category];
                 if (count($fixtures)===1) {
-                    yield[['username'=>'reusevaluesofexistinguser', 'name'=>'selfregistered user for example team','email'=>'electronic@mail.tld','teamName'=>'EasyEnough','affiliation'=>'none'],'demodemodemo', [...$fixtures, SelfRegisteredUserFixture::class],''];
+                    yield[['username'=>'reusevaluesofexistinguser', 'name'=>'selfregistered user for example team','teamName'=>'EasyEnough','affiliation'=>'none'],'demodemodemo', [...$fixtures, SelfRegisteredUserFixture::class],''];
                 }
             }
         }
     }
 
-    public function selfRegisterWrongPasswordProvider(): Generator
+    public static function selfRegisterWrongPasswordProvider(): Generator
     {
         foreach ([[EnableSelfregisterFixture::class],[EnableSelfregisterFixture::class,EnableSelfregisterSecondCategoryFixture::class]] as $fixtures) {
             foreach (['2','4'] as $index => $category) {
@@ -239,7 +230,7 @@ class PublicControllerTest extends BaseTestCase
         }
     }
 
-    public function selfRegisterDuplicateValueProvider(): Generator
+    public static function selfRegisterDuplicateValueProvider(): Generator
     {
         $inputs = ['username'=>'originalUsername', 'teamName'=>'TeamName','affiliation'=>'none'];
         $password = 'foo';
@@ -275,7 +266,7 @@ class PublicControllerTest extends BaseTestCase
         }
     }
 
-    public function selfRegisterNonExistingValuesProvider(): Generator
+    public static function selfRegisterNonExistingValuesProvider(): Generator
     {
         $fixtures = [EnableSelfregisterFixture::class,EnableSelfregisterSecondCategoryFixture::class];
         yield[['username'=>'nonexistingcategory', 'teamName'=>'NewTeam','affiliation'=>'none'], $fixtures, '42'];
@@ -286,9 +277,8 @@ class PublicControllerTest extends BaseTestCase
 
     /**
      * Test that the problem statistics render the correct data
-     *
-     * @dataProvider provideTestProblemStatistics
      */
+    #[DataProvider('provideTestProblemStatistics')]
     public function testProblemStatistics(
         bool $removeFreezeTime,
         bool $removeUnfreezeTime,
@@ -333,7 +323,7 @@ class PublicControllerTest extends BaseTestCase
         self::assertCount($expectedBlueBoxes, $frozenBoxes);
     }
 
-    public function provideTestProblemStatistics(): Generator
+    public static function provideTestProblemStatistics(): Generator
     {
         yield [false, false, 1, 1, 6]; // Keep both times, we expect one green, one red and six blue boxes (2 around the freeze and 4 at the end)
         yield [true, true, 3, 3, 0]; // Remove both times, we expect three green and three red boxes

@@ -41,6 +41,14 @@
                 {{ _self.section_header('sliders', 'Scoring') }}
                 {{ _self.form_table_row(form.scoreboardType) }}
                 {{ _self.form_table_row(form.scoreDiffEpsilon) }}
+                <tr data-penalty-time-field>
+                    <th>{{ form.penaltyTime.vars.label }}</th>
+                    <td>
+                        {{ form_errors(form.penaltyTime) }}
+                        {{ form_widget(form.penaltyTime) }}
+                        {{ form_help(form.penaltyTime) }}
+                    </td>
+                </tr>
                 {{ _self.form_table_row(form.allowSubmit) }}
                 {{ _self.form_table_row(form.processBalloons) }}
                 {{ _self.form_table_row(form.runtimeAsScoreTiebreaker) }}
@@ -97,6 +105,7 @@
                         {{ form_help(form.externalSourcePassword) }}
                     </td>
                 </tr>
+                {{ _self.form_table_row(form.shadowCompareByScore, 'data-external-source-field') }}
             </tbody>
         </table>
     </div>
@@ -208,10 +217,14 @@
 <script>
     function afterProblemAdd() {
         bindColor();
-        $('[data-toggle="toggle"]').not('.toggle-initialized').bootstrapToggle().addClass('toggle-initialized');
+        // Only initialize toggles in the newly added row (last row in the collection)
+        $('[data-collection-holder] tr:last [data-toggle="toggle"]').bootstrapToggle();
     }
 
     $(function () {
+        // Mark all existing toggles as initialized to prevent accidental re-initialization
+        $('[data-toggle="toggle"]').addClass('toggle-initialized');
+
         function showHideTeams() {
             if ($('#contest_openToAllTeams').is(':checked')) {
                 $('[data-teams-field]').hide();
@@ -276,5 +289,16 @@
                 $('i', $(this)).attr('class', 'fa fa-eye');
             }
         });
+
+        function showHidePenaltyTime() {
+            if ($('#contest_scoreboardType').val() === 'pass-fail') {
+                $('[data-penalty-time-field]').show();
+            } else {
+                $('[data-penalty-time-field]').hide();
+            }
+        }
+
+        $('#contest_scoreboardType').on('change', showHidePenaltyTime);
+        showHidePenaltyTime();
     });
 </script>

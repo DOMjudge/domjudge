@@ -3,7 +3,7 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-PROBLEMS = hello fltcmp boolfind
+PROBLEMS = hello fltcmp boolfind jumble hangman
 
 INI = $(PROBLEMS:=.ini)
 PDF = $(PROBLEMS:=.pdf)

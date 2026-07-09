@@ -2,13 +2,12 @@
 
 namespace App\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Generator;
 
 class GeneralAvailabilityTest extends BaseTestCase
 {
-    /**
-     * @dataProvider urlProvider
-     */
+    #[DataProvider('urlProvider')]
     public function testPageIsSuccessful(string $url, int $code): void
     {
         $this->client->request('GET', $url);
@@ -18,7 +17,7 @@ class GeneralAvailabilityTest extends BaseTestCase
         self::assertEquals($code, $actual, var_export($response, true));
     }
 
-    public function urlProvider(): Generator
+    public static function urlProvider(): Generator
     {
         yield ['/public/problems', 200];
         yield ['/public', 200];

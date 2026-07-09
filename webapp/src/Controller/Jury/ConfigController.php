@@ -38,6 +38,7 @@ class ConfigController extends AbstractController
         foreach ($specs as &$spec) {
             $spec = $this->config->addOptions($spec);
         }
+
         unset($spec);
         /** @var Configuration[] $options */
         $options = $this->em->createQueryBuilder()
@@ -121,6 +122,10 @@ class ConfigController extends AbstractController
                 $this->addFlash('danger', 'Some errors occurred while saving configuration, ' .
                     'please check the data you entered.');
             }
+        }
+
+        if (((int)$this->config->get('minimum_number_of_balloons')) !== 0) {
+            $this->addFlash('warning', 'Minimum number of balloons is enabled, this leads to data inconsistencies and/or information leaking during the freeze. Can be disabled in the "Display" tab.');
         }
 
         $categories = [];

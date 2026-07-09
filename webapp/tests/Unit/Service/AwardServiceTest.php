@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Service;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataTransferObject\Award;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -190,7 +191,6 @@ class AwardServiceTest extends KernelTestCase
             $rankCache,
             $this->contest->getFreezeData(),
             true,
-            20,
             false
         );
     }
@@ -269,9 +269,7 @@ class AwardServiceTest extends KernelTestCase
         }
     }
 
-    /**
-     * @dataProvider provideMedalType
-     */
+    #[DataProvider('provideMedalType')]
     public function testMedalType(int $teamIndex, ?string $expectedMedalType): void
     {
         $awardsService = $this->getAwardService();
@@ -279,7 +277,7 @@ class AwardServiceTest extends KernelTestCase
         static::assertEquals($expectedMedalType, $awardsService->medalType($team, $this->contest, $this->scoreboard));
     }
 
-    public function provideMedalType(): \Generator
+    public static function provideMedalType(): \Generator
     {
         yield [0, 'gold-medal'];
         yield [1, 'gold-medal'];

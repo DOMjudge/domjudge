@@ -28,6 +28,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use JsonException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Validator\ConstraintViolationInterface;
@@ -59,10 +60,12 @@ readonly class ImportExportService
      *     penalty_time: int,
      *     activate_time: string,
      *     warning_message?: string,
+     *     process_balloons?: bool,
      *     medals: array{
-     *         gold: int,
-     *         silver: int,
-     *         bronze: int
+     *         enabled: bool,
+     *         gold?: int,
+     *         silver?: int,
+     *         bronze?: int
      *     },
      *     scoreboard_freeze_time?: string,
      *     scoreboard_freeze_duration?: string,
@@ -83,6 +86,8 @@ readonly class ImportExportService
      *         use_judgements?: bool,
      *         username?: string,
      *         password?: string,
+     *         score_diff_epsilon?: float,
+     *         compare_by_score_only?: bool,
      *     }
      * }
      */
@@ -99,7 +104,7 @@ readonly class ImportExportService
                 ? $contest->getEndtimeString()
                 : Utils::absTime($contest->getEndtime(), true),
             'duration' => Utils::relTime($contest->getContestTime((float)$contest->getEndtime())),
-            'penalty_time' => $this->config->get('penalty_time'),
+            'penalty_time' => $contest->getPenaltyTime(),
             'activate_time' => Utils::isRelTime($contest->getActivatetimeString())
                 ? $contest->getActivatetimeString()
                 : Utils::absTime($contest->getActivatetime(), true),
@@ -108,7 +113,11 @@ readonly class ImportExportService
         if ($warnMsg = $contest->getWarningMessage()) {
             $data['warning_message'] = $warnMsg;
         }
+        if (!$contest->getProcessBalloons()) {
+            $data['process_balloons'] = false;
+        }
 
+        $data['medals'] = ['enabled' => $contest->getMedalsEnabled()];
         foreach (['gold', 'silver', 'bronze'] as $medal) {
             $medalCount = $contest->{'get' . ucfirst($medal) . 'Medals'}();
             if ($medalCount) {
@@ -153,6 +162,12 @@ readonly class ImportExportService
             }
             if ($contest->getExternalSourcePassword()) {
                 $shadow['password'] = $contest->getExternalSourcePassword();
+            }
+            if ($contest->getScoreDiffEpsilon() != 0.0001) {
+                $shadow['score_diff_epsilon'] = (float)$contest->getScoreDiffEpsilon();
+            }
+            if ($contest->getShadowCompareByScore()) {
+                $shadow['compare_by_score_only'] = true;
             }
             $data['shadow'] = $shadow;
         }
@@ -323,7 +338,8 @@ readonly class ImportExportService
             ->setStarttimeString(date_format($startTime, 'Y-m-d H:i:s e'))
             ->setActivatetimeString($activateTimeIsRelative ? $activateRelativeTime : date_format($activateTime, 'Y-m-d H:i:s e'))
             ->setEndtimeString(sprintf('+%s', $data['duration']))
-            ->setPublic($data['public'] ?? true);
+            ->setPublic($data['public'] ?? true)
+            ->setProcessBalloons($data['process_balloons'] ?? $data['process-balloons'] ?? true);
         if ($deactivateTime) {
             $contest->setDeactivatetimeString($deactivateTimeIsRelative ? $deactivateRelativeTime : date_format($deactivateTime, 'Y-m-d H:i:s e'));
         }
@@ -339,15 +355,28 @@ readonly class ImportExportService
             $contest->setScoreboardtype($scoreboardType);
         }
 
+        if ($contest->getScoreboardType() === ScoreboardType::PASS_FAIL) {
+            $penaltyTime = $data['penalty_time'] ?? $data['penalty-time'] ?? $data['penalty'] ?? null;
+            if ($penaltyTime !== null) {
+                $contest->setPenaltytime((int)$penaltyTime);
+            }
+        } else {
+            $contest->setPenaltyTime(0);
+        }
+
         // Get all visible categories. For now, we assume these are the ones getting awards
         $visibleCategories = $this->em->getRepository(TeamCategory::class)->findBy(['visible' => true]);
 
-        if (empty($visibleCategories)) {
+        // Check if medals are explicitly enabled/disabled, otherwise infer from visible categories
+        $medalsEnabled = $data['medals']['enabled'] ?? null;
+        if ($medalsEnabled === false) {
+            $contest->setMedalsEnabled(false);
+        } elseif (empty($visibleCategories)) {
             $contest->setMedalsEnabled(false);
         } else {
             foreach ($visibleCategories as $visibleCategory) {
                 $contest
-                    ->setMedalsEnabled(true)
+                    ->setMedalsEnabled($medalsEnabled ?? true)
                     ->addMedalCategory($visibleCategory);
             }
 
@@ -393,13 +422,23 @@ readonly class ImportExportService
         if ($shadow) {
             $contest->setExternalSourceEnabled(true);
             $inflector = InflectorFactory::create()->build();
+
+            // Fields that don't follow the setExternalSource* naming pattern
+            $fieldMapping = [
+                'score_diff_epsilon'    => 'setScoreDiffEpsilon',
+                'score-diff-epsilon'    => 'setScoreDiffEpsilon',
+                'compare_by_score_only' => 'setShadowCompareByScore',
+                'compare-by-score-only' => 'setShadowCompareByScore',
+            ];
+
             foreach ($shadow as $field => $value) {
                 if ($field === 'type') {
-                    // Type is now an enum
                     $value = ExternalContestSourceType::from($value);
                 }
-                // Map shadow fields to Contest setter methods
-                $fieldFunc = 'setExternalSource' . ucfirst($inflector->camelize($field));
+
+                $fieldFunc = $fieldMapping[$field]
+                    ?? 'setExternalSource' . ucfirst($inflector->camelize($field));
+
                 if (method_exists($contest, $fieldFunc)) {
                     $contest->$fieldFunc($value);
                 }
@@ -407,21 +446,6 @@ readonly class ImportExportService
         }
 
         $this->em->flush();
-
-        $penaltyTime = $data['penalty_time'] ?? $data['penalty-time'] ?? $data['penalty'] ?? null;
-        if ($penaltyTime !== null) {
-            $currentPenaltyTime = $this->config->get('penalty_time');
-            if ($penaltyTime != $currentPenaltyTime) {
-                $penaltyTimeConfiguration = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'penalty_time']);
-                if (!$penaltyTimeConfiguration) {
-                    $penaltyTimeConfiguration = new Configuration();
-                    $penaltyTimeConfiguration->setName('penalty_time');
-                    $this->em->persist($penaltyTimeConfiguration);
-                }
-
-                $penaltyTimeConfiguration->setValue((int)$penaltyTime);
-            }
-        }
 
         if (isset($data['problems'])) {
             $this->importProblemsData($contest, $data['problems']);
@@ -576,6 +600,29 @@ readonly class ImportExportService
         return $data;
     }
 
+    public function getResultsTsvResponse(
+        Contest $contest,
+        int $sortOrder,
+        bool $individuallyRanked = false,
+        bool $honors = true,
+    ): StreamedResponse {
+        $data = $this->getResultsData($sortOrder, $individuallyRanked, $honors, $contest);
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($data): void {
+            echo "results\t1\n";
+            foreach ($data as $row) {
+                echo implode("\t", array_map(fn($field) => Utils::toTsvField((string)$field), $row->toArray())) . "\n";
+            }
+        });
+
+        $filename = 'results.tsv';
+        $response->headers->set('Content-Type', 'text/plain; name="' . $filename . '"; charset=utf-8');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+        return $response;
+    }
+
     /**
      * @return ResultRow[]
      */
@@ -583,8 +630,11 @@ readonly class ImportExportService
         int $sortOrder,
         bool $individuallyRanked = false,
         bool $honors = true,
+        ?Contest $contest = null,
     ): array {
-        $contest = $this->dj->getCurrentContest();
+        if ($contest === null) {
+            $contest = $this->dj->getCurrentContest();
+        }
         if ($contest === null) {
             throw new BadRequestHttpException('No current contest');
         }
@@ -1406,11 +1456,6 @@ readonly class ImportExportService
                 return -1;
             }
 
-            if (preg_match('/^([a-zA-Z0-9]{1}([a-zA-Z0-9._-]{0,34}[a-zA-Z0-9])?)$/', $teamItem['team']['teamid']) === 0) {
-                $message = 'ID not in CLICS format';
-                return -1;
-            }
-
             $team->setExternalid($teamItem['team']['teamid']);
             unset($teamItem['team']['teamid']);
 
@@ -1577,9 +1622,24 @@ readonly class ImportExportService
                         $team
                             ->setExternalid((string)$teamId)
                             ->setName($teamId . ' - auto-create during import');
-                        $this->em->persist($team);
-                        $this->dj->auditlog('team', $team->getExternalid(),
-                            'added', 'imported from tsv');
+                        $errors = $this->validator->validate($team);
+                        if ($errors->count()) {
+                            $messages = [];
+                            /** @var ConstraintViolationInterface $error */
+                            foreach ($errors as $error) {
+                                $messages[] = sprintf('  • `%s`: %s', $error->getPropertyPath(), $error->getMessage());
+                            }
+
+                            $message .= sprintf("Auto-created team for user at index %d (%s) has errors:\n%s\n\n",
+                                $index,
+                                json_encode($accountItem),
+                                implode("\n", $messages));
+                            $anyErrors = true;
+                        } else {
+                            $this->em->persist($team);
+                            $this->dj->auditlog('team', $team->getExternalid(),
+                                'added', 'imported from tsv');
+                        }
                     }
                 }
                 $accountItem['user']['team'] = $team;

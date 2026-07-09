@@ -81,7 +81,6 @@ class ScoringScoreboardIntegrationTest extends KernelTestCase
         $this->configValues = [
             'verification_required'    => false,
             'compile_penalty'          => false,
-            'penalty_time'             => 20,
             'score_in_seconds'         => false,
             'shadow_mode'              => 0,
             'show_teams_on_scoreboard' => 0,
@@ -197,7 +196,7 @@ class ScoringScoreboardIntegrationTest extends KernelTestCase
     protected function tearDown(): void
     {
         // Preserve the data for inspection if a test failed.
-        if (!$this->hasFailed()) {
+        if (!$this->status()->isFailure() && !$this->status()->isError()) {
             $this->em->remove($this->contest);
             $this->em->remove($this->judgehost);
             foreach ($this->teams as $team) {
@@ -439,7 +438,7 @@ class ScoringScoreboardIntegrationTest extends KernelTestCase
         // Calculate total score if not provided
         if ($score === null) {
             $totalScore = '0';
-            foreach ($testcaseResults as $tcKey => [$result, $tcScore]) {
+            foreach ($testcaseResults as [$result, $tcScore]) {
                 if ($result === 'correct') {
                     $totalScore = bcadd($totalScore, $tcScore, 9);
                 }

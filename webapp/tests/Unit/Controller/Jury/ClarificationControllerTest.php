@@ -23,10 +23,10 @@ class ClarificationControllerTest extends BaseTestCase
         $this->client->click($link);
         $crawler = $this->checkStatusAndFollowRedirect();
 
-        $h3s = $crawler->filter('h3')->extract(['_text']);
-        self::assertEquals('New requests', $h3s[0]);
-        self::assertEquals('Handled requests', $h3s[1]);
-        self::assertEquals('General clarifications', $h3s[2]);
+        $h2s = $crawler->filter('h2')->extract(['_text']);
+        self::assertEquals('New requests', $h2s[0]);
+        self::assertEquals('Handled requests', $h2s[1]);
+        self::assertEquals('General clarifications', $h2s[2]);
 
         self::assertSelectorExists('html:contains("Is it necessary to read the problem statement carefully?")');
     }
@@ -41,8 +41,8 @@ class ClarificationControllerTest extends BaseTestCase
         $this->verifyPageResponse('GET', '/jury/contests/demo/clarifications', 200);
         $crawler = $this->getCurrentCrawler();
 
-        self::assertSelectorTextContains('h3#newrequests ~ div.table-wrapper', 'Is it necessary to');
-        self::assertSelectorTextContains('h3#oldrequests ~ div.table-wrapper', 'What is 2+2?');
+        self::assertSelectorTextContains('h2#newrequests ~ div.table-wrapper', 'Is it necessary to');
+        self::assertSelectorTextContains('h2#oldrequests ~ div.table-wrapper', 'What is 2+2?');
     }
     /**
      * Test that general clarification is under general clarifications header.
@@ -55,9 +55,9 @@ class ClarificationControllerTest extends BaseTestCase
         $crawler = $this->getCurrentCrawler();
 
         // General clarification to all.
-        self::assertSelectorTextContains('h3#clarifications ~ div.table-wrapper', 'Lunch is served');
+        self::assertSelectorTextContains('h2#clarifications ~ div.table-wrapper', 'Lunch is served');
         // Jury initiated message to specific team.
-        self::assertSelectorTextContains('h3#clarifications ~ div.table-wrapper', 'There was a mistake');
+        self::assertSelectorTextContains('h2#clarifications ~ div.table-wrapper', 'There was a mistake');
     }
 
     /**

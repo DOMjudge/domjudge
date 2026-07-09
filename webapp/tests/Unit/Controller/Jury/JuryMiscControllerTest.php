@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\SampleSubmissionsMultipleTriesFixture;
 use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectFixture;
 use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectSameLanguageFixture;
@@ -59,9 +60,7 @@ class JuryMiscControllerTest extends BaseTestCase
         self::assertSelectorExists('html:contains("DOMjudge Jury interface")');
     }
 
-    /**
-     * @dataProvider provideContestStageForBalloon
-     */
+    #[DataProvider('provideContestStageForBalloon')]
     public function testBalloonScoreboard(array $fixtures, bool $public, string $contestStage): void
     {
         //self::assertEquals((string) $public, $contestStage);
@@ -122,7 +121,7 @@ class JuryMiscControllerTest extends BaseTestCase
         }
     }
 
-    public function provideContestStageForBalloon(): Generator
+    public static function provideContestStageForBalloon(): Generator
     {
         foreach (['preActivation'=>[DemoPreActivationContestFixture::class],
                   'preStart'=>[DemoPreStartContestFixture::class],
@@ -153,9 +152,8 @@ class JuryMiscControllerTest extends BaseTestCase
 
     /**
      * Test that the ajax endpoints return the correct data.
-     *
-     * @dataProvider provideJuryAjax
      */
+    #[DataProvider('provideJuryAjax')]
     public function testJuryAjax(string $endpoint, int $status, array $newRoles, array $finalObject): void
     {
         $url = '/jury/ajax/'.$endpoint;
@@ -171,7 +169,7 @@ class JuryMiscControllerTest extends BaseTestCase
         }
     }
 
-    public function provideJuryAjax(): Generator
+    public static function provideJuryAjax(): Generator
     {
         foreach ([200 => ['balloon','jury','admin'], 403 => ['team']] as $status => $roles) {
             foreach ($roles as $role) {
@@ -186,7 +184,9 @@ class JuryMiscControllerTest extends BaseTestCase
                 yield ['problems', $status, [$role], ['results' => [0 => ['id' => 'boolfind', 'text' => 'Boolean switch search (boolfind)'],
                                                                     1 => ['id' => 'fltcmp',
                                                                           'text' => 'Float special compare test (fltcmp)'],
-                                                                    2 => ['id' => 'hello', 'text' => 'Hello World (hello)']]]];
+                                                                    2 => ['id' => 'hangman', 'text' => 'Hangman (hangman)'],
+                                                                    3 => ['id' => 'hello', 'text' => 'Hello World (hello)'],
+                                                                    4 => ['id' => 'jumble', 'text' => 'Jumble words (jumble)']]]];
                 yield ['teams', $status, [$role], ['results' => [0 => ['id' => 'domjudge', 'text' => 'DOMjudge (domjudge)'],
                                                                  1 => ['id' => 'exteam', 'text' => 'Example teamname (exteam)']]]];
                 yield ['languages', $status, [$role], ['results' => [0 => ['id' => 'ada', 'text' => 'Ada (ada)'],
@@ -196,22 +196,23 @@ class JuryMiscControllerTest extends BaseTestCase
                                                                      4 => ['id' => 'csharp', 'text' => 'C# (csharp)'],
                                                                      5 => ['id' => 'cpp', 'text' => 'C++ (cpp)'],
                                                                      6 => ['id' => 'f95', 'text' => 'Fortran (f95)'],
-                                                                     7 => ['id' => 'haskell', 'text' => 'Haskell (haskell)'],
-                                                                     8 => ['id' => 'java', 'text' => 'Java (java)'],
-                                                                     9 => ['id' => 'javascript', 'text' => 'JavaScript (javascript)'],
-                                                                     10 => ['id' => 'kotlin', 'text' => 'Kotlin (kotlin)'],
-                                                                     11 => ['id' => 'lua', 'text' => 'Lua (lua)'],
-                                                                     12 => ['id' => 'ocaml', 'text' => 'OCaml (ocaml)'],
-                                                                     13 => ['id' => 'pascal', 'text' => 'Pascal (pascal)'],
-                                                                     14 => ['id' => 'pl', 'text' => 'Perl (pl)'],
-                                                                     15 => ['id' => 'sh', 'text' => 'POSIX shell (sh)'],
-                                                                     16 => ['id' => 'prolog', 'text' => 'Prolog (prolog)'],
-                                                                     17 => ['id' => 'python3', 'text' => 'Python 3 (python3)'],
-                                                                     18 => ['id' => 'r', 'text' => 'R (r)'],
-                                                                     19 => ['id' => 'ruby', 'text' => 'Ruby (ruby)'],
-                                                                     20 => ['id' => 'rust', 'text' => 'Rust (rust)'],
-                                                                     21 => ['id' => 'scala', 'text' => 'Scala (scala)'],
-                                                                     22 => ['id' => 'swift', 'text' => 'Swift (swift)']]]];
+                                                                     7 => ['id' => 'golang', 'text' => 'Golang (golang)'],
+                                                                     8 => ['id' => 'haskell', 'text' => 'Haskell (haskell)'],
+                                                                     9 => ['id' => 'java', 'text' => 'Java (java)'],
+                                                                     10 => ['id' => 'javascript', 'text' => 'JavaScript (javascript)'],
+                                                                     11 => ['id' => 'kotlin', 'text' => 'Kotlin (kotlin)'],
+                                                                     12 => ['id' => 'lua', 'text' => 'Lua (lua)'],
+                                                                     13 => ['id' => 'ocaml', 'text' => 'OCaml (ocaml)'],
+                                                                     14 => ['id' => 'pascal', 'text' => 'Pascal (pascal)'],
+                                                                     15 => ['id' => 'pl', 'text' => 'Perl (pl)'],
+                                                                     16 => ['id' => 'sh', 'text' => 'POSIX shell (sh)'],
+                                                                     17 => ['id' => 'prolog', 'text' => 'Prolog (prolog)'],
+                                                                     18 => ['id' => 'python3', 'text' => 'Python 3 (python3)'],
+                                                                     19 => ['id' => 'r', 'text' => 'R (r)'],
+                                                                     20 => ['id' => 'ruby', 'text' => 'Ruby (ruby)'],
+                                                                     21 => ['id' => 'rust', 'text' => 'Rust (rust)'],
+                                                                     22 => ['id' => 'scala', 'text' => 'Scala (scala)'],
+                                                                     23 => ['id' => 'swift', 'text' => 'Swift (swift)']]]];
                 yield ['contests', $status, [$role], ['results' => [0 => ['id' => 'demo', 'text' => 'Demo contest (demo - demo)']
                                                                    ]]];
             }

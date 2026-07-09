@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Service;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Entity\Configuration;
 use App\Entity\Executable;
 use App\Service\ConfigurationService;
@@ -70,9 +71,7 @@ class ConfigurationServiceTest extends KernelTestCase
         $this->config = null;
     }
 
-    /**
-     * @dataProvider provideConfigDefaults
-     */
+    #[DataProvider('provideConfigDefaults')]
     public function testConfigDefaults(string $categoryName, string $itemName): void
     {
         $foundItem = $this->findItem($categoryName, $itemName);
@@ -85,9 +84,7 @@ class ConfigurationServiceTest extends KernelTestCase
         self::assertSame($defaultValue, $this->config->get($itemName));
     }
 
-    /**
-     * @dataProvider provideConfigDefaults
-     */
+    #[DataProvider('provideConfigDefaults')]
     public function testConfigDefaultsAll(
         string $categoryName,
         string $itemName
@@ -103,7 +100,7 @@ class ConfigurationServiceTest extends KernelTestCase
         self::assertSame($defaultValue, $all[$itemName]);
     }
 
-    public function provideConfigDefaults(): Generator
+    public static function provideConfigDefaults(): Generator
     {
         yield ['Scoring', 'compile_penalty'];
         yield ['Scoring', 'results_prio'];
@@ -112,9 +109,7 @@ class ConfigurationServiceTest extends KernelTestCase
         yield ['Display', 'time_format'];
     }
 
-    /**
-     * @dataProvider provideInvalidItem
-     */
+    #[DataProvider('provideInvalidItem')]
     public function testInvalidItem(string $itemName, bool $publicOnly): void
     {
         $this->expectExceptionMessageMatches("/^Configuration variable '.*' not found\.$/");
@@ -124,16 +119,14 @@ class ConfigurationServiceTest extends KernelTestCase
         $this->config->get($itemName, $publicOnly);
     }
 
-    public function provideInvalidItem(): Generator
+    public static function provideInvalidItem(): Generator
     {
         yield ['does_not_exist', false]; // This item does not exist
         yield ['does_not_exist', true];
         yield ['results_prio', true]; // This item exists but is non-public
     }
 
-    /**
-     * @dataProvider provideConfigFromDatabase
-     */
+    #[DataProvider('provideConfigFromDatabase')]
     public function testConfigFromDatabase(
         string $itemName,
         mixed $dbValue,
@@ -160,9 +153,7 @@ class ConfigurationServiceTest extends KernelTestCase
         );
     }
 
-    /**
-     * @dataProvider provideConfigFromDatabase
-     */
+    #[DataProvider('provideConfigFromDatabase')]
     public function testConfigFromDatabaseAll(
         string $itemName,
         mixed $dbValue,
@@ -189,18 +180,16 @@ class ConfigurationServiceTest extends KernelTestCase
         );
     }
 
-    public function provideConfigFromDatabase(): Generator
+    public static function provideConfigFromDatabase(): Generator
     {
-        yield ['compile_penalty', true, 1];
+        yield ['compile_penalty', true];
         yield ['results_prio', ['no-output' => 37, 'correct' => 1]];
         yield ['clar_categories', ['Category 1', 'Category 2']];
         yield ['show_compile', 1];
         yield ['time_format', '%H:%M:%s'];
     }
 
-    /**
-     * @dataProvider provideAllHidesNonPublic
-     */
+    #[DataProvider('provideAllHidesNonPublic')]
     public function testAllHidesNonPublic(string $itemName): void
     {
         $this->configRepository->expects(self::once())
@@ -211,7 +200,7 @@ class ConfigurationServiceTest extends KernelTestCase
         self::assertArrayNotHasKey($itemName, $all);
     }
 
-    public function provideAllHidesNonPublic(): Generator
+    public static function provideAllHidesNonPublic(): Generator
     {
         yield ['verification_required'];
         yield ['script_timelimit'];
@@ -231,14 +220,15 @@ class ConfigurationServiceTest extends KernelTestCase
         $this->configRepository->expects(self::once())
             ->method('findAll')
             ->willReturn($unknownItems);
-        $matcher = self::exactly(2);
-        $this->logger->expects($matcher)
-            ->method('warning')->willReturnCallback(function (...$parameters) use ($matcher): void {
-                if ($matcher->getInvocationCount() === 1) {
+        $callCount = 0;
+        $this->logger->expects(self::exactly(2))
+            ->method('warning')->willReturnCallback(function (...$parameters) use (&$callCount): void {
+                $callCount++;
+                if ($callCount === 1) {
                     $this->assertSame('Configuration value %s not defined', $parameters[0]);
                     $this->assertSame(['unknown1'], $parameters[1]);
                 }
-                if ($matcher->getInvocationCount() === 2) {
+                if ($callCount === 2) {
                     $this->assertSame('Configuration value %s not defined', $parameters[0]);
                     $this->assertSame(['unknown2'], $parameters[1]);
                 }
@@ -270,9 +260,7 @@ class ConfigurationServiceTest extends KernelTestCase
         self::assertArrayNotHasKey('unknown2', $all);
     }
 
-    /**
-     * @dataProvider provideAddOptionsExecutables
-     */
+    #[DataProvider('provideAddOptionsExecutables')]
     public function testAddOptionsExecutables(string $item, array $expected): void
     {
         if ($item === 'default_compare') {
@@ -317,7 +305,7 @@ class ConfigurationServiceTest extends KernelTestCase
         self::assertSame($expected, $spec->options);
     }
 
-    public function provideAddOptionsExecutables(): Generator
+    public static function provideAddOptionsExecutables(): Generator
     {
         yield ['default_compare', [
             'exec1' => 'Descr 1',
@@ -329,9 +317,7 @@ class ConfigurationServiceTest extends KernelTestCase
         ] ];
     }
 
-    /**
-     * @dataProvider provideAddOptionsResults
-     */
+    #[DataProvider('provideAddOptionsResults')]
     public function testAddOptionsResults(string $item): void
     {
         $verdictOptions = ['' => ''];
@@ -352,7 +338,7 @@ class ConfigurationServiceTest extends KernelTestCase
         }
     }
 
-    public function provideAddOptionsResults(): Generator
+    public static function provideAddOptionsResults(): Generator
     {
         yield ['results_prio'];
         yield ['results_remap'];

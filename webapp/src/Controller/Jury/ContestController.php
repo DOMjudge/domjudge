@@ -12,6 +12,7 @@ use App\Entity\JudgeTask;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\RemovedInterval;
+use App\Entity\ScoreboardType;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
@@ -84,6 +85,7 @@ class ContestController extends BaseController
             'shortname'       => ['title' => 'shortname', 'sort' => true],
             'name'            => ['title' => 'name', 'sort' => true],
             'scoreboard_type' => ['title' => 'scoreboard type', 'sort' => true],
+            'penalty_time'    => ['title' => 'penalty time'],
             'activatetime'    => ['title' => 'activate', 'sort' => true],
             'starttime'       => ['title' => 'start', 'sort' => true,
                                   'default_sort' => true, 'default_sort_order' => 'desc'],
@@ -267,6 +269,12 @@ class ContestController extends BaseController
                 if ($timeIcon !== null) {
                     $contestdata[$timeField . 'time']['icon']  = $timeIcon;
                 }
+            }
+
+            if ($contest->getScoreboardType() === ScoreboardType::PASS_FAIL) {
+                $contestdata['penalty_time']['value'] .= ' minutes';
+            } else {
+                $contestdata['penalty_time']['value'] = '-';
             }
 
             $styles = [];

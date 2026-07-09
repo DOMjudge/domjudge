@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Generator;
 
 class JudgehostControllerTest extends BaseTestCase
@@ -42,6 +43,10 @@ class JudgehostControllerTest extends BaseTestCase
 
     public function provideSingle(): Generator
     {
+        if (empty($this->expectedObjects)) {
+            yield [0, []];
+            return;
+        }
         foreach ($this->expectedObjects as $expectedProperties) {
             yield [$expectedProperties['hostname'], $expectedProperties];
         }
@@ -49,9 +54,8 @@ class JudgehostControllerTest extends BaseTestCase
 
     /**
      * Test that the endpoint returns an empty list for objects that don't exist.
-     *
-     * @dataProvider provideSingleNotFound
      */
+    #[DataProvider('provideSingleNotFound')]
     public function testSingleNotFound(string $id): void
     {
         $id = $this->resolveReference($id);

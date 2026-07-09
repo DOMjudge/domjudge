@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Service\Compare;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataTransferObject\ResultRow;
 use App\Service\Compare\Message;
 use App\Service\Compare\MessageType;
@@ -16,9 +17,8 @@ class ResultsCompareServiceTest extends KernelTestCase
      * @param ResultRow[]  $results1
      * @param ResultRow[]  $results2
      * @param Message[] $expectedMessages
-     *
-     * @dataProvider provideCompare
      */
+    #[DataProvider('provideCompare')]
     public function testCompare(array $results1, array $results2, array $expectedMessages): void
     {
         $serializer = $this->createMock(SerializerInterface::class);
@@ -30,7 +30,7 @@ class ResultsCompareServiceTest extends KernelTestCase
         self::assertEquals($expectedMessages, $messages);
     }
 
-    public function provideCompare(): Generator
+    public static function provideCompare(): Generator
     {
         yield [[], [], []];
         yield [

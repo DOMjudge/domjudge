@@ -21,7 +21,9 @@ return RectorConfig::configure()
         RenameFunctionRector::class,
         ConsistentImplodeRector::class,
         ClosureToArrowFunctionRector::class,
+        __DIR__ . '/config/bundles.php',
     ])
+    ->withImportNames(importShortClasses: false)
     ->withTypeCoverageLevel(0)
     ->withDeadCodeLevel(0)
     ->withCodeQualityLevel(0);

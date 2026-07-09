@@ -93,6 +93,13 @@
                         <td>{{ contest.scoreboardType.value }}</td>
                         <td></td>
                     </tr>
+                    {% if contest.scoreboardType == constant('App\\Entity\\ScoreboardType::PASS_FAIL') %}
+                        <tr>
+                            <th>Penalty time</th>
+                            <td>{{ contest.penaltyTime }} minutes</td>
+                            <td></td>
+                        </tr>
+                    {% endif %}
                     <tr>
                         <th>Score diff epsilon</th>
                         <td>{{ contest.scoreDiffEpsilon }}</td>
@@ -131,13 +138,13 @@
                         <td>
                             {% if contest.medalsEnabled %}
                                 <div class="card">
-                                    <h6 class="card-header" id="categories">
+                                    <div class="card-header" id="categories">
                                         <a class="collapsed d-block text-dark pt-0 pb-0" data-bs-toggle="collapse" href="#collapsecategories" aria-expanded="true" aria-controls="collapsecategories" id="collapseheader">
                                             {{ (contest.goldMedals > 0) + (contest.silverMedals > 0) + (contest.bronzeMedals > 0) }} different types of medals (Show/Hide details)
                                             <i class="fa fa-chevron-down float-end"></i>
                                         </a>
-                                    </h6>
-                                    <div id="collapsecategories" class="collapse collapsed" aria-labelledby="categories">
+                                    </div>
+                                    <div id="collapsecategories" class="collapse collapsed">
                                         <div class="card-body pb-1">
                                             <a>{{ contest.goldMedals }} Gold Medal(s)</a>
                                             <br>

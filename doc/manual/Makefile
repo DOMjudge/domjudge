@@ -37,10 +37,12 @@ install-docs: docs
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/manual build/domjudge-team-manual.pdf
 
 inplace-install: docs
+ifeq ($(BUILD_DOCS),yes)
 inplace-install-l:
 	ln -sf build/html
 	ln -sf build/team
 	ln -sf build/domjudge-team-manual.pdf
+endif
 
 inplace-uninstall-l:
 	-rm -f html team

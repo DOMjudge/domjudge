@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Service;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\NonSortOrderTeamCategoryFixture;
 use App\DataFixtures\Test\TeamWithExternalIdEqualsOneFixture;
 use App\DataFixtures\Test\TeamWithExternalIdEqualsTwoFixture;
@@ -41,9 +42,7 @@ class ImportExportServiceTest extends BaseTestCase
         self::bootKernel();
     }
 
-    /**
-     * @dataProvider provideImportContestDataErrors
-     */
+    #[DataProvider('provideImportContestDataErrors')]
     public function testImportContestDataErrors(mixed $data, string $expectedMessage): void
     {
         /** @var ImportExportService $importExportService */
@@ -53,7 +52,7 @@ class ImportExportServiceTest extends BaseTestCase
         self::assertNull($cid);
     }
 
-    public function provideImportContestDataErrors(): Generator
+    public static function provideImportContestDataErrors(): Generator
     {
         yield [[], 'Error parsing YAML file.'];
         yield [['name' => 'Some name'], 'Missing fields: one of (start_time, start-time), one of (id, short_name, short-name), duration'];
@@ -108,15 +107,14 @@ class ImportExportServiceTest extends BaseTestCase
         ];
     }
 
-    /**
-     * @dataProvider provideImportContestDataSuccess
-     */
+    #[DataProvider('provideImportContestDataSuccess')]
     public function testImportContestDataSuccess(
         mixed $data,
         string $expectedShortName,
         string $expectedActivateTimeString,
         ?string $expectedDeactivateTimeString,
-        array $expectedProblems = []
+        array $expectedProblems = [],
+        int $expectedPenaltyTime = 20,
     ): void {
         /** @var ImportExportService $importExportService */
         $importExportService = static::getContainer()->get(ImportExportService::class);
@@ -131,6 +129,7 @@ class ImportExportServiceTest extends BaseTestCase
         self::assertEquals($expectedShortName, $contest->getShortname());
         self::assertEquals($expectedActivateTimeString, $contest->getActivatetimeString());
         self::assertEquals($expectedDeactivateTimeString, $contest->getDeactivatetimeString());
+        self::assertEquals($expectedPenaltyTime, $contest->getPenaltyTime());
 
         if (isset($data['scoreboard_type']) || isset($data['scoreboard-type'])) {
             self::assertEquals($data['scoreboard_type'] ?? $data['scoreboard-type'], $contest->getScoreboardType()->value);
@@ -154,7 +153,7 @@ class ImportExportServiceTest extends BaseTestCase
         self::assertEquals($expectedProblems, $problems);
     }
 
-    public function provideImportContestDataSuccess(): Generator
+    public static function provideImportContestDataSuccess(): Generator
     {
         // YAML format:
 
@@ -279,6 +278,23 @@ class ImportExportServiceTest extends BaseTestCase
             'score-test',
             '2020-01-01 10:34:56 UTC',
             null,
+            [],
+            0,
+        ];
+        // Testing different penalty time
+        yield [
+            [
+                'name'            => 'Penalty Type Test',
+                'short-name'      => 'penalty-time-test',
+                'duration'        => '5:00:00',
+                'start-time'      => '2020-01-01T12:34:56+02:00',
+                'penalty-time'    => '123456',
+            ],
+            'penalty-time-test',
+            '2020-01-01 10:34:56 UTC',
+            null,
+            [],
+            123456,
         ];
         // Scoring contest with problems: verify problems get scoring type.
         yield [
@@ -305,12 +321,11 @@ class ImportExportServiceTest extends BaseTestCase
             '2020-01-01 10:34:56 UTC',
             null,
             ['A' => 'scoreprobA', 'B' => 'scoreprobB'],
+            0,
         ];
     }
 
-    /**
-     * @dataProvider provideImportContestDataWithShadow
-     */
+    #[DataProvider('provideImportContestDataWithShadow')]
     public function testImportContestDataWithShadow(
         mixed $data,
         bool $expectedEnabled,
@@ -332,7 +347,7 @@ class ImportExportServiceTest extends BaseTestCase
         self::assertEquals($expectedSource, $contest->getExternalSourceSource());
     }
 
-    public function provideImportContestDataWithShadow(): Generator
+    public static function provideImportContestDataWithShadow(): Generator
     {
         // Presence of shadow key enables shadow mode automatically
         yield [
@@ -401,9 +416,7 @@ class ImportExportServiceTest extends BaseTestCase
         ];
     }
 
-    /**
-     * @dataProvider provideExportContestYamlDataWithShadow
-     */
+    #[DataProvider('provideExportContestYamlDataWithShadow')]
     public function testExportContestYamlDataWithShadow(
         bool $enabled,
         bool $useJudgements,
@@ -446,7 +459,7 @@ class ImportExportServiceTest extends BaseTestCase
         }
     }
 
-    public function provideExportContestYamlDataWithShadow(): Generator
+    public static function provideExportContestYamlDataWithShadow(): Generator
     {
         // Shadow mode disabled - no shadow key in export
         yield [
@@ -503,9 +516,7 @@ class ImportExportServiceTest extends BaseTestCase
         ];
     }
 
-    /**
-     * @dataProvider provideImportProblemsDataSuccess
-     */
+    #[DataProvider('provideImportProblemsDataSuccess')]
     public function testImportProblemsDataSuccess(mixed $data, array $expectedProblems): void
     {
         // First create a new contest by import it
@@ -541,7 +552,7 @@ class ImportExportServiceTest extends BaseTestCase
         self::assertEquals($expectedProblems, $problems);
     }
 
-    public function provideImportProblemsDataSuccess(): Generator
+    public static function provideImportProblemsDataSuccess(): Generator
     {
         yield [
             [
@@ -1505,9 +1516,7 @@ EOF;
         return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
     }
 
-    /**
-     * @dataProvider provideGetResultsData
-     */
+    #[DataProvider('provideGetResultsData')]
     public function testGetResultsData(bool $full, bool $honors, string $dataSet, string $expectedResultsFile): void
     {
         // Set up some results we can test with
@@ -1657,7 +1666,7 @@ EOF;
         self::assertEquals($expectedResults, $results);
     }
 
-    public function provideGetResultsData(): Generator
+    public static function provideGetResultsData(): Generator
     {
         yield [true, true, 'wf', 'results-full-honors.tsv'];
         yield [false, true, 'wf', 'results-wf-honors.tsv'];

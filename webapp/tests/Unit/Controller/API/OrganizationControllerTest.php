@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\SampleAffiliationsFixture;
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
@@ -90,9 +91,7 @@ class OrganizationControllerTest extends BaseTestCase
         parent::testList();
     }
 
-    /**
-     * @dataProvider provideSingle
-     */
+    #[DataProvider('provideSingle')]
     public function testSingle(int|string $id, array $expectedProperties): void
     {
         // Remove country and country flag if not enabled.
@@ -239,5 +238,13 @@ class OrganizationControllerTest extends BaseTestCase
         foreach ($newOrganizationPostData as $key => $value) {
             self::assertEquals($newItems[$listKey][$key], $value);
         }
+    }
+
+    public function testNewAddedOrganizationWithInvalidId(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations');
+        $data = ['id' => 'invalid id!', 'shortname' => 'newOrg', 'formal_name' => 'newOrgWithName', 'country' => 'NLD'];
+        $response = $this->verifyApiJsonResponse('POST', $url, 400, 'admin', $data);
+        self::assertStringContainsString('Only letters, numbers, dashes, underscores and dots are allowed.', $response['message']);
     }
 }

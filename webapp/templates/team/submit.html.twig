@@ -2,42 +2,84 @@
 
 {% block title %}Submit - {{ parent() }}{% endblock %}
 
+{% block team_scripts %}
+    {% if 'paste' in submit_methods %}
+        <script src="{{ asset('js/monaco/vs/loader.js') }}"></script>
+        <script>
+            {# A bit ugly to do the replace, but Symfony adds a version to any asset URLs so remove it again #}
+            require.config({ paths: { vs: '{{ asset('js/monaco/vs') }}'.replace(/\?.*/, '') } });
+            window.editorThemeFolder = '{{ asset('js/monaco/themes') }}'.replace(/\?.*/, '');
+        </script>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
-    <div class="container submitform pt-5">
-        {% if current_team_contest is not empty and not current_team_contest.allowSubmit %}
+    {% if current_team_contest is not empty and not current_team_contest.allowSubmit %}
+        <div class="container submitform pt-5">
             {% include 'partials/alert.html.twig' with {'type': 'danger', 'message': 'Submissions (temporarily) disabled.'} %}
-        {% else %}
-            <h1 class="text-center">Submit {% if problem is not null %}problem {{ problem.name }}{% endif %}</h1>
-            {% if current_team_contest is empty or (not is_granted('ROLE_JURY') and not current_team_contest.freezeData.started) %}
-                <div class="container submitform">
-                    <div class="alert alert-danger" role="alert">Contest has not yet started - cannot submit.</div>
-                </div>
-            {% else %}
+        </div>
+    {% elseif current_team_contest is empty or (not is_granted('ROLE_JURY') and not current_team_contest.freezeData.started) %}
+        <div class="container submitform pt-5">
+            <div class="alert alert-danger" role="alert">Contest has not yet started - cannot submit.</div>
+        </div>
+    {% else %}
+        {% set has_upload = 'upload' in submit_methods %}
+        {% set has_paste = 'paste' in submit_methods %}
 
-                {{ form_start(form) }}
-                {% if rateLimitStatus is not empty %}
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Submission limit reached - if you submit now, it will likely be rejected:</strong>
-                        <ul class="mb-0">
-                            {% for limit in rateLimitStatus %}
-                                <li>Maximum of {{ limit.limit }} submission(s) per {{ limit.period }} allowed.</li>
-                            {% endfor %}
-                        </ul>
+        {% if has_upload and has_paste %}
+            <div class="paste-submit-page">
+                <ul class="nav nav-tabs px-3 pt-2" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="upload-tab-page" data-bs-toggle="tab" data-bs-target="#upload-pane-page" type="button" role="tab" aria-controls="upload-pane-page" aria-selected="true">
+                            <i class="fas fa-file-upload"></i> Upload File
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="paste-tab-page" data-bs-toggle="tab" data-bs-target="#paste-pane-page" type="button" role="tab" aria-controls="paste-pane-page" aria-selected="false">
+                            <i class="fas fa-paste"></i> Paste Code
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content flex-fill d-flex">
+                    <div class="tab-pane fade show active w-100" id="upload-pane-page" role="tabpanel" aria-labelledby="upload-tab-page">
+                        <div class="container submitform pt-3">
+                            {% set uform = upload_form %}
+                            {{ form_start(uform) }}
+                            {% include 'team/partials/rate_limit_warning.html.twig' %}
+                            {{ form_row(uform.code) }}
+                            {{ form_row(uform.problem) }}
+                            {{ form_row(uform.language) }}
+                            {{ form_row(uform.entry_point) }}
+                            <div class="mb-3">
+                                <button type="submit" class="btn-success btn"><i class="fas fa-cloud-upload-alt"></i> Submit</button>
+                            </div>
+                            {{ form_end(uform) }}
+                        </div>
                     </div>
-                {% endif %}
-                {{ form_row(form.code) }}
-                {{ form_row(form.problem) }}
-                {{ form_row(form.language) }}
-                {{ form_row(form.entry_point) }}
-                <div class="mb-3">
-                    <button type="submit" class="btn-success btn"><i class="fas fa-cloud-upload-alt"></i> Submit
-                    </button>
+                    <div class="tab-pane fade d-flex flex-column w-100" id="paste-pane-page" role="tabpanel" aria-labelledby="paste-tab-page">
+                        {% include 'team/partials/paste_form.html.twig' %}
+                    </div>
                 </div>
-                {{ form_end(form) }}
-
-            {% endif %}
+            </div>
+        {% elseif has_upload %}
+            <div class="container submitform pt-5">
+                <h1 class="text-center">Submit {% if problem is not null %}problem {{ problem.name }}{% endif %}</h1>
+                {% set uform = upload_form %}
+                {{ form_start(uform) }}
+                {% include 'team/partials/rate_limit_warning.html.twig' %}
+                {{ form_row(uform.code) }}
+                {{ form_row(uform.problem) }}
+                {{ form_row(uform.language) }}
+                {{ form_row(uform.entry_point) }}
+                <div class="mb-3">
+                    <button type="submit" class="btn-success btn"><i class="fas fa-cloud-upload-alt"></i> Submit</button>
+                </div>
+                {{ form_end(uform) }}
+            </div>
+        {% elseif has_paste %}
+            <div class="paste-submit-page">
+                {% include 'team/partials/paste_form.html.twig' %}
+            </div>
         {% endif %}
-
-    </div>
+    {% endif %}
 {% endblock %}

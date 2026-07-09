@@ -14,7 +14,7 @@ class LanguagesControllerTest extends JuryControllerTestCase
     protected static string  $identifyingEditAttribute = 'name';
     protected static ?string $defaultEditEntityName    = 'Java';
     protected static string  $baseUrl                  = '/jury/languages';
-    protected static array   $exampleEntries           = ['c', 'csharp', 'Haskell', 'Bash shell', "pas, p", 'no', 'yes', 'R', 'r'];
+    protected static array   $exampleEntries           = ['c', 'csharp', 'Haskell', 'Bash shell', "pas, p", 'R', 'r'];
     protected static string  $shortTag                 = 'language';
     protected static array   $deleteEntities           = ['C++','C#','C','Kotlin'];
     protected static string  $deleteEntityIdentifier   = 'name';

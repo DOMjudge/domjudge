@@ -28,3 +28,4 @@ composer*
 ./m4
 ./webapp/tests/Unit/Fixtures
 ./webapp/config/reference.php
+./example_problems/hangman/submissions/time_limit_exceeded/run_frequency/words.py

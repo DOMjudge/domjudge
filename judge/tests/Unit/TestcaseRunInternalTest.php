@@ -8,6 +8,11 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionMethod;
 
+/**
+ * @phpstan-type TimeLimit array{cpu: array{0: string, 1: string}, wall: array{0: string, 1: string}}
+ * @phpstan-import-type RunConfig from JudgeDaemon
+ * @phpstan-import-type CompareConfig from JudgeDaemon
+ */
 class TestcaseRunInternalTest extends TestCase
 {
     private ?JudgeDaemon $daemon = null;
@@ -22,15 +27,12 @@ class TestcaseRunInternalTest extends TestCase
         $reflection = new ReflectionClass(JudgeDaemon::class);
         $this->daemon = $reflection->newInstanceWithoutConstructor();
         $this->method = $reflection->getMethod('testcaseRunInternal');
-        $this->method->setAccessible(true);
 
         // Initialize the runuser and rungroup properties that testcaseRunInternal now uses
         $runuserProperty = $reflection->getProperty('runuser');
-        $runuserProperty->setAccessible(true);
         $runuserProperty->setValue($this->daemon, RUNUSER);
 
         $rungroupProperty = $reflection->getProperty('rungroup');
-        $rungroupProperty->setAccessible(true);
         $rungroupProperty->setValue($this->daemon, RUNGROUP);
 
         $this->tempDir = sys_get_temp_dir() . '/domjudge-test-' . uniqid();
@@ -50,6 +52,11 @@ class TestcaseRunInternalTest extends TestCase
         }
     }
 
+    /**
+     * @param TimeLimit $timelimit
+     * @param RunConfig|null $run_config
+     * @param CompareConfig|null $compare_config
+     */
     private function callTestcaseRunInternal(
         string $input,
         string $output,
@@ -80,6 +87,9 @@ class TestcaseRunInternalTest extends TestCase
         );
     }
 
+    /**
+     * @return array{memory_limit: int, output_limit: int, process_limit: int}
+     */
     private function defaultRunConfig(): array
     {
         return [
@@ -89,6 +99,9 @@ class TestcaseRunInternalTest extends TestCase
         ];
     }
 
+    /**
+     * @return array{script_timelimit: int, script_memory_limit: int, script_filesize_limit: int}
+     */
     private function defaultCompareConfig(): array
     {
         return [
@@ -127,6 +140,9 @@ class TestcaseRunInternalTest extends TestCase
         return $passdir;
     }
 
+    /**
+     * @return TimeLimit
+     */
     private function defaultTimelimit(): array
     {
         return [
@@ -135,6 +151,9 @@ class TestcaseRunInternalTest extends TestCase
         ];
     }
 
+    /**
+     * @return array<string, array{0: string, 1: string}>
+     */
     public static function missingFileProvider(): array
     {
         return [

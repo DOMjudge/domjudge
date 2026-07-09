@@ -19,12 +19,16 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\VarExporter\VarExporter;
 
 #[Autoconfigure(public: true)]
 class ConfigurationService
 {
     /** @var array<string, array<string, string>> $dbConfigCache */
     protected ?array $dbConfigCache = null;
+
+    /** @var array<string, ConfigurationSpecification>|null */
+    private ?array $specCache = null;
 
     public function __construct(
         protected readonly EntityManagerInterface $em,
@@ -101,6 +105,10 @@ class ConfigurationService
             }
             // $result[$name] exists iff it should be visible.
             if (isset($result[$name])) {
+                // Cast legacy 0/1 values to proper booleans for bool-typed configs.
+                if (isset($specs[$name]) && $specs[$name]->type === 'bool') {
+                    $value = (bool)$value;
+                }
                 $result[$name] = $value;
             }
         }
@@ -115,6 +123,10 @@ class ConfigurationService
      */
     public function getConfigSpecification(): array
     {
+        if ($this->specCache !== null) {
+            return $this->specCache;
+        }
+
         // We use Symfony resource caching so we can load the config on every
         // request without having a performance impact.
         // See https://symfony.com/doc/4.3/components/config/caching.html for
@@ -137,11 +149,11 @@ class ConfigurationService
                     }
                 }
 
-                $code          = var_export($config, true);
+                $code          = VarExporter::export($config);
                 $specification = <<<EOF
 <?php
 
-return {$code};
+return {$code};\n
 EOF;
 
                 $cache->write($specification,
@@ -149,7 +161,7 @@ EOF;
                 // @codeCoverageIgnoreEnd
             });
 
-        return array_map(
+        return $this->specCache = array_map(
             ConfigurationSpecification::fromArray(...),
             require $cacheFile
         );

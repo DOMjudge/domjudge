@@ -7,6 +7,7 @@ use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
 use App\Entity\Submission;
+use App\Entity\SubmissionSource;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -54,6 +55,8 @@ class ShadowDifferencesController extends BaseController
         string $external = 'all',
         #[MapQueryParameter]
         string $local = 'all',
+        #[MapQueryParameter]
+        ?float $minAbsDelta = null,
     ): Response {
         $contest = $this->dj->getCurrentContest();
         if (!$contest) {
@@ -87,9 +90,9 @@ class ShadowDifferencesController extends BaseController
             ->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1')
             ->select('s', 'ej', 'j')
             ->andWhere('s.contest = :contest')
-            ->andWhere('s.externalid IS NOT NULL')
-            ->andWhere('s.expected_results IS NULL')
+            ->andWhere('s.source = :external')
             ->setParameter('contest', $contest)
+            ->setParameter('external', SubmissionSource::SHADOWING)
             ->getQuery()
             ->getResult();
 
@@ -108,8 +111,8 @@ class ShadowDifferencesController extends BaseController
             }
         };
 
-        // Build up the verdict matrix and collect score change data.
-        $scoreChanges = [];
+        // Build up the verdict matrix and collect score comparison data.
+        $scoreComparisons = [];
         $hasScoringProblems = false;
         $maxScore = 0;
 
@@ -149,7 +152,7 @@ class ShadowDifferencesController extends BaseController
             // Append submitid to list of orig->new verdicts.
             $verdictTable[$externalResult][$localResult][] = $submitid;
 
-            // Collect score change data for scoring problems.
+            // Collect score data for scoring problems.
             $problem = $submission->getProblem();
             if ($problem->isScoringProblem()
                 && $externalJudgement?->getResult() && $localJudging?->getResult()) {
@@ -160,20 +163,20 @@ class ShadowDifferencesController extends BaseController
                 $absDelta = abs($delta);
                 $maxScore = max($maxScore, $externalScore, $localScore);
 
-                if ($absDelta > $contest->getScoreDiffEpsilon()) {
-                    $scoreChanges[] = [
-                        'submitId' => $submission->getExternalid(),
-                        'contestId' => $contest->getExternalid(),
-                        'teamName' => $submission->getTeam()->getEffectiveName(),
-                        'teamId' => $submission->getTeam()->getExternalid(),
-                        'problemName' => $problem->getName(),
-                        'problemId' => $problem->getExternalid(),
-                        'oldScore' => $externalScore,
-                        'newScore' => $localScore,
-                        'delta' => $delta,
-                        'absDelta' => $absDelta,
-                    ];
-                }
+                // Include all scoring submissions for the heatmap visualization.
+                // The JS will bucket them appropriately (unchanged in center, differences in outer rows).
+                $scoreComparisons[] = [
+                    'submitId' => $submission->getExternalid(),
+                    'contestId' => $contest->getExternalid(),
+                    'teamName' => $submission->getTeam()->getEffectiveName(),
+                    'teamId' => $submission->getTeam()->getExternalid(),
+                    'problemName' => $problem->getName(),
+                    'problemId' => $problem->getExternalid(),
+                    'oldScore' => $externalScore,
+                    'newScore' => $localScore,
+                    'delta' => $delta,
+                    'absDelta' => $absDelta,
+                ];
             }
         }
 
@@ -186,7 +189,7 @@ class ShadowDifferencesController extends BaseController
             }
         }
 
-        $verificationViewTypes = [0 => 'all', 1 => 'unverified', 2 => 'verified'];
+        $verificationViewTypes = [0 => 'unverified', 1 => 'verified', 2 => 'all'];
         $verificationView      = 0;
         if ($verificationViewFromRequest) {
             $index = array_search($verificationViewFromRequest, $verificationViewTypes);
@@ -204,6 +207,10 @@ class ShadowDifferencesController extends BaseController
         }
         if ($viewTypes[$view] == 'diff') {
             $restrictions->externalDifference = true;
+            $restrictions->scoreDiffEpsilon = $contest->getScoreDiffEpsilon();
+            if ($contest->getShadowCompareByScore()) {
+                $restrictions->shadowCompareByScore = true;
+            }
         }
         if ($verificationViewTypes[$verificationView] == 'unverified') {
             $restrictions->externallyVerified = false;
@@ -217,13 +224,18 @@ class ShadowDifferencesController extends BaseController
         if ($local !== 'all') {
             $restrictions->result = $local;
         }
+        if ($minAbsDelta !== null && $minAbsDelta > 0) {
+            $restrictions->minAbsDelta = $minAbsDelta;
+        }
 
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $this->submissions->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
             $restrictions,
             page: $request->query->getInt('page', 1),
-            showShadowUnverified: true
+            showShadowUnverified: true,
+            shadowCompareByScore: $contest->getShadowCompareByScore(),
+            scoreDiffEpsilon: $contest->getScoreDiffEpsilon()
         );
 
         $data = [
@@ -248,9 +260,10 @@ class ShadowDifferencesController extends BaseController
                 'ajax' => true,
             ],
             'hasScoringProblems' => $hasScoringProblems,
-            'scoreChanges' => $scoreChanges,
+            'scoreComparisons' => $scoreComparisons,
             'maxScore' => $maxScore,
             'scoreDiffEpsilon' => $contest->getScoreDiffEpsilon(),
+            'minAbsDelta' => $minAbsDelta ?? 0,
         ];
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;

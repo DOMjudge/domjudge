@@ -24,7 +24,12 @@
             max-width: {{ thumbnailSize }}px;
             max-height: {{ thumbnailSize }}px;
         }
+
+        .scoring-details-container .full-precision { display: none; }
+        .scoring-details-container.show-full .rounded-precision { display: none; }
+        .scoring-details-container.show-full .full-precision { display: inline; }
     </style>
+
 {% endblock %}
 
 {% block content %}
@@ -96,14 +101,10 @@
                                     <span class="ms-1 scoring-testcase-result">
                                         {{ tc.result | displayScoringTestcaseResult(tc.rank) }}
                                     </span>
-                                    {% if group.accept_score is null %}
-                                        <span class="ms-1 scoring-testcase-score text-muted" title="{{ tc.score is not null ? 'Full score: ' ~ tc.score : '' }}">
-                                            {% if tc.score is not null %}
-                                                <span class="rounded-precision">{{ "%.2f" | format(tc.score) }}</span>
-                                                <span class="full-precision">{{ tc.score }}</span>
-                                            {% else %}
-                                                -
-                                            {% endif %}
+                                    {% if tc.score is not null %}
+                                        <span class="ms-1 scoring-testcase-score text-muted" title="Full score: {{ tc.score }}">
+                                            <span class="rounded-precision">{{ "%.2f" | format(tc.score) }}</span>
+                                            <span class="full-precision">{{ tc.score }}</span>
                                         </span>
                                     {% endif %}
                                 </li>
@@ -133,39 +134,47 @@
         </div>
     {% endif %}
 
-    {% if selectedJudging is not null and selectedJudging.result is not empty and submission.expectedScore is not null %}
-        {# Expected score comparison for scoring problems #}
-        {% if selectedJudging.score == submission.expectedScore %}
-            <div class="alert alert-success">
-                Actual score matches the expected score ({{ selectedJudging.score }}).
-            </div>
-        {% else %}
-            <div class="alert alert-danger">
-                Actual score {{ selectedJudging.score }} does NOT match expected score: {{ submission.expectedScore }}.
-            </div>
+    {% if submission.source.value == 'shadowing' and (externalJudgement is null or externalJudgement.result is empty) %}
+        <div class="alert alert-warning">
+            This submission was imported from an external source and we are still waiting for the external result.
+        </div>
+    {% endif %}
+
+    {% if selectedJudging is not null and selectedJudging.result is not empty %}
+        {% if submission.expectedScore is not null %}
+            {% if selectedJudging.score == submission.expectedScore %}
+                <div class="alert alert-success">
+                    Actual score matches the expected score ({{ selectedJudging.score }}).
+                </div>
+            {% else %}
+                <div class="alert alert-danger">
+                    Actual score {{ selectedJudging.score }} does NOT match expected score: {{ submission.expectedScore }}.
+                </div>
+            {% endif %}
         {% endif %}
-    {% elseif selectedJudging is not null and selectedJudging.result is not empty and submission.expectedResults %}
-        {# Expected verdict comparison for pass/fail problems #}
-        {% if selectedJudging.result|upper not in submission.expectedResults %}
-            <div class="alert alert-danger">
-                Actual result {{ selectedJudging.result | printValidJuryResult }} does NOT match expected result(s):
-                {% for expectedResult in submission.expectedResults %}
-                    {{ expectedResult | printValidJuryResult }}
-                    {% if not loop.last %}or{% endif %}
-                {% endfor %}.
-            </div>
-        {% elseif submission.expectedResults|length > 1 %}
-            <div class="alert alert-warning">
-                Actual result {{ selectedJudging.result | printValidJuryResult }} matches one of multiple expected results:
-                {% for expectedResult in submission.expectedResults %}
-                    {{ expectedResult | printValidJuryResult }}
-                    {% if not loop.last %}or{% endif %}
-                {% endfor %}.
-            </div>
-        {% else %}
-            <div class="alert alert-success">
-                Actual result matches the expected result ({{ selectedJudging.result | printValidJuryResult }}).
-            </div>
+
+        {% if submission.expectedResults %}
+            {% if selectedJudging.result|upper not in submission.expectedResults %}
+                <div class="alert alert-danger">
+                    Actual result {{ selectedJudging.result | printValidJuryResult }} does NOT match expected result(s):
+                    {% for expectedResult in submission.expectedResults %}
+                        {{ expectedResult | printValidJuryResult }}
+                        {% if not loop.last %}or{% endif %}
+                    {% endfor %}.
+                </div>
+            {% elseif submission.expectedResults|length > 1 %}
+                <div class="alert alert-warning">
+                    Actual result {{ selectedJudging.result | printValidJuryResult }} matches one of multiple expected results:
+                    {% for expectedResult in submission.expectedResults %}
+                        {{ expectedResult | printValidJuryResult }}
+                        {% if not loop.last %}or{% endif %}
+                    {% endfor %}.
+                </div>
+            {% else %}
+                <div class="alert alert-success">
+                    Actual result matches the expected result ({{ selectedJudging.result | printValidJuryResult }}).
+                </div>
+            {% endif %}
         {% endif %}
     {% endif %}
 
@@ -178,8 +187,8 @@
                 </p>
                 <p>
                     {% for version in versions %}
-                            <pre class="output_text">{{ version }}</pre>
-                            {% if not loop.last %}<hr />{% endif %}
+                        <pre class="output_text">{{ version }}</pre>
+                        {% if not loop.last %}<hr />{% endif %}
                     {% endfor %}
                 </p>
             </div>
@@ -328,26 +337,37 @@
         </div>
     {% endif %}
 
+    {# Check for score difference on scoring problems #}
+    {% set hasScoreDifference = false %}
+    {% if submission.problem.scoringProblem
+        and selectedJudging is not null
+        and selectedJudging.result is not empty
+        and externalJudgement is not null
+        and externalJudgement.result is not empty %}
+        {% set scoreDiffEpsilon = current_contest.scoreDiffEpsilon|default(0.0001) %}
+        {% set hasScoreDifference = (selectedJudging.score - externalJudgement.score)|abs > scoreDiffEpsilon %}
+    {% endif %}
     {% if externalJudgement is not null and externalJudgement.result is not empty and (
         (selectedJudging is not null and selectedJudging.result is not empty and externalJudgement.result != selectedJudging.result)
-        or submission.importError) %}
+        or submission.importError
+        or hasScoreDifference) %}
         <div class="alert alert-danger">
             <strong>Results differ!</strong>
             <hr>
             <p>
                 This submission was judged as
                 {% if external_ccs_submission_url is empty %}
-                    {{ externalJudgement.result | printValidJuryResult }} by the external CCS
+                    {{ externalJudgement.result | printValidJuryResult }}{% if hasScoreDifference %} (score: {{ externalJudgement.score | number_format(3) }}){% endif %} by the external CCS
                 {% else %}
                     <a href="{{ submission | externalCcsUrl }}" target="_blank">
-                        {{ externalJudgement.result | printValidJuryResult }} by the external CCS
+                        {{ externalJudgement.result | printValidJuryResult }}{% if hasScoreDifference %} (score: {{ externalJudgement.score | number_format(3) }}){% endif %} by the external CCS
                     </a>
                 {% endif -%}
                 , but as
                 {% if submission.importError %}
                     {{ 'import-error' | printValidJuryResult }}
                 {% else %}
-                    {{ selectedJudging.result | printValidJuryResult }}
+                    {{ selectedJudging.result | printValidJuryResult }}{% if hasScoreDifference %} (score: {{ selectedJudging.score | number_format(3) }}){% endif %}
                 {% endif %}
                 by DOMjudge.
             </p>
@@ -369,74 +389,74 @@
         <h2>Judgings</h2>
         <table class="judging-table table table-striped table-hover table-sm" style="width: auto;">
             <thead>
-            <tr>
-                <td></td>
-                <th scope="col">ID</th>
-                <th scope="col">start</th>
-                <th scope="col">max runtime</th>
-                <th scope="col">judgehost</th>
-                <th scope="col">result</th>
-                {% if submission.problem.scoringProblem %}
-                    <th scope="col">score</th>
-                {% endif %}
-                <th scope="col">rejudging</th>
-            </tr>
+                <tr>
+                    <td></td>
+                    <th scope="col">ID</th>
+                    <th scope="col">start</th>
+                    <th scope="col">max runtime</th>
+                    <th scope="col">judgehost</th>
+                    <th scope="col">result</th>
+                    {% if submission.problem.scoringProblem %}
+                        <th scope="col">score</th>
+                    {% endif %}
+                    <th scope="col">rejudging</th>
+                </tr>
             </thead>
             <tbody>
-            {% for judging in judgings %}
-                {% set link = path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, jid: judging.judgingid}) %}
-                <tr {% if not judging.valid %}class="disabled"{% endif %}>
-                    <td>
-                        <a href="{{ link }}">
-                            {% if selectedJudging is not null and selectedJudging.judgingid == judging.judgingid %}
-                                <i class="fas fa-long-arrow-alt-right"></i>
-                            {% else %}
-                                &nbsp;
-                            {% endif %}
-                        </a>
-                    </td>
-                    <td><a href="{{ link }}">j{{ judging.judgingid }}</a></td>
-                    <td><a href="{{ link }}">{{ judging.starttime | printtime(null, submission.contest) }}</a></td>
-                    <td>
-                        <a href="{{ link }}">
-                            {% if maxRunTimes[judging.judgingId] is not null %}
-                                {{ maxRunTimes[judging.judgingId] }}s
-                            {% endif %}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{{ link }}">
-                            {{ judging.judgehosts | printHosts }}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{{ link }}">
-                            {{ judging.result | printResult(judging.valid, true) }}
-                            {% if judging.stillBusy %}
-                                (&hellip;)
-                            {% endif %}
-                        </a>
-                    </td>
-                    {% if submission.problem.scoringProblem %}
-                        <td class="right">
+                {% for judging in judgings %}
+                    {% set link = path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, jid: judging.judgingid}) %}
+                    <tr {%- if not judging.valid %} class="disabled"{% endif %}>
+                        <td>
                             <a href="{{ link }}">
-                                {% if judging.score is not null %}
-                                    {{ "%.2f" | format(judging.score) }}
+                                {% if selectedJudging is not null and selectedJudging.judgingid == judging.judgingid %}
+                                    <i class="fas fa-long-arrow-alt-right"></i>
                                 {% else %}
-                                    -
+                                    &nbsp;
                                 {% endif %}
                             </a>
                         </td>
-                    {% endif %}
-                    <td>
-                        <a href="{{ link }}">
-                            {% if judging.rejudging is not null %}
-                                r{{ judging.rejudging.rejudgingid }} ({{ judging.rejudging.reason }})
-                            {% endif %}
-                        </a>
-                    </td>
-                </tr>
-            {% endfor %}
+                        <td><a href="{{ link }}">j{{ judging.judgingid }}</a></td>
+                        <td><a href="{{ link }}">{{ judging.starttime | printtime(null, submission.contest) }}</a></td>
+                        <td>
+                            <a href="{{ link }}">
+                                {% if maxRunTimes[judging.judgingId] is not null %}
+                                    {{ maxRunTimes[judging.judgingId] }}s
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ link }}">
+                                {{ judging.judgehosts | printHosts }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ link }}">
+                                {{ judging.result | printResult(judging.valid, true) }}
+                                {% if judging.stillBusy %}
+                                    (&hellip;)
+                                {% endif %}
+                            </a>
+                        </td>
+                        {% if submission.problem.scoringProblem %}
+                            <td class="right">
+                                <a href="{{ link }}">
+                                    {% if judging.score is not null %}
+                                        {{ "%.2f" | format(judging.score) }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </a>
+                            </td>
+                        {% endif %}
+                        <td>
+                            <a href="{{ link }}">
+                                {% if judging.rejudging is not null %}
+                                    r{{ judging.rejudging.rejudgingid }} ({{ judging.rejudging.reason }})
+                                {% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     {% endif %}
@@ -474,9 +494,9 @@
                             {%- else %}
                                 {{- selectedJudging.result | printValidJuryResult -}}
                             {%- endif %}
-                            {% if submission.problem.scoringProblem %}
+                            {%- if submission.problem.scoringProblem %}
                                 (score: <span title="{{ selectedJudging.score }}">{{ "%.2f" | format(selectedJudging.score) }}</span>)
-                            {% endif %}
+                            {%- endif %}
                             {%- if submission.stillBusy -%}
                                 (&hellip;)
                             {%- endif -%}
@@ -491,10 +511,10 @@
                             {% if submission.importError %}
                                 External result: {{ externalJudgement.result | printValidJuryResult }}
                             {% else %}
-                                (external: {{ externalJudgement.result | printValidJuryResult }}
-                                {% if submission.problem.scoringProblem %}
-                                    , score: {{ "%.2f" | format(externalJudgement.score) }}
-                                {% endif %}
+                                (external: {{ externalJudgement.result | printValidJuryResult -}}
+                                {%- if submission.problem.scoringProblem -%}
+                                    , score: {{ "%.2f" | format(externalJudgement.score) -}}
+                                {%- endif -%}
                                 )
                             {% endif %}
                         {%- endif %}
@@ -528,49 +548,43 @@
                 <div style="float: right;">
                     {% if selectedJudging.debugPackages | length > 0 %}
                        {% for debug_package in selectedJudging.debugPackages %}
-                           <a href="{{ path('download_full_debug', {'debug_package_id': debug_package.debugPackageId }) }}">
-                               <button class="btn btn-sm btn-outline-secondary" >
-                                   <i class="fas fa-download"></i>
-                                   Debug Package ({{ debug_package.judgehost.hostname }})
-                               </button>
+                           <a class="btn btn-sm btn-outline-secondary" href="{{ path('download_full_debug', {'debug_package_id': debug_package.debugPackageId }) }}">
+                               <i class="fas fa-download"></i>
+                               Debug Package ({{ debug_package.judgehost.hostname }})
                            </a>
                        {% endfor %}
                     {% else %}
                         {% if not requestedOutputCount %}
-                            <a href="{{ path('request_full_debug', {'jid': selectedJudging.judgingid}) }}">
-                                <button class="btn btn-sm btn-outline-secondary" >
-                                    <i class="fas fa-upload"></i>
-                                    Retrieve Full Debug Package
-                                </button>
+                            <a class="btn btn-sm btn-outline-secondary" href="{{ path('request_full_debug', {'jid': selectedJudging.judgingid}) }}">
+                                <i class="fas fa-upload"></i>
+                                Retrieve Full Debug Package
                             </a>
                         {% endif %}
                     {% endif %}
-                &nbsp;
-                {% if not selectedJudging.verified %}
-                    <form action="{{ path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, jid: selectedJudging.judgingid}) }}"
-                          method="post" style="display: inline;">
-                        {% if selectedJudging.juryMember is not empty %}
-                            (claimed by {{ selectedJudging.juryMember }})
-                            <input type="hidden" name="forceclaim" value="1"/>
-                        {% endif %}
-                        {% if app.user.username == selectedJudging.juryMember %}
-                            <input type="submit" value="unclaim" name="unclaim" class="btn btn-outline-secondary btn-sm"/>
-                        {% else %}
-                            <input type="submit" value="claim" name="claim" class="btn btn-outline-secondary btn-sm"/>
-                        {% endif %}
-                    </form>
-                {% endif %}
-                &nbsp;
-                {% if selectedJudging is null or selectedJudging.result is empty %}
-                    {%- if not selectedJudging or not selectedJudging.started %}
-                        <a href="{{ path('jury_submission_create_tasks', {'contestId': submission.contest.externalid, 'submitId': submission.externalid}) }}">
-                            <button class="btn btn-sm btn-outline-secondary" >
+                    &nbsp;
+                    {% if not selectedJudging.verified %}
+                        <form action="{{ path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, jid: selectedJudging.judgingid}) }}"
+                              method="post" style="display: inline;">
+                            {% if selectedJudging.juryMember is not empty %}
+                                (claimed by {{ selectedJudging.juryMember }})
+                                <input type="hidden" name="forceclaim" value="1"/>
+                            {% endif %}
+                            {% if app.user.username == selectedJudging.juryMember %}
+                                <input type="submit" value="unclaim" name="unclaim" class="btn btn-outline-secondary btn-sm"/>
+                            {% else %}
+                                <input type="submit" value="claim" name="claim" class="btn btn-outline-secondary btn-sm"/>
+                            {% endif %}
+                        </form>
+                    {% endif %}
+                    &nbsp;
+                    {% if selectedJudging is null or selectedJudging.result is empty %}
+                        {%- if not selectedJudging or not selectedJudging.started %}
+                            <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_submission_create_tasks', {'contestId': submission.contest.externalid, 'submitId': submission.externalid}) }}">
                                 <i class="fas fa-gavel"></i>
                                 Judge submission
-                            </button>
-                        </a>
+                            </a>
+                        {%- endif %}
                     {%- endif %}
-                {%- endif %}
                 </div>
             </div>
         {% endif %}
@@ -622,7 +636,7 @@
             {% if output is empty %}
                 <div class="card-body nodata">There were no compiler errors or warnings.</div>
             {% else %}
-                <div class="card-body"><pre class="output_text">{{ output }}</pre></div>
+                <div class="card-body"><pre class="output_text">{{ output | convertUnprintableChars }}</pre></div>
             {% endif %}
         </div>
 
@@ -673,7 +687,11 @@
                     {% if lastJudging is not null %}
                         <tr class="lasttcruns">
                             <td>
-                                {{ lastRuns | displayTestcaseResults(lastJudging.endtime is not empty) }}
+                                {{ lastRuns | displayTestcaseResults(
+                                    lastJudging.endtime is not empty,
+                                    false,
+                                    lastRunsByTestcaseId
+                                ) }}
                             </td>
                             <td>
                                 <a href="{{ lastSubmissionLink }}">previous {{ lastSubmission.externalid }}</a>
@@ -708,12 +726,6 @@
                     </div>
                 </div>
             </div>
-
-            <style>
-                .scoring-details-container .full-precision { display: none; }
-                .scoring-details-container.show-full .rounded-precision { display: none; }
-                .scoring-details-container.show-full .full-precision { display: inline; }
-            </style>
 
             <script>
                 $(function() {
@@ -829,63 +841,63 @@
                             -#}<button type="button" class="btn btn-link" onclick="navigator.clipboard.writeText('{{ runsOutput[runIdx].testcasedir }}')"><i class="fa-regular fa-copy"></i></button>
                         {% endif %}
                         <div style="float: right;">
-                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'input'}) }}">
-                                <button class="btn btn-sm btn-outline-secondary" >
-                                    <i class="fas fa-download"></i>
-                                    Input
-                                </button>
+                            <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'input'}) }}">
+                                <i class="fas fa-download"></i>
+                                Input
                             </a>
-                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'output'}) }}">
-                                <button class="btn btn-sm btn-outline-secondary" >
-                                    <i class="fas fa-download"></i>
-                                    Reference Output
-                                </button>
+                            <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'output'}) }}">
+                                <i class="fas fa-download"></i>
+                                Reference Output
                             </a>
-                            {% if run.firstJudgingRun is not null %}
-                                <a href="{{ path('jury_submission_team_output', {'contestId': submission.contest.externalid, 'submission': submission.externalid, 'run': run.firstJudgingRun.runid}) }}">
-                                    <button class="btn btn-sm btn-outline-secondary" >
-                                        <i class="fas fa-download"></i>
-                                        {% if runsOutput[runIdx].is_output_run_truncated_in_db %}
-                                            Truncated
-                                        {% endif %}
-                                        Team Output
-                                    </button>
+                            {% if run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
+                                {% set pass = "" %}
+                                {% set passnumber = 1 %}
+                                {% if isMultiPassProblem and runsOutput[runIdx].pass is defined and runsOutput[runIdx].pass %}
+                                    {% set pass = " on " ~ runsOutput[runIdx].pass %}
+                                    {% set passnumber = runsOutput[runIdx].pass %}
+                                {% endif %}
+                                <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_submission_team_output', {'contestId': submission.contest.externalid, 'submission': submission.externalid, 'run': run.firstJudgingRun.runid}) }}">
+                                    <i class="fas fa-download"></i>
+                                    {% if runsOutput[runIdx].is_output_run_truncated_in_db %}
+                                        Truncated
+                                    {% endif %}
+                                    Team Output {{- pass }}
                                 </a>
                                 {% if runsOutput[runIdx].is_output_run_truncated_in_db %}
-                                    <a href="{{ path('request_output', {'jid': run.firstJudgingRun.judgingid, 'jrid': run.firstJudgingRun.runid}) }}">
-                                        <button class="btn btn-sm btn-outline-secondary" >
-                                            <i class="fas fa-upload"></i>
-                                            Retrieve Full Team Output
-                                        </button>
+                                    <a class="btn btn-sm btn-outline-secondary" href="{{
+                                        path('request_output', {'jid': run.firstJudgingRun.judgingid, 'jrid': run.firstJudgingRun.runid, 'pass': passnumber})
+                                    }}">
+                                        <i class="fas fa-upload"></i>
+                                        Retrieve Full Team Output
                                     </a>
                                 {% endif %}
                             {% endif %}
                         </div>
                     </div>
                     <div class="card-body">
-                    {% if run.firstJudgingRun is not null %}
-                        {% if run.firstJudgingRun.runresult != 'correct' and isMultiPassProblem %}
-                            <div class="alert alert-warning">Note that this is a multi-pass problem, and only data of the failing pass is presented.</div>
-                        {% endif %}
-                        {{ runsOutput[runIdx].metadata | printMetadata }}
-                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample-{{ runIdx }}"
-                                aria-expanded="false">
-                            show complete metadata
-                        </button>
-                        {% if runsOutput[runIdx].metadata is not null %}
-                            {% if runsOutput[runIdx].output_limit is defined and runsOutput[runIdx].output_limit %}
-                                <div class="alert alert-warning">
-                                    The submission output (<code>{{ runsOutput[runIdx].output_limit }}</code>) was
-                                    truncated because of the configured output limit.
+                        {% if run.firstJudgingRun is not null %}
+                            {% if run.firstJudgingRun.runresult != 'correct' and isMultiPassProblem and runsOutput[runIdx].output_run %}
+                                <div class="alert alert-warning">Note that this is a multi-pass problem, and only data of the failing pass is presented.</div>
+                            {% endif %}
+                            {{ runsOutput[runIdx].metadata | printMetadata }}
+                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseExample-{{ runIdx }}"
+                                    aria-expanded="false">
+                                show complete metadata
+                            </button>
+                            {% if runsOutput[runIdx].metadata is not null %}
+                                {% if runsOutput[runIdx].output_limit is defined and runsOutput[runIdx].output_limit %}
+                                    <div class="alert alert-warning">
+                                        The submission output (<code>{{ runsOutput[runIdx].output_limit }}</code>) was
+                                        truncated because of the configured output limit.
+                                    </div>
+                                {% endif %}
+                                <div class="collapse" id="collapseExample-{{ runIdx }}">
+                                      <div class="card card-body output_text">{{ runsOutput[runIdx].metadata }}</div>
                                 </div>
                             {% endif %}
-                            <div class="collapse" id="collapseExample-{{ runIdx }}">
-                                  <div class="card card-body output_text">{{ runsOutput[runIdx].metadata }}</div>
-                            </div>
                         {% endif %}
-                    </span>
-                    {% endif %}
+                    </div>
                     {% if run.description is not null %}
                         <p><em>
                             {{ run.description(true) | descriptionExpand }}
@@ -915,26 +927,13 @@
                     {% else %}
                         {% if run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
                             {% if combinedRunCompare %}
-                                <h5>Validator output</h5>
+                                <h4>Validator output</h4>
                                 {% if runsOutput[runIdx].output_diff is empty %}
                                     <p class="nodata">There was no validator output.</p>
                                 {% else %}
-                                    <pre class="output_text">{{ runsOutput[runIdx].output_diff }}</pre>
-                                {% endif %}
-                            {% else %}
-                                <h5>Diff output</h5>
-                                {% if runsOutput[runIdx].output_diff is empty %}
-                                    <p class="nodata">There was no diff output.</p>
-                                {% else %}
-                                    <pre class="output_text">{{ runsOutput[runIdx].output_diff }}</pre>
+                                    <pre class="output_text">{{ runsOutput[runIdx].output_diff | convertUnprintableChars }}</pre>
                                 {% endif %}
 
-                                {% if run.firstJudgingRun.runresult != 'correct' %}
-                                    {{ runsOutput[runIdx] | runDiff }}
-                                {% endif %}
-                            {% endif %}
-
-                            {% if combinedRunCompare %}
                                 <h5>Validator/Submission interaction</h5>
                                 {% if runsOutput[runIdx].output_run is empty %}
                                     <p class="nodata">There was no interaction log.</p>
@@ -942,11 +941,22 @@
                                     {{ runsOutput[runIdx].output_run | interactiveLog }}
                                 {% endif %}
                             {% else %}
+                                <h4>Diff output</h4>
+                                {% if runsOutput[runIdx].output_diff is empty %}
+                                    <p class="nodata">There was no diff output.</p>
+                                {% else %}
+                                    <pre class="output_text">{{ runsOutput[runIdx].output_diff | convertUnprintableChars}}</pre>
+                                {% endif %}
+
+                                {% if run.firstJudgingRun.runresult != 'correct' %}
+                                    {{ runsOutput[runIdx] | runDiff }}
+                                {% endif %}
+
                                 <h5>Program output</h5>
                                 {% if runsOutput[runIdx].output_run is empty %}
                                     <p class="nodata">There was no program output.</p>
                                 {% else %}
-                                    <pre class="output_text">{{ runsOutput[runIdx].output_run }}</pre>
+                                    <pre class="output_text">{{ runsOutput[runIdx].output_run | convertUnprintableChars }}</pre>
                                 {% endif %}
                             {% endif %}
 
@@ -954,21 +964,22 @@
                             {% if runsOutput[runIdx].output_error is empty %}
                                 <p class="nodata">There was no stderr output.</p>
                             {% else %}
-                                <pre class="output_text">{{ runsOutput[runIdx].output_error }}</pre>
+                                <pre class="output_text">{{ runsOutput[runIdx].output_error | convertUnprintableChars }}</pre>
                             {% endif %}
 
                             <h5>Judging system output (info/debug/errors)</h5>
                             {% if runsOutput[runIdx].output_system is empty %}
                                 <p class="nodata">There was no judging system output.</p>
                             {% else %}
-                                <pre class="output_text">{{ runsOutput[runIdx].output_system }}</pre>
+                                <pre class="output_text">{{ runsOutput[runIdx].output_system | convertUnprintableChars }}</pre>
                             {% endif %}
 
                             {% if runsOutput[runIdx].team_message is not empty %}
                                 <h5>Judge message for the team</h5>
                                 <pre class="output_text">
-{{  runsOutput[runIdx].team_message }}</pre>
-                            {%  endif %}
+                                    {{- runsOutput[runIdx].team_message | convertUnprintableChars }}
+                                </pre>
+                            {% endif %}
                         {% endif %}
 
                         {% if runsOutput[runIdx].validatorMetadata is not empty %}
@@ -986,8 +997,6 @@
 
                         {% endif %}
                     {% endif %}
-
-                    </div>
                 </div>
             {% endfor %}
 

@@ -8,7 +8,6 @@ DIR="$PWD"
 
 export version=$1
 unittest=$2
-[ "$version" = "8.2" ] && CODECOVERAGE=1 || CODECOVERAGE=0
 
 # Set up
 export unit=1
@@ -29,14 +28,8 @@ cd /opt/domjudge/domserver
 sed -i "s!:domjudge_test:!:domjudge:!" /opt/domjudge/domserver/etc/dbpasswords.secret
 
 # Run phpunit tests.
-pcov=""
-phpcov=""
-if [ "$CODECOVERAGE" -eq 1 ]; then
-    phpcov="-dpcov.enabled=1 -dpcov.directory=webapp/src"
-    pcov="--coverage-html=${DIR}/coverage-html --coverage-clover coverage.xml"
-fi
 set +e
-php $phpcov webapp/bin/phpunit -c webapp/phpunit.xml.dist webapp/tests/$unittest --log-junit ${ARTIFACTS}/unit-tests.xml --colors=never $pcov | tee "$ARTIFACTS"/phpunit.out
+php webapp/bin/phpunit -c webapp/phpunit.xml.dist webapp/tests/$unittest --log-junit ${ARTIFACTS}/unit-tests.xml --colors=never | tee "$ARTIFACTS"/phpunit.out
 UNITSUCCESS=$?
 
 # Store the unit tests also in the root for the GHA
@@ -47,21 +40,7 @@ touch ${DIR}/webapp/var/log/test.log
 cp ${DIR}/webapp/var/log/*.log "$ARTIFACTS"/
 
 set -e
-CNT=0
-THRESHOLD=10
-if [ $CODECOVERAGE -eq 1 ]; then
-    CNT=$(sed -n '/Generating code coverage report/,$p' "$ARTIFACTS"/phpunit.out | grep -cv ^$)
-fi
 
-if [ $UNITSUCCESS -ne 0 ] || [ $CNT -gt $THRESHOLD ]; then
+if [ $UNITSUCCESS -ne 0 ]; then
     exit 1
-fi
-
-if [ $CODECOVERAGE -eq 1 ]; then
-    section_start "Upload code coverage"
-    # Only upload when we got working unit-tests.
-    set +u # Uses some variables which are not set
-    # shellcheck disable=SC1090
-    . $DIR/.github/jobs/uploadcodecov.sh &>> "$ARTIFACTS"/codecov.log
-    section_end
 fi

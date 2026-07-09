@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\RejudgingStatesFixture;
 use App\Entity\Contest;
 use App\Tests\Unit\BaseTestCase;
@@ -11,9 +12,7 @@ class RejudgingControllerTest extends BaseTestCase
 {
     protected array $roles = ['admin'];
 
-    /**
-     * @dataProvider provideRoles
-     */
+    #[DataProvider('provideRoles')]
     public function testStartPage(array $roles, int $http): void
     {
         $this->roles = $roles;
@@ -32,7 +31,7 @@ class RejudgingControllerTest extends BaseTestCase
     /**
      * Provide the HTTP access code for the DOMjudge role
      */
-    public function provideRoles(): Generator
+    public static function provideRoles(): Generator
     {
         yield [[],302];
         foreach (['team','balloon','clarification_rw'] as $role) {
@@ -71,9 +70,7 @@ class RejudgingControllerTest extends BaseTestCase
         $this->client->request('GET', '/team/change-contest/' . $cid);
     }
 
-    /**
-     * @dataProvider provideShownRejudgings
-     **/
+    #[DataProvider('provideShownRejudgings')]
     public function testRejudgingCurrentContest(
         ?string $contestName,
         array $shown,
@@ -90,9 +87,7 @@ class RejudgingControllerTest extends BaseTestCase
         }
     }
 
-    /**
-     * @dataProvider provideShownRejudgings
-     **/
+    #[DataProvider('provideShownRejudgings')]
     public function testRejudgingCounterMenu(
         ?string $contestName,
         array $shown,
@@ -114,7 +109,7 @@ class RejudgingControllerTest extends BaseTestCase
         static::assertCount($todo, $rejudgings);
     }
 
-    public function provideShownRejudgings(): Generator
+    public static function provideShownRejudgings(): Generator
     {
         // The case where no contest is active/chosen/current.
         $show = [];

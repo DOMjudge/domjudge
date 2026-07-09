@@ -111,7 +111,7 @@ class AuditLogController extends AbstractController
     {
         switch ($type) {
             case 'balloon':
-                return $this->generateUrl('jury_balloons');
+                return $this->generateUrl('jury_balloons_legacy');
             case 'clarification':
                 return $this->generateUrl('jury_clarification_legacy', ['id' => $id]);
             case 'configuration':

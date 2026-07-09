@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use Doctrine\ORM\Query\Expr\Join;
 use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Entity\Submission;
@@ -54,7 +55,7 @@ class AnalysisController extends AbstractController
          *                   'timediff': float, 'num_judgings': int}> $delayedJudgings */
         $delayedJudgings = $em->createQueryBuilder()
             ->from(Submission::class, 's')
-            ->innerJoin(Judging::class, 'j', Expr\Join::WITH, 's.submitid = j.submission')
+            ->innerJoin(Judging::class, 'j', Join::WITH, 's.submitid = j.submission')
             ->select('s.externalid as submitexternalid, MIN(j.judgingid) AS judgingid, s.submittime, MIN(j.starttime) - s.submittime AS timediff, COUNT(j.judgingid) AS num_judgings')
             ->andWhere('s.contest = :contest')
             ->setParameter('contest', $contest)

@@ -51,37 +51,32 @@ class StatisticsService
      */
     public function getTeams(Contest $contest, string $filter): array
     {
-        if ($contest->isOpenToAllTeams()) {
-            return $this->applyFilter($this->em->createQueryBuilder()
-                ->select('t', 'ts', 'j', 'lang', 'a')
-                ->from(Team::class, 't')
-                ->join('t.categories', 'tc')
-                ->leftJoin('t.affiliation', 'a')
-                ->join('t.submissions', 'ts')
-                ->join('ts.language', 'l')
-                ->join('ts.judgings', 'j')
-                ->andWhere('j.valid = true')
-                ->join('ts.language', 'lang')
-                ->orderBy('t.teamid'), $filter)
-                ->getQuery()->getResult();
-        } else {
-            return $this->applyFilter($this->em->createQueryBuilder()
-                ->select('t', 'c', 'ts', 'j', 'lang', 'a')
-                ->from(Team::class, 't')
+        $qb = $this->em->createQueryBuilder()
+            ->select('t', 'ts', 'j', 'lang', 'a')
+            ->from(Team::class, 't')
+            ->join('t.categories', 'tc')
+            ->leftJoin('t.affiliation', 'a')
+            ->join('t.submissions', 'ts')
+            ->join('ts.judgings', 'j')
+            ->andWhere('j.valid = true')
+            ->join('ts.language', 'lang')
+            ->andWhere('ts.contest = :contest')
+            ->andWhere('ts.submittime >= :starttime')
+            ->andWhere('ts.submittime <= :endtime')
+            ->orderBy('t.teamid');
+
+        if (!$contest->isOpenToAllTeams()) {
+            $qb->addSelect('c')
                 ->leftJoin('t.contests', 'c')
-                ->leftJoin('t.affiliation', 'a')
-                ->join('t.categories', 'tc')
                 ->leftJoin('tc.contests', 'cc')
-                ->join('t.submissions', 'ts')
-                ->join('ts.language', 'l')
-                ->join('ts.judgings', 'j')
-                ->andWhere('j.valid = true')
-                ->join('ts.language', 'lang')
-                ->andWhere('c = :contest OR cc = :contest'), $filter)
-                ->orderBy('t.teamid')
-                ->setParameter('contest', $contest)
-                ->getQuery()->getResult();
+                ->andWhere('c = :contest OR cc = :contest');
         }
+
+        return $this->applyFilter($qb, $filter)
+            ->setParameter('contest', $contest)
+            ->setParameter('starttime', $contest->getStarttime(false))
+            ->setParameter('endtime', $contest->getEndtime())
+            ->getQuery()->getResult();
     }
 
     /**
@@ -154,16 +149,6 @@ class StatisticsService
             ];
             /** @var Submission $s */
             foreach ($team->getSubmissions() as $s) {
-                if ($s->getContest() !== $contest) {
-                    continue;
-                }
-                if ($s->getSubmitTime() > $contest->getEndTime()) {
-                    continue;
-                }
-                if ($s->getSubmitTime() < $contest->getStartTime()) {
-                    continue;
-                }
-
                 if ($noFrozen && $s->getSubmittime() > $contest->getFreezetime()) {
                     continue;
                 }
@@ -298,8 +283,9 @@ class StatisticsService
         usort($judgings, static fn(Judging $a, Judging $b) => $a->getJudgingid() <=> $b->getJudgingid());
 
         $misc = [];
-        $misc['correct_percentage'] = array_key_exists('correct',
-            $results) ? ($results['correct'] / count($judgings)) * 100.0 : 0;
+        $totalValid = array_sum($results);
+        $misc['correct_percentage'] = $totalValid > 0 && array_key_exists('correct', $results)
+            ? ($results['correct'] / $totalValid) * 100.0 : 0;
 
         return [
             'contest' => $contest,
@@ -417,14 +403,37 @@ class StatisticsService
             'problems' => [],
             'numBuckets' => static::NUM_GROUPED_BINS,
         ];
-        // Get a whole bunch of judgings (and related objects).
-        // Where:
-        //   - The judging is valid
-        //   - The judging submission is part of the selected contest
-        //   - The judging submission matches the problem we're analyzing
-        //   - The submission was made by a team in a visible category
-        $judgingsQueryBuilder = $this->em->createQueryBuilder()
-            ->select('COUNT(j) AS count, p.probid')
+
+        // Determine the bins to use.
+        $contestStart = $contest->getStarttime(false);
+        $duration = $contest->getEndtime() - $contestStart;
+        $binDuration = round($duration / static::NUM_GROUPED_BINS, 0);
+
+        // Pre-compute bin boundaries.
+        $binStarts = [];
+        $binEnds = [];
+        for ($bin = 0; $bin < static::NUM_GROUPED_BINS; $bin++) {
+            $binStarts[$bin] = new DateTime(Utils::absTime($contestStart + $bin * $binDuration));
+            $binEnds[$bin] = (clone $binStarts[$bin])->add(new DateInterval(sprintf('PT%dS', $binDuration)));
+        }
+
+        // Determine which bin the freeze starts in. Bins before this have
+        // separate correct/incorrect counts; bins from this index onward
+        // get the same total for both (shown as "frozen" by the template).
+        $freezeBin = static::NUM_GROUPED_BINS; // default: no freeze
+        if (!$showVerdictsInFreeze && $contest->getFreezetime() !== null) {
+            for ($bin = 0; $bin < static::NUM_GROUPED_BINS; $bin++) {
+                if ($binEnds[$bin]->getTimestamp() > $contest->getFreezetime()) {
+                    $freezeBin = $bin;
+                    break;
+                }
+            }
+        }
+
+        // Fetch all judging counts in a single query, grouped by problem
+        // and whether the result is correct.
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->select('p.probid, j.result, s.submittime')
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
             ->join('s.problem', 'p')
@@ -436,77 +445,60 @@ class StatisticsService
             ->andWhere('s.problem IN (:problems)')
             ->andWhere('tc.visible = true')
             ->setParameter('problems', $problems)
-            ->setParameter('contest', $contest)
-            ->groupBy('s.problem');
+            ->setParameter('contest', $contest);
 
         if ($verificationRequired) {
-            $judgingsQueryBuilder->andWhere('j.verified = true');
+            $queryBuilder->andWhere('j.verified = true');
         }
 
-        // Determine the bins to use.
-        $duration = $contest->getEndtime() - $contest->getStarttime(false);
-        $binDuration = round($duration / static::NUM_GROUPED_BINS, 0);
+        $rows = $queryBuilder->getQuery()->getArrayResult();
 
-        for ($bin = 0; $bin < static::NUM_GROUPED_BINS; $bin++) {
-            $start = new DateTime(Utils::absTime($contest->getStarttime(false) + $bin * $binDuration));
-            $end = (clone $start)->add(new DateInterval(sprintf('PT%dS',
-                $binDuration)));
-            foreach ([true, false] as $correct) {
-                $queryBuilder = clone $judgingsQueryBuilder;
-                $queryBuilder->andWhere('s.submittime >= :starttime');
-                $queryBuilder->andWhere('s.submittime < :endtime');
-                if ($showVerdictsInFreeze || $end->getTimestamp() <= $contest->getFreezetime()) {
-                    // When we don't want to show frozen correct/incorrect submissions,
-                    // get the same data for both correct and incorrect.
-                    // This logic assumes the freeze matches with the start of a bucket.
-                    // If this is not the case, the whole bucket that contains the freeze
-                    // will be showed as frozen.
-                    if ($correct) {
-                        $queryBuilder->andWhere('j.result = :correct');
-                    } else {
-                        $queryBuilder->andWhere('j.result != :correct');
-                    }
-                    $queryBuilder->setParameter('correct', 'correct');
-                }
-                $queryBuilder
-                    ->setParameter('starttime', $start->getTimestamp())
-                    ->setParameter('endtime', $end->getTimestamp());
+        // Bin the results in PHP.
+        $counts = [];
+        foreach ($rows as $row) {
+            $bin = (int)floor(((float)$row['submittime'] - $contestStart) / $binDuration);
+            $bin = min($bin, static::NUM_GROUPED_BINS - 1);
 
-                $statsIndex = $correct ? 'correct' : 'incorrect';
-
-                $result = $queryBuilder->getQuery()->getArrayResult();
-                foreach ($result as $resultItem) {
-                    $stats['problems'][$resultItem['probid']][$statsIndex][$bin] = [
-                        'start' => $start,
-                        'end' => $end,
-                        'count' => $resultItem['count'],
-                    ];
-                }
-
-                foreach ($problems as $problem) {
-                    if (!isset($stats['problems'][$problem->getProbid()][$statsIndex][$bin])) {
-                        $stats['problems'][$problem->getProbid()][$statsIndex][$bin] = [
-                            'start' => $start,
-                            'end' => $end,
-                            'count' => 0,
-                        ];
-                    }
-                }
+            $isCorrect = ($row['result'] === 'correct');
+            if ($bin < $freezeBin) {
+                $statsIndex = $isCorrect ? 'correct' : 'incorrect';
+                $counts[$row['probid']][$bin][$statsIndex]
+                    = ($counts[$row['probid']][$bin][$statsIndex] ?? 0) + 1;
+            } else {
+                // In frozen bins, both correct and incorrect get the same total.
+                $counts[$row['probid']][$bin]['frozen']
+                    = ($counts[$row['probid']][$bin]['frozen'] ?? 0) + 1;
             }
         }
 
+        // Build the output structure expected by the template.
         $maxBucketSizeCorrect = 0;
         $maxBucketSizeIncorrect = 0;
-        foreach ($stats['problems'] as $problemStats) {
-            foreach ([true, false] as $correct) {
-                $statsIndex = $correct ? 'correct' : 'incorrect';
-                foreach ($problemStats[$statsIndex] as $statItem) {
-                    if ($correct) {
-                        $maxBucketSizeCorrect = max($maxBucketSizeCorrect, $statItem['count']);
-                    } else {
-                        $maxBucketSizeIncorrect = max($maxBucketSizeIncorrect, $statItem['count']);
-                    }
+        foreach ($problems as $problem) {
+            $probid = $problem->getProbid();
+            for ($bin = 0; $bin < static::NUM_GROUPED_BINS; $bin++) {
+                if ($bin < $freezeBin) {
+                    $correctCount = $counts[$probid][$bin]['correct'] ?? 0;
+                    $incorrectCount = $counts[$probid][$bin]['incorrect'] ?? 0;
+                } else {
+                    $frozenCount = $counts[$probid][$bin]['frozen'] ?? 0;
+                    $correctCount = $frozenCount;
+                    $incorrectCount = $frozenCount;
                 }
+
+                $stats['problems'][$probid]['correct'][$bin] = [
+                    'start' => $binStarts[$bin],
+                    'end' => $binEnds[$bin],
+                    'count' => $correctCount,
+                ];
+                $stats['problems'][$probid]['incorrect'][$bin] = [
+                    'start' => $binStarts[$bin],
+                    'end' => $binEnds[$bin],
+                    'count' => $incorrectCount,
+                ];
+
+                $maxBucketSizeCorrect = max($maxBucketSizeCorrect, $correctCount);
+                $maxBucketSizeIncorrect = max($maxBucketSizeIncorrect, $incorrectCount);
             }
         }
 
@@ -563,15 +555,6 @@ class StatisticsService
         $teams = $this->getTeams($contest, $view);
         foreach ($teams as $team) {
             foreach ($team->getSubmissions() as $s) {
-                if ($s->getContest() !== $contest) {
-                    continue;
-                }
-                if ($s->getSubmitTime() > $contest->getEndTime()) {
-                    continue;
-                }
-                if ($s->getSubmitTime() < $contest->getStartTime()) {
-                    continue;
-                }
                 if ($s->getSubmittime() > $contest->getFreezetime()) {
                     continue;
                 }

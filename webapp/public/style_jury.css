@@ -58,6 +58,33 @@ tr.summary td { border-top: 1px solid black; }
     width: 93px; height: 196px;
 }
 
+.dj-dashboard {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.dj-tile {
+    transition: background-color 0.15s, box-shadow 0.15s;
+    color: inherit;
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.dj-tile:hover {
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    color: inherit;
+}
+.dj-tile i.fa-2x {
+    width: 100%;
+}
+
 a.collapse { color: black; text-decoration: none; }
 
 .judgetime { font-size: smaller; font-style: italic; }
@@ -117,7 +144,8 @@ div.submissions-filter ul.token-input-list {
 
 .data-table  td.testcase-results {
     white-space: normal;
-    word-wrap: break-word;
+    min-width: 400px;
+    width: 100%;
 }
 
 .has_tooltip {
@@ -203,7 +231,13 @@ div.submission-summary > span {
     font-size: 0.8rem;
     margin-top: 0.15rem;
 }
-.contest-fields-table td .form-check { padding-left: 0; }
+/* Keep Bootstrap's .form-check padding for native checkboxes. Bootstrap pairs
+ * that padding with a negative margin on .form-check-input; removing only the
+ * padding moves non-toggle checkboxes out of their table cell. bootstrap-toggle
+ * wraps toggle checkboxes in a visible .toggle element, so align only that
+ * generated control with the table-cell edge.
+ */
+.contest-fields-table td .form-check > .toggle[data-toggle="toggle"] { margin-left: -1.5em; }
 .contest-form .page-header-bar {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border: 1px solid #dee2e6;
@@ -240,6 +274,20 @@ div.submission-summary > span {
 
 table.submissions-table {
     width: auto;
+}
+.submissions-table tbody td {
+    vertical-align: middle;
+}
+
+/* Sticky header for submissions table */
+.submissions-table thead.thead-light {
+    position: sticky;
+    top: var(--navbar-height);
+    z-index: 10;
+}
+.submissions-table thead.thead-light th {
+    background-color: #e9ecef;
+    box-shadow: inset 0 -1px 0 #dee2e6;
 }
 
 .devmode {

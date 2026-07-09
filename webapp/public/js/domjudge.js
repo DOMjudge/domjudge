@@ -74,6 +74,9 @@ function disableKeys()
 function getEditorThemes()
 {
     const element = document.querySelector('[data-editor-themes]');
+    if (element === null) {
+        return {};
+    }
     return JSON.parse(element.dataset.editorThemes);
 }
 
@@ -81,7 +84,9 @@ function getCurrentEditorTheme()
 {
     const theme = localStorage.getItem('domjudge_editor_theme');
     if (theme === null) {
-        return Object.keys(getEditorThemes())[0];
+        const themes = getEditorThemes();
+        const keys = Object.keys(themes);
+        return keys.length > 0 ? keys[0] : 'vs';
     }
     return theme;
 }
@@ -666,7 +671,7 @@ function toggleRefresh($url, $after, usingAjax) {
     $('#refresh-toggle').text(text);
 }
 
-function updateClarifications()
+function updateTeamNotifications()
 {
     $.ajax({
         url: $('#menuDefault').data('update-url'),
@@ -675,13 +680,34 @@ function updateClarifications()
         if (jqXHR.getResponseHeader('X-Login-Page')) {
             window.location = jqXHR.getResponseHeader('X-Login-Page');
         } else {
-            let data = json['unread_clarifications'];
-            let num = data.length;
-            for (let i = 0; i < num; i++) {
+            let clarData = json['unread_clarifications'];
+            if (clarData) for (let i = 0; i < clarData.length; i++) {
                 sendNotification('New clarification',
-                 {'tag': 'clar_' + data[i].clarid,
-                        'link': domjudge_base_url + '/team/clarifications/'+data[i].clarid,
-                        'body': data[i].body });
+                 {'tag': 'clar_' + clarData[i].clarid,
+                        'link': domjudge_base_url + '/team/clarifications/'+clarData[i].clarid,
+                        'body': clarData[i].body });
+            }
+
+            let subData = json['unread_submissions'];
+            if (subData) {
+                for (let i = 0; i < subData.length; i++) {
+                    let bodyParts = [subData[i].probname];
+                    if (subData[i].score !== null) {
+                        bodyParts.push('Score: ' + parseFloat(subData[i].score).toFixed(2));
+                    }
+                    if (subData[i].submittime) {
+                        let secsAgo = Math.floor(Date.now() / 1000 - subData[i].submittime);
+                        if (secsAgo < 60) {
+                            bodyParts.push(secsAgo + ' seconds ago');
+                        } else {
+                            bodyParts.push(Math.floor(secsAgo / 60) + ' minutes ago');
+                        }
+                    }
+                    sendNotification('Submission judged: ' + subData[i].result,
+                     {'tag': 'c' + subData[i].cid + '_sub_' + subData[i].submitid + '_judge_' + subData[i].judgingid,
+                            'link': domjudge_base_url + '/team/submission/' + subData[i].submitid,
+                            'body': bodyParts.join(' · ') });
+                }
             }
         }
     })
@@ -1296,6 +1322,11 @@ function loadSubmissions(dataElement, $displayElement) {
                     $item.find('[data-time]').html(submission.time);
                     $item.find('[data-language-id]').html(submission.language);
                     $item.find('[data-verdict]').html(submission.verdict);
+                    if (submission.score === null) {
+                        $item.find('[data-score]').html('-');
+                    } else {
+                        $item.find('[data-score]').html(parseFloat(submission.score).toFixed(2));
+                    }
                     $submissionList.append($item);
                 }
                 $displayElement.find('.spinner-border').remove();
@@ -1529,7 +1560,17 @@ function initDiffEditorTab(editorId, diffId, submissionId, models) {
         if (isDeleted) {
             document.getElementById(diffId).parentElement.style.display = exists ? '' : 'none';
             navItem.style.display = exists ? '' : 'none';
-            if (!exists) return;
+            if (!exists) {
+                // If the hidden tab was active, activate the first tab that belongs to the current submission.
+                if (navItem.classList.contains('active')) {
+                    const nav = navItem.closest('ul');
+                    const firstOwned = nav.querySelector('.nav-link[data-rank]:not([data-rank=""])');
+                    if (firstOwned) {
+                        bootstrap.Tab.getOrCreateInstance(firstOwned).show();
+                    }
+                }
+                return;
+            }
         }
 
         const model = models[submitId];
@@ -1599,11 +1640,21 @@ function initDiffEditorTab(editorId, diffId, submissionId, models) {
 // Force a recompute of the monaco editor height when the display size changes.
 if ('ResizeObserver' in window) {
     $(() => {
-        var monacoObserver = new ResizeObserver(() => {
+        let bodyWidth = document.body.offsetWidth;
+        let bodyHeight = document.body.offsetHeight;
+        var monacoObserver = new ResizeObserver($.debounce(function() {
+            const newWidth = document.body.offsetWidth;
+            const newHeight = document.body.offsetHeight;
+            if (newWidth === bodyWidth && newHeight === bodyHeight) {
+                return;
+            }
+            bodyWidth = newWidth;
+            bodyHeight = newHeight;
+
             document.querySelectorAll('.monaco-editor').forEach(e => {
                 e.style.height = "0";
             });
-        });
+        }, 100));
         monacoObserver.observe(document.body);
     });
 }

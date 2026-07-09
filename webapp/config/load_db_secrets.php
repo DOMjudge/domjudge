@@ -24,16 +24,21 @@ function get_db_url(): string
     $dbsecretsfile = ETCDIR . '/dbpasswords.secret';
     $db_credentials = @file($dbsecretsfile);
     if (!$db_credentials) {
-        # Make sure that this fails with a clear error in Symfony.
-        return 'mysql://cannot_read_dbpasswords_secret:@localhost:3306/';
+        throw new RuntimeException("Cannot read DB passwords/secrets at '" . $dbsecretsfile . "'.");
     }
 
+    $found = false;
+    [$host, $db, $user, $pass, $port] = ['', '', '', '', ''];
     foreach ($db_credentials as $line) {
         if ($line[0] == '#') {
             continue;
         }
-        list($_, $host, $db, $user, $pass, $port) = array_pad(explode(':', trim($line)), 6, null);
+        $found = true;
+        [$_, $host, $db, $user, $pass, $port] = array_pad(explode(':', trim($line)), 6, null);
         break;
+    }
+    if (!$found) {
+        throw new RuntimeException("No DB passwords found in: " . $dbsecretsfile);
     }
 
     return sprintf(
@@ -60,5 +65,5 @@ $env = [
 ];
 
 foreach ($env as $k => $v) {
-    $_ENV[$k] = $_ENV[$k] ?? (isset($_SERVER[$k]) && !str_starts_with($k, 'HTTP_') ? $_SERVER[$k] : $v);
+    $_ENV[$k] ??= isset($_SERVER[$k]) && !str_starts_with($k, 'HTTP_') ? $_SERVER[$k] : $v;
 }

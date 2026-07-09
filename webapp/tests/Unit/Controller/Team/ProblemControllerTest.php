@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Team;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\DemoAboutToStartContestFixture;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
@@ -16,15 +17,16 @@ class ProblemControllerTest extends BaseTestCase
 
     /**
      * Test that the problem index page shows the correct information.
-     *
-     * @dataProvider withLimitsProvider
      */
+    #[DataProvider('withLimitsProvider')]
     public function testIndex(bool $withLimits): void
     {
         $problems = [
             'hello',
             'fltcmp',
             'boolfind',
+            'jumble',
+            'hangman',
         ];
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
@@ -48,11 +50,15 @@ class ProblemControllerTest extends BaseTestCase
                     'Hello World',
                     'Float special compare test',
                     'Boolean switch search',
+                    'Jumble words',
+                    'Hangman',
                 ];
                 $letters = [
                     'A',
                     'B',
                     'C',
+                    'D',
+                    'E',
                 ];
                 $crawler = $this->client->request('GET', '/team/problems');
 
@@ -60,11 +66,15 @@ class ProblemControllerTest extends BaseTestCase
                 static::assertSelectorTextContains('.nav-item .nav-link.active',
                     'Problemset');
 
-                // Get the card bodies and verify we have exactly three of them.
+                // Get the card bodies and verify we have exactly five of them.
                 $cardBodies = $crawler->filter('.card-body');
-                static::assertSame(3, $cardBodies->count());
+                static::assertSame(5, $cardBodies->count());
 
-                for ($i = 0; $i < 3; $i++) {
+                for ($i = 0; $i < 5; $i++) {
+                    $timelimit = '5 seconds';
+                    if ($i === 4) {
+                        $timelimit = '1 second';
+                    }
                     $card = $cardBodies->eq($i);
                     static::assertSame($letters[$i],
                         $card->filter('.card-title')->text(null, true));
@@ -73,7 +83,7 @@ class ProblemControllerTest extends BaseTestCase
 
                     if ($withLimits) {
                         static::assertSame(
-                            'Limits: 5 seconds / 2 GB',
+                            'Limits: ' . $timelimit . ' / 2 GB',
                             $card->filter('h4.card-subtitle')->text(null, true)
                         );
                     } else {
@@ -91,7 +101,7 @@ class ProblemControllerTest extends BaseTestCase
             });
     }
 
-    public function withLimitsProvider(): Generator
+    public static function withLimitsProvider(): Generator
     {
         yield [false];
         yield [true];

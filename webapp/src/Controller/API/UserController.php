@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @extends AbstractRestController<User, User>
@@ -41,7 +42,8 @@ class UserController extends AbstractRestController
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        protected readonly ImportExportService $importExportService
+        protected readonly ImportExportService $importExportService,
+        protected readonly ValidatorInterface $validator,
     ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
     }
@@ -336,8 +338,12 @@ class UserController extends AbstractRestController
     public function updateAction(
         #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
         UpdateUser $updateUser,
-        Request $request
+        Request $request,
+        string $id,
     ): Response {
+        if ($id !== $updateUser->id) {
+            throw new BadRequestHttpException('ID in URL does not match ID in payload');
+        }
         return $this->addOrUpdateUser($updateUser, $request);
     }
 
@@ -362,7 +368,6 @@ class UserController extends AbstractRestController
         $user
             ->setUsername($addUser->username)
             ->setName($addUser->name)
-            ->setEmail($addUser->email)
             ->setIpAddress($addUser->ip)
             ->setPlainPassword($addUser->password)
             ->setEnabled($addUser->enabled ?? true);
@@ -414,6 +419,15 @@ class UserController extends AbstractRestController
                 throw new BadRequestHttpException(sprintf("Role %s not found", $djRole));
             }
             $user->addUserRole($role);
+        }
+
+        $errors = $this->validator->validate($user);
+        if ($errors->count()) {
+            $messages = [];
+            foreach ($errors as $error) {
+                $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
+            }
+            throw new BadRequestHttpException(implode("\n", $messages));
         }
 
         $this->em->persist($user);

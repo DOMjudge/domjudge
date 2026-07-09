@@ -10,9 +10,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Contests</h1>
-
-    <h3>Current contests</h3>
+    <h1>Current contests</h1>
 
     {% for contest in current_contests %}
         <div class="row mb-4">
@@ -78,7 +76,7 @@
         {% endif %}
     {% endfor %}
 
-    <h3>All available contests</h3>
+    <h1>All available contests</h1>
 
     {{ macros.table(contests_table, table_fields) }}
 

@@ -131,12 +131,11 @@ class Judging extends AbstractJudgement
         type: 'decimal',
         precision: 32,
         scale: 9,
-        options: [
-            'comment' => 'Optional score for this run, e.g. for partial scoring',
-            'default' => '0.000000000',
-        ]
+        nullable: true,
+        options: ['comment' => 'Optional score for this run, e.g. for partial scoring']
     )]
-    private string|float $score = 0;
+    #[OA\Property(nullable: true)]
+    private string|float|null $score = null;
 
 
     #[ORM\ManyToOne]
@@ -485,12 +484,12 @@ class Judging extends AbstractJudgement
         return $this;
     }
 
-    public function getScore(): string
+    public function getScore(): ?string
     {
-        return (string)$this->score;
+        return $this->score === null ? null : (string)$this->score;
     }
 
-    public function setScore(string|float $score): Judging
+    public function setScore(string|float|null $score): Judging
     {
         $this->score = $score;
         return $this;

@@ -115,6 +115,13 @@ class ClarificationController extends AbstractRestController
         Request $request,
         ?string $id
     ): Response {
+        $maxLength = $this->config->get('clar_max_body_length');
+        if ($maxLength > 0 && mb_strlen($clarificationPost->text) > $maxLength) {
+            throw new BadRequestHttpException(
+                sprintf('Clarification body is too long: %d characters, maximum is %d.', mb_strlen($clarificationPost->text), $maxLength)
+            );
+        }
+
         $contestId = $this->getContestId($request);
         $contest   = $this->em->getRepository(Contest::class)->find($contestId);
 

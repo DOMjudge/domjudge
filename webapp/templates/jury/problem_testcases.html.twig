@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Testcases for p{{ problem.externalid }} - {{ parent() }}{% endblock %}
+{% block title %}Testcases for {{ problem.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -73,13 +73,13 @@
                         {% endif %}
                         <td rowspan="2" class="testrank">
                             {% if allowEdit %}
-                                <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'up'}) }}"
+                                <a href="{{ path('jury_problem_testcase_move', {'probId': problem.externalid, 'rank': testcase.rank, 'direction': 'up'}) }}"
                                    title="Move testcase up"><i class="fas fa-arrow-up"></i></a><br>
                             {% endif %}
                             {{ testcase.rank }}
                             {% if allowEdit %}
                                 <br>
-                                <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'down'}) }}"
+                                <a href="{{ path('jury_problem_testcase_move', {'probId': problem.externalid, 'rank': testcase.rank, 'direction': 'down'}) }}"
                                    title="Move testcase down"><i class="fas fa-arrow-down"></i></a>
                             {% endif %}
                         </td>
@@ -88,7 +88,7 @@
                                    {% if testcase.sample %}checked{% endif %} />
                         </td>
                         <td class="filename">
-                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'input'}) }}">
+                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.externalid, 'rank': testcase.rank, 'type': 'input'}) }}">
                                 {{ testcase.downloadName | split('/') | last }}.{{ extensionMapping.input }}
                             </a>
                         </td>
@@ -114,7 +114,7 @@
                     </tr>
                     <tr>
                         <td class="filename">
-                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'output'}) }}">
+                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.externalid, 'rank': testcase.rank, 'type': 'output'}) }}">
                                 {{ testcase.downloadName | split('/') | last }}.{{ extensionMapping.output }}
                             </a>
                         </td>
@@ -132,8 +132,8 @@
                         {% endif %}
                         <td class="testimage">
                             {% if row.imageSize > 0 %}
-                                <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'image'}) }}">
-                                    <span class="filename">p{{ problem.probid }}.t{{ testcase.rank }}.{{ testcase.imageType }}</span>
+                                <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.externalid, 'rank': testcase.rank, 'type': 'image'}) }}">
+                                    <span class="filename">{{ problem.externalid }}.t{{ testcase.rank }}.{{ testcase.imageType }}</span>
                                 </a>
                                 {% if allowEdit %}
                                 &nbsp;

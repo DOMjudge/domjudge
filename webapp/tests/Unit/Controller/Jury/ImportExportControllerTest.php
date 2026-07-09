@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\ClarificationFixture;
 use App\DataFixtures\Test\DemoPreStartContestFixture;
 use App\DataFixtures\Test\NonSortOrderTeamCategoryFixture;
@@ -28,9 +29,8 @@ class ImportExportControllerTest extends BaseTestCase
 
     /**
      * Test that the expected contest dropdowns on the index page are present.
-     *
-     * @dataProvider provideContests
      */
+    #[DataProvider('provideContests')]
     public function testIndexContestDropdowns(string $contest): void
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
@@ -39,7 +39,7 @@ class ImportExportControllerTest extends BaseTestCase
         self::assertSelectorExists(sprintf('select#contest_export_contest > option:contains("%s")', $contest));
     }
 
-    public function provideContests(): Generator
+    public static function provideContests(): Generator
     {
         yield ['Demo contest'];
     }
@@ -76,9 +76,8 @@ class ImportExportControllerTest extends BaseTestCase
 
     /**
      * Test export of contest.yaml.
-     *
-     * @dataProvider provideContestYamlContents
      */
+    #[DataProvider('provideContestYamlContents')]
     public function testContestExport(string $cid, string $expectedYaml): void
     {
         $this->loadFixtures([DemoPreStartContestFixture::class]);
@@ -87,9 +86,9 @@ class ImportExportControllerTest extends BaseTestCase
         static::assertEquals($expectedYaml, $this->client->getInternalResponse()->getContent());
     }
 
-    public function provideContestYamlContents(): Generator
+    public static function provideContestYamlContents(): Generator
     {
-        $year = date('Y')+1;
+        $year = (int)date('Y')+1;
         $pastYear = date('Y');
         $yaml =<<<HEREDOC
 id: demo
@@ -102,6 +101,7 @@ penalty_time: 20
 activate_time: '{$pastYear}-01-01T08:00:00+00:00'
 scoreboard_type: pass-fail
 medals:
+    enabled: true
     gold: 4
     silver: 4
     bronze: 4
@@ -129,6 +129,20 @@ problems:
         name: 'Boolean switch search'
         color: saddlebrown
         rgb: '#9B630C'
+    -
+        id: jumble
+        label: D
+        letter: D
+        name: 'Jumble words'
+        color: indigo
+        rgb: '#541298'
+    -
+        id: hangman
+        label: E
+        letter: E
+        name: Hangman
+        color: chartreuse
+        rgb: '#6f0'
 
 HEREDOC;
         yield ["demo", $yaml];
@@ -136,9 +150,8 @@ HEREDOC;
 
     /**
      * Test export of groups.tsv and teams.tsv.
-     *
-     * @dataProvider provideTsvContents
      */
+    #[DataProvider('provideTsvContents')]
     public function testGroupsTeamsTsvExport(string $linkname, string $expectedData): void
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
@@ -148,7 +161,7 @@ HEREDOC;
         static::assertEquals($expectedData, $this->client->getInternalResponse()->getContent());
     }
 
-    public function provideTsvContents(): Generator
+    public static function provideTsvContents(): Generator
     {
         yield ['a:contains("teams.tsv")', 'teams	1
 exteam	exteam	participants	Example teamname	Utrecht University	UU	NLD	utrecht
@@ -178,9 +191,8 @@ observers	Observers
 
     /**
      * Test export of results.html
-     *
-     * @dataProvider provideResultsHtmlExport
      */
+    #[DataProvider('provideResultsHtmlExport')]
     public function testResultsHtmlExport(bool $individuallyRanked, bool $honors, string $format): void
     {
         $this->loadFixture(ClarificationFixture::class);
@@ -196,7 +208,7 @@ observers	Observers
         self::assertSelectorExists('td:contains("Example teamname")');
     }
 
-    public function provideResultsHtmlExport(): Generator
+    public static function provideResultsHtmlExport(): Generator
     {
         yield [true, true, 'html_inline'];
         yield [true, false, 'html_inline'];
@@ -210,9 +222,8 @@ observers	Observers
 
     /**
      * Test export of results.tsv
-     *
-     * @dataProvider provideResultsTsvExport
      */
+    #[DataProvider('provideResultsTsvExport')]
     public function testResultsTsvExport(
         int $sortOrder,
         bool $individuallyRanked,
@@ -231,7 +242,7 @@ observers	Observers
         static::assertEquals($expectedData, $this->client->getInternalResponse()->getContent());
     }
 
-    public function provideResultsTsvExport(): Generator
+    public static function provideResultsTsvExport(): Generator
     {
         yield [0, true, true, "results	1\nexteam		Honorable	0	0	0	\n"];
         yield [0, true, false, "results	1\nexteam		Honorable	0	0	0	\n"];

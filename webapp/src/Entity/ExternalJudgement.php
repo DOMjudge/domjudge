@@ -6,6 +6,7 @@ use App\Controller\API\AbstractRestController as ARC;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use App\Validator\Constraints as AppAssert;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
@@ -39,6 +40,7 @@ class ExternalJudgement extends AbstractJudgement
         options: ['comment' => 'Judgement ID in external system, should be unique inside a single contest', 'collation' => 'utf8mb4_bin']
     )]
     #[Serializer\SerializedName('id')]
+    #[AppAssert\Identifier]
     protected string $externalid;
 
     #[ORM\Column(
@@ -96,12 +98,10 @@ class ExternalJudgement extends AbstractJudgement
         type: 'decimal',
         precision: 32,
         scale: 9,
-        options: [
-            'comment' => 'Optional score for this run, e.g. for partial scoring',
-            'default' => '0.000000000',
-        ]
+        nullable: true,
+        options: ['comment' => 'Optional score for this run, e.g. for partial scoring']
     )]
-    private string|float $score = 0;
+    private string|float|null $score = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
@@ -218,12 +218,12 @@ class ExternalJudgement extends AbstractJudgement
         return $this->valid;
     }
 
-    public function getScore(): string
+    public function getScore(): ?string
     {
-        return (string)$this->score;
+        return $this->score === null ? null : (string)$this->score;
     }
 
-    public function setScore(string|float $score): ExternalJudgement
+    public function setScore(string|float|null $score): ExternalJudgement
     {
         $this->score = $score;
         return $this;

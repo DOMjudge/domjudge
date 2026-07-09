@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# GoLang compile wrapper-script for 'compile.sh'.
+# See that script for syntax and more info.
+
+DEST="$1" ; shift
+MEMLIMIT="$1" ; shift
+
+# Compilation needs to store temporary files. The current workdirectory is not
+# available during the submission run. The `HOME`
+# is needed for the linker to work.
+export TMPDIR="$PWD"
+export HOME="$PWD"
+
+# Uncomment the line below if you want it make easier for teams to do local
+# debugging.
+# export ONLINE_JUDGE=1 DOMJUDGE=1
+
+go build -o "$DEST" "$@"
+exit $?

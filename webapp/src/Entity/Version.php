@@ -42,7 +42,7 @@ class Version
 
     #[ORM\ManyToOne(targetEntity: Judgehost::class)]
     #[ORM\JoinColumn(name: 'judgehostid', referencedColumnName: 'judgehostid', onDelete: 'SET NULL')]
-    private Judgehost $judgehost;
+    private ?Judgehost $judgehost = null;
 
     #[ORM\Column(
         type: 'decimal',
@@ -133,12 +133,12 @@ class Version
         return $this;
     }
 
-    public function getJudgehost(): Judgehost
+    public function getJudgehost(): ?Judgehost
     {
         return $this->judgehost;
     }
 
-    public function setJudgehost(Judgehost $judgehost): Version
+    public function setJudgehost(?Judgehost $judgehost): Version
     {
         $this->judgehost = $judgehost;
         return $this;

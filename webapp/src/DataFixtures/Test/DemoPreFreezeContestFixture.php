@@ -14,14 +14,14 @@ class DemoPreFreezeContestFixture extends AbstractTestDataFixture
             ->setStarttimeString('2021-01-01 09:00:00 Europe/Amsterdam')
             ->setFreezetimeString(
                 sprintf(
-                    '%s-01-01 09:00:00 Europe/Amsterdam',
-                    date('Y') + 1
+                    '%d-01-01 09:00:00 Europe/Amsterdam',
+                    (int)date('Y') + 1
                 )
             )
             ->setEndtimeString(
                 sprintf(
-                    '%s-02-01 09:00:00 Europe/Amsterdam',
-                    date('Y') + 1
+                    '%d-02-01 09:00:00 Europe/Amsterdam',
+                    (int)date('Y') + 1
                 )
             ); // Set the time explicit to guard against changes in the Default fixture.
         $manager->persist($demoContest);

@@ -150,18 +150,18 @@
 
     {% if stats %}
         <h2>Statistics over repeated rejudgings</h2>
-        <h4>Runtime spread</h4>
-            <table class="table table-sm table-striped">
-                <tr><th>submission/testcase</th><th>spread</th><th>#judgings</th><th>result</th></tr>
-		{% for spread in stats.runtime_spread %}
-		    <tr>
-                        <td>s{{ spread.submitid }}/tc{{ spread.rank }}</td>
-                        <td>{{ spread.spread | number_format(3) }}s</td>
-                        <td>{{ spread.count }}</td>
-                        <td>{{ spread.verdict | printResult }}</td>
-		    </tr>
-		{% endfor %}
-	    </table>
+        <h3>Runtime spread</h3>
+        <table class="table table-sm table-striped">
+            <tr><th>submission/testcase</th><th>spread</th><th>#judgings</th><th>result</th></tr>
+		        {% for spread in stats.runtime_spread %}
+		            <tr>
+                    <td>s{{ spread.submitid }}/tc{{ spread.rank }}</td>
+                    <td>{{ spread.spread | number_format(3) }}s</td>
+                    <td>{{ spread.count }}</td>
+                    <td>{{ spread.verdict | printResult }}</td>
+		            </tr>
+		        {% endfor %}
+	      </table>
         {% if stats.judging_runs_differ %}
             <h4>Judging Run Differences</h4>
             <ul>
@@ -174,7 +174,7 @@
             {% endif %}
         {% endif %}
         {% if stats.judgehost_stats | length > 1 %}
-            <h4>Judgehost stats</h4>
+            <h3>Judgehost stats</h3>
             <table class="table table-sm table-striped">
                 <tr><th>Judgehost</th><th>#judgings</th><th>avg. runtime</th><th>std.dev.</th><th>avg. duration</th></tr>
                 {% for judgehost in stats.judgehost_stats %}
@@ -189,7 +189,7 @@
             </table>
         {% endif %}
         {% if stats.judgings %}
-            <h4>Judging verdicts</h4>
+            <h3>Judging verdicts</h3>
             <table class="table table-sm table-striped">
                 <tr><th>jID</th><th>rID</th><th>Judgehost</th><th>duration (incl. compile)</th><th>verdict</th></tr>
                 {% for judging in stats.judgings %}
@@ -211,7 +211,7 @@
         <div class="btn-group btn-group-sm mb-3" role="group">
             <span class="input-group-text listtoggles">Show:</span>
             {%- for idx, type in viewTypes %}
-                <input type="radio" autocomplete="off" class="btn-check"
+                <input type="radio" class="btn-check"
                     name="viewtype" id="viewtype{{ idx }}" value="{{ type }}"
                     {% if idx == view %}checked{% endif %}>
                 <label class="btn btn-secondary" for="viewtype{{ idx }}">{{ type }}</label>
@@ -219,7 +219,7 @@
         </div>
         {% if rejudging.repeat %}
             <div class="btn-group btn-group-sm" role="group">
-                <input type="checkbox" class="btn-check" id="statistics-toggle" {% if showStatistics %}checked{% endif %} autocomplete="off">
+                <input type="checkbox" class="btn-check" id="statistics-toggle" {%- if showStatistics %} checked{% endif %}>
                 <label for="statistics-toggle" class="btn btn-outline-secondary">
                     <i class="fas fa-list-ol"></i> Statistics
                 </label>
@@ -235,8 +235,12 @@
                 <select style="width: 100%" class="select2 form-control" name="oldverdict" id="oldverdict">
                     <option value="all" {% if oldverdict == 'all' %}selected{% endif %}>all</option>
                     {%- for verdict, abbreviation in verdicts %}
-                        <option value="{{ verdict }}" {% if oldverdict == verdict %}selected{% endif %}>
-                            {{ verdict }}
+                        <option value="{% if verdict == '' %}judging{% else %}{{ verdict }}{% endif %}" {% if oldverdict == verdict %}selected{% endif %}>
+                            {% if verdict == '' %}
+                                still judging
+                            {% else %}
+                                {{ verdict }}
+                            {% endif %}
                         </option>
                     {%- endfor %}
 
@@ -247,8 +251,12 @@
                 <select style="width: 100%" class="select2 form-control" name="newverdict" id="newverdict">
                     <option value="all" {% if newverdict == 'all' %}selected{% endif %}>all</option>
                     {%- for verdict, abbreviation in verdicts %}
-                        <option value="{{ verdict }}" {% if newverdict == verdict %}selected{% endif %}>
-                            {{ verdict }}
+                        <option value="{% if verdict == '' %}judging{% else %}{{ verdict }}{% endif %}" {% if newverdict == verdict %}selected{% endif %}>
+                            {% if verdict == '' %}
+                                still judging
+                            {% else %}
+                                {{ verdict }}
+                            {% endif %}
                         </option>
                     {%- endfor %}
 

@@ -16,7 +16,6 @@ class UserControllerTest extends AccountBaseTestCase
             "id" => "admin",
             "username" => "admin",
             "name" => "Administrator",
-            "email" => null,
             "ip" => null,
             "enabled" => true
         ],
@@ -28,7 +27,6 @@ class UserControllerTest extends AccountBaseTestCase
             "id" => "judgehost",
             "username" => "judgehost",
             "name" => "User for judgedaemons",
-            "email" => null,
             "ip" => null,
             "enabled" => true
         ],
@@ -40,7 +38,6 @@ class UserControllerTest extends AccountBaseTestCase
             "id" => "demo",
             "username" => "demo",
             "name" => "demo user for example team",
-            "email" => null,
             "ip" => null,
             "enabled" => true
         ],
@@ -90,5 +87,19 @@ class UserControllerTest extends AccountBaseTestCase
 
         $response = $this->verifyApiJsonResponse('PUT', $this->helperGetEndpointURL($this->apiEndpoint) . '/someid', 400, 'admin', $data);
         static::assertMatchesRegularExpression('/id:\n.*This value should be of type string./', $response['message']);
+    }
+
+    public function testUpdateWithInvalidExternalId(): void
+    {
+        $data = [
+            'id' => 'invalid id!',
+            'username' => 'testuser',
+            'name' => 'Test User',
+            'roles' => ['team'],
+            'password' => 'testpassword',
+        ];
+
+        $response = $this->verifyApiJsonResponse('PUT', $this->helperGetEndpointURL($this->apiEndpoint) . '/invalid%20id!', 400, 'admin', $data);
+        self::assertStringContainsString('Only letters, numbers, dashes, underscores and dots are allowed.', $response['message']);
     }
 }

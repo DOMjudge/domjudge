@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Entity\Contest;
 use App\Entity\Problem;
 use App\Entity\Submission;
@@ -68,8 +69,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test that jury <???> overview page exists.
-     * @dataProvider provideBasePage
      */
+    #[DataProvider('provideBasePage')]
     public function testPageOverview(
         string $role,
         int $statusCode,
@@ -93,9 +94,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
-    /**
-     * @dataProvider provideRoleAccessData
-     */
+    #[DataProvider('provideRoleAccessData')]
     public function testHTTPAccessForRole(string $role, string $url, int $statusCode, string $HTTPMethod): void
     {
         $this->roles = [$role];
@@ -112,7 +111,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
      * - expected statusCode for this role,
      * - the method to try (GET, POST).
      */
-    public function provideRoleAccessData(): Generator
+    public static function provideRoleAccessData(): Generator
     {
         foreach (['GET', 'POST', 'HEAD'] as $HTTP) {
             foreach (['admin', 'jury'] as $role) {
@@ -136,7 +135,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
      * - the expected HTTP statusCode,
      * - the pre-existing entry.
      */
-    public function provideBasePage(): Generator
+    public static function provideBasePage(): Generator
     {
         foreach (static::$exampleEntries as $exampleEntry) {
             foreach (static::$rolesView as $role) {
@@ -288,10 +287,13 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test that admin can add a new entity for this controller.
-     * @dataProvider provideAddCorrectEntities
      */
+    #[DataProvider('provideAddCorrectEntities')]
     public function testCheckAddEntityAdmin(array $element, array $expected): void
     {
+        if (empty($element)) {
+            static::markTestSkipped('No add entities defined.');
+        }
         $this->roles = ['admin'];
         $this->logOut();
         $this->logIn();
@@ -328,10 +330,13 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test failures when the admin provides wrong data.
-     * @dataProvider provideAddFailureEntities
      */
+    #[DataProvider('provideAddFailureEntities')]
     public function testCheckAddEntityAdminFailure(array $element, string $message): void
     {
+        if (empty($element)) {
+            static::markTestSkipped('No add failure entities defined.');
+        }
         $this->roles = ['admin'];
         $this->logOut();
         $this->logIn();
@@ -346,11 +351,13 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test that admin can add edit an entity for this controller.
-     *
-     * @dataProvider provideEditCorrectEntities
      */
+    #[DataProvider('provideEditCorrectEntities')]
     public function testCheckEditEntityAdminCorrect(array $formDataKeys, array $formDataValues): void
     {
+        if (empty($formDataKeys)) {
+            static::markTestSkipped('No edit entities defined.');
+        }
         if (static::$addPlus != '') {
             static::markTestSkipped('Edit not implemented yet for ' . static::$shortTag . '.');
         }
@@ -402,11 +409,13 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test that admin can edit an entity for this controller but receives an error when providing wrong data.
-     *
-     * @dataProvider provideEditFailureEntities
      */
+    #[DataProvider('provideEditFailureEntities')]
     public function testCheckEditEntityAdminFailure(array $formDataKeys, array $formDataValues, string $message): void
     {
+        if (empty($formDataKeys)) {
+            static::markTestSkipped('No edit failure entities defined.');
+        }
         if (static::$addPlus != '') {
             static::markTestSkipped('Edit not implemented yet for ' . static::$shortTag . '.');
         }
@@ -451,6 +460,10 @@ abstract class JuryControllerTestCase extends BaseTestCase
     public function provideAddCorrectEntities(): Generator
     {
         $entities = static::$addEntities;
+        if (empty($entities)) {
+            yield [[], []];
+            return;
+        }
         foreach ($entities as $element) {
             [$combinedValues, $element] = $this->helperProvideMergeAddEntity($element);
             [$combinedValues, $element] = $this->helperProvideTranslateAddEntity($combinedValues, $element);
@@ -461,6 +474,10 @@ abstract class JuryControllerTestCase extends BaseTestCase
     public function provideAddFailureEntities(): Generator
     {
         $entities = static::$addEntitiesFailure;
+        if (empty($entities)) {
+            yield [[], ''];
+            return;
+        }
         foreach ($entities as $message => $elementList) {
             foreach ($elementList as $element) {
                 [$entity, $expected] = $this->helperProvideMergeAddEntity($element);
@@ -507,6 +524,10 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     public function provideEditCorrectEntities(): Generator
     {
+        if (empty(static::$addEntities)) {
+            yield [[], []];
+            return;
+        }
         foreach (static::$addEntities as $element) {
             [$formdataKeys, $formdataValues] = $this->helperProvideMergeEditEntity($element);
             yield [$formdataKeys, $formdataValues];
@@ -519,6 +540,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
            [$message => [[$offending_key => $offending_value, $other_key => $other_values...]]]
            is expected to have the offending value, when this is defined in $editEntitiesSkipFields
            we skip this */
+        $yielded = false;
         foreach (static::$addEntitiesFailure as $message => $entityList) {
             foreach ($entityList as $element) {
                 if (in_array(array_key_first($element), static::$editEntitiesSkipFields)) {
@@ -529,15 +551,18 @@ abstract class JuryControllerTestCase extends BaseTestCase
                 }
                 [$formdataKeys, $formdataValues] = $this->helperProvideMergeEditEntity($element);
                 yield [$formdataKeys, $formdataValues, $message];
+                $yielded = true;
             }
+        }
+        if (!$yielded) {
+            yield [[], [], ''];
         }
     }
 
     /**
      * Test that the standard user can delete an entity.
-     *
-     * @dataProvider provideDeleteEntity
      */
+    #[DataProvider('provideDeleteEntity')]
     public function testDeleteEntity(string $entityShortName): void
     {
         $this->roles = ['admin'];
@@ -567,7 +592,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
     /**
      * - entityShortname to delete.
      */
-    public function provideDeleteEntity(): Generator
+    public static function provideDeleteEntity(): Generator
     {
         if (static::$delete !== '') {
             foreach (static::$deleteEntities as $entity) {

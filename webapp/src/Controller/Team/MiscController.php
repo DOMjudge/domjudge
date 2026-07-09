@@ -147,7 +147,10 @@ class MiscController extends BaseController
     #[Route(path: '/updates', name: 'team_ajax_updates', methods: ['GET'])]
     public function updatesAction(): JsonResponse
     {
-        return $this->json(['unread_clarifications' => $this->dj->getUnreadClarifications()]);
+        return $this->json([
+            'unread_clarifications' => $this->dj->getUnreadClarifications(),
+            'unread_submissions' => $this->dj->getJudgingNotifications(),
+        ]);
     }
 
     #[Route(path: '/change-contest/{contestId}', name: 'team_change_contest')]
@@ -210,7 +213,7 @@ class MiscController extends BaseController
     {
         $user    = $this->dj->getUser();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
-        if (!$contest->getFreezeData()->started()) {
+        if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException('Contest text not found or not available');
         }
         return $contest->getContestProblemsetStreamedResponse();

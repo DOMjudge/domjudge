@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Controller\Jury\QueueTaskController;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -36,9 +37,7 @@ class QueueTaskControllerTest extends BaseTestCase
         $this->submissionService = self::getContainer()->get(SubmissionService::class);
     }
 
-    /**
-     * @dataProvider provideNotAllowed
-     */
+    #[DataProvider('provideNotAllowed')]
     public function testNotAllowed(string $role): void
     {
         $this->roles = [$role];
@@ -47,7 +46,7 @@ class QueueTaskControllerTest extends BaseTestCase
         $this->verifyPageResponse('GET', '/jury/queuetasks', 403);
     }
 
-    public function provideNotAllowed(): Generator
+    public static function provideNotAllowed(): Generator
     {
         yield ['team'];
         yield ['jury'];
@@ -130,9 +129,7 @@ class QueueTaskControllerTest extends BaseTestCase
         }
     }
 
-    /**
-     * @dataProvider provideLazyShadowMode
-     */
+    #[DataProvider('provideLazyShadowMode')]
     public function testLazy(bool $shadowMode, int $globalLazy, int $problemLazy): void
     {
         $this->setupShadowMode($shadowMode);

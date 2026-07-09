@@ -24,6 +24,7 @@ use App\Entity\ProblemAttachment;
 use App\Entity\QueueTask;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
+use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
@@ -77,6 +78,9 @@ class DOMJudgeService
 
     private string $localVersionString = '';
 
+    /** @var array<string, string[]> */
+    private array $assetFilesCache = [];
+
     final public const EVAL_DEFAULT = 0;
     final public const EVAL_LAZY = 1;
     final public const EVAL_FULL = 2;
@@ -102,6 +106,7 @@ class DOMJudgeService
 
     public function __construct(
         protected readonly EntityManagerInterface $em,
+        protected readonly BalloonService $balloonService,
         protected readonly LoggerInterface $logger,
         protected readonly RequestStack $requestStack,
         protected readonly ParameterBagInterface $params,
@@ -358,6 +363,43 @@ class DOMJudgeService
     }
 
     /**
+     * @return list<array{submitid: int, judgingid: int, cid: int, result: string, probname: string, submittime: float, score: string|null}>
+     */
+    public function getJudgingNotifications(): array
+    {
+        $user    = $this->getUser();
+        $team    = $user->getTeam();
+        if ($team === null) {
+            return [];
+        }
+        $contest = $this->getCurrentContest($team->getTeamId());
+        if ($contest === null) {
+            return [];
+        }
+
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->select('s.submitid', 'j.judgingid', 'IDENTITY(s.contest) AS cid', 'j.result', 'j.score', 'p.name AS probname', 's.submittime')
+            ->from(Judging::class, 'j')
+            ->join('j.submission', 's')
+            ->join('s.contest_problem', 'cp')
+            ->join('cp.problem', 'p')
+            ->andWhere('j.valid = true')
+            ->andWhere('j.result IS NOT NULL')
+            ->andWhere('j.endtime > :since')
+            ->andWhere('s.team = :team')
+            ->andWhere('s.contest = :contest')
+            ->setParameter('since', time() - 10 * 60)
+            ->setParameter('team', $team)
+            ->setParameter('contest', $contest);
+
+        if ($this->config->get('verification_required')) {
+            $queryBuilder->andWhere('j.verified = 1');
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
+    /**
      * @return array{clarifications: array<array{clarid: int, body: string}>,
      *               judgehosts: array<array{hostname: string, polltime: float}>,
      *               rejudgings: array<array{rejudgingid: int, starttime: string, endtime: string|float}>,
@@ -424,10 +466,18 @@ class DOMJudgeService
 
             if ($this->shadowMode()) {
                 if ($contest) {
-                    $hasDifference = '(j.result IS NOT NULL AND ej.result != j.result)'
-                        . ' OR s.importError IS NOT NULL'
-                        . ' OR (j.result IS NOT NULL AND ABS(j.score - ej.score) > :scoreDiffEpsilon'
-                        . '     AND BIT_AND(p.types, :scoringType) > 0)';
+                    if ($contest->getShadowCompareByScore()) {
+                        // Score-based comparison: for scoring problems, only score matters
+                        $hasDifference = 's.importError IS NOT NULL'
+                            . ' OR (j.result IS NOT NULL AND BIT_AND(p.types, :scoringType) = 0 AND ej.result != j.result)'
+                            . ' OR (j.result IS NOT NULL AND BIT_AND(p.types, :scoringType) > 0 AND ABS(j.score - ej.score) > :scoreDiffEpsilon)';
+                    } else {
+                        // Verdict-based comparison (current behavior)
+                        $hasDifference = '(j.result IS NOT NULL AND ej.result != j.result)'
+                            . ' OR s.importError IS NOT NULL'
+                            . ' OR (j.result IS NOT NULL AND ABS(j.score - ej.score) > :scoreDiffEpsilon'
+                            . '     AND BIT_AND(p.types, :scoringType) > 0)';
+                    }
                     $shadow_difference_count = $this->em->createQueryBuilder()
                         ->from(Submission::class, 's')
                         ->innerJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1')
@@ -435,7 +485,8 @@ class DOMJudgeService
                         ->innerJoin('s.problem', 'p')
                         ->select('COUNT(s.submitid)')
                         ->andWhere('s.contest = :contest')
-                        ->andWhere('s.externalid IS NOT NULL')
+                        ->andWhere('s.source = :external')
+                        ->setParameter('external', SubmissionSource::SHADOWING)
                         ->andWhere('ej.result IS NOT NULL')
                         ->andWhere($hasDifference)
                         ->andWhere('ej.verified = false')
@@ -467,26 +518,14 @@ class DOMJudgeService
         }
 
         if ($this->checkrole('balloon') && $contest) {
-            $balloonsQuery = $this->em->createQueryBuilder()
-                ->select('b.balloonid', 't.name', 't.location', 'p.name AS pname')
-                ->from(Balloon::class, 'b')
-                ->leftJoin('b.submission', 's')
-                ->leftJoin('s.problem', 'p')
-                ->leftJoin('s.contest', 'co')
-                ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
-                ->leftJoin('s.team', 't')
-                ->andWhere('co.cid = :cid')
-                ->andWhere('b.done = 0')
-                ->setParameter('cid', $contest->getCid());
-
-            $freezetime = $contest->getFreezeTime();
-            if ($freezetime !== null && !(bool)$this->config->get('show_balloons_postfreeze')) {
-                $balloonsQuery
-                    ->andWhere('s.submittime < :freeze')
-                    ->setParameter('freeze', $freezetime);
-            }
-
-            $balloons = $balloonsQuery->getQuery()->getResult();
+            $balloons = array_map(function ($balloon) {
+                return [
+                    'balloonid' => $balloon['data']['balloonid'],
+                    'name' => $balloon['data']['team']->getName(),
+                    'location' => $balloon['data']['location'],
+                    'pname' => $balloon['data']['contestproblem']->getProblem()->getName(),
+                ];
+            }, $this->balloonService->collectBalloonTable($contest, true));
         }
 
         return [
@@ -741,8 +780,13 @@ class DOMJudgeService
         } elseif ($res === ZIPARCHIVE::ER_MEMORY) {
             throw new ServiceUnavailableHttpException(null, 'Not enough memory to extract ZIP archive.');
         } elseif ($res !== true) {
+            $fileSize = file_exists($filename) ? filesize($filename) : 'file not found';
             throw new ServiceUnavailableHttpException(null,
-                'Unknown error while extracting ZIP archive: ' . print_r($res, true));
+                sprintf('Unknown error while extracting ZIP archive (error code: %s, file size: %s, path: %s).',
+                    print_r($res, true),
+                    is_int($fileSize) ? sprintf('%d bytes', $fileSize) : $fileSize,
+                    $filename
+                ));
         }
 
         return $zip;
@@ -1428,9 +1472,13 @@ class DOMJudgeService
      */
     public function getAssetFiles(string $path): array
     {
+        if (isset($this->assetFilesCache[$path])) {
+            return $this->assetFilesCache[$path];
+        }
+
         $customDir = sprintf('%s/public/%s', $this->params->get('kernel.project_dir'), $path);
         if (!is_dir($customDir)) {
-            return [];
+            return $this->assetFilesCache[$path] = [];
         }
 
         $results = [];
@@ -1442,7 +1490,7 @@ class DOMJudgeService
             }
         }
 
-        return $results;
+        return $this->assetFilesCache[$path] = $results;
     }
 
     /**
@@ -1569,7 +1617,7 @@ class DOMJudgeService
     {
         $compareExecutable = $this->getImmutableCompareExecutable($contestProblem);
         $problem = $contestProblem->getProblem();
-        $outputValidatorFlags = $outputValidatorFlags ?? $problem->getSpecialCompareArgs();
+        $outputValidatorFlags ??= $problem->getSpecialCompareArgs();
         return Utils::jsonEncode(
             [
                 'script_timelimit' => $this->config->get('script_timelimit'),
@@ -1645,6 +1693,13 @@ class DOMJudgeService
         $zip->addFromString('index.html', $contestPage);
 
         $submissionsDataRequest  = Request::create('/public/submissions-data.json', Request::METHOD_GET);
+        if ($contest !== null) {
+            $submissionsDataRequest->attributes->set('_domjudge_static_scoreboard_contest', $contest);
+        }
+        $submissionsDataRequest->attributes->set(
+            '_domjudge_static_scoreboard_force_unfrozen',
+            $forceUnfrozen
+        );
         $submissionsDataRequest->setSession($this->requestStack->getSession());
         /** @var JsonResponse $response */
         $response = $this->httpKernel->handle($submissionsDataRequest, HttpKernelInterface::SUB_REQUEST);
@@ -1877,7 +1932,7 @@ class DOMJudgeService
             return false;
         }
 
-        preg_match("/\d.\d.\d/", $this->domjudgeVersion, $matches);
+        preg_match("/\d+.\d+.\d+/", $this->domjudgeVersion, $matches);
         $extractedLocalVersionString = $matches[0];
         if ($this->config->get('check_new_version', false) === UpdateStrategy::INCREMENTAL) {
             /* Steer towards the nearest highest patch release first
@@ -1889,9 +1944,11 @@ class DOMJudgeService
              * instead of going to the latest release:
              * DJ6.0.0 -> DJ9.1.2
              */
-            $patch = "/" . $localVersion[0] . "." . $localVersion[1] . ".\d/";
-            $minor = "/" . $localVersion[0] . ".\d.\d/";
-            $major = "/\d.\d.\d/";
+            $patch = "/" . $localVersion[0] . "." . $localVersion[1] . ".\d+/";
+            $minor = "/" . $localVersion[0] . ".\d+.\d+/";
+            $major = "/\d+.\d+.\d+/";
+            // Natural sort would let us find the lowest patch first
+            $versions = array_reverse($versions);
             foreach ([$patch, $minor, $major] as $regex) {
                 foreach ($versions as $release) {
                     if (preg_match($regex, $release)) {

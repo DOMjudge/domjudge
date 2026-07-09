@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Utils;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\ContestTimeFixture;
 use App\Entity\Contest;
 use App\Tests\Unit\BaseTestCase as BaseBaseTestCase;
@@ -21,9 +22,8 @@ class FreezeDataTest extends BaseBaseTestCase
     /**
      * Testing all functions separate makes little sense as they all need similar data.
      * By keeping the assertions separate it's still easy to see where we get a possible failure.
-     *
-     * @dataProvider provideContestProgress
      */
+    #[DataProvider('provideContestProgress')]
     public function testFreezeData(
         string $reference,
         int $progress,
@@ -55,7 +55,7 @@ class FreezeDataTest extends BaseBaseTestCase
      * - ShowFrozen
      * - ShowFinal
      */
-    public function provideContestProgress(): Generator
+    public static function provideContestProgress(): Generator
     {
         yield ['beforeActivation',              -1, false, false, false, false, false, false];
         yield ['beforeStart',                   -1, false, false, false, false, false, false];

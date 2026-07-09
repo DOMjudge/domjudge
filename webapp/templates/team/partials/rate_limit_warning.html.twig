@@ -1,0 +1,11 @@
+{% if rateLimitStatus is defined and rateLimitStatus is not empty %}
+    <div class="alert alert-warning {{ alert_extra_classes | default('') }}">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Submission limit reached - if you submit now, it will likely be rejected:</strong>
+        <ul class="mb-0">
+            {% for limit in rateLimitStatus %}
+                <li>Maximum of {{ limit.limit }} submission(s) per {{ limit.period }} allowed.</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

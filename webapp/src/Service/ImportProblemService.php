@@ -117,10 +117,21 @@ readonly class ImportProblemService
             unset($contestProblemProperties['short-name']);
         }
 
-        // Set timelimit from alternative source:
-        if (!isset($problemProperties['timelimit']) &&
-            ($str = $zip->getFromName($tleFile)) !== false) {
-            $problemProperties['timelimit'] = trim($str);
+        // Set timelimit from alternative source (.timelimit file):
+        $tleFileValue = null;
+        if (($str = $zip->getFromName($tleFile)) !== false) {
+            $trimmed = trim($str);
+            if (!is_numeric($trimmed)) {
+                $messages['danger'][] = sprintf(
+                    'Invalid time limit in .timelimit file: %s is not a valid number.',
+                    $trimmed
+                );
+                return null;
+            }
+            $tleFileValue = (float)$trimmed;
+            if (!isset($problemProperties['timelimit'])) {
+                $problemProperties['timelimit'] = $tleFileValue;
+            }
         }
 
         // Take problem:externalid from zip filename, and use as backup for
@@ -237,6 +248,15 @@ readonly class ImportProblemService
         // types) are set before the entity validation callbacks fire.
         $validationMode = 'default';
         if (!static::parseYaml($problemYaml, $messages, $validationMode, $propertyAccessor, $problem)) {
+            return null;
+        }
+
+        // Check for conflicting time limits between .timelimit file and problem.yaml.
+        if ($tleFileValue !== null && abs($problem->getTimelimit() - $tleFileValue) > 1e-9) {
+            $messages['danger'][] = sprintf(
+                'Conflicting time limits: .timelimit file specifies %s seconds, but problem.yaml specifies %s seconds.',
+                $tleFileValue, $problem->getTimelimit()
+            );
             return null;
         }
 
@@ -705,6 +725,7 @@ readonly class ImportProblemService
                 Utils::jsonDecode($submission_file_string);
 
             $numJurySolutions = 0;
+            $deferredSubmissions = [];
             foreach ($zipEntries as $j => $path) {
                 if (!Utils::startsWith($path, 'submissions/')) {
                     // Skipping non-submission files silently.
@@ -850,7 +871,8 @@ readonly class ImportProblemService
                         );
                         $submission     = $this->submissionService->submitSolution(
                             $team, $jury_user, $contestProblem, $contest, $languageToUse, $filesToSubmit, SubmissionSource::PROBLEM_IMPORT, null,
-                            null, $entry_point, null, null, $submissionMessage
+                            null, $entry_point, null, null, $submissionMessage,
+                            deferPostProcessing: true
                         );
 
                         if (!$submission) {
@@ -858,15 +880,13 @@ readonly class ImportProblemService
                                 $messages['danger'][] = $submissionMessage;
                             }
                         } else {
-                            $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
                             if ($expectedResults !== null) {
                                 $submission->setExpectedResults($expectedResults);
                             }
                             if ($expectedScore !== null) {
                                 $submission->setExpectedScore($expectedScore);
                             }
-                            // Flush changes to submission.
-                            $this->em->flush();
+                            $deferredSubmissions[] = $submission;
 
                             $successful_subs[] = "'" . $path . "'";
                             $numJurySolutions++;
@@ -879,6 +899,11 @@ readonly class ImportProblemService
                         unlink($f);
                     }
                 }
+            }
+
+            // Batch post-process all deferred submissions (event logging, scoreboard, audit log).
+            if (!empty($deferredSubmissions)) {
+                $this->submissionService->postProcessSubmissions($deferredSubmissions, $contest);
             }
 
             if ($numJurySolutions > 0) {
@@ -931,6 +956,12 @@ readonly class ImportProblemService
         $file = $request->files->get('zip');
         if (empty($file)) {
             throw new BadRequestHttpException('ZIP file missing');
+        }
+        if (!$file->isValid()) {
+            throw new BadRequestHttpException(
+                sprintf('ZIP file upload failed: %s (check upload_max_filesize and post_max_size in php.ini).',
+                    $file->getErrorMessage()
+                ));
         }
 
         $contest = null;
@@ -1144,7 +1175,7 @@ readonly class ImportProblemService
                     try {
                         $aggregationType = TestcaseAggregationType::tryFrom($flag);
                         $testcaseGroup->setAggregationType($aggregationType);
-                    } catch (ValueError $e) {
+                    } catch (ValueError) {
                         $messages['danger'][] = sprintf("Invalid aggregation type '%s' in test group '%s'.", $flag, $name);
                         return null;
                     }
@@ -1234,6 +1265,9 @@ readonly class ImportProblemService
         }
 
         if (isset($yamlData['limits'])) {
+            if (isset($yamlData['limits']['time_limit'])) {
+                $yamlProblemProperties['timelimit'] = $yamlData['limits']['time_limit'];
+            }
             if (isset($yamlData['limits']['memory'])) {
                 $yamlProblemProperties['memlimit'] = 1024 * $yamlData['limits']['memory'];
             }

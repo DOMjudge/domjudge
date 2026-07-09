@@ -32,6 +32,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
             ['cpp',        'C++',         ['cpp', 'cc', 'cxx', 'c++'], false, null,         true,   true,   1,     'cpp',               'g++ --version',      ''],
             ['csharp',     'C#',          ['csharp', 'cs'],            false, null,         false,  true,   1,     'csharp',            'mcs --version',      'mono --version'],
             ['f95',        'Fortran',     ['f95', 'f90'],              false, null,         false,  true,   1,     'f95',               'gfortran --version', ''],
+            ['golang',     'Golang',      ['go'],                      false, null,         false,  true,   1,     'go',                'go version',         ''],
             ['haskell',    'Haskell',     ['hs', 'lhs'],               false, null,         false,  true,   1,     'hs',                'ghc --version',      ''],
             ['java',       'Java',        ['java'],                    false, 'Main class', true,   true,   1,     'java_javac_detect', 'javac -version',     'java -version'],
             ['javascript', 'JavaScript',  ['js', 'mjs'],               false, 'Main file',  false,  true,   1,     'js',                'nodejs --version',   'nodejs --version'],
@@ -46,7 +47,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
             ['ruby',       'Ruby',        ['rb'],                      false, 'Main file',  false,  true,   1,     'rb',                'ruby --version',     'ruby --version'],
             ['rust',       'Rust',        ['rs'],                      false, null,         false,  true,   1,     'rs',                'rustc --version',    ''],
             ['scala',      'Scala',       ['scala'],                   false, null,         false,  true,   1,     'scala',             'scalac -version',    'scala -version'],
-            ['sh',         'POSIX shell', ['sh'],                      false, 'Main file',  false,  true,   1,     'sh',                'md5sum /bin/sh',                   'md5sum /bin/sh'],
+            ['sh',         'POSIX shell', ['sh'],                      false, 'Main file',  false,  true,   1,     'sh',                'md5sum /bin/sh',     'md5sum /bin/sh'],
             ['swift',      'Swift',       ['swift'],                   false, 'Main file',  false,  true,   1,     'swift',             'swiftc --version',   ''],
         ];
 

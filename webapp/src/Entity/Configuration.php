@@ -47,13 +47,6 @@ class Configuration
 
     public function setValue(mixed $value): Configuration
     {
-        // Do not use 'True'/'False' but 1/0 since the former cannot be parsed by the old code.
-        if ($value === true) {
-            $value = 1;
-        } elseif ($value === false) {
-            $value = 0;
-        }
-
         $this->value = $value;
         return $this;
     }

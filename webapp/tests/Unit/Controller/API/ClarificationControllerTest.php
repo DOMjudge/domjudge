@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\ClarificationFixture;
 use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\Entity\Clarification;
@@ -119,9 +120,8 @@ class ClarificationControllerTest extends BaseTestCase
 
     /**
      * Test that if invalid data is supplied, the correct message is returned.
-     *
-     * @dataProvider provideAddInvalidData
      */
+    #[DataProvider('provideAddInvalidData')]
     public function testAddInvalidData(string $user, array $dataToSend, string $expectedMessage): void
     {
         $contestId = $this->getDemoContestId();
@@ -139,7 +139,7 @@ class ClarificationControllerTest extends BaseTestCase
         }
     }
 
-    public function provideAddInvalidData(): Generator
+    public static function provideAddInvalidData(): Generator
     {
         yield ['demo', [], 'Request payload contains invalid "json" data.'];
         yield ['demo', ['invalidfield' => 'value'], "/text:\n.*This value should be of type string./"];
@@ -193,9 +193,8 @@ class ClarificationControllerTest extends BaseTestCase
 
     /**
      * Test that creating a clarification works as expected.
-     *
-     * @dataProvider provideAddSuccess
      */
+    #[DataProvider('provideAddSuccess')]
     public function testAddSuccess(
         string $user,
         array $dataToSend,
@@ -262,7 +261,7 @@ class ClarificationControllerTest extends BaseTestCase
         static::assertEquals($expectedInReplyToId, $clarificationFromApi['reply_to_id'], 'Wrong in reply to ID');
     }
 
-    public function provideAddSuccess(): Generator
+    public static function provideAddSuccess(): Generator
     {
         yield [
             'demo',

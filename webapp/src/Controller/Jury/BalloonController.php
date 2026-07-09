@@ -55,6 +55,10 @@ class BalloonController extends AbstractController
     #[Route(path: '/balloons', name: 'jury_balloons_legacy')]
     public function legacyIndexAction(): Response
     {
+        if (((int)$this->config->get('minimum_number_of_balloons')) !== 0) {
+            $this->addFlash('warning', 'Minimum number of balloons is enabled, this leads to data inconsistencies and/or information leaking during the freeze. Can be disabled in the "Configuration settings".');
+        }
+
         $contest = $this->dj->getCurrentContest();
         if (!$contest) {
             $this->addFlash('warning', 'Please select a contest first to view balloons.');

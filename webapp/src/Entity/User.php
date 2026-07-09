@@ -14,6 +14,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Validator\Constraints as AppAssert;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -47,6 +48,7 @@ class User extends BaseApiEntity implements
         options: ['comment' => 'User ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
     #[Serializer\SerializedName('id')]
+    #[AppAssert\Identifier]
     protected ?string $externalid = null;
 
     #[ORM\Column(options: ['comment' => 'User login name'])]
@@ -57,12 +59,6 @@ class User extends BaseApiEntity implements
 
     #[ORM\Column(options: ['comment' => 'Name'])]
     private string $name = '';
-
-    #[ORM\Column(nullable: true, options: ['comment' => 'Email address'])]
-    #[Assert\Email]
-    #[OA\Property(nullable: true)]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
-    private ?string $email = null;
 
     #[ORM\Column(
         type: 'decimal',
@@ -216,17 +212,6 @@ class User extends BaseApiEntity implements
     public function getShortDescription(): string
     {
         return $this->getName() ?: $this->getUsername();
-    }
-
-    public function setEmail(?string $email): User
-    {
-        $this->email = $email;
-        return $this;
-    }
-
-    public function getEmail(): ?string
-    {
-        return $this->email;
     }
 
     public function setLastLogin(string|float|null $lastLogin): User

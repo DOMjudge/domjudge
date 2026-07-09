@@ -23,10 +23,11 @@ class VarargsLogMessageProcessor implements ProcessorInterface
             return $record;
         }
 
-        $res = false;
         try {
             $res = vsprintf($record->message, $record->context);
-        } catch (ValueError) {}
+        } catch (ValueError) {
+            $res = false;
+        }
 
         if ($res !== false) {
             $record = $record->with(

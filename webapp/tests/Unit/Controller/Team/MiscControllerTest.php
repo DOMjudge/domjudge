@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Team;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Entity\Contest;
 use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
@@ -41,9 +42,8 @@ class MiscControllerTest extends BaseTestCase
     /**
      * Test that the team overview page contains the correct data for normal
      * and AJAX requests.
-     *
-     * @dataProvider ajaxProvider
      */
+    #[DataProvider('ajaxProvider')]
     public function testTeamOverviewPage(bool $ajax): void
     {
         $this->verifyPageResponse('GET', '/team', 200, null, $ajax);
@@ -56,7 +56,7 @@ class MiscControllerTest extends BaseTestCase
         self::assertEquals('Clarification Requests', $h1s[2]);
     }
 
-    public function ajaxProvider(): Generator
+    public static function ajaxProvider(): Generator
     {
         yield [false];
         yield [true];
@@ -118,9 +118,8 @@ class MiscControllerTest extends BaseTestCase
 
     /**
      * Test that it is possible to change contests.
-     *
-     * @dataProvider withReferrerProvider
      */
+    #[DataProvider('withReferrerProvider')]
     public function testChangeContest(bool $withReferrer): void
     {
         $start       = (int)floor(microtime(true) - 1800);
@@ -180,7 +179,7 @@ class MiscControllerTest extends BaseTestCase
 //        self::assertSelectorTextContains('.card-header span', 'Test contest for switching');
     }
 
-    public function withReferrerProvider(): Generator
+    public static function withReferrerProvider(): Generator
     {
         yield [true];
         yield [false];

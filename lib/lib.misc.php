@@ -15,14 +15,16 @@ require_once('lib.wrappers.php');
  */
 function overshoot_time(float $timelimit, string $overshoot_cfg) : float
 {
-    /** @var string[] $tokens */
     $tokens = preg_split('/([+&|])/', $overshoot_cfg, -1, PREG_SPLIT_DELIM_CAPTURE);
-    if (count($tokens)!=1 && count($tokens)!=3) {
-        error("invalid timelimit overshoot string '$overshoot_cfg'");
+    if ($tokens === false) {
+        error("failed parsing/splitting overshoot string '$overshoot_cfg'");
+    }
+    if (count($tokens) !== 1 && count($tokens) !== 3) {
+        error("expected 1 or 3 tokens got: '" . count($tokens) . "' from timelimit overshoot string '$overshoot_cfg'");
     }
 
     $val1 = overshoot_parse($timelimit, $tokens[0]);
-    if (count($tokens)==1) {
+    if (count($tokens) === 1) {
         return $val1;
     }
 
@@ -43,16 +45,12 @@ function overshoot_time(float $timelimit, string $overshoot_cfg) : float
  */
 function overshoot_parse(float $timelimit, string $token) : float
 {
-    $res = sscanf($token, '%d%c%n');
-    if (count((array) $res)!=3) {
-        error("invalid timelimit overshoot token '$token'");
-    }
-    [$val, $type, $len] = $res;
-    if (strlen($token)!=$len) {
+    $ret = sscanf($token, '%d%c%n', $val, $type, $len);
+    if ($ret === null || $ret !== 3 || strlen($token) !== $len) {
         error("invalid timelimit overshoot token '$token'");
     }
 
-    if ($val<0) {
+    if ($val < 0) {
         error("timelimit overshoot cannot be negative: '$token'");
     }
     switch ($type) {
@@ -69,7 +67,7 @@ function overshoot_parse(float $timelimit, string $token) : float
  * Call alert plugin program to perform user configurable action on
  * important system events. See default alert script for more details.
  */
-function alert(string $msgtype, string $description = '')
+function alert(string $msgtype, string $description = ''): void
 {
     system(LIBDIR . "/alert '$msgtype' '$description' &");
 }
@@ -78,7 +76,7 @@ function alert(string $msgtype, string $description = '')
  * Functions to support (graceful) shutdown of daemons upon receiving a
  * signal.
  */
-function sig_handler(int $signal, $siginfo = null)
+function sig_handler(int $signal, mixed $siginfo = null): void
 {
     global $exitsignalled, $gracefulexitsignalled;
 
@@ -95,7 +93,7 @@ function sig_handler(int $signal, $siginfo = null)
     }
 }
 
-function initsignals()
+function initsignals(): void
 {
     global $exitsignalled;
 
@@ -122,6 +120,9 @@ function initsignals()
  */
 function version() : never
 {
+    if (!defined('SCRIPT_ID')) {
+        define('SCRIPT_ID', basename($_SERVER['PHP_SELF'], '.php'));
+    }
     echo SCRIPT_ID . " -- part of DOMjudge version " . DOMJUDGE_VERSION . "\n" .
         "Written by the DOMjudge developers\n\n" .
         "DOMjudge comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n" .
@@ -137,7 +138,7 @@ function version() : never
  * @param string $content  The content to append
  * @return int|false       The number of bytes that were written to the file, or false on failure.
  */
-function appendToFile(string $filename, string $content)
+function appendToFile(string $filename, string $content): int|false
 {
     return file_put_contents($filename, $content, FILE_APPEND);
 }

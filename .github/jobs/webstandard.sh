@@ -55,8 +55,6 @@ wget \
     --no-clobber \
     --page-requisites \
     --html-extension \
-    --convert-links \
-    --restrict-file-names=windows \
     --domains localhost \
     --no-parent \
     --load-cookies cookies.txt \
@@ -67,7 +65,7 @@ section_end
 
 section_start "Archive downloaded site"
 set +e
-cp -r localhost $ARTIFACTS/
+zip -r $ARTIFACTS/downloaded_site.zip localhost
 set -e
 section_end
 
@@ -77,24 +75,27 @@ section_start "Analyse failures"
 # Exit code 8 can also be because of HTTP 400 or 404
 if [ $RET -ne 0 ] && [ $RET -ne 4 ] && [ $RET -ne 8 ]; then
     echo "Server log"
-    tail -n1000 /opt/domjude/domserver/webapp/var/log/prod.log
+    tail -n1000 /opt/domjudge/domserver/webapp/var/log/prod.log
     section_end
 
     exit $RET
 fi
 
-EXPECTED_HTTP_CODES="200\|302\|400\|404\|403"
+EXPECTED_HTTP_CODES="200\|302\|400\|403"
 if [ "$ROLE" = "public" ]; then
     # It's expected to encounter a 401 for the login page as we supply the wrong password
     EXPECTED_HTTP_CODES="$EXPECTED_HTTP_CODES\|401"
 fi
+
+HTTP_404_IGNORED="robots.txt\|imgBase.replace"
+
 set +e
-NUM_ERRORS=$(grep -v "HTTP/1.1\" \($EXPECTED_HTTP_CODES\)" /var/log/nginx/domjudge.log | grep -v "robots.txt" -c; if [ "$?" -gt 1 ]; then exit 127; fi)
+NUM_ERRORS=$(grep -v "HTTP/1.1\" \($EXPECTED_HTTP_CODES\)" /var/log/nginx/domjudge.log | grep -v "${HTTP_404_IGNORED}" -c; if [ "$?" -gt 1 ]; then exit 127; fi)
 set -e
 echo "$NUM_ERRORS"
 
 if [ "$NUM_ERRORS" -ne 0 ]; then
-    grep -v "HTTP/1.1\" \($EXPECTED_HTTP_CODES\)" /var/log/nginx/domjudge.log | grep -v "robots.txt"
+    grep -v "HTTP/1.1\" \($EXPECTED_HTTP_CODES\)" /var/log/nginx/domjudge.log | grep -v "${HTTP_404_IGNORED}"
     exit 1
 fi
 section_end
@@ -102,6 +103,36 @@ section_end
 if [ "$TEST" = "none" ]; then
     exit $NUM_ERRORS
 fi
+
+w3c_analyse () {
+    FLTR="$1"
+    LOGID="$2"
+    URL="$3"
+    TYP="$4"
+    # shellcheck disable=SC2086
+    for typ in $TYP
+    do
+        section_start "Analyse with $typ"
+        # shellcheck disable=SC2086
+        "$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
+
+        # Count errors from JSON and produce gnu-format log
+        NEWFOUNDERRORS=$(python3 -c "import json; print(len(json.load(open('result.json'))['messages']))")
+        FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
+
+        python3 -m "json.tool" < result.json > "$ARTIFACTS/w3c$typ$URL${LOGID}.json"
+        SUMMARYFILE="$ARTIFACTS/w3c_${typ}_${URL}_${LOGID}_summary.log"
+        trace_off; python3 .github/jobs/jsontogha.py --summary-file "$SUMMARYFILE" "$ARTIFACTS/w3c$typ$URL${LOGID}.json"; trace_on
+        section_end
+
+        if [ "$NEWFOUNDERRORS" -gt 0 ]; then
+            echo "::error::$typ validation ($LOGID): found $NEWFOUNDERRORS error(s)"
+            cat "$SUMMARYFILE"
+        else
+            echo "$typ validation ($LOGID): OK"
+        fi
+    done
+}
 
 if [ "$TEST" = "w3cval" ]; then
     section_start "Remove files from upstream with problems"
@@ -122,19 +153,11 @@ if [ "$TEST" = "w3cval" ]; then
     touch vnu.properties
     section_end
 
-    FLTR='--filterpattern .*autocomplete.*|.*role=tab.*|.*descendant.*|.*Stray.*|.*attribute.*|.*Forbidden.*|.*stream.*|.*obsolete.*'
-    for typ in html css svg
-    do
-        section_start "Analyse with $typ"
-        # shellcheck disable=SC2086
-        "$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
-        # shellcheck disable=SC2086
-        NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR "$URL" 2>&1 | tee "$ARTIFACTS/w3c_${typ}_${URL}.log" | wc -l)
-        FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
-        python3 -m "json.tool" < result.json > "$ARTIFACTS/w3c$typ$URL.json"
-        trace_off; python3 .github/jobs/jsontogha.py "$ARTIFACTS/w3c$typ$URL.json"; trace_on
-        section_end
-    done
+    FLTR1='--filterpattern .*descendant.*|.*Stray.*'
+    w3c_analyse "$FLTR1" "Stray" "public" "html"
+    FLTR2='--filterpattern .*descendant.*'
+    w3c_analyse "$FLTR2" "descendant" "public" "html"
+    w3c_analyse "" "full" "public" "html css svg"
 else
     section_start "Remove files from upstream with problems"
     rm -rf localhost/domjudge/{doc,api}
@@ -156,12 +179,24 @@ else
     for file in $(find $URL -name "*.html")
     do
         section_start "$file"
-        su domjudge -c "/home/domjudge/node_modules/.bin/pa11y --config .github/jobs/pa11y_config.json $STAN -r json -T $ACCEPTEDERR $FLTR $file" | python3 -m json.tool
-        ERR=$(su domjudge -c "/home/domjudge/node_modules/.bin/pa11y --config .github/jobs/pa11y_config.json $STAN -r csv -T $ACCEPTEDERR $FLTR $file" | wc -l)
-        FOUNDERR=$((ERR+FOUNDERR-1)) # Remove header row
+        su domjudge -c "/home/domjudge/node_modules/.bin/pa11y --config .github/jobs/pa11y_config.json $STAN -r json -T $ACCEPTEDERR $FLTR $file" > result.json
+
+        # Count errors from JSON
+        NEWFOUNDERRORS=$(python3 -c "import json; data=json.load(open('result.json')); print(len(data))")
+        FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
+
+        LOGNAME=$(echo "$file" | tr '/' '_')
+        cp result.json "$ARTIFACTS/pa11y_${LOGNAME}.json"
+        SUMMARYFILE="$ARTIFACTS/pa11y_${LOGNAME}_summary.log"
+        trace_off; python3 .github/jobs/jsontogha.py --summary-file "$SUMMARYFILE" result.json; trace_on
         section_end
+
+        if [ "$NEWFOUNDERRORS" -gt 0 ]; then
+            echo "::error::pa11y found $NEWFOUNDERRORS error(s) in $file"
+            cat "$SUMMARYFILE"
+        fi
     done
 fi
 
-echo "Found: " $FOUNDERR
+echo "Total errors found: $FOUNDERR"
 [ "$FOUNDERR" -eq 0 ]

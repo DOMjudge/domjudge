@@ -1,0 +1,1 @@
+../../../webapp/bin/console

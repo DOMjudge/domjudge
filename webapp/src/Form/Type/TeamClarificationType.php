@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\Length;
 
 class TeamClarificationType extends AbstractType
 {
@@ -50,11 +51,17 @@ class TeamClarificationType extends AbstractType
         $builder->add('subject', ChoiceType::class, [
             'choices' => $subjects,
         ]);
+        $maxLength = $this->config->get('clar_max_body_length');
+        $constraints = [];
+        if ($maxLength > 0) {
+            $constraints[] = new Length(max: $maxLength, maxMessage: 'Clarification body is too long: {{ value }} characters, maximum is {{ limit }}.');
+        }
         $builder->add('message', TextareaType::class, [
             'attr' => [
                 'rows' => 5,
                 'cols' => 85,
             ],
+            'constraints' => $constraints,
         ]);
     }
 }

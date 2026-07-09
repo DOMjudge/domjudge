@@ -107,6 +107,10 @@ class JudgeTask
     #[Serializer\Type('string')]
     private ?int $compare_script_id = null;
 
+    #[ORM\Column(nullable: true, options: ['comment' => 'Pass number, used for multipass problems', 'unsigned' => true])]
+    #[Serializer\Type('string')]
+    private ?int $pass = null;
+
     #[ORM\Column(nullable: true, options: ['comment' => 'Testcase ID', 'unsigned' => true])]
     #[Serializer\Type('string')]
     private ?int $testcase_id = null;
@@ -281,6 +285,17 @@ class JudgeTask
     public function getCompareScriptId(): int
     {
         return $this->compare_script_id;
+    }
+
+    public function setPass(int $pass): JudgeTask
+    {
+        $this->pass = $pass;
+        return $this;
+    }
+
+    public function getPass(): int
+    {
+        return $this->pass;
     }
 
     public function setTestcaseId(int $testcase_id): JudgeTask

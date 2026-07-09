@@ -446,7 +446,7 @@ class SubmissionController extends BaseController
                 ->join('t.content', 'tc')
                 ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
                 ->leftJoin('jr.output', 'jro')
-                ->select('t', 'jr', 'tc.image_thumb AS image_thumb', 'jro.metadata', 'jro.validatorMetadata')
+                ->select('t', 'jr', 'tc.image_thumb AS image_thumb', 'jro.metadata', 'jro.validatorMetadata', 'jr.pass')
                 ->andWhere('t.problem = :problem')
                 ->setParameter('judging', $selectedJudging)
                 ->setParameter('problem', $submission->getProblem())
@@ -554,6 +554,8 @@ class SubmissionController extends BaseController
         $lastJudging = null;
         /** @var Testcase[] $lastRuns */
         $lastRuns = [];
+        /** @var array<int, JudgingRun> $lastRunsByTestcaseId */
+        $lastRunsByTestcaseId = [];
         if ($lastSubmission !== null) {
             $lastJudging = $this->em->createQueryBuilder()
                 ->from(Judging::class, 'j')
@@ -569,14 +571,22 @@ class SubmissionController extends BaseController
             if ($lastJudging !== null) {
                 $lastRuns = $this->em->createQueryBuilder()
                     ->from(Testcase::class, 't')
-                    ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
-                    ->select('t', 'jr')
+                    ->select('t')
                     ->andWhere('t.problem = :problem')
-                    ->setParameter('judging', $lastJudging)
                     ->setParameter('problem', $submission->getProblem())
                     ->orderBy('t.ranknumber')
                     ->getQuery()
                     ->getResult();
+
+                // Testcase entities may already have judging_runs hydrated for the current judging,
+                // so fetch previous runs separately and index them explicitly.
+                /** @var JudgingRun[] $previousRuns */
+                $previousRuns = $this->em->getRepository(JudgingRun::class)->findBy([
+                    'judging' => $lastJudging,
+                ]);
+                foreach ($previousRuns as $previousRun) {
+                    $lastRunsByTestcaseId[$previousRun->getTestcase()->getTestcaseid()] = $previousRun;
+                }
             }
         }
 
@@ -643,6 +653,7 @@ class SubmissionController extends BaseController
             'externalRuns' => $externalRuns,
             'runsOutput' => $runsOutput,
             'lastRuns' => $lastRuns,
+            'lastRunsByTestcaseId' => $lastRunsByTestcaseId,
             'unjudgableReasons' => $unjudgableReasons,
             'verificationRequired' => (bool)$this->config->get('verification_required'),
             'claimWarning' => $claimWarning,
@@ -790,13 +801,13 @@ class SubmissionController extends BaseController
     ): StreamedResponse {
         $name = 'debug_package.j' . $debugPackage->getJudging()->getJudgingid()
             . '.db' . $debugPackage->getDebugPackageId()
-            . '.jh' . $debugPackage->getJudgehost()->getJudgehostid()
+            . '.jh' . ($debugPackage->getJudgehost()?->getJudgehostid() ?? 'unknown')
             . '.tar.gz';
         return Utils::streamAsBinaryFile(file_get_contents($debugPackage->getFilename()), $name);
     }
 
-    #[Route(path: '/request-output/{jid}/{jrid}', name: 'request_output')]
-    public function requestOutput(Request $request, Judging $jid, JudgingRun $jrid): RedirectResponse
+    #[Route(path: '/request-output/{jid}/{jrid}/{pass}', name: 'request_output')]
+    public function requestOutput(Request $request, Judging $jid, JudgingRun $jrid, int $pass = 1): RedirectResponse
     {
         $submission = $jid->getSubmission();
         $testcase = $jrid->getTestcase();
@@ -808,6 +819,7 @@ class SubmissionController extends BaseController
             ->setPriority(JudgeTask::PRIORITY_HIGH)
             ->setJobId($jid->getJudgingid())
             ->setUuid($jid->getUuid())
+            ->setPass($pass)
             ->setTestcaseId($testcase->getTestcaseid())
             ->setTestcaseHash($testcase->getTestcaseHash());
         $this->em->persist($judgeTask);

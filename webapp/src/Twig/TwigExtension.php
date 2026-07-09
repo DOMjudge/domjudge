@@ -74,6 +74,19 @@ class TwigExtension
         return base64_decode($string);
     }
 
+    #[AsTwigFilter('convertUnprintableChars')]
+    public function convertUnprintableChars(string $input): string
+    {
+        $translationChars = ["\x7F" => "\u{2421}"]; // DEL (0x7F) -> ␡
+        for ($i = 0; $i <= 0x1F; $i++) {
+            if ($i === 0xA) {
+                continue; // Skip newline as we can & do show that
+            }
+            $translationChars[chr($i)] = mb_chr(0x2400 + $i, 'UTF-8');
+        }
+        return strtr($input, $translationChars);
+    }
+
     #[AsTwigFilter('printtimediff')]
     public function printtimediff(?float $start, ?float $end = null): string
     {
@@ -336,56 +349,75 @@ class TwigExtension
             $submissionDone = $judging && !empty($judging->getEndtime());
         }
 
-        $results = '';
+        $total = count($testcases);
+        $separator = '<span class="tc-sep"></span>';
+        $tcBar = '<span class="tc-bar">%s</span>';
+        if ($total === 0) {
+            return sprintf($tcBar, $separator);
+        }
+
+        $segments = '';
         $lastTypeSample = true;
+
         foreach ($testcases as $key => $testcase) {
             if ($testcase['sample'] != $lastTypeSample) {
-                $results        .= ' | ';
+                $segments       .= $separator;
                 $lastTypeSample = $testcase['sample'];
             }
-            $class = $submissionDone ? 'secondary' : 'primary';
-            $text  = '?';
+
+            $class       = $submissionDone ? 'tc-pending-done' : 'tc-pending';
+            $resultLabel = 'pending';
 
             if ($testcase['runresult'] !== null) {
-                $text  = substr($testcase['runresult'], 0, 1);
-                $class = 'danger';
                 if ($testcase['runresult'] === Judging::RESULT_CORRECT) {
-                    $text  = '✓';
-                    $class = 'success';
+                    $class       = 'tc-correct';
+                    $resultLabel = 'correct';
+                } else {
+                    $resultSlug  = str_replace(' ', '-', $testcase['runresult']);
+                    $class       = 'tc-incorrect tc-r-' . htmlspecialchars($resultSlug);
+                    $resultLabel = $testcase['runresult'];
                 }
             } elseif (array_key_exists('valid', $testcase) && !$testcase['valid']) {
-                $text = '✕';
+                $class       = 'tc-invalid';
+                $resultLabel = 'invalid';
             } elseif (array_key_exists('hostname', $testcase) && $testcase['hostname'] !== null) {
-                $text  = '↺';
-                $class = 'info';
+                $class       = 'tc-running';
+                $resultLabel = 'running';
             }
 
             if (!empty($testcase['description'])) {
-                $title = sprintf('Run %d: %s', $key + 1,
-                                 htmlspecialchars($testcase['description']));
+                $title = sprintf('Run %d: %s (%s)', $key + 1,
+                                 htmlspecialchars($testcase['description']), $resultLabel);
             } else {
-                $title = sprintf('Run %d', $key + 1);
+                $title = sprintf('Run %d: %s', $key + 1, $resultLabel);
             }
 
-            $results .= sprintf('<span class="badge text-bg-%s badge-testcase" title="%s">%s</span>', $class, $title,
-                                $text);
+            $segments .= sprintf('<span class="tc-seg %s" title="%s"></span>', $class, $title);
+        }
+        if (!str_contains($segments, $separator)) {
+            $segments .= $separator;
         }
 
-        return $results;
+        return sprintf($tcBar, $segments);
     }
 
     // TODO: this function shares a lot with the above one, unify them?
     /**
      * @param Testcase[] $testcases
+     * @param array<int, JudgingRun>|null $judgingRunsByTestcaseId
      */
     #[AsTwigFilter('displayTestcaseResults', isSafe: ['html'])]
-    public function displayTestcaseResults(array $testcases, bool $submissionDone, bool $isExternal = false): string
-    {
+    public function displayTestcaseResults(
+        array $testcases,
+        bool $submissionDone,
+        bool $isExternal = false,
+        ?array $judgingRunsByTestcaseId = null,
+    ): string {
         $results = '';
         $lastTypeSample = true;
         foreach ($testcases as $testcase) {
             if ($testcase->getSample() != $lastTypeSample) {
-                $results        .= ' | ';
+                $results        .= '<span class="tc-sep"></span>';
                 $lastTypeSample = $testcase->getSample();
             }
 
@@ -393,7 +425,13 @@ class TwigExtension
             $text      = '?';
             $isCorrect = false;
             /** @var JudgingRun|ExternalRun|null $run */
-            $run = $isExternal ? $testcase->getFirstExternalRun() : $testcase->getFirstJudgingRun();
+            if ($isExternal) {
+                $run = $testcase->getFirstExternalRun();
+            } elseif ($judgingRunsByTestcaseId !== null) {
+                $run = $judgingRunsByTestcaseId[$testcase->getTestcaseid()] ?? null;
+            } else {
+                $run = $testcase->getFirstJudgingRun();
+            }
             if ($isExternal) {
                 $runResult = $run?->getResult();
             } else {
@@ -479,11 +517,18 @@ class TwigExtension
             case 'queued':
             case 'pending':
             case 'aborted':
-            case 'n / a':
                 if (!$jury) {
                     $result = 'pending';
                 }
                 $style = 'sol_queued';
+                break;
+            case 'internal':
+                if (!$jury) {
+                    $result = 'pending';
+                    $style = 'sol_queued';
+                } else {
+                    $style = 'sol_internal';
+                }
                 break;
             case 'correct':
                 $style = 'sol_correct';
@@ -735,8 +780,8 @@ class TwigExtension
                     . '</td>';
             }
             $idx       += $len + 4;
-            $team      = $is_validator ? '<td/>' : $content;
-            $validator = $is_validator ? $content : '<td/>';
+            $team      = $is_validator ? '<td></td>' : $content;
+            $validator = $is_validator ? $content : '<td></td>';
             $body      .= "<tr>" . ($forTeam ? "" : "<td>$time</td>")
                           . $validator
                           . $team
@@ -754,7 +799,7 @@ class TwigExtension
         // TODO: can be improved using diffposition.txt
         // FIXME: only show when diffposition.txt is set?
         // FIXME: cut off after XXX lines
-        $lines_team = preg_split('/\n/', trim($runOutput['output_run']));
+        $lines_team = preg_split('/\n/', trim($this->convertUnprintableChars($runOutput['output_run'])));
         $lines_ref  = preg_split('/\n/', trim($runOutput['output_reference']));
 
         $diffs    = [];
@@ -776,13 +821,13 @@ class TwigExtension
         $lastErr      = min(count($diffs) - 1, $lastErr);
         $result       = "<br/>\n<table class=\"lcsdiff output_text\">\n";
         if ($firstErr > 0) {
-            $result .= "<tr><td class=\"linenr\">[...]</td><td/></tr>\n";
+            $result .= "<tr><td class=\"linenr\">[...]</td><td></td></tr>\n";
         }
         for ($i = $firstErr; $i <= $lastErr; $i++) {
             $result .= "<tr><td class=\"linenr\">" . ($i + 1) . "</td><td>" . $diffs[$i] . "</td></tr>";
         }
         if ($lastErr < count($diffs) - 1) {
-            $result .= "<tr><td class=\"linenr\">[...]</td><td/></tr>\n";
+            $result .= "<tr><td class=\"linenr\">[...]</td><td></td></tr>\n";
         }
         $result .= "</table>\n";
 
@@ -975,9 +1020,9 @@ HTML;
     }
 
     #[AsTwigFunction('calculatePenaltyTime')]
-    public function calculatePenaltyTime(bool $solved, int $num_submissions): int
+    public function calculatePenaltyTime(int $penaltyTime, bool $solved, int $num_submissions): int
     {
-        return Utils::calcPenaltyTime($solved, $num_submissions, (int)$this->config->get('penalty_time'),
+        return Utils::calcPenaltyTime($solved, $num_submissions, $penaltyTime,
                                       (bool)$this->config->get('score_in_seconds'));
     }
 

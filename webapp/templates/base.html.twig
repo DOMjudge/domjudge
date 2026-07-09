@@ -31,6 +31,7 @@
 {% block menu %}{% endblock %}
 {% block body %}
     <div class="container-fluid{% if fill_height is defined and fill_height %} flex-pass{% endif %}">
+        {# We have a couple of subtemplates where this <div class=row> is closed within the template and a new one is opened #}
         <div class="row{% if fill_height is defined and fill_height %} flex-pass{% endif %}">
             <div class="col-12{% if fill_height is defined and fill_height %} flex-pass{% endif %}">
                 {% block messages %}

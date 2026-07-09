@@ -70,10 +70,6 @@ are covered by other copyrights. This will be noted in the files
 themselves and these copyrights/attributions can also be found in the
 DOMjudge manual.
 
-The following JavaScript libraries/snippets are included:
-- coloris: Momo Bassit, licensed under the MIT license, see COPYING.MIT.
-- Monaco editor: licensed under the MIT license, see COPYING.MIT.
-
 The default validator from the Kattis problemtools package is
 included, licensed under the MIT licence, see COPYING.MIT.
 
@@ -81,8 +77,11 @@ The M4 autoconf macros are licensed under all-permissive and GPL3+
 licences; see the respective files under m4/ for details.
 
 The DOMjudge tarball ships external library dependencies in the
-webapp/vendor directory. These are covered by their individual licenses
-as specified in the file composer.lock.
+webapp/vendor and webapp/node_modules directories. The libraries
+shipped under webapp/vendor are covered by their individual licenses
+as specified in the file composer.lock. The libraries shipped under
+webapp/node_modules are covered by the licenses documented in
+webapp/LICENSES.txt.
 
 Contact
 -------

@@ -32,9 +32,7 @@ if (defined('LOGFILE')) {
 
 // Open syslog connection:
 if (defined('SYSLOG')) {
-    if (!openlog(SCRIPT_ID, LOG_NDELAY | LOG_PID | LOG_CONS, SYSLOG)) {
-        error("cannot open syslog");
-    }
+    openlog(SCRIPT_ID, LOG_NDELAY | LOG_PID | LOG_CONS, SYSLOG);
 }
 
 /**
@@ -43,14 +41,14 @@ if (defined('SYSLOG')) {
  * If this is the web interface: write to the screen with the right CSS class.
  * If this is the command line: write to Standard Error.
  */
-function logmsg(int $msglevel, string $string)
+function logmsg(int $msglevel, string $string): void
 {
     global $verbose, $loglevel;
 
     // Trim $string to reasonable length
     $string = substr($string, 0, 10000);
 
-    $msec = sprintf("%03d", (int)(explode(' ', microtime())[0]*1000));
+    $msec = sprintf("%03d", (float)(explode(' ', microtime()))[0]*1000);
     $stamp = "[" . date('M d H:i:s') . ".$msec] " . SCRIPT_ID .
         (function_exists('posix_getpid') ? "[" . posix_getpid() . "]" : "") .
         ": ";
@@ -86,7 +84,7 @@ function error(string $string): never
 /**
  * Log a warning at level LOG_WARNING.
  */
-function warning(string $string)
+function warning(string $string): void
 {
     logmsg(LOG_WARNING, "warning: $string");
 }
@@ -94,9 +92,9 @@ function warning(string $string)
 /**
  * Write debugging output using var_dump(). Uses <pre> in web context.
  */
-function debug()
+function debug(): void
 {
-    if (DEBUG===0) {
+    if (!defined('DEBUG') || DEBUG===0) {
         return;
     }
 

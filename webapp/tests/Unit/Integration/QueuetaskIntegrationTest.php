@@ -55,7 +55,6 @@ class QueuetaskIntegrationTest extends KernelTestCase
         $this->configValues = [
             'verification_required' => false,
             'compile_penalty' => false,
-            'penalty_time' => 20,
             'score_in_seconds' => false,
             'sourcefiles_limit' => 1,
             'sourcesize_limit' => 1024*256,

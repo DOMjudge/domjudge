@@ -179,10 +179,18 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
     if dj_utils.confirm('Import problems?', True):
         # Check if our user is linked to a team.
         user_data = dj_utils.do_api_request('user')
-        has_team_linked = 'team' in user_data and user_data['team'] and 'roles' in user_data and 'team' in user_data['roles']
-        if not has_team_linked and not dj_utils.confirm('No team associated with your account. Jury submissions won\'t be imported. Really continue?', False):
-            exit(2)
-
+        username = user_data['username']
+        has_team_linked = 'team' in user_data and user_data['team']
+        has_teamrole_set = 'roles' in user_data and 'team' in user_data['roles']
+        if not has_team_linked or not has_teamrole_set:
+            message = f"Jury submissions won't be imported, as your account ('{username}') is not properly configured:"
+            if not has_team_linked:
+                message += "\n  - No team associated with your account."
+            if not has_teamrole_set:
+                message += "\n  - Team role is not configured for your account."
+            message += "\nReally continue?"
+            if not dj_utils.confirm(message, False):
+                exit(2)
         print('Importing problems.')
 
         if cid is None:

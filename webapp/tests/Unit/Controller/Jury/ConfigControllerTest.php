@@ -32,25 +32,25 @@ class ConfigControllerTest extends BaseTestCase
 
         self::assertSelectorExists('a.nav-link:contains("Scoring")');
 
-        self::assertSelectorExists('label:contains("Penalty time:")');
-        self::assertSelectorExists('p:contains("Penalty time in minutes per wrong submission (if eventually solved).")');
+        self::assertSelectorExists('label:contains("Memory limit:")');
+        self::assertSelectorExists('p:contains("Maximum memory usage (in kB) by submissions. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB! Can be overridden per problem.")');
         $crawler = $this->getCurrentCrawler();
-        $minutes = $crawler->filter('input#config_penalty_time')->extract(['value']);
-        self::assertEquals("20", $minutes[0]);
+        $memoryLimit = $crawler->filter('input#config_memory_limit')->extract(['value']);
+        self::assertEquals("2097152", $memoryLimit[0]);
     }
 
     /**
-     * Test that a different penalty time shows up in this page.
+     * Test that a different memory limit shows up in this page.
      */
-    public function testChangedPenaltyTime(): void
+    public function testChangedMemoryLimit(): void
     {
-        $this->withChangedConfiguration('penalty_time', "30",
+        $this->withChangedConfiguration('memory_limit', "123456",
             function ($errors): void {
                 static::assertEmpty($errors);
                 $this->verifyPageResponse('GET', '/jury/config', 200);
                 $crawler = $this->getCurrentCrawler();
-                $minutes = $crawler->filter('input#config_penalty_time')->extract(['value']);
-                static::assertEquals("30", $minutes[0]);
+                $memoryLimit = $crawler->filter('input#config_memory_limit')->extract(['value']);
+                static::assertEquals("123456", $memoryLimit[0]);
             });
     }
 
@@ -67,18 +67,18 @@ class ConfigControllerTest extends BaseTestCase
     }
 
     /**
-     * Test that an invalid penalty time produces an error
+     * Test that an invalid memory limit produces an error
      */
-    public function testChangedPenaltyTimeInvalid(): void
+    public function testChangedMemoryLimitInvalid(): void
     {
-        $this->withChangedConfiguration('penalty_time', "-1",
+        $this->withChangedConfiguration('memory_limit', "-1",
             function ($errors): void {
-                static::assertEquals(['penalty_time' => 'A non-negative number is required.'], $errors);
+                static::assertEquals(['memory_limit' => 'A positive number is required.'], $errors);
                 $this->verifyPageResponse('GET', '/jury/config', 200);
                 $crawler = $this->getCurrentCrawler();
-                $minutes = $crawler->filter('input#config_penalty_time')->extract(['value']);
+                $memoryLimit = $crawler->filter('input#config_memory_limit')->extract(['value']);
                 // test that it is still 20, i.e. it didn't change
-                static::assertEquals("20", $minutes[0]);
+                static::assertEquals("2097152", $memoryLimit[0]);
             });
     }
 }

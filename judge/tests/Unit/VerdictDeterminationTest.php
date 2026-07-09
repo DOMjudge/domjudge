@@ -24,10 +24,13 @@ class VerdictDeterminationTest extends TestCase
     {
         $reflection = new ReflectionClass(JudgeDaemon::class);
         $method = $reflection->getMethod('getVerdictMessage');
-        $method->setAccessible(true);
         return $method->invoke($this->daemon, $verdict, $input->programMeta, $input->compareMeta, $input->combinedRunCompare, $filelimit);
     }
 
+    /**
+     * @param array<string, string> $programMeta
+     * @param array<string, string> $compareMeta
+     */
     private function makeInput(
         array $programMeta = [],
         array $compareMeta = [],

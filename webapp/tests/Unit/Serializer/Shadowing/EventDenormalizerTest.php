@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Serializer\Shadowing;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataTransferObject\Shadowing\Event;
 use App\DataTransferObject\Shadowing\EventType;
 use App\DataTransferObject\Shadowing\LanguageEvent;
@@ -13,9 +14,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class EventDenormalizerTest extends KernelTestCase
 {
-    /**
-     * @dataProvider provideDenormalize
-     */
+    #[DataProvider('provideDenormalize')]
     public function testDenormalizeUseContext(
         mixed $data,
         array $context,
@@ -34,9 +33,7 @@ class EventDenormalizerTest extends KernelTestCase
         self::assertEquals($expectedData, $event->data);
     }
 
-    /**
-     * @dataProvider provideDenormalize
-     */
+    #[DataProvider('provideDenormalize')]
     public function testDenormalizeDoNotUseContext(
         mixed $data,
         array $context,
@@ -55,7 +52,7 @@ class EventDenormalizerTest extends KernelTestCase
         self::assertEquals($expectedData, $event->data);
     }
 
-    public function provideDenormalize(): Generator
+    public static function provideDenormalize(): Generator
     {
         yield '2022-07 format, create/update single' => [
             [

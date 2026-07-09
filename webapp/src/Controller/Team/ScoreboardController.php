@@ -3,13 +3,17 @@
 namespace App\Controller\Team;
 
 use App\Controller\BaseController;
+use App\Controller\ScoreboardSubmissionsTrait;
 use App\Entity\Team;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
+use App\Service\SubmissionService;
+use App\Twig\TwigExtension;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -25,10 +29,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route(path: '/team')]
 class ScoreboardController extends BaseController
 {
+    use ScoreboardSubmissionsTrait;
+
     public function __construct(
         DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly ScoreboardService $scoreboardService,
+        protected readonly SubmissionService $submissionService,
+        protected readonly TwigExtension $twigExtension,
         EntityManagerInterface $em,
         protected readonly EventLogService $eventLogService,
         KernelInterface $kernel,
@@ -57,6 +65,32 @@ class ScoreboardController extends BaseController
             return $this->render('partials/scoreboard.html.twig', $data, $response);
         }
         return $this->render('team/scoreboard.html.twig', $data, $response);
+    }
+
+    #[Route(path: '/scoreboard/submissions/team/{teamId}/problem/{problemId}', name: 'team_submissions')]
+    public function submissionsAction(string $teamId, string $problemId): Response
+    {
+        $user    = $this->dj->getUser();
+        $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
+
+        if (!$contest) {
+            throw $this->createNotFoundException('No active contest found');
+        }
+
+        return $this->getSubmissionsPageResponse($contest, $teamId, $problemId, 'team_submissions_data_cell', 'team/base.html.twig');
+    }
+
+    #[Route(path: '/scoreboard/submissions-data/team/{teamId}/problem/{problemId}.json', name: 'team_submissions_data_cell')]
+    public function submissionsDataAction(string $teamId, string $problemId): JsonResponse
+    {
+        $user    = $this->dj->getUser();
+        $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
+
+        if (!$contest) {
+            throw $this->createNotFoundException('No active contest found');
+        }
+
+        return $this->getSubmissionsDataResponse($contest, $teamId, $problemId);
     }
 
     #[Route(path: '/team/{teamId}', name: 'team_team')]

@@ -72,6 +72,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <linux/prctl.h>
+#include <sys/prctl.h>
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
@@ -100,7 +102,6 @@ const int soft_timelimit = 1;
 const int hard_timelimit = 2;
 
 const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
-const struct timespec cg_delete_delay = { 0, 10000000L }; /* 0.01 seconds */
 
 extern int verbose;
 
@@ -584,10 +585,19 @@ void cgroup_delete()
 	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
 		if ( cgroup_add_controller(cg, "cpuset")==nullptr ) die(0,"cgroup_add_controller cpuset");
 	}
-	/* Clean up our cgroup */
-	nanosleep(&cg_delete_delay,nullptr);
-	int ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
-	// TODO: is this actually benign to ignore ECGOTHER here?
+	/* Clean up our cgroup. Try immediately; if the kernel hasn't
+	   finished cleaning up yet, retry with short sleeps. */
+	const struct timespec retry_delay = { 0, 1000000L }; /* 1ms */
+	const int max_retries = 10;
+	int ret;
+	for (int attempt = 0; attempt <= max_retries; attempt++) {
+		if (attempt > 0) nanosleep(&retry_delay, nullptr);
+		ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
+		if (ret == 0 || ret == ECGOTHER) break;
+		if (attempt < max_retries) {
+			logmsg(LOG_DEBUG, "cgroup delete attempt {} failed ({}), retrying...", attempt + 1, ret);
+		}
+	}
 	if ( ret!=0 && ret!=ECGOTHER ) die(ret,"deleting cgroup");
 
 	cgroup_free(&cg);
@@ -685,10 +695,16 @@ char *username()
 	errno = 0; /* per the linux GETPWNAM(3) man-page */
 
 	struct passwd *pwd;
-	pwd = getpwuid(getuid());
+	uid_t uid = getuid();
+	pwd = getpwuid(uid);
 
-	if ( pwd==nullptr || errno ) die(errno,"failed to get username");
-	errno = saved_errno;
+	if ( pwd==nullptr || errno) {
+		logmsg(LOG_WARNING, "failed to get username");
+		static char uid_str[32];
+		snprintf(uid_str, sizeof(uid_str), "%u", uid);
+		errno = saved_errno;
+		return uid_str;
+	}
 
 	return pwd->pw_name;
 }
@@ -874,6 +890,9 @@ void setrestrictions()
 	}
 	/* Set user-id (must be root for this). */
 	if ( use_user ) {
+		if ( prctl(PR_SET_NO_NEW_PRIVS, 1L, 0L, 0L, 0L) ) {
+			die(errno, "cannot set no_new_privs attribute");
+		}
 		if ( setuid(runuid) ) die(errno,"cannot set user ID to `{}'",runuid);
 		logmsg(LOG_DEBUG, "using user ID `{}' for command",runuid);
 	} else {

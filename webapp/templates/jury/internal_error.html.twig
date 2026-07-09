@@ -113,7 +113,7 @@
                 <tr>
                     <th>Judgehost log snippet</th>
                     <td>
-                        <pre class="output_text">{{ internalError.judgehostlog | base64_decode }}</pre>
+                        <pre class="output_text">{{ internalError.judgehostlog | base64_decode | convertUnprintableChars }}</pre>
                     </td>
                 </tr>
             </table>

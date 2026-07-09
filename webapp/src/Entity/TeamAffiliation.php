@@ -3,18 +3,20 @@ namespace App\Entity;
 
 use App\DataTransferObject\ImageFile;
 use App\Repository\TeamAffiliationRepository;
+use App\Validator\Constraints as AppAssert;
 use App\Validator\Constraints\Country;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use OpenApi\Attributes as OA;
+use Stringable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Affilitations for teams (e.g.: university, company).
+ * Affiliations for teams (e.g.: university, company).
  */
 #[ORM\Entity(repositoryClass: TeamAffiliationRepository::class)]
 #[ORM\Table(options: [
@@ -37,7 +39,8 @@ class TeamAffiliation extends BaseApiEntity implements
     HasExternalIdInterface,
     AssetEntityInterface,
     ExternalIdFromInternalIdInterface,
-    PrefixedExternalIdInterface
+    PrefixedExternalIdInterface,
+    Stringable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -50,6 +53,7 @@ class TeamAffiliation extends BaseApiEntity implements
         options: ['comment' => 'Team affiliation ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
     #[Serializer\SerializedName('id')]
+    #[AppAssert\Identifier]
     protected ?string $externalid = null;
 
     #[ORM\Column(
@@ -304,6 +308,6 @@ class TeamAffiliation extends BaseApiEntity implements
 
     public function __toString(): string
     {
-        return $this->getName() ?? $this->getShortname();
+        return $this->getName() ?? $this->getShortname() ?? $this->getExternalid();
     }
 }

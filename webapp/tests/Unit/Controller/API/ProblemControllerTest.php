@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\AddProblemAttachmentFixture;
 use App\DataFixtures\Test\DummyProblemFixture;
 use App\Entity\Problem;
@@ -76,6 +77,42 @@ class ProblemControllerTest extends BaseTestCase
             ],
             'attachments' => [],
         ],
+        'jumble' => [
+            "ordinal"    => 3,
+            "id"         => "jumble",
+            "short_name" => "D",
+            "label"      => "D",
+            "time_limit" => 5,
+            "name"       => "Jumble words",
+            "rgb"        => "#541298",
+            "color"      => "indigo",
+            "statement"  => [
+                [
+                    'href'     => 'contests/demo/problems/jumble/statement',
+                    'mime'     => 'application/pdf',
+                    'filename' => 'D.pdf',
+                ],
+            ],
+            'attachments' => [],
+        ],
+        'hangman' => [
+            "ordinal"    => 4,
+            "id"         => "hangman",
+            "short_name" => "E",
+            "label"      => "E",
+            "time_limit" => 1,
+            "name"       => "Hangman",
+            "rgb"        => "#6f0",
+            "color"      => "chartreuse",
+            "statement"  => [
+                [
+                    'href'     => 'contests/demo/problems/hangman/statement',
+                    'mime'     => 'application/pdf',
+                    'filename' => 'E.pdf',
+                ],
+            ],
+            'attachments' => [],
+        ],
     ];
 
     protected array $expectedAbsent = ['4242', 'nonexistent'];
@@ -99,7 +136,7 @@ class ProblemControllerTest extends BaseTestCase
         // Check that we still have three problems left
         $indexUrl = $this->helperGetEndpointURL($this->apiEndpoint);
         $problems = $this->verifyApiJsonResponse('GET', $indexUrl, 200, $this->apiUser);
-        self::assertCount(3, $problems);
+        self::assertCount(5, $problems);
     }
 
     public function testAddNotAllowed(): void
@@ -118,14 +155,13 @@ class ProblemControllerTest extends BaseTestCase
         // Check that we still have three problems left
         $indexUrl = $this->helperGetEndpointURL($this->apiEndpoint);
         $problems = $this->verifyApiJsonResponse('GET', $indexUrl, 200, $this->apiUser);
-        self::assertCount(3, $problems);
+        self::assertCount(5, $problems);
     }
 
     /**
      * Test that the statement endpoint returns a PDF for objects that exist.
-     *
-     * @dataProvider provideSingle
      */
+    #[DataProvider('provideSingle')]
     public function testStatement(int|string $id): void
     {
         $id = $this->resolveReference($id);
@@ -144,9 +180,8 @@ class ProblemControllerTest extends BaseTestCase
 
     /**
      * Test that the statement endpoint does not return anything for objects that don't exist.
-     *
-     * @dataProvider provideSingleNotFound
      */
+    #[DataProvider('provideSingleNotFound')]
     public function testStatementNotFound(string $id): void
     {
         $id = $this->resolveReference($id);

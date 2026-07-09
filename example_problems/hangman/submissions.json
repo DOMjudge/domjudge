@@ -1,0 +1,5 @@
+{
+    "submissions/time_limit_exceeded/run_frequency/": {
+        "entry_point": "main.py"
+    }
+}

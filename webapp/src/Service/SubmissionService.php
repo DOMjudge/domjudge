@@ -33,11 +33,24 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use ZipArchive;
 
 class SubmissionService
 {
     final public const FILENAME_REGEX = '/^[a-zA-Z0-9_][a-zA-Z0-9+_\.-]*$/';
+
+    /**
+     * Sanitize a filename to match FILENAME_REGEX by replacing invalid characters with underscores.
+     */
+    public static function sanitizeFilename(string $filename): string
+    {
+        if (preg_match(self::FILENAME_REGEX, $filename)) {
+            return $filename;
+        }
+        return preg_replace('/[^a-zA-Z0-9+_.\-]/', '_', $filename);
+    }
+
     final public const PROBLEM_RESULT_MATCHSTRING = ['@EXPECTED_RESULTS@: ', '@EXPECTED_SCORE@: '];
     final public const PROBLEM_RESULT_REMAP = [
         'ACCEPTED' => 'CORRECT',
@@ -84,37 +97,35 @@ class SubmissionService
 
         if ($testcaseGroup->getChildren()->isEmpty()) {
             $relevantRuns = $runsByGroup[$testcaseGroup->getTestcaseGroupId()] ?? [];
-            if ($testcaseGroup->getAcceptScore() !== null) {
-                $acceptScore = $testcaseGroup->getAcceptScore();
-                foreach ($relevantRuns as $run) {
-                    if ($run->getRunresult() === null || $run->getRunresult() === '') {
-                        $allResultsReady = false;
-                    } elseif ($run->getRunresult() !== 'correct') {
+            $acceptScore = $testcaseGroup->getAcceptScore();
+            $hasScoreTxt = false;
+            foreach ($relevantRuns as $run) {
+                if ($run->getRunresult() === null || $run->getRunresult() === '') {
+                    $allResultsReady = false;
+                } else {
+                    if ($run->getScore() !== null) {
+                        $hasScoreTxt = true;
+                        // Only respect score for AC/WA submissions. If the
+                        // submission crashed or ran into the timelimit, we
+                        // should not take the score from the validator (see
+                        // also how we handle it for interactive problems).
+                        if ($run->getRunresult() === 'correct' || $run->getRunresult() === 'wrong-answer') {
+                            $results[] = $run->getScore();
+                        } else {
+                            $results[] = '0';
+                        }
+                    }
+                    if ($run->getRunresult() !== 'correct') {
                         $allCorrect = false;
                         if ($firstIncorrectVerdict === null) {
                             $firstIncorrectVerdict = $run->getRunresult();
                         }
                     }
                 }
-                if (count($relevantRuns) > 0) {
-                    if ($allCorrect) {
-                        $results[] = $acceptScore;
-                    } else {
-                        $results[] = '0';
-                    }
-                }
-            } else {
-                foreach ($relevantRuns as $run) {
-                    $results[] = $run->getScore();
-                    if ($run->getRunresult() === null || $run->getRunresult() === '') {
-                        $allResultsReady = false;
-                    } elseif ($run->getRunresult() !== 'correct') {
-                        $allCorrect = false;
-                        if ($firstIncorrectVerdict === null) {
-                            $firstIncorrectVerdict = $run->getRunresult();
-                        }
-                    }
-                }
+            }
+            // If no score.txt was produced, fall back to accept_score / 0.
+            if (!$hasScoreTxt && $acceptScore !== null && count($relevantRuns) > 0) {
+                $results[] = $allCorrect ? $acceptScore : '0';
             }
         } else {
             foreach ($testcaseGroup->getChildren() as $childGroup) {
@@ -247,20 +258,15 @@ class SubmissionService
         $hierarchy['result'] = $result;
 
         if ($group->getChildren()->isEmpty()) {
-            if ($group->getAcceptScore() !== null) {
-                // Leaf group with accept score
-                if ($result !== null) {
-                    if ($result === 'correct') {
-                        $hierarchy['child_scores'][] = (string)bcadd($group->getAcceptScore(), '0', ScoreboardService::SCALE);
-                    } else {
-                        $hierarchy['child_scores'][] = (string)bcadd('0', '0', ScoreboardService::SCALE);
-                    }
-                }
-            }
-
             $relevantRuns = $runsByGroup[$group->getTestcaseGroupId()] ?? [];
+            $hasScoreTxt = false;
             foreach ($relevantRuns as $run) {
-                $tc_score = (string)bcadd((string)$run->getScore(), '0', ScoreboardService::SCALE);
+                $tc_score = $run->getScore() !== null
+                    ? (string)bcadd($run->getScore(), '0', ScoreboardService::SCALE)
+                    : null;
+                if ($tc_score !== null) {
+                    $hasScoreTxt = true;
+                }
                 $tc_name = $run->getTestcase()->getOrigInputFilename();
                 if ($tc_name !== null) {
                     $lastSlash = strrpos($tc_name, '/');
@@ -275,8 +281,17 @@ class SubmissionService
                     'orig_input_filename' => $run->getTestcase()->getOrigInputFilename(),
                     'display_name' => $tc_name,
                 ];
-                if ($group->getAcceptScore() === null) {
+                if ($tc_score !== null) {
                     $hierarchy['child_scores'][] = $tc_score;
+                }
+            }
+            // If no score.txt was produced, fall back to accept_score / 0.
+            $acceptScore = $group->getAcceptScore();
+            if (!$hasScoreTxt && $acceptScore !== null && $result !== null) {
+                if ($result === 'correct') {
+                    $hierarchy['child_scores'][] = (string)bcadd($acceptScore, '0', ScoreboardService::SCALE);
+                } else {
+                    $hierarchy['child_scores'][] = (string)bcadd('0', '0', ScoreboardService::SCALE);
                 }
             }
             // Sort testcases by rank
@@ -315,6 +330,8 @@ class SubmissionService
         bool $paginated = true,
         ?int $page = null,
         bool $showShadowUnverified = false,
+        bool $shadowCompareByScore = false,
+        float $scoreDiffEpsilon = 0.0001,
     ): array {
         if (empty($contests)) {
             if ($paginated) {
@@ -337,8 +354,8 @@ class SubmissionService
 
         if ($restrictions->withExternalId ?? false) {
             $queryBuilder
-                ->andWhere('s.externalid IS NOT NULL')
-                ->andWhere('s.expected_results IS NULL');
+                ->andWhere('s.source = :external')
+                ->setParameter('external', SubmissionSource::SHADOWING);
         }
 
         if (isset($restrictions->rejudgingId)) {
@@ -412,19 +429,49 @@ class SubmissionService
 
         if (isset($restrictions->externalDifference)) {
             if ($restrictions->externalDifference) {
-                if ($restrictions->result === 'judging' || $restrictions->externalResult === 'judging') {
-                    // When either the local or external result is set to judging explicitly,
-                    // coalesce the result with a known non-null value, because in MySQL
-                    // 'correct' <> null is not true. By coalescing with '-' we prevent this.
+                // Always include score differences for scoring problems
+                // When shadowCompareByScore is true: only score differences matter for scoring problems
+                // When shadowCompareByScore is false: both verdict and score differences matter
+                $queryBuilder->innerJoin('s.problem', 'p_diff');
+
+                if ($restrictions->shadowCompareByScore) {
+                    // For scoring problems: compare scores only (ignore verdict if scores match)
+                    // For non-scoring problems: compare verdicts
                     $queryBuilder
-                        ->andWhere('COALESCE(j.result, :dash) != COALESCE(ej.result, :dash)')
-                        ->setParameter('dash', '-');
+                        ->andWhere(
+                            '(BIT_AND(p_diff.types, :scoringType) = 0 AND COALESCE(j.result, :dash) != COALESCE(ej.result, :dash))'
+                            . ' OR (BIT_AND(p_diff.types, :scoringType) > 0 AND ABS(COALESCE(j.score, 0) - COALESCE(ej.score, 0)) > :scoreDiffEpsilon)'
+                        )
+                        ->setParameter('scoringType', Problem::TYPE_SCORING)
+                        ->setParameter('dash', '-')
+                        ->setParameter('scoreDiffEpsilon', $restrictions->scoreDiffEpsilon ?? 0.0001);
                 } else {
-                    $queryBuilder->andWhere('j.result != ej.result');
+                    // Show verdict differences OR score differences for scoring problems
+                    $queryBuilder
+                        ->andWhere(
+                            'COALESCE(j.result, :dash) != COALESCE(ej.result, :dash)'
+                            . ' OR (BIT_AND(p_diff.types, :scoringType) > 0 AND ABS(COALESCE(j.score, 0) - COALESCE(ej.score, 0)) > :scoreDiffEpsilon)'
+                        )
+                        ->setParameter('scoringType', Problem::TYPE_SCORING)
+                        ->setParameter('dash', '-')
+                        ->setParameter('scoreDiffEpsilon', $restrictions->scoreDiffEpsilon ?? 0.0001);
                 }
             } else {
                 $queryBuilder->andWhere('j.result = ej.result');
             }
+        }
+
+        if (isset($restrictions->minAbsDelta)) {
+            // Filter by minimum absolute score delta (for scoring problems)
+            // Join problem if not already joined by externalDifference
+            if (!isset($restrictions->externalDifference) || !$restrictions->externalDifference) {
+                $queryBuilder->innerJoin('s.problem', 'p_diff');
+            }
+            $queryBuilder
+                ->andWhere('BIT_AND(p_diff.types, :scoringTypeMinDelta) > 0')
+                ->andWhere('ABS(COALESCE(j.score, 0) - COALESCE(ej.score, 0)) >= :minAbsDelta')
+                ->setParameter('scoringTypeMinDelta', Problem::TYPE_SCORING)
+                ->setParameter('minAbsDelta', $restrictions->minAbsDelta);
         }
 
         if (isset($restrictions->externalResult)) {
@@ -597,10 +644,15 @@ class SubmissionService
             'judging' => 'j.starttime IS NOT NULL AND j.endtime IS NULL'
         ];
         if ($showShadowUnverified) {
-            $countQueryExtras['shadowUnverified'] = 'ej.verified = 0 AND ej.result IS NOT NULL AND (ej.result != j.result OR j.result IS NULL)';
+            // Shadow unverified count handled separately below due to score comparison complexity
+            $countQueryExtras['shadowUnverified'] = null;
             unset($countQueryExtras['unverified']);
         }
         foreach ($countQueryExtras as $count => $countQueryExtra) {
+            // shadowUnverified is handled separately below
+            if ($countQueryExtra === null) {
+                continue;
+            }
             $countQueryBuilder = (clone $queryBuilder)->select('COUNT(s.submitid) AS cnt');
             if (!empty($countQueryExtra)) {
                 $countQueryBuilder->andWhere($countQueryExtra);
@@ -609,6 +661,27 @@ class SubmissionService
                 ->getQuery()
                 ->getSingleScalarResult();
         }
+
+        // Handle shadowUnverified count separately due to score comparison complexity
+        if ($showShadowUnverified) {
+            $shadowCountBuilder = (clone $queryBuilder)->select('COUNT(s.submitid) AS cnt');
+            $shadowCountBuilder->andWhere('ej.verified = 0 AND ej.result IS NOT NULL');
+
+            // Always count score differences for scoring problems as unverified
+            $shadowCountBuilder
+                ->innerJoin('s.problem', 'p_shadow')
+                ->andWhere(
+                    '(j.result IS NULL OR COALESCE(j.result, \'-\') != COALESCE(ej.result, \'-\'))'
+                    . ' OR (BIT_AND(p_shadow.types, :scoringType) > 0 AND ABS(COALESCE(j.score, 0) - COALESCE(ej.score, 0)) > :scoreDiffEpsilon)'
+                )
+                ->setParameter('scoringType', Problem::TYPE_SCORING)
+                ->setParameter('scoreDiffEpsilon', $scoreDiffEpsilon);
+
+            $counts['shadowUnverified'] = (int)$shadowCountBuilder
+                ->getQuery()
+                ->getSingleScalarResult();
+        }
+
         $counts['perteam'] = (clone $queryBuilder)
             ->select('COUNT(DISTINCT s.team) AS cnt')
             ->andWhere($countQueryExtras['queued'])
@@ -674,7 +747,7 @@ class SubmissionService
     }
 
     /**
-     * @return array<int, array{count: int, limit: int, period: string}>
+     * @return array<int, array{count: int, limit: int, period: string, wait_time: int}>
      */
     public function getRateLimitStatus(Team $team, Contest $contest): array
     {
@@ -687,6 +760,9 @@ class SubmissionService
         $maxSeconds = max(array_keys($rateLimits));
         $startTime = $submitTime - $maxSeconds;
 
+        // Fetch all submission times within the maximum configured rate limit window.
+        // We need the full set of times to calculate the current submission count
+        // for each individual rate limit window (e.g., "10 per minute" and "100 per hour").
         $submissions = $this->em->createQueryBuilder()
             ->select('s.submittime')
             ->from(Submission::class, 's')
@@ -709,13 +785,19 @@ class SubmissionService
             $windowStart = $submitTime - $seconds;
 
             $count = 0;
+            $windowSubTimes = [];
             foreach ($subTimes as $subTime) {
                 if ($subTime >= $windowStart) {
                     $count++;
+                    $windowSubTimes[] = (float)$subTime;
                 }
             }
 
             if ($count >= $limit) {
+                rsort($windowSubTimes);
+                $relevantSubTime = $windowSubTimes[$limit - 1];
+                $waitTime = $relevantSubTime + $seconds - $submitTime;
+
                 $minutes = (float) $seconds / 60.0;
                 if ($seconds < 60) {
                     $period = sprintf("%d seconds", $seconds);
@@ -728,6 +810,7 @@ class SubmissionService
                     'count' => $count,
                     'limit' => $limit,
                     'period' => $period,
+                    'wait_time' => (int)ceil($waitTime),
                 ];
             }
         }
@@ -756,7 +839,8 @@ class SubmissionService
         ?string $externalId = null,
         ?float $submitTime = null,
         ?string &$message = null,
-        bool $forceImportInvalid = false
+        bool $forceImportInvalid = false,
+        bool $deferPostProcessing = false
     ): ?Submission {
         if (!$team instanceof Team) {
             $team = $this->em->getRepository(Team::class)->find($team);
@@ -854,18 +938,20 @@ class SubmissionService
             $allowedLanguages = $this->dj->getAllowedLanguagesForContest($contest);
             if (!in_array($language, $allowedLanguages, strict: true)) {
                 throw new BadRequestHttpException(
-                    sprintf("Language '%s' not allowed for contest [c%d].", $language->getLangid(), $contest->getCid()));
+                    sprintf("Language '%s' not allowed for contest '%s'.",
+                        $language->getName(), $contest->getName()));
             }
         } else {
             $allowedLanguages = $allowedLanguages->toArray();
             if (!in_array($language, $allowedLanguages, strict: true)) {
                 throw new BadRequestHttpException(
-                    sprintf("Language '%s' not allowed for problem [p%d].", $language->getLangid(), $problem->getProbid()));
+                    sprintf("Language '%s' not allowed for problem '%s'.",
+                        $language->getName(), $problem->getProblem()->getName()));
             }
         }
 
         if ($language->getRequireEntryPoint() && empty($entryPoint)) {
-            $message = sprintf("Entry point required for '%s' but none given.", $language->getLangid());
+            $message = sprintf("Entry point required for '%s' but none given.", $language->getName());
             if ($forceImportInvalid) {
                 $importError = $message;
             } else {
@@ -913,7 +999,9 @@ class SubmissionService
         $rateLimitStatus = $this->getRateLimitStatus($team, $contest);
         if (!empty($rateLimitStatus)) {
             $violation = $rateLimitStatus[0];
-            throw new BadRequestHttpException(
+            $waitTime = max(array_column($rateLimitStatus, 'wait_time'));
+            throw new TooManyRequestsHttpException(
+                $waitTime,
                 sprintf("Submission limit reached: maximum of %d submissions per %s allowed.",
                     $violation['limit'], $violation['period'])
             );
@@ -1061,6 +1149,12 @@ class SubmissionService
                 $judging->setJuryMember($juryMember);
             }
             $this->em->persist($judging);
+
+            if ($deferPostProcessing) {
+                // Defer flush and judge task creation to postProcessSubmissions().
+                return $submission;
+            }
+
             // This is so that we can use the submitid/judgingid below.
             $this->em->flush();
 
@@ -1111,6 +1205,72 @@ class SubmissionService
         }
 
         return $submission;
+    }
+
+    /**
+     * Batch post-process submissions that were created with deferPostProcessing=true.
+     * Handles event logging, scoreboard calculation, and audit logging in bulk.
+     *
+     * @param Submission[] $submissions
+     */
+    public function postProcessSubmissions(array $submissions, Contest $contest): void
+    {
+        if (empty($submissions)) {
+            return;
+        }
+
+        $contestId = $contest->getCid();
+
+        // Single flush for all deferred submissions, judgings, and expected results.
+        // This assigns IDs to all entities at once instead of flushing per submission.
+        $this->em->flush();
+
+        // Create judge tasks for all judgings now that they have IDs.
+        foreach ($submissions as $submission) {
+            if ($submission->isImportError()) {
+                continue;
+            }
+            $judging = $submission->getJudgings()->first();
+            if ($judging) {
+                $this->dj->maybeCreateJudgeTasks($judging, JudgeTask::PRIORITY_LOW);
+            }
+        }
+
+        // Batch event logging: log all submission events in one call.
+        $submitIds = array_map(fn(Submission $s) => $s->getSubmitid(), $submissions);
+        $this->em->wrapInTransaction(function () use ($submitIds, $contestId): void {
+            $this->em->flush();
+            $this->eventLogService->log(
+                'submission', $submitIds, EventLogService::ACTION_CREATE, $contestId
+            );
+        });
+
+        // Reload contest after EM clear (caused by internal API request in event logging).
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+
+        // Batch scoreboard: calculate once per unique (team, problem) pair.
+        $scoreboardPairs = [];
+        foreach ($submissions as $submission) {
+            $teamId = $submission->getTeam()->getTeamid();
+            $problemId = $submission->getProblem()->getProbid();
+            $key = $teamId . '-' . $problemId;
+            if (!isset($scoreboardPairs[$key])) {
+                $scoreboardPairs[$key] = [$teamId, $problemId];
+            }
+        }
+        foreach ($scoreboardPairs as [$teamId, $problemId]) {
+            $team = $this->em->getRepository(Team::class)->find($teamId);
+            $problem = $this->em->getRepository(Problem::class)->find($problemId);
+            $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+        }
+
+        // Batch audit logging.
+        $contestExternalId = $contest->getExternalid();
+        foreach ($submitIds as $submitId) {
+            $submission = $this->em->getRepository(Submission::class)->find($submitId);
+            $this->dj->auditlog('submission', $submission->getExternalid(), 'added',
+                'via ' . SubmissionSource::PROBLEM_IMPORT->value, null, $contestExternalId);
+        }
     }
 
     /**

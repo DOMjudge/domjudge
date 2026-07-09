@@ -15,6 +15,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotEqualTo;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -106,11 +107,17 @@ class JuryClarificationType extends AbstractType
             'group_by' => $subjectGroupBy,
         ]);
 
+        $maxLength = $this->config->get('clar_max_body_length');
+        $constraints = [];
+        if ($maxLength > 0) {
+            $constraints[] = new Length(max: $maxLength, maxMessage: 'Clarification body is too long: {{ value }} characters, maximum is {{ limit }}.');
+        }
         $builder->add('message', TextareaType::class, [
             'attr' => [
                 'rows' => 5,
                 'cols' => 85,
             ],
+            'constraints' => $constraints,
         ]);
 
         $builder->add('jurymember', HiddenType::class, [

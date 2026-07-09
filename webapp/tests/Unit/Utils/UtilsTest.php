@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Utils;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Entity\TeamAffiliation;
 use App\Utils\Utils;
 use Generator;
@@ -720,8 +721,8 @@ class UtilsTest extends TestCase
 
     /**
      * test image thumbnail creation
-     * @dataProvider provideImagesToThumb
      */
+    #[DataProvider('provideImagesToThumb')]
     public function testGetImageThumb(string $imageLocation, string $mime) : void
     {
         $logo = __DIR__ . $imageLocation;
@@ -738,7 +739,7 @@ class UtilsTest extends TestCase
         self::assertEquals($mime, $data['mime']);
     }
 
-    public function provideImagesToThumb() : \Generator
+    public static function provideImagesToThumb() : \Generator
     {
         yield ['/../../../public/images/teams/domjudge.jpg', 'image/jpeg'];
         yield ['/../../../public/js/cross.gif', 'image/gif'];
@@ -762,9 +763,8 @@ class UtilsTest extends TestCase
 
     /**
      * Test getting image size
-     *
-     * @dataProvider provideTestGetImageSize
      */
+    #[DataProvider('provideTestGetImageSize')]
     public function testGetImageSize(string $filename, int $expectedWidth, int $expectedHeight): void
     {
         [$width, $height, $ratio] = Utils::getImageSize($filename);
@@ -773,7 +773,7 @@ class UtilsTest extends TestCase
         self::assertEquals($width / $height, $ratio);
     }
 
-    public function provideTestGetImageSize(): Generator
+    public static function provideTestGetImageSize(): Generator
     {
         yield [__DIR__ . '/../../../public/js/hs.png', 181, 101];
         yield [__DIR__ . '/../../../public/images/teams/domjudge.jpg', 320, 200];

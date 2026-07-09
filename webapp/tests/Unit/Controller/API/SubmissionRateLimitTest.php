@@ -43,6 +43,12 @@ class SubmissionRateLimitTest extends UnitBaseTestCase
         static::assertEquals($status, $response->getStatusCode(),
             sprintf("\nUnexpected status code: %d (expected %d)\nURL: %s\nUser: %s\nResponse: %s\n",
                 $response->getStatusCode(), $status, $apiUri, $user, $response->getContent()));
+
+        if ($status === 429) {
+            static::assertTrue($response->headers->has('Retry-After'), 'Response should have a Retry-After header');
+            static::assertGreaterThan(0, (int)$response->headers->get('Retry-After'), 'Retry-After should be greater than 0');
+        }
+
         return json_decode($response->getContent(), true);
     }
 
@@ -71,8 +77,8 @@ class SubmissionRateLimitTest extends UnitBaseTestCase
             $this->submitSolution('ratelimit-user', 'ratelimit-password', 200);
             $this->submitSolution('ratelimit-user', 'ratelimit-password', 200);
 
-            // Fourth submission should fail with 400 Bad Request
-            $response = $this->submitSolution('ratelimit-user', 'ratelimit-password', 400);
+            // Fourth submission should fail with 429 Too Many Requests
+            $response = $this->submitSolution('ratelimit-user', 'ratelimit-password', 429);
 
             static::assertStringContainsString('Submission limit reached', $response['message']);
             static::assertStringContainsString('3 submissions per 10 seconds', $response['message']);
@@ -103,7 +109,7 @@ class SubmissionRateLimitTest extends UnitBaseTestCase
             // 10s window: OK (0 existing)
             // 60s window: FAIL (2 existing within 60s)
             // 3600s window: OK (2 existing)
-            $response = $this->submitSolution('ratelimit-user', 'ratelimit-password', 400);
+            $response = $this->submitSolution('ratelimit-user', 'ratelimit-password', 429);
 
             static::assertStringContainsString('Submission limit reached', $response['message']);
             static::assertStringContainsString('2 submissions per 1 minute allowed', $response['message']);

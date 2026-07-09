@@ -18,25 +18,32 @@
                 <div class="modal-body">
                     {% include 'partials/alert.html.twig' with {'type': 'danger', 'message': 'Submissions (temporarily) disabled.'} %}
                 </div>
-            {% else %}
-                {{ form_start(form) }}
+            {% elseif upload_form is defined and upload_form is not null %}
+                {% set uform = upload_form %}
+
+                {% if 'paste' in submit_methods %}
+                    <ul class="nav nav-tabs px-3 pt-2">
+                        <li class="nav-item">
+                            <span class="nav-link active">
+                                <i class="fas fa-file-upload"></i> Upload File
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('team_submit') }}?tab=paste">
+                                <i class="fas fa-paste"></i> Paste Code
+                            </a>
+                        </li>
+                    </ul>
+                {% endif %}
+
+                {{ form_start(uform) }}
                 <div class="modal-body">
-                    {% if rateLimitStatus is not empty %}
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <strong>Submission limit reached - if you submit now, it will likely be rejected:</strong>
-                            <ul class="mb-0">
-                                {% for limit in rateLimitStatus %}
-                                    <li>Maximum of {{ limit.limit }} submission(s) per {{ limit.period }} allowed.</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
-                    {{ form_row(form.code) }}
+                    {% include 'team/partials/rate_limit_warning.html.twig' %}
+                    {{ form_row(uform.code) }}
                     <div class="alert d-none" id="files_selected"></div>
-                    {{ form_row(form.problem) }}
-                    {{ form_row(form.language) }}
-                    {{ form_row(form.entry_point) }}
+                    {{ form_row(uform.problem) }}
+                    {{ form_row(uform.language) }}
+                    {{ form_row(uform.entry_point) }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -44,51 +51,62 @@
                         <i class="fas fa-cloud-upload-alt"></i> Submit
                     </button>
                 </div>
-                {{ form_end(form) }}
+                {{ form_end(uform) }}
+            {% else %}
+                <div class="modal-body">
+                    <p>Use the <a href="{{ path('team_submit') }}">full submit page</a> to submit via the code editor.</p>
+                </div>
             {% endif %}
         </div>
     </div>
 
     <script>
-        const fileInput = document.getElementById('submit_problem_code');
-        fileInput.addEventListener('change', (event) => {
-            const filenameRegex = {{ validFilenameRegex }};
-            const five_minutes_in_ms = 5 * 60 * 1000;
-            const now = Date.now();
-            filesSelected = $('#files_selected');
-            filesSelected.addClass('d-none');
+        {% if upload_form is defined and upload_form is not null %}
+        (function() {
+            const formPrefix = '{{ upload_form.vars.id }}';
+            const fileInput = document.getElementById(formPrefix + '_code');
+            if (fileInput) {
+                fileInput.addEventListener('change', (event) => {
+                    const filenameRegex = {{ validFilenameRegex }};
+                    const five_minutes_in_ms = 5 * 60 * 1000;
+                    const now = Date.now();
+                    const filesSelected = $('#files_selected');
+                    filesSelected.addClass('d-none');
 
-            var fileInfoHtml = '';
-            const files = event.target.files;
-            atLeastOneFileRecent = false;
-            for (let file of files) {
-                const date = new Date(file.lastModified);
-                const ago = humanReadableTimeDiff((now - date)/1000) + ' ago';
-                if(date > now - five_minutes_in_ms) {
-                    atLeastOneFileRecent = true;
-                }
-                fileValidChars = file.name.match(filenameRegex);
-                size = humanReadableBytes(file.size);
+                    var fileInfoHtml = '';
+                    const files = event.target.files;
+                    let atLeastOneFileRecent = false;
+                    for (let file of files) {
+                        const date = new Date(file.lastModified);
+                        const ago = humanReadableTimeDiff((now - date)/1000) + ' ago';
+                        if(date > now - five_minutes_in_ms) {
+                            atLeastOneFileRecent = true;
+                        }
+                        const fileValidChars = file.name.match(filenameRegex);
+                        const size = humanReadableBytes(file.size);
 
-                className = '';
-                message = `size ${size}`;
-                message += `, last modified ${ago}`;
-                if(!fileValidChars) {
-                    className = 'bg-danger';
-                    message += ', invalid filename';
-                }
-                if(file.size == 0) {
-                    className = 'bg-warning';
-                    message += ', empty file';
-                }
-                fileInfoHtml += `<li class="${className}"><span class="filename">${file.name}</span> ${message}</li>`;
+                        let className = '';
+                        let message = `size ${size}`;
+                        message += `, last modified ${ago}`;
+                        if(!fileValidChars) {
+                            className = 'bg-danger';
+                            message += ', invalid filename';
+                        }
+                        if(file.size == 0) {
+                            className = 'bg-warning';
+                            message += ', empty file';
+                        }
+                        fileInfoHtml += `<li class="${className}"><span class="filename">${file.name}</span> ${message}</li>`;
+                    }
+                    let result = '<ul>' + fileInfoHtml + '</ul>';
+                    if(!atLeastOneFileRecent) {
+                        result += '<div class="alert alert-warning">None of the selected files have been recently modified</div>';
+                    }
+                    filesSelected.html(result);
+                    filesSelected.removeClass('d-none');
+                });
             }
-            result = '<ul>' + fileInfoHtml + '</ul>';
-            if(!atLeastOneFileRecent) {
-                result += '<div class="alert alert-warning">None of the selected files have been recently modified</div>';
-            }
-            filesSelected.html(result);
-            filesSelected.removeClass('d-none');
-        });
+        })();
+        {% endif %}
     </script>
 </div>

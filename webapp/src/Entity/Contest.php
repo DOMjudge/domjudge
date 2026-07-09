@@ -9,6 +9,7 @@ use App\DataTransferObject\ImageFile;
 use App\Repository\ContestRepository;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
+use App\Validator\Constraints as AppAssert;
 use App\Validator\Constraints\Identifier;
 use App\Validator\Constraints\TimeString;
 use DateTime;
@@ -65,6 +66,7 @@ class Contest extends BaseApiEntity implements
         options: ['comment' => 'Contest ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
     #[Serializer\SerializedName('id')]
+    #[AppAssert\Identifier]
     protected ?string $externalid = null;
 
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]
@@ -160,6 +162,12 @@ class Contest extends BaseApiEntity implements
     #[ORM\Column(type: 'string', enumType: ScoreboardType::class, options: ['default' => 'pass-fail'])]
     #[Serializer\Exclude]
     private ScoreboardType $scoreboardType = ScoreboardType::PASS_FAIL;
+
+    #[ORM\Column(
+        options: ['comment' => 'Penalty time in minutes per wrong submission (if eventually solved)', 'unsigned' => true, 'default' => 20]
+    )]
+    #[Serializer\SerializedName('penalty_time')]
+    private int $penaltyTime = 20;
 
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('scoreboard_type')]
@@ -364,6 +372,10 @@ class Contest extends BaseApiEntity implements
     #[Serializer\Exclude]
     private string|float $scoreDiffEpsilon = 0.0001;
 
+    #[ORM\Column(options: ['comment' => 'For shadow mode, compare by score only (ignore verdict if scores match)?', 'default' => 0])]
+    #[Serializer\Exclude]
+    private bool $shadowCompareByScore = false;
+
     #[ORM\Column(nullable: true, options: ['comment' => 'Last encountered event ID from external source, if any'])]
     #[Serializer\Exclude]
     private ?string $externalSourceLastEventId = null;
@@ -480,9 +492,6 @@ class Contest extends BaseApiEntity implements
     #[ORM\OneToMany(mappedBy: 'contest', targetEntity: ExternalSourceWarning::class)]
     #[Serializer\Exclude]
     private Collection $externalSourceWarnings;
-
-    #[Serializer\SerializedName('penalty_time')]
-    private ?int $penaltyTimeForApi = null;
 
     // This field gets filled by the contest visitor with a data transfer
     // object that represents the banner
@@ -936,6 +945,17 @@ class Contest extends BaseApiEntity implements
         return $this->scoreboardType;
     }
 
+    public function getPenaltyTime(): int
+    {
+        return $this->penaltyTime;
+    }
+
+    public function setPenaltyTime(int $penaltyTime): Contest
+    {
+        $this->penaltyTime = $penaltyTime;
+        return $this;
+    }
+
     public function setOpenToAllTeams(bool $openToAllTeams): Contest
     {
         $this->openToAllTeams = $openToAllTeams;
@@ -1075,6 +1095,17 @@ class Contest extends BaseApiEntity implements
     public function setScoreDiffEpsilon(string|float $scoreDiffEpsilon): Contest
     {
         $this->scoreDiffEpsilon = $scoreDiffEpsilon;
+        return $this;
+    }
+
+    public function getShadowCompareByScore(): bool
+    {
+        return $this->shadowCompareByScore;
+    }
+
+    public function setShadowCompareByScore(bool $shadowCompareByScore): Contest
+    {
+        $this->shadowCompareByScore = $shadowCompareByScore;
         return $this;
     }
 
@@ -1802,17 +1833,6 @@ class Contest extends BaseApiEntity implements
     public function getContestProblemsetType(): ?string
     {
         return $this->contestProblemsetType;
-    }
-
-    public function setPenaltyTimeForApi(?int $penaltyTimeForApi): Contest
-    {
-        $this->penaltyTimeForApi = $penaltyTimeForApi;
-        return $this;
-    }
-
-    public function getPenaltyTimeForApi(): ?int
-    {
-        return $this->penaltyTimeForApi;
     }
 
     public function setBannerForApi(?ImageFile $bannerForApi = null): Contest

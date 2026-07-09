@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Service\Compare;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataTransferObject\ContestState;
 use App\DataTransferObject\Scoreboard\Problem;
 use App\DataTransferObject\Scoreboard\Row;
@@ -18,9 +19,8 @@ class ScoreboardCompareServiceTest extends KernelTestCase
 {
     /**
      * @param Message[] $expectedMessages
-     *
-     * @dataProvider provideCompare
      */
+    #[DataProvider('provideCompare')]
     public function testCompare(
         Scoreboard $scoreboard1,
         Scoreboard $scoreboard2,
@@ -35,7 +35,7 @@ class ScoreboardCompareServiceTest extends KernelTestCase
         self::assertEquals($expectedMessages, $messages);
     }
 
-    public function provideCompare(): Generator
+    public static function provideCompare(): Generator
     {
         yield [new Scoreboard(), new Scoreboard(), []];
         yield [

@@ -18,6 +18,8 @@ class ProblemControllerAdminTest extends ProblemControllerTest
         $this->expectedObjects['boolfind']['test_data_count'] = 10;
         $this->expectedObjects['fltcmp']['test_data_count'] = 1+3; // 1 sample, 3 secret cases
         $this->expectedObjects['hello']['test_data_count'] = 1;
+        $this->expectedObjects['jumble']['test_data_count'] = 3+15;
+        $this->expectedObjects['hangman']['test_data_count'] = 1+7;
         parent::setUp();
     }
 
@@ -29,7 +31,7 @@ class ProblemControllerAdminTest extends ProblemControllerTest
         "color": "greenyellow",
         "externalid": "ascendingphoto",
         "id": "ascendingphoto",
-        "label": "D",
+        "label": "F",
         "name": "Ascending Photo",
         "ordinal": 0,
         "rgb": "#aeff21",
@@ -40,7 +42,7 @@ class ProblemControllerAdminTest extends ProblemControllerTest
         "color": "blueviolet",
         "externalid": "boss",
         "id": "boss",
-        "label": "E",
+        "label": "G",
         "name": "Boss Battle",
         "ordinal": 1,
         "rgb": "#5b29ff",
@@ -51,7 +53,7 @@ class ProblemControllerAdminTest extends ProblemControllerTest
         "color": "hotpink",
         "externalid": "connect",
         "id": "connect",
-        "label": "F",
+        "label": "H",
         "name": "Connect the Dots",
         "ordinal": 2,
         "rgb": "#ff4fa7",
@@ -70,7 +72,7 @@ EOF;
 
         self::assertIsArray($ids);
 
-        $expectedProblems = ['D' => 'ascendingphoto', 'E' => 'boss', 'F' => 'connect'];
+        $expectedProblems = ['F' => 'ascendingphoto', 'G' => 'boss', 'H' => 'connect'];
 
         // First clear the entity manager to have all data.
         static::getContainer()->get(EntityManagerInterface::class)->clear();
@@ -92,16 +94,16 @@ EOF;
         $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/fltcmp';
         $this->verifyApiJsonResponse('DELETE', $url, 204, $this->apiUser);
 
-        // Check that we now have two problems left
+        // Check that we now have four problems left
         $indexUrl = $this->helperGetEndpointURL($this->apiEndpoint);
         $problems = $this->verifyApiJsonResponse('GET', $indexUrl, 200, $this->apiUser);
-        self::assertCount(2, $problems);
+        self::assertCount(4, $problems);
     }
 
     public function testDeleteNotFound(): void
     {
         // Check that we can delete the problem
-        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/4';
+        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/6';
         $this->verifyApiJsonResponse('DELETE', $url, 404, $this->apiUser);
     }
 
@@ -112,7 +114,7 @@ EOF;
         $body = [
             'label'        => 'newproblem',
             'points'       => 3,
-            'rgb'        => '#013370',
+            'rgb'          => '#013370',
             'allow_submit' => true,
             'allow_judge'  => true,
         ];
@@ -126,7 +128,7 @@ EOF;
 
         $expected = [
             'id'         => $problemId,
-            'ordinal'    => 3, // `newproblem` comes after `boolfind`, `fltcmp` and `hello`
+            'ordinal'    => 5, // `newproblem` comes after `boolfind`, `fltcmp`, `hangman`, `hello` and `jumble`
             'time_limit' => 2,
             'name'       => 'Dummy problem',
             'label'      => $body['label'],
@@ -139,10 +141,10 @@ EOF;
             self::assertEquals($value, $problemResponse[$key], "$key has correct value");
         }
 
-        // Check that we now have four problems
+        // Check that we now have six problems
         $indexUrl = $this->helperGetEndpointURL($this->apiEndpoint);
         $problems = $this->verifyApiJsonResponse('GET', $indexUrl, 200, $this->apiUser);
-        self::assertCount(4, $problems);
+        self::assertCount(6, $problems);
     }
 
     public function testAddNotFound(): void

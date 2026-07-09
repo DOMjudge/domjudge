@@ -13,14 +13,14 @@ class DemoPreDeactivateContestFixture extends AbstractTestDataFixture
         $demoContest
             ->setStarttimeString(
                 sprintf(
-                    '%s-06-06 00:00:00 Europe/Amsterdam',
-                    date('Y') - 1
+                    '%d-06-06 00:00:00 Europe/Amsterdam',
+                    (int)date('Y') - 1
                 )
             )
             ->setEndtimeString(
                 sprintf(
-                    '%s-06-06 09:00:00 Europe/Amsterdam',
-                    date('Y') - 1
+                    '%d-06-06 09:00:00 Europe/Amsterdam',
+                    (int)date('Y') - 1
                 )
             )->setUnfreezetimeString(
                 sprintf(
@@ -29,8 +29,8 @@ class DemoPreDeactivateContestFixture extends AbstractTestDataFixture
                 )
             )->setDeactivatetimeString(
                 sprintf(
-                    '%s-01-01 09:00:00 Europe/Amsterdam',
-                    date('Y') + 2
+                    '%d-01-01 09:00:00 Europe/Amsterdam',
+                    (int)date('Y') + 2
                 )
             ); // Set the time explicit to guard against changes in the Default fixture.
         $manager->persist($demoContest);

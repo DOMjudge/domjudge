@@ -6,6 +6,10 @@ on:
       - main
       - '[0-9]+.[0-9]+'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   debian-family:
     strategy:
@@ -28,8 +32,10 @@ jobs:
     container:
       image: ${{ matrix.os }}:${{ matrix.version }}
     steps:
-      - name: Install git so we get the .github directory
-        run: apt-get update; apt-get install -y git
+      - name: Install git and ca-certs
+        run: |
+          apt-get update
+          apt-get install -y git ca-certificates
       - uses: actions/checkout@v4
       - name: Setup image and run bats tests
         run: .github/jobs/configure-checks/setup_configure_image.sh

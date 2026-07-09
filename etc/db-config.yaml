@@ -12,13 +12,6 @@
             default_value: false
             public: true
             description: Should submissions with compiler-error incur penalty time (and be shown on the scoreboard)?
-        -   name: penalty_time
-            type: int
-            default_value: 20
-            public: true
-            description: Penalty time in minutes per wrong submission (if eventually solved).
-            regex: /^\d+$/
-            error_message: A non-negative number is required.
         -   name: results_prio
             type: array_keyval
             default_value:
@@ -209,6 +202,13 @@
             default_value: []
             public: true
             description: List of clarification queues.
+        -   name: clar_max_body_length
+            type: int
+            default_value: 10000
+            public: true
+            description: Maximum number of characters allowed in a clarification body. Set to 0 to disable the limit.
+            regex: /^\d+$/
+            error_message: A non-negative number is required.
         -   name: clar_default_problem_queue
             type: string
             default_value: ""
@@ -270,11 +270,16 @@
             default_value: false
             public: true
             description: Show results of TOO-LATE submissions in team interface?
-        -   name: show_balloons_postfreeze
+        -   name: minimum_number_of_balloons
+            type: int
+            default_value: 0
+            public: true
+            description: How many balloons to hand out ignoring freeze time. Limited to problems solved pre-freeze.
+        -   name: any_balloon_postfreeze
             type: bool
             default_value: false
             public: true
-            description: Give out balloon notifications after the scoreboard has been frozen?
+            description: Hand out balloons during the freeze for problems that have not been solved pre-freeze.
         -   name: show_relative_time
             type: bool
             default_value: false
@@ -334,6 +339,15 @@
                 2: After first submission
             regex: /^\d+$/
             error_message: A value between 0 and 2 is required.
+        -   name: submit_methods
+            type: array_val
+            default_value:
+                - upload
+            public: true
+            description: Allowed submission methods in the web interface.
+            options:
+                - upload
+                - paste
         -   name: enable_ranking
             type: bool
             default_value: true

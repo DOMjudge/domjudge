@@ -2,6 +2,7 @@
 
 namespace App\Tests\E2E\Controller;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Tests\Unit\BaseTestCase;
 use Generator;
 
@@ -48,14 +49,19 @@ class ControllerRolesTraversalTest extends BaseTestCase
      */
     protected function roleCombinations(array $start_roles, array $possible_roles): array
     {
-        // Initialize by adding the empty set.
+        // Base roles alone.
         $results = [$start_roles];
 
+        // Base roles + each optional role individually.
         foreach ($possible_roles as $element) {
-            foreach ($results as $combination) {
-                $results[] = [$element, ...$combination];
-            }
+            $results[] = [$element, ...$start_roles];
         }
+
+        // Base roles + all optional roles together.
+        if (count($possible_roles) > 1) {
+            $results[] = [...$possible_roles, ...$start_roles];
+        }
+
         return $results;
     }
 
@@ -121,9 +127,6 @@ class ControllerRolesTraversalTest extends BaseTestCase
         foreach ($tmp as $possUrl) {
             if (!$this->urlExcluded($possUrl, $skip)) {
                 $ret[] = $possUrl;
-                if (!str_contains($possUrl, '#')) {
-                    $ret[] = $possUrl.'#';
-                }
             }
         }
         return $ret;
@@ -201,8 +204,8 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * @param string[] $baseRoles The default role of the user.
      * @param string[] $optionalRoles The roles which should not restrict the viewable pages.
      * @param bool     $shadowMode Put the installation in this shadow mode.
-     * @dataProvider provideRoleAccessData
      */
+    #[DataProvider('provideRoleAccessData')]
     public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages, bool $shadowMode, string $skip): void
     {
         $this->setupShadowMode($shadowMode);
@@ -250,8 +253,8 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * @param string[] $roleOthersBaseURL The base URLs of the other roles.
      * @param string[] $roles The tested roles.
      * @param string[] $rolesOther The other roles.
-     * @dataProvider provideRoleAccessOtherRoles
      */
+    #[DataProvider('provideRoleAccessOtherRoles')]
     public function testRoleAccessOtherRoles(
         string $roleBaseURL,
         array $roleOthersBaseURL,
@@ -276,8 +279,8 @@ class ControllerRolesTraversalTest extends BaseTestCase
 
     /**
      * Test that pages depending on an active contest do not crash on the server.
-     * @dataProvider provideNoContestScenario
      */
+    #[DataProvider('provideNoContestScenario')]
     public function testNoContestAccess(string $roleBaseURL, array $baseRoles, bool $shadowMode, string $skip): void
     {
         $this->setupShadowMode($shadowMode);

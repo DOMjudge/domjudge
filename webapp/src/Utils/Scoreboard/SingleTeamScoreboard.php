@@ -32,12 +32,11 @@ class SingleTeamScoreboard extends Scoreboard
         array $scoreCache,
         FreezeData $freezeData,
         bool $showFtsInFreeze,
-        int $penaltyTime,
         bool $scoreIsInSeconds
     ) {
         $this->showRestrictedFts = $showFtsInFreeze || $freezeData->showFinal();
         parent::__construct($contest, [$team->getTeamid() => $team], [], $problems, $scoreCache, $rankCache, $freezeData, true,
-            $penaltyTime, $scoreIsInSeconds);
+            $scoreIsInSeconds);
     }
 
     protected function calculateScoreboard(): void
@@ -55,7 +54,7 @@ class SingleTeamScoreboard extends Scoreboard
 
             $penalty = Utils::calcPenaltyTime(
                 $scoreRow->getIsCorrect($this->restricted), $scoreRow->getSubmissions($this->restricted),
-                $this->penaltyTime, $this->scoreIsInSeconds
+                $this->contest->getPenaltyTime(), $this->scoreIsInSeconds
             );
 
             $contestProblem = $scoreRow->getContest()->getContestProblem($scoreRow->getProblem());

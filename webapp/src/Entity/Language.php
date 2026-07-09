@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use OpenApi\Attributes as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use App\Validator\Constraints as AppAssert;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -38,6 +39,7 @@ class Language extends BaseApiEntity implements
     #[ORM\Column(nullable: true, options: ['comment' => 'Language ID to expose in the REST API'])]
     #[Serializer\SerializedName('id')]
     #[Serializer\Groups([ARC::GROUP_DEFAULT, ARC::GROUP_NONSTRICT])]
+    #[AppAssert\Identifier]
     protected ?string $externalid = null;
 
     #[ORM\Column(options: ['comment' => 'Descriptive language name'])]

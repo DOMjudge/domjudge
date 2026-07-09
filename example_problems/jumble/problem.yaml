@@ -1,0 +1,4 @@
+name: Jumble words
+validation: custom multi-pass
+limits:
+  validation_passes: 2

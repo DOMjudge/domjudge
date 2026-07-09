@@ -47,10 +47,12 @@ AC_ARG_ENABLE([judgehost-build],AS_HELP_STRING([--enable-judgehost-build],
 [if test "x$enableval" = xno ; then AC_SUBST(JUDGEHOST_BUILD_ENABLED,no) fi])
 
 if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
-	# Set default {C,CXX,LD}FLAGS. This might screw up portability, but
+	# The judgedaemon only uses C++ code
+	AC_LANG([C++])
+	# Set default {CXX,LD}FLAGS. This might screw up portability, but
 	# adds important security. Only set these flags when none are supplied
 	# by the user.
-	for flag in CFLAGS CXXFLAGS LDFLAGS ; do
+	for flag in CXXFLAGS LDFLAGS ; do
 		AC_MSG_CHECKING([whether configure should try to set $flag])
 		if test x`eval echo '${'$flag'+set}'` = xset ; then res=no ; else res=yes ; fi
 		eval enable_${flag}_setting=$res
@@ -71,7 +73,6 @@ if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 	AX_APPEND_LINK_FLAGS([-Wl,-z,relro], DEF_LDFLAGS)
 	AX_APPEND_LINK_FLAGS([-Wl,-z,now],   DEF_LDFLAGS)
 
-	test "x$enable_CFLAGS_setting"   = xyes && AC_SUBST(CFLAGS,   "$DEF_CXFLAGS -std=c11")
 	test "x$enable_CXXFLAGS_setting" = xyes && AC_SUBST(CXXFLAGS, "$DEF_CXFLAGS -std=c++20")
 	test "x$enable_LDFLAGS_setting"  = xyes && AC_SUBST(LDFLAGS,  $DEF_LDFLAGS)
 fi
@@ -267,7 +268,6 @@ AC_MSG_RESULT($BASEURL)
 # Checks for programs.
 if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 AC_PROG_CXX
-AC_PROG_CC
 AC_PROG_CXXCPP
 AC_PROG_CPP
 fi
@@ -318,6 +318,8 @@ AC_REPLACE_FUNCS([atexit dup2 getcwd gettimeofday memset mkdir realpath setenv \
                  [],[AC_MSG_ERROR([required C function is missing.])])
 fi
 
+AC_CHECK_PROG(BASH_CHECK, bash, yes)
+
 AC_CHECK_PROG(PHP_CHECK,php,yes)
 AS_IF([test x"$PHP_CHECK" != x"yes"],
       [phpversion=8.1],
@@ -340,7 +342,6 @@ echo " * installation source.: $INSTALL_METHOD"
 echo " * prefix..............: $prefix"
 if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 echo " * CPPFLAGS............: $CPPFLAGS"
-echo " * CFLAGS..............: $CFLAGS"
 echo " * CXXFLAGS............: $CXXFLAGS"
 echo " * LDFLAGS.............: $LDFLAGS"
 fi
@@ -397,6 +398,12 @@ if test "x$BASEURL_UNCONFIGURED" = x1 ; then
    echo "not work out of the box!"
    echo "Rerun configure with option '--with-baseurl=BASEURL' to correct this."
    echo ""
+fi
+if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
+AS_IF([test x"$BASH_CHECK" != x"yes"], [AC_MSG_WARN([Bash is needed for running the judgehost with a chroot.])])
+fi
+if test "x$DOMSERVER_BUILD_ENABLED" = xyes; then
+AS_IF([test x"$BASH_CHECK" != x"yes"], [AC_MSG_WARN([Bash is missing. Bash is needed for database setup.])])
 fi
 fi # !QUIET
 # }}}

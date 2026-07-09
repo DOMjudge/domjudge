@@ -211,12 +211,12 @@ class ExternalContestSourceService
         return ($this->cachedContestData !== null);
     }
 
-    /**
-     * Throws an exception indicating the contest source is invalid, including the actual error message.
-     * This should only be called after isValidContestSource() returns false.
-     */
     private function throwInvalidSourceException(): never
     {
+        if ($this->isValidContestSource()) {
+            throw new LogicException('The contest source is valid, which is unexpected when calling throwInvalidSourceException.');
+        }
+
         throw new LogicException('The contest source is not valid: ' . ($this->loadingError ?? 'Unknown error'));
     }
 
@@ -539,6 +539,7 @@ class ExternalContestSourceService
                         }
                     }
                     if (!$receivedData) {
+                        $this->updateProgress('Waiting for new events (last: ' . ($this->getLastReadEventId() ?? 'none') . ')');
                         $hundred_ms = 100 * 1000 * 1000;
                         time_nanosleep(0, $hundred_ms);
                     } else {
@@ -883,7 +884,7 @@ class ExternalContestSourceService
                 'start_time_enabled' => true,
                 'start_time_string'  => preg_replace('/\.000$/', '', $startTime->format('Y-m-d H:i:s.v')) . ' ' . $timezoneToUse,
                 'end_time_string'    => preg_replace('/\.000$/', '', $fullDuration),
-                'freeze_time_string' => preg_replace('/\.000$/', '', $fullFreeze),
+                'freeze_time_string' => $fullFreeze !== null ? preg_replace('/\.000$/', '', $fullFreeze) : null,
             ];
         } else {
             $toCheck = [
@@ -892,15 +893,7 @@ class ExternalContestSourceService
         }
 
         $toCheck['name'] = $data->name;
-
-        // Also compare the penalty time
-        $penaltyTime = $data->penaltyTime;
-        if ($penaltyTime !== null && $this->config->get('penalty_time') != $penaltyTime) {
-            $this->logger->warning(
-                'Penalty time does not match between feed (%d) and local (%d)',
-                [$penaltyTime, $this->config->get('penalty_time')]
-            );
-        }
+        $toCheck['penalty_time'] = $data->penaltyTime ?? 0;
 
         $this->compareOrCreateValues($event, $data->id, $contest, $toCheck);
 
@@ -1191,7 +1184,7 @@ class ExternalContestSourceService
             );
             $contestProblem->setShortname($data->label);
         }
-        if (preg_match('/^#[[:xdigit:]]{3}(?:[[:xdigit:]]{3}){0,2}$/', $data->rgb)) {
+        if ($data->rgb && !preg_match('/^#[[:xdigit:]]{3}(?:[[:xdigit:]]{3}){0,2}$/', $data->rgb)) {
             $this->logger->warning(
                 'Contest problem color does not match between feed (%s) and local (%s), but feed is invalid.',
                 [$data->rgb, $contestProblem->getColor()]
@@ -1424,13 +1417,25 @@ class ExternalContestSourceService
 
         $submitTime = Utils::toEpochFloat($data->time);
 
+        $body = $data->text;
+        $maxLength = $this->config->get('clar_max_body_length');
+        if ($maxLength > 0 && mb_strlen($body) > $maxLength) {
+            $dropped = mb_strlen($body) - $maxLength;
+            $suffix = sprintf("\n[... body truncated, %d characters dropped]", $dropped);
+            $body = mb_substr($body, 0, $maxLength - mb_strlen($suffix)) . $suffix;
+            $this->logger->warning(
+                'Clarification %s body truncated from %d to %d characters.',
+                [$data->id, mb_strlen($data->text), $maxLength]
+            );
+        }
+
         $clarification
             ->setInReplyTo($inReplyTo)
             ->setSender($fromTeam)
             ->setRecipient($toTeam)
             ->setProblem($problem)
             ->setContest($contest)
-            ->setBody($data->text)
+            ->setBody($body)
             ->setSubmittime($submitTime);
 
         if ($inReplyTo) {
@@ -2081,10 +2086,8 @@ class ExternalContestSourceService
      */
     protected function getAnalystRunPriority(ExternalRun $run): int | null {
         return match ($run->getResult()) {
-            // We will not get any new useful information for TLE testcases, while they take a lot of judgedaemon time.
-            'timelimit' => null,
-            // We often do not get new useful information for judging correct testcases.
-            'correct' => null,
+            // We will not get any new useful information for AC/TLE testcases, while they take a lot of judgedaemon time.
+            'timelimit', 'correct' => null,
             // Wrong answers are interesting for the analysts, assign a high priority but below manual judging.
             'wrong-answer' => JudgeTask::PRIORITY_HIGH + 1,
             // Compile errors could be interesting to see what went wrong, assign a low priority.

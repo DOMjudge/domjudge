@@ -35,7 +35,9 @@
                 data-problem-name="{{ problem.problem.name | escape('html_attr') }}"
                 data-problem-badge="{{ problem | problemBadge | escape('html_attr') }}"
             >
-                <a {% if link %}href="{{ link }}"{% endif %} target="{{ target }}">
+                {% if link %}
+                    <a href="{{ link }}" target="{{ target }}">
+                {% endif %}
                     {{  problem | problemBadge }}
                     {% if showPoints and not scoringScoreboard %}
                         <br/>
@@ -43,7 +45,9 @@
                             [{% if problem.points == 1 %}1 point{% else %}{{ problem.points }} points{% endif %}]
                         </span>
                     {% endif %}
-                </a>
+                {% if link %}
+                    </a>
+                {% endif %}
             </th>
         {% endfor %}
     {% endif %}

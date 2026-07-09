@@ -1,0 +1,4 @@
+name: Hangman
+validation: custom multi-pass
+limits:
+  validation_passes: 26

@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Utils\Scoreboard;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\ContestTimeFixture;
 use App\Entity\Contest;
 use App\Tests\Unit\BaseTestCase as BaseBaseTestCase;
@@ -12,9 +13,7 @@ use Generator;
 
 class ScoreboardTest extends BaseBaseTestCase
 {
-    /**
-     * @dataProvider provideFreezeDataProgress
-     */
+    #[DataProvider('provideFreezeDataProgress')]
     public function testScoreboardProgress(
         string $reference,
         int $progress,
@@ -29,13 +28,13 @@ class ScoreboardTest extends BaseBaseTestCase
         $em = self::getContainer()->get('doctrine')->getManager();
         $contest = $em->getRepository(Contest::class)->findOneBy(['name' => $reference]);
         $freezeData = new FreezeData($contest);
-        $scoreBoard = new Scoreboard($contest, [], [], [], [], [], $freezeData, false, 0, true);
+        $scoreBoard = new Scoreboard($contest, [], [], [], [], [], $freezeData, false, true);
         self::assertEquals($scoreBoard->getProgress(), $progress);
     }
 
-    public function provideFreezeDataProgress(): Generator
+    public static function provideFreezeDataProgress(): Generator
     {
-        $class = new FreezeDataTest();
+        $class = new FreezeDataTest('provideContestProgress');
         return $class->provideContestProgress();
     }
 }

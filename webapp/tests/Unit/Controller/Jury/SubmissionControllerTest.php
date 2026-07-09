@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\SampleSubmissionsFixture;
 use App\Tests\Unit\BaseTestCase;
 use Generator;
@@ -21,16 +22,15 @@ class SubmissionControllerTest extends BaseTestCase
 
     /**
      * Test the filtered views do throw server errors.
-     *
-     * @dataProvider provideViews
      */
+    #[DataProvider('provideViews')]
     public function testIndexViewFilter(string $filter, array $fixtures): void
     {
         $this->loadFixtures($fixtures);
         $this->verifyPageResponse('GET', static::$baseURL . '?view=' . $filter, 200);
     }
 
-    public function provideViews(): Generator
+    public static function provideViews(): Generator
     {
         foreach ([[], [SampleSubmissionsFixture::class]] as $fixtures) {
             foreach (['all', 'unjudged', 'unverified'] as $view) {

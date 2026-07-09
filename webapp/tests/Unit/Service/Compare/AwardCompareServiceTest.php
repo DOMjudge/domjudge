@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Service\Compare;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataTransferObject\Award;
 use App\Service\Compare\AwardCompareService;
 use App\Service\Compare\Message;
@@ -16,9 +17,8 @@ class AwardCompareServiceTest extends KernelTestCase
      * @param Award[]   $awards1
      * @param Award[]   $awards2
      * @param Message[] $expectedMessages
-     *
-     * @dataProvider provideCompare
      */
+    #[DataProvider('provideCompare')]
     public function testCompare(array $awards1, array $awards2, array $expectedMessages): void
     {
         $serializer = $this->createMock(SerializerInterface::class);
@@ -30,7 +30,7 @@ class AwardCompareServiceTest extends KernelTestCase
         self::assertEquals($expectedMessages, $messages);
     }
 
-    public function provideCompare(): Generator
+    public static function provideCompare(): Generator
     {
         yield [[], [], []];
         yield [

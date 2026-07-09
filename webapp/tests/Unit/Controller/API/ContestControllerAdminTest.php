@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\DemoAboutToStartContestFixture;
 use App\DataFixtures\Test\DemoPostUnfreezeContestFixture;
 use App\DataFixtures\Test\DemoPreEndContestFixture;
@@ -27,9 +28,7 @@ class ContestControllerAdminTest extends ContestControllerTest
         return $new;
     }
 
-    /**
-     * @dataProvider provideAddYaml
-     */
+    #[DataProvider('provideAddYaml')]
     public function testAddYaml(string $yaml, string $expectedYaml, string $contestName): void
     {
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
@@ -51,7 +50,7 @@ class ContestControllerAdminTest extends ContestControllerTest
         self::assertNull($this->getContest($cid)->getDeactivatetime());
     }
 
-    public function provideAddYaml(): Generator
+    public static function provideAddYaml(): Generator
     {
         yield [
             <<<EOF
@@ -85,6 +84,7 @@ end_time: '+2:00:00'
 duration: 2:00:00.000
 penalty_time: 20
 medals:
+    enabled: true
     gold: 4
     silver: 4
     bronze: 4
@@ -114,6 +114,7 @@ end_time: '+5:00:00'
 duration: 5:00:00.000
 penalty_time: 0
 medals:
+    enabled: true
     gold: 4
     silver: 4
     bronze: 4
@@ -259,9 +260,7 @@ EOF;
         self::assertArrayNotHasKey('problemset', $object);
     }
 
-    /**
-     * @dataProvider provideChangeTimes
-     */
+    #[DataProvider('provideChangeTimes')]
     public function testChangeTimes(
         array $body,
         int $expectedResponseCode,
@@ -304,7 +303,7 @@ EOF;
         }
     }
 
-    public function provideChangeTimes(): Generator
+    public static function provideChangeTimes(): Generator
     {
         // Note that if the first item contains "id", we replace it with the correct ID in the test
 
@@ -338,9 +337,7 @@ EOF;
         yield [['id' => "demo", 'scoreboard_thaw_time' => '-15 seconds'], 200, 'Demo contest', [], true, true];
     }
 
-    /**
-     * @dataProvider provideNewContest
-     */
+    #[DataProvider('provideNewContest')]
     public function testActivateTimeContestYaml(
         string $activateTime, string $startTime, ?string $deactivateTime,
         bool $setActivate, bool $setDeactivate
@@ -399,7 +396,7 @@ EOF;
         }
     }
 
-    public function provideNewContest(): Generator
+    public static function provideNewContest(): Generator
     {
         // Test Activation in past, present & future
         yield [Utils::printtime(Utils::now()-14*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), null, true, false];
@@ -434,5 +431,33 @@ EOF;
         yield ["2000-01-01 10:10:10", "2000-01-01 10:10:10", null, false, false];
         yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), "2099-01-01 10:10:10", null, false, false];
         yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), "2077-01-01 10:10:10", "2099-01-01 10:10:10", false, true];
+    }
+
+    public function testResultsTsv(): void
+    {
+        $id = 1;
+        if ($this->objectClassForExternalId !== null) {
+            $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
+        }
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, (string)$id);
+
+        $content = $this->verifyApiResponse('GET', $url . '/results.tsv', 200, $this->apiUser, null, [], true);
+        self::assertIsString($content);
+        self::assertStringContainsString("\t", $content);
+    }
+
+    public function testScoreboardZip(): void
+    {
+        $id = 1;
+        if ($this->objectClassForExternalId !== null) {
+            $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
+        }
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, (string)$id);
+
+        $content = $this->verifyApiResponse('GET', $url . '/scoreboard.zip', 200, $this->apiUser, null, [], true);
+        self::assertIsString($content);
+
+        $zipContents = $this->unzipString($content);
+        self::assertNotEmpty($zipContents);
     }
 }

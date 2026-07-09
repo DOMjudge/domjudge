@@ -29,7 +29,7 @@ class DebugPackage
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'judgehostid', referencedColumnName: 'judgehostid', onDelete: 'SET NULL')]
-    private Judgehost $judgehost;
+    private ?Judgehost $judgehost = null;
 
     public function getDebugPackageId(): int
     {
@@ -58,12 +58,12 @@ class DebugPackage
         return $this;
     }
 
-    public function getJudgehost(): Judgehost
+    public function getJudgehost(): ?Judgehost
     {
         return $this->judgehost;
     }
 
-    public function setJudgehost(Judgehost $judgehost): DebugPackage
+    public function setJudgehost(?Judgehost $judgehost): DebugPackage
     {
         $this->judgehost = $judgehost;
         return $this;

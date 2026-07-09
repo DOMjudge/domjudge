@@ -19,9 +19,8 @@ class ContestControllerTest extends JuryControllerTestCase
     protected static string  $deleteEntityIdentifier   = 'name';
     protected static string  $getIDFunc                = 'getExternalid';
     protected static string  $className                = Contest::class;
-    protected static array $DOM_elements               = ['h1'                            => ['Contests'],
-                                                          'h3'                            => ['admin' => ['Current contests', 'All available contests'],
-                                                             'jury' => []],
+    protected static array $DOM_elements               = ['h1'                            => ['admin' => ['Current contests', 'All available contests'],
+                                                                                              'jury'  => []],
                                                           'a.btn[title="Import contest"]' => ['admin' => [" Import contest"],'jury'=>[]]];
     protected static ?array $deleteExtra               = ['pageurl'   => '/jury/contests/demo',
                                                           'deleteurl' => '/jury/contests/demo/problems/boolfind/delete',
@@ -315,7 +314,7 @@ class ContestControllerTest extends JuryControllerTestCase
                                                                                                                         'allowJudge' => '1',
                                                                                                                         'color' => '#000000',
                                                                                                                         'lazyEvalResults' => '0']], 'name' => 'No known problem']],
-                                                          'Only alphanumeric characters and ._- are allowed' => [['shortname' => '"quoted"']]];
+                                                          'Only letters, numbers, dashes, underscores and dots are allowed.' => [['shortname' => '"quoted"']]];
 
     protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {
