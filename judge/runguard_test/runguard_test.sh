@@ -230,6 +230,17 @@ test_signal_mask() {
 	expect_stdout "SigBlk:.*0000000000000000"
 }
 
+test_oom_score_adj() {
+	# A negative oom_score_adj is inherited by the command and shields it
+	# from the OOM killer, so runguard resets its own to zero first. Check
+	# that it does so when it inherits one, e.g. from sshd, instead of
+	# failing: that would take the judgehost down with it.
+	exec_check_success sudo bash -c \
+		"echo -100 > /proc/self/oom_score_adj; exec $RUNGUARD $RUNGUARD_OPTIONS -v cat /proc/self/oom_score_adj"
+	expect_stdout "^0$"
+	expect_stderr "resetting"
+}
+
 test_envvars() {
 	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS ./print_envvars.py
 	expect_stdout "COUNT: 2."
