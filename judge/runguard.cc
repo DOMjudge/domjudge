@@ -1268,7 +1268,7 @@ int main(int argc, char **argv)
 		if ( fscanf(fp,"%d", &ret)!=1 ) die(errno,"cannot read from `{}'", oom_score_path);
 		if ( ret<0 ) {
 			int oom_reset_value = 0;
-			die(0, "resetting `{}' from {} to {}", oom_score_path, ret, oom_reset_value);
+			logmsg(LOG_DEBUG, "resetting `{}' from {} to {}", oom_score_path, ret, oom_reset_value);
 			rewind(fp);
 			if ( fprintf(fp,"%d\n", oom_reset_value) <= 0 ) {
 				die(errno, "cannot write to `{}'", oom_score_path);
