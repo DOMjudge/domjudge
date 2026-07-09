@@ -112,8 +112,11 @@ test_streamsize() {
 test_streamsize_stderr() {
 	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -t 1 -s 42 ./fill-stderr.sh
 	expect_stderr "DOMjudge"
-	# Allow 100 bytes extra, for the runguard time limit message.
-	limit=$((42*1024 + 100))
+	# Allow some bytes extra: runguard shares this stderr with the command
+	# and reports the time limit, the signal that killed it and the soft
+	# time limit on it. Those messages are timestamped and carry our pid,
+	# so do not depend on their exact length.
+	limit=$((42*1024 + 512))
 	actual=$(wc -c < "$LOG2")
 	[ $limit -gt $actual ] || fail "stdout not limited to ${limit}B, but wrote ${actual}B"
 }
