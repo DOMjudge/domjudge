@@ -202,6 +202,13 @@ test_memsize() {
 	expect_stdout "mem = 1073741824"
 }
 
+test_signal_mask() {
+	# runguard blocks SIGCHLD for its own bookkeeping, and a signal mask
+	# survives the execve(), so the command must not inherit ours.
+	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS grep SigBlk /proc/self/status
+	expect_stdout "SigBlk:.*0000000000000000"
+}
+
 test_envvars() {
 	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS ./print_envvars.py
 	expect_stdout "COUNT: 2."

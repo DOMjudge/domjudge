@@ -1292,6 +1292,13 @@ int main(int argc, char **argv)
 			logmsg(LOG_DEBUG, "metafile closed in child");
 		}
 
+		/* Restore the signal mask before we hand over: we inherit the
+		   one of runguard, which blocks SIGCHLD for its own bookkeeping,
+		   and execve() leaves it in place. */
+		if ( sigprocmask(SIG_SETMASK, &emptymask, nullptr)!=0 ) {
+			die(errno,"unblocking signals for command");
+		}
+
 		/* And execute child command. */
 		execvp(cmdname,cmdargs);
 		die(errno,"cannot start `{}' as user `{}'", cmdname, username());
