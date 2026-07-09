@@ -70,6 +70,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 #include <linux/prctl.h>
@@ -490,7 +491,12 @@ void output_cgroup_stats(double *cputime)
 	void *handle;
 	ret = cgroup_read_stats_begin("cpu", cgroupname, &handle, &stat);
 	while (ret == 0) {
-		logmsg(LOG_DEBUG, "cpu.stat: {} = {}", stat.name, stat.value);
+		/* libcgroup hands us the value from cpu.stat verbatim,
+		   including its trailing newline. */
+		std::string_view value{stat.value};
+		value = value.substr(0, value.find_last_not_of("\r\n") + 1);
+
+		logmsg(LOG_DEBUG, "cpu.stat: {} = {}", stat.name, value);
 		if (strcmp(stat.name, "usage_usec") == 0) {
 			long long usec = strtoll(stat.value, nullptr, 10);
 			*cputime = usec / 1e6;
