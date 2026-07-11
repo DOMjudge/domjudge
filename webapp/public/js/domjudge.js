@@ -824,7 +824,7 @@ function updateMenuBalloons(data)
             var text = (data[i].location !== null) ? data[i].location+': ' : '';
             text += data[i].pname + ' ' + data[i].name;
             sendNotification('New balloon:',
-                 {'tag': 'ball_' + data[i].baloonid,
+                 {'tag': 'ball_' + data[i].balloonid,
                         'link': domjudge_base_url + '/jury/balloons',
                         'body': text});
         }
