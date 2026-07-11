@@ -703,7 +703,7 @@ class Utils
      * Generate resized thumbnail image and return as string.
      * Return FALSE on errors and stores error message in $error if set.
      */
-    public static function getImageThumb(string $image, int $thumbMaxSize, string $tmpdir, ?string &$error = null): bool|string
+    public static function getImageThumb(string $image, int $thumbMaxSize, ?string &$error = null): bool|string
     {
         if (!function_exists('gd_info')) {
             $error = self::GD_MISSING;
@@ -737,29 +737,26 @@ class Utils
             return false;
         }
 
-        if (!($tmpfname = tempnam($tmpdir, "thumb-"))) {
-            $error = 'Cannot create temporary file in directory ' . $tmpdir . '.';
-            return false;
-        }
-
-        $success = false;
+        // Render into an in-memory buffer rather than a temp file, so this does
+        // not depend on a writable temporary directory and avoids a disk
+        // round-trip.
+        ob_start();
         switch ($type) {
             case 'jpeg':
-                $success = imagejpeg($thumb, $tmpfname);
+                $success = imagejpeg($thumb);
                 break;
             case 'png':
-                $success = imagepng($thumb, $tmpfname);
+                $success = imagepng($thumb);
                 break;
             case 'gif':
-                $success = imagegif($thumb, $tmpfname);
+                $success = imagegif($thumb);
                 break;
+            default:
+                $success = false;
         }
-        if (!$success) {
+        $thumbstr = ob_get_clean();
+        if (!$success || $thumbstr === false || $thumbstr === '') {
             $error = 'Failed to output thumbnail image.';
-            return false;
-        }
-        if (($thumbstr = file_get_contents($tmpfname)) === false) {
-            $error = 'Cannot read image from temporary file \'$tmpfname\'.';
             return false;
         }
 

@@ -666,8 +666,7 @@ class ProblemController extends BaseController
                                     $this->addFlash('danger', sprintf('image: %s', $error));
                                     return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                                 }
-                                $thumb = Utils::getImageThumb($content, $thumbnailSize,
-                                                            $this->dj->getDomjudgeTmpDir(), $error);
+                                $thumb = Utils::getImageThumb($content, $thumbnailSize, $error);
                                 if ($thumb === false) {
                                     $this->addFlash('danger', sprintf('image: %s', $error));
                                     return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
@@ -786,8 +785,7 @@ class ProblemController extends BaseController
                         $this->addFlash('danger', sprintf('image: %s', $error));
                         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                     }
-                    $thumb = Utils::getImageThumb($content, $thumbnailSize,
-                                                  $this->dj->getDomjudgeTmpDir(), $error);
+                    $thumb = Utils::getImageThumb($content, $thumbnailSize, $error);
                     if ($thumb === false) {
                         $this->addFlash('danger', sprintf('image: %s', $error));
                         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);

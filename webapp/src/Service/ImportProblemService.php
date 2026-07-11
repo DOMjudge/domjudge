@@ -450,7 +450,6 @@ readonly class ImportProblemService
                             $thumbnailSize = $this->config->get('thumbnail_size');
                             $imageThumb    = Utils::getImageThumb(
                                 $imageFile, $thumbnailSize,
-                                $this->dj->getDomjudgeTmpDir(),
                                 $errormsg
                             );
                             if ($imageThumb === false) {
