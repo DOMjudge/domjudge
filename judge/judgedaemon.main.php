@@ -1155,12 +1155,14 @@ class JudgeDaemon
             self::FD_STDERR => ['file', $stderr_target ?: '/dev/null', 'w'],
         ];
 
-        // For proc_open, we need to pass the command as a string for security
         $command_string = implode(' ', array_map(dj_escapeshellarg(...), $command_parts));
-
         logmsg(LOG_DEBUG, "Executing command: $command_string");
 
-        $process = proc_open($command_string, $descriptorspec, $pipes);
+        // Pass the command as an array so proc_open() execvp()'s it directly
+        // instead of running it through `/bin/sh -c`. This avoids one shell
+        // process per call and is safer, as no shell command line (that would
+        // need escaping) is ever constructed.
+        $process = proc_open($command_parts, $descriptorspec, $pipes);
         if (!is_resource($process)) {
             logmsg(LOG_ERR, "Failed to start process: $command_string");
             if ($stderr_temp !== null) {
