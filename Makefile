@@ -337,7 +337,7 @@ endif
 	fi
 	@sandbox_err=0; \
 	for service in apache2 nginx php$(PHPVERSION)-fpm php-fpm; do \
-		$(CURDIR)/misc-tools/check-systemd-sandbox $$service $(CURDIR)/webapp/var || sandbox_err=1; \
+		$(CURDIR)/misc-tools/check-systemd-sandbox $$service $(CURDIR)/webapp/var $(domserver_tmpdir) || sandbox_err=1; \
 	done; \
 	if [ $$sandbox_err -ne 0 ]; then \
 		echo "ERROR: Fix the above systemd sandboxing issue(s) before continuing."; \

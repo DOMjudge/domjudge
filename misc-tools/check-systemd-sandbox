@@ -1,13 +1,17 @@
 #!/bin/sh
 # Check if a systemd service has sandboxing that would prevent writing
-# to a given directory. This detects ProtectHome, ProtectSystem, etc.
+# to one or more directories. This detects ProtectHome, ProtectSystem, etc.
 #
-# Usage: check-systemd-sandbox <service> <writable-path>
+# Usage: check-systemd-sandbox <service> <writable-path> [<writable-path>...]
+#
+# Any path that is made read-only by the sandbox and not already listed in
+# ReadWritePaths is reported together with a single command that adds all of
+# them at once.
 
 set -eu
 
 SERVICE="$1.service"
-WRITABLE_PATH="$2"
+shift
 
 if ! command -v systemctl >/dev/null 2>&1; then
     exit 0
@@ -17,51 +21,77 @@ if ! systemctl cat "$SERVICE" >/dev/null 2>&1; then
     exit 0
 fi
 
-WARNINGS=""
-
 PROTECT_HOME=$(systemctl show -p ProtectHome --value "$SERVICE" 2>/dev/null || true)
-if [ "$PROTECT_HOME" = "yes" ] || [ "$PROTECT_HOME" = "read-only" ] || [ "$PROTECT_HOME" = "tmpfs" ]; then
-    case "$WRITABLE_PATH" in
-        /home/*|/root/*|/run/user/*)
-            WARNINGS="${WARNINGS}  - ProtectHome=${PROTECT_HOME} makes ${WRITABLE_PATH} read-only/inaccessible
-"
-            ;;
-    esac
-fi
-
 PROTECT_SYSTEM=$(systemctl show -p ProtectSystem --value "$SERVICE" 2>/dev/null || true)
-case "$PROTECT_SYSTEM" in
-    full)
-        case "$WRITABLE_PATH" in
-            /usr/*|/boot/*|/efi/*|/etc/*)
-                WARNINGS="${WARNINGS}  - ProtectSystem=${PROTECT_SYSTEM} makes ${WRITABLE_PATH} read-only
-"
-                ;;
-        esac
-        ;;
-    strict)
-        # strict makes the entire filesystem read-only except /dev, /proc, /sys
-        WARNINGS="${WARNINGS}  - ProtectSystem=strict makes the entire filesystem read-only
-"
-        ;;
-esac
+READ_WRITE_PATHS=$(systemctl show -p ReadWritePaths --value "$SERVICE" 2>/dev/null || true)
 
-if [ -n "$WARNINGS" ]; then
-    READ_WRITE_PATHS=$(systemctl show -p ReadWritePaths --value "$SERVICE" 2>/dev/null || true)
-    # Check if our path is already in ReadWritePaths
-    if echo "$READ_WRITE_PATHS" | grep -qF "$WRITABLE_PATH"; then
-        exit 0
+# Is $1 already granted by ReadWritePaths? Entries are space-separated and may
+# carry a leading '-' (ignore-if-missing), which we strip before comparing.
+is_already_writable() {
+    _needle="$1"
+    for _entry in $READ_WRITE_PATHS; do
+        case "$_entry" in -*) _entry=${_entry#-} ;; esac
+        [ "$_entry" = "$_needle" ] && return 0
+    done
+    return 1
+}
+
+WARNINGS=""    # reasons for the paths that are not writable yet (what is wrong now)
+AFFECTED=""    # every sandboxed path, whether or not it is already granted
+ANY_MISSING=0
+
+for path in "$@"; do
+    reason=""
+    case "$PROTECT_HOME" in
+        yes|read-only|tmpfs)
+            case "$path" in
+                /home/*|/root/*|/run/user/*)
+                    reason="ProtectHome=${PROTECT_HOME} makes ${path} read-only/inaccessible" ;;
+            esac ;;
+    esac
+    if [ -z "$reason" ]; then
+        case "$PROTECT_SYSTEM" in
+            full)
+                case "$path" in
+                    /usr/*|/boot/*|/efi/*|/etc/*)
+                        reason="ProtectSystem=full makes ${path} read-only" ;;
+                esac ;;
+            strict)
+                # strict makes the entire filesystem read-only except a few
+                # kernel/API paths.
+                reason="ProtectSystem=strict makes ${path} read-only" ;;
+        esac
     fi
 
+    [ -n "$reason" ] || continue
+
+    # Every sandboxed path must be listed in the suggested fix. `systemctl edit`
+    # overwrites the same override file, so a fix that lists only the paths that
+    # happen to be missing right now would drop the ones granted by a previous
+    # run causing the check to flip-flop between paths.
+    AFFECTED="${AFFECTED} ${path}"
+
+    is_already_writable "$path" && continue
+    ANY_MISSING=1
+    WARNINGS="${WARNINGS}  - ${reason}
+"
+done
+
+if [ "$ANY_MISSING" -eq 1 ]; then
+    AFFECTED=${AFFECTED# }
     echo ""
     echo "WARNING: systemd service '$SERVICE' has sandboxing that may prevent"
-    echo "         DOMjudge from writing to $WRITABLE_PATH:"
+    echo "         DOMjudge from writing to the following path(s):"
     echo ""
     printf '%s' "$WARNINGS"
     echo ""
-    echo "Fix this by running:"
-    printf '    printf '"'"'[Service]\nReadWritePaths=%s\n'"'"' | sudo SYSTEMD_EDITOR=tee systemctl edit %s\n' "$WRITABLE_PATH" "$SERVICE"
+    echo "Fix this by granting write access to all affected paths at once"
+    echo "(a single ReadWritePaths line, so a previous fix is not overwritten):"
+    echo ""
+    printf '    printf '"'"'[Service]\nReadWritePaths=%s\n'"'"' | sudo SYSTEMD_EDITOR=tee systemctl edit %s\n' "$AFFECTED" "$SERVICE"
     printf '    sudo systemctl restart %s\n' "$SERVICE"
+    echo ""
+    echo "We recommend to rerun this check after running the above command."
     echo ""
     exit 1
 fi
