@@ -1127,6 +1127,59 @@ class JudgeDaemon
     }
 
     /**
+     * Recursively adjust permission bits of $path and everything below it,
+     * like `chmod -R`: the bits in $add are turned on, the bits in $remove are
+     * turned off, all other bits (including setuid/setgid/sticky) are left
+     * untouched. Symbolic links are not followed, matching `chmod -R` and
+     * avoiding chmod'ing files outside the tree via a planted symlink.
+     * Returns false on the first failure.
+     */
+    private function chmodRecursive(string $path, int $add, int $remove): bool
+    {
+        if (is_link($path)) {
+            return true;
+        }
+        $perms = fileperms($path);
+        if ($perms === false) {
+            return false;
+        }
+        $newPerms = (($perms & 07777) | $add) & ~$remove;
+
+        // We can only recurse into a directory while we (its owner) may read and
+        // enter it (owner r+x, 0500). If it is already enterable, recurse first
+        // and chmod afterwards (post-order), so a change that revokes access
+        // still reaches the children first. Otherwise chmod first (pre-order),
+        // so a directory we are opening up becomes enterable before we descend.
+        // This keeps the walk correct for adding and removing any bits.
+        $isDir = is_dir($path);
+        $recurseFirst = $isDir && ($perms & 0500) === 0500;
+
+        if (!$recurseFirst && !chmod($path, $newPerms)) {
+            return false;
+        }
+        if ($isDir) {
+            $entries = scandir($path);
+            if ($entries === false) {
+                // Could not read the directory (e.g. a subdirectory the compare
+                // script left unreadable); report failure like `chmod -R` does.
+                return false;
+            }
+            foreach ($entries as $entry) {
+                if ($entry === '.' || $entry === '..') {
+                    continue;
+                }
+                if (!$this->chmodRecursive("$path/$entry", $add, $remove)) {
+                    return false;
+                }
+            }
+        }
+        if ($recurseFirst && !chmod($path, $newPerms)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * @param string[] $command_parts
      * @param int|DONT_CARE $retval
      */
@@ -2113,15 +2166,9 @@ class JudgeDaemon
                 // We need to set permissions explicitly for two reasons:
                 // `umask` might block them from being 0777, and for multi-pass problems there is the implicit contract
                 // of keeping files around between passes. This is ugly, but what the spec currently dictates.
-                // Cannot use `chmod` here directly because of recursion.
-                if (!$this->runCommandSafe(
-                    [
-                        'chmod',
-                        '-R',
-                        'go+w',
-                        'feedback',
-                    ]
-                )) {
+                // go+w: add the group- and other-write bits (0022) so the
+                // compare script (running as a different user) can write here.
+                if (!$this->chmodRecursive("$realWorkdir/feedback", 0022, 0)) {
                     logmsg(LOG_WARNING, "Could not chmod 'feedback' to go+w.");
                     return Verdict::INTERNAL_ERROR;
                 }
@@ -2170,15 +2217,8 @@ class JudgeDaemon
                 )
             );
 
-            // Cannot use chmod directly here for recursion.
-            if (!$this->runCommandSafe(
-                [
-                    'chmod',
-                    '-R',
-                    'go-w',
-                    'feedback',
-                ]
-            )) {
+            // go-w: revoke the group- and other-write bits (0022) again.
+            if (!$this->chmodRecursive("$realWorkdir/feedback", 0, 0022)) {
                 logmsg(LOG_WARNING, "Could not chmod 'feedback' to go-w.");
                 return Verdict::INTERNAL_ERROR;
             }
