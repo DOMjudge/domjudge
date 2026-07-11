@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  debian-family:
+  mainstream:
     strategy:
       matrix:
         version: [noble, rolling]
@@ -25,20 +25,53 @@ jobs:
             version: stable
           - os: debian
             version: testing
+          - os: fedora
+            version: latest
     runs-on: ubuntu-latest
     env:
       DEBIAN_FRONTEND: noninteractive
       TZ: Etc/UTC
-    container:
-      image: ${{ matrix.os }}:${{ matrix.version }}
     steps:
-      - name: Install git and ca-certs
-        run: |
-          apt-get update
-          apt-get install -y git ca-certificates
       - uses: actions/checkout@v4
-      - name: Setup image and run bats tests
-        run: .github/jobs/configure-checks/setup_configure_image.sh
+      - name: Create intermediate container with required tools installed
+        run: |
+          mkdir -p /tmp/bats_logs/{gcc,gpp,clang,apache,nginx,cgroup}
+          docker run --name preinstall \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" ${{ matrix.os}}:${{ matrix.version }} \
+            $(pwd)/.github/jobs/configure-checks/setup_configure_image.sh 
+          docker commit preinstall baseimage
+      - name: Check GCC installation
+        run: |
+          docker run --name gcc         -v /tmp/bats_logs/gcc:/tmp/bats_logs \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
+            $(pwd)/.github/jobs/configure-checks/run_bats.sh "gcc"
+      - name: Check G++ installation
+        run: |
+          docker run --name gpp         -v /tmp/bats_logs/gpp:/tmp/bats_logs \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
+            $(pwd)/.github/jobs/configure-checks/run_bats.sh "gpp"
+      - name: Check Clang installation
+        run: |
+          echo "Start Clang check"
+          docker run --name clang       -v /tmp/bats_logs/clang:/tmp/bats_logs \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
+            $(pwd)/.github/jobs/configure-checks/run_bats.sh "clang"
+      - name: Check Apache2 checks
+        run: |
+          docker run --name apache      -v /tmp/bats_logs/apache:/tmp/bats_logs \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
+            $(pwd)/.github/jobs/configure-checks/run_bats.sh "apache"
+      - name: Check Nginx checks
+        run: |
+          docker run --name nginx       -v /tmp/bats_logs/nginx:/tmp/bats_logs \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
+            $(pwd)/.github/jobs/configure-checks/run_bats.sh "nginx"
+          echo "Start LibCgroup check"
+      - name: Cgroup checks
+        run: |
+          docker run --name cgroup      -v /tmp/bats_logs/cgroup:/tmp/bats_logs \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
+            $(pwd)/.github/jobs/configure-checks/run_bats.sh "cgroup"
       - name: Upload all logs/artifacts
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
