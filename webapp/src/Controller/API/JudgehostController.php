@@ -886,13 +886,18 @@ class JudgehostController extends AbstractFOSRestController
             });
 
             if ($judgehost === null) {
-                // Invalidate old judging and create a new one - but without judgetasks yet since this was triggered by
-                // an internal error.
+                // Invalidate old judging and create a new one - but without
+                // judgetasks yet since this was triggered by an internal
+                // error.
+                // The new judging takes the place of the old one, so it is
+                // only valid if the old one was; this is particularly
+                // important in case of rejudgings.
+                $wasValid = $judging->getValid();
                 $judging->setValid(false);
                 $newJudging = new Judging();
                 $newJudging
                     ->setContest($judging->getContest())
-                    ->setValid(true)
+                    ->setValid($wasValid)
                     ->setSubmission($judging->getSubmission())
                     ->setOriginalJudging($judging);
                 $this->em->persist($newJudging);
