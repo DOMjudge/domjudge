@@ -301,6 +301,12 @@ class SubmissionController extends BaseController
                 ->setParameter('rejudgingId', $rejudgingId)
                 ->setParameter('submitId', $submitId)
                 ->setParameter('contest', $contest)
+                // A submission can have more than one judging within the same
+                // rejudging, for example when a judging was aborted or
+                // requeued after an internal error. Make this more robust by
+                // picking the most recent one.
+                ->orderBy('j.judgingid', 'DESC')
+                ->setMaxResults(1)
                 ->getQuery()
                 ->getOneOrNullResult();
             if ($judging) {
