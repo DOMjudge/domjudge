@@ -81,6 +81,10 @@ class RejudgingService
         $singleJudging = (count($judgings) == 1);
         $index = 0;
         $first = true;
+        // We can be handed more than one judging of the same submission, for
+        // example when a submission ended up with several valid judgings. Only
+        // rejudge each submission once by tracking them as seen.
+        $seenSubmissions = [];
         foreach ($judgings as $judging) {
             $submission = $judging->getSubmission();
             $contestProblem = $submission->getContestProblem();
@@ -88,15 +92,17 @@ class RejudgingService
 
             $index++;
             if (
-                // Record and skip submission/judging if it is already part of another judging or is not allowed
-                // to be judged.
+                // Record and skip submission/judging if it is already part of
+                // another judging or is not allowed to be judged.
                 $submission->getRejudging() !== null
+                || isset($seenSubmissions[$submission->getSubmitid()])
                 || !$contestProblem->getAllowJudge()
                 || !$language->getAllowJudge()
             ) {
                 $skipped[] = $judging;
                 continue;
             }
+            $seenSubmissions[$submission->getSubmitid()] = true;
 
 
             $this->em->wrapInTransaction(function () use (
