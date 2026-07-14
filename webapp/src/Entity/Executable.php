@@ -10,13 +10,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 use ZipArchive;
 
 /**
- * Compile, compare, and run script executable bundles.
+ * Compile, compare, run and output visualizer script executable bundles.
  */
 #[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
-    'comment' => 'Compile, compare, and run script executable bundles',
+    'comment' => 'Compile, compare, run and output visualization script executable bundles',
 ])]
 class Executable
 {
@@ -31,7 +31,7 @@ class Executable
     private ?string $description = null;
 
     #[ORM\Column(length: 32, options: ['comment' => 'Type of executable'])]
-    #[Assert\Choice(['compare', 'compile', 'debug', 'run'])]
+    #[Assert\Choice(['compare', 'compile', 'debug', 'visualizer', 'run'])]
     private string $type;
 
     #[ORM\OneToOne(targetEntity: ImmutableExecutable::class)]
@@ -56,11 +56,18 @@ class Executable
     #[ORM\OneToMany(targetEntity: Problem::class, mappedBy: 'run_executable')]
     private Collection $problems_run;
 
+    /**
+     * @var Collection<int, Problem>
+     */
+    #[ORM\OneToMany(targetEntity: Problem::class, mappedBy: 'visualizer_executable')]
+    private Collection $problems_visualizer;
+
     public function __construct()
     {
-        $this->languages        = new ArrayCollection();
-        $this->problems_compare = new ArrayCollection();
-        $this->problems_run     = new ArrayCollection();
+        $this->languages           = new ArrayCollection();
+        $this->problems_compare    = new ArrayCollection();
+        $this->problems_run        = new ArrayCollection();
+        $this->problems_visualizer = new ArrayCollection();
     }
 
     public function setExecid(string $execid): Executable
@@ -143,6 +150,20 @@ class Executable
         return $this->problems_run;
     }
 
+    public function addProblemsVisualizer(Problem $problemsVisualizer): Executable
+    {
+        $this->problems_visualizer[] = $problemsVisualizer;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Problem>
+     */
+    public function getProblemsVisualizer(): Collection
+    {
+        return $this->problems_visualizer;
+    }
+
     public function setImmutableExecutable(ImmutableExecutable $immutableExecutable): Executable
     {
         $this->immutableExecutable = $immutableExecutable;
@@ -190,7 +211,7 @@ class Executable
         if (in_array($this->execid, $configScripts, true)) {
             return true;
         }
-        if (count($this->problems_compare) || count($this->problems_run)) {
+        if (count($this->problems_compare) || count($this->problems_run) || count($this->problems_visualizer)) {
             return true;
         }
         foreach ($this->languages as $lang) {

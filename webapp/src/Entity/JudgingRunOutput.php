@@ -64,6 +64,26 @@ class JudgingRunOutput
     #[ORM\Column(
         type: 'blobtext',
         nullable: true,
+        options: ['comment' => 'The output visualization for the team output']
+    )]
+    private ?string $visualization_judge = null;
+
+    #[ORM\Column(options: ['comment' => 'Mime type of output visualization for judges'], nullable: true)]
+    private ?string $visualization_judge_mime = null;
+
+    #[ORM\Column(
+        type: 'blobtext',
+        nullable: true,
+        options: ['comment' => 'The output visualization for the team output visible for the team']
+    )]
+    private ?string $visualization_team = null;
+
+    #[ORM\Column(options: ['comment' => 'Mime type of output visualization for team'], nullable: true)]
+    private ?string $visualization_team_mime = null;
+
+    #[ORM\Column(
+        type: 'blobtext',
+        nullable: true,
         options: ['comment' => 'Judging metadata of the run']
     )]
     private ?string $metadata = null;
@@ -139,6 +159,50 @@ class JudgingRunOutput
     public function getTeamMessage(): ?string
     {
         return $this->team_message;
+    }
+
+    public function getVisualization(): string
+    {
+        return $this->visualization_judge;
+    }
+
+    public function setVisualization(?string $image): self
+    {
+        $this->visualization_judge = $image;
+        return $this;
+    }
+
+    public function getVisualizationTeam(): ?string
+    {
+        return $this->visualization_team;
+    }
+
+    public function setVisualizationTeam(?string $image): self
+    {
+        $this->visualization_team = $image;
+        return $this;
+    }
+
+    public function getVisualizationMime(): ?string
+    {
+        return $this->visualization_judge_mime;
+    }
+
+    public function setVisualizationMime(?string $imageMime): self
+    {
+        $this->visualization_judge_mime = $imageMime;
+        return $this;
+    }
+
+    public function getVisualizationTeamMime(): ?string
+    {
+        return $this->visualization_team_mime;
+    }
+
+    public function setVisualizationTeamMime(?string $imageMime): self
+    {
+        $this->visualization_team_mime = $imageMime;
+        return $this;
     }
 
     public function getMetadata(): string

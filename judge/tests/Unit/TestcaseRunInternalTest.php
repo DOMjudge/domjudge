@@ -12,6 +12,7 @@ use ReflectionMethod;
  * @phpstan-type TimeLimit array{cpu: array{0: string, 1: string}, wall: array{0: string, 1: string}}
  * @phpstan-import-type RunConfig from JudgeDaemon
  * @phpstan-import-type CompareConfig from JudgeDaemon
+ * @phpstan-import-type VisualizerConfig from JudgeDaemon
  */
 class TestcaseRunInternalTest extends TestCase
 {
@@ -56,6 +57,7 @@ class TestcaseRunInternalTest extends TestCase
      * @param TimeLimit $timelimit
      * @param RunConfig|null $run_config
      * @param CompareConfig|null $compare_config
+     * @param VisualizerConfig|null $visualizer_config
      */
     private function callTestcaseRunInternal(
         string $input,
@@ -66,11 +68,15 @@ class TestcaseRunInternalTest extends TestCase
         bool $combined_run_compare,
         string $compare_runpath,
         ?string $compare_args,
+        string $visualizer_runpath,
+        ?string $visualizer_args,
         ?array $run_config = null,
-        ?array $compare_config = null
+        ?array $compare_config = null,
+        ?array $visualizer_config = null,
     ): Verdict {
         $run_config = $run_config ?? $this->defaultRunConfig();
         $compare_config = $compare_config ?? $this->defaultCompareConfig();
+        $visualizer_config = $visualizer_config ?? $this->defaultVisualizerConfig();
 
         return $this->method->invoke(
             $this->daemon,
@@ -82,8 +88,11 @@ class TestcaseRunInternalTest extends TestCase
             $combined_run_compare,
             $compare_runpath,
             $compare_args,
+            $visualizer_runpath,
+            $visualizer_args,
             $run_config,
-            $compare_config
+            $compare_config,
+            $visualizer_config
         );
     }
 
@@ -103,6 +112,18 @@ class TestcaseRunInternalTest extends TestCase
      * @return array{script_timelimit: int, script_memory_limit: int, script_filesize_limit: int}
      */
     private function defaultCompareConfig(): array
+    {
+        return [
+            'script_timelimit' => 30,
+            'script_memory_limit' => 2097152,
+            'script_filesize_limit' => 2621440,
+        ];
+    }
+
+    /**
+     * @return array{script_timelimit: int, script_memory_limit: int, script_filesize_limit: int}
+     */
+    private function defaultVisualizerConfig(): array
     {
         return [
             'script_timelimit' => 30,
@@ -173,6 +194,7 @@ class TestcaseRunInternalTest extends TestCase
         $passdir = $which === 'passdir' ? $badPath : $this->createPassDir();
         $run = $this->createExecutable('run.sh');
         $compare = $this->createExecutable('compare.sh');
+        $visualizer = $this->createExecutable('visualizer.sh');
 
         $result = $this->callTestcaseRunInternal(
             $input,
@@ -182,6 +204,8 @@ class TestcaseRunInternalTest extends TestCase
             $run,
             false,
             $compare,
+            null,
+            $visualizer,
             null
         );
 
@@ -196,6 +220,7 @@ class TestcaseRunInternalTest extends TestCase
         mkdir($passdir, 0555, true);
         $run = $this->createExecutable('run.sh');
         $compare = $this->createExecutable('compare.sh');
+        $visualizer = $this->createTestFile('visualizer.sh');
 
         $result = $this->callTestcaseRunInternal(
             $input,
@@ -205,6 +230,8 @@ class TestcaseRunInternalTest extends TestCase
             $run,
             false,
             $compare,
+            null,
+            $visualizer,
             null
         );
 
@@ -221,6 +248,7 @@ class TestcaseRunInternalTest extends TestCase
         mkdir($passdir, 0666, true);
         $run = $this->createExecutable('run.sh');
         $compare = $this->createExecutable('compare.sh');
+        $visualizer = $this->createTestFile('visualizer.sh');
 
         $result = $this->callTestcaseRunInternal(
             $input,
@@ -230,6 +258,8 @@ class TestcaseRunInternalTest extends TestCase
             $run,
             false,
             $compare,
+            null,
+            $visualizer,
             null
         );
 
@@ -246,6 +276,7 @@ class TestcaseRunInternalTest extends TestCase
         chmod($passdir . '/execdir/program', 0644);
         $run = $this->createExecutable('run.sh');
         $compare = $this->createExecutable('compare.sh');
+        $visualizer = $this->createTestFile('visualizer.sh');
 
         $result = $this->callTestcaseRunInternal(
             $input,
@@ -255,6 +286,8 @@ class TestcaseRunInternalTest extends TestCase
             $run,
             false,
             $compare,
+            null,
+            $visualizer,
             null
         );
 
@@ -268,6 +301,7 @@ class TestcaseRunInternalTest extends TestCase
         $passdir = $this->createPassDir();
         $run = $this->createTestFile('run.sh', "#!/bin/sh\nexit 0\n");
         $compare = $this->createExecutable('compare.sh');
+        $visualizer = $this->createTestFile('visualizer.sh');
 
         $result = $this->callTestcaseRunInternal(
             $input,
@@ -277,6 +311,8 @@ class TestcaseRunInternalTest extends TestCase
             $run,
             false,
             $compare,
+            null,
+            $visualizer,
             null
         );
 
@@ -290,6 +326,7 @@ class TestcaseRunInternalTest extends TestCase
         $passdir = $this->createPassDir();
         $run = $this->createExecutable('run.sh');
         $compare = $this->createTestFile('compare.sh', "#!/bin/sh\nexit 42\n");
+        $visualizer = $this->createTestFile('visualizer.sh');
 
         $result = $this->callTestcaseRunInternal(
             $input,
@@ -299,7 +336,34 @@ class TestcaseRunInternalTest extends TestCase
             $run,
             false,
             $compare,
+            null,
+            $visualizer,
             null
+        );
+
+        $this->assertEquals(Verdict::INTERNAL_ERROR, $result);
+    }
+
+    public function testVisualizerScriptNotExecutableReturnsInternalError(): void
+    {
+        $input = $this->createTestFile('testdata.in', 'test input');
+        $output = $this->createTestFile('testdata.out', 'expected output');
+        $passdir = $this->createPassDir();
+        $run = $this->createExecutable('run.sh');
+        $compare = $this->createTestFile('compare.sh');
+        $visualizer = $this->createTestFile('visualizer.sh', "#!/bin/sh\nexit 42\n");
+
+        $result = $this->callTestcaseRunInternal(
+            $input,
+            $output,
+            $this->defaultTimelimit(),
+            $passdir,
+            $run,
+            false,
+            $compare,
+            null,
+            $visualizer,
+            null,
         );
 
         $this->assertEquals(Verdict::INTERNAL_ERROR, $result);
