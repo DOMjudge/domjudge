@@ -2612,7 +2612,7 @@ class JudgeDaemon
             }
         }
         if ($nextPass) {
-            $description = 'validator produced more passes than allowed ($passLimit)';
+            $description = "validator produced more passes than allowed ($passLimit)";
             $this->disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
             return false;
         }
