@@ -560,6 +560,16 @@ readonly class ImportProblemService
                 if (($descriptionFile = $zip->getFromName($baseFileName . '.desc')) !== false) {
                     $testcase->setDescription($descriptionFile);
                 }
+                if (($interactionFile = $zip->getFromName($baseFileName . '.interaction')) !== false) {
+                    // Interaction logs only describe how a sample is meant to
+                    // be read, so they are meaningless for secret testcases.
+                    if ($type === 'sample') {
+                        $testcaseContent->setInteraction($interactionFile);
+                    } else {
+                        $messages['warning'][] = sprintf("Ignoring '%s.interaction': only samples can have an interaction log.",
+                            $baseFileName);
+                    }
+                }
                 if ($imageFile !== false) {
                     $testcase->setImageType($imageType);
                     $testcaseContent
