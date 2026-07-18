@@ -306,6 +306,12 @@ class ProblemController extends BaseController
 
         // Build up YAML.
         $yaml = ['name' => $problem->getName()];
+        // The problem package format expects the types space separated, while
+        // we keep them comma separated for display purposes.
+        $yaml['type'] = str_replace(', ', ' ', $problem->getTypesAsString());
+        // Note that we keep writing the deprecated `validation` key for
+        // backwards compatibility. It cannot express every combination of
+        // types, which is exactly why the format replaced it with `type`.
         if (!empty($problem->getCompareExecutable())) {
             $yaml['validation'] = 'custom';
         } elseif ($problem->isInteractiveProblem() && !empty($problem->getRunExecutable())) {
@@ -320,6 +326,9 @@ class ProblemController extends BaseController
         }
         if (!empty($problem->getOutputlimit())) {
             $yaml['limits']['output'] = (int)round($problem->getOutputlimit() / 1024);
+        }
+        if ($problem->isMultipassProblem()) {
+            $yaml['limits']['validation_passes'] = $problem->getMultipassLimit();
         }
 
         $yamlString = '# Problem exported by DOMjudge on ' . date('c') . "\n" . Yaml::dump($yaml);

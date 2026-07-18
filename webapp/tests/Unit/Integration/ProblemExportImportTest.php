@@ -64,6 +64,33 @@ class ProblemExportImportTest extends BaseTestCase
         }
     }
 
+    /**
+     * The demo data contains no multi-pass problem, so import one first.
+     */
+    public function testMultipassRoundtrip(): void
+    {
+        $this->client->request('GET', '/jury/change-contest/demo');
+
+        $hangman = __DIR__ . '/../../../../example_problems/hangman.zip';
+        self::assertFileExists($hangman);
+        $problem = $this->importZip(file_get_contents($hangman), 'multipass-original.zip');
+        self::assertNotNull($problem);
+        self::assertTrue($problem->isMultipassProblem());
+        self::assertEquals(26, $problem->getMultipassLimit());
+
+        // The export must carry both the type and the pass limit.
+        $exported = $this->unzipString($this->exportProblem($problem->getExternalid()));
+        self::assertArrayHasKey('problem.yaml', $exported);
+        self::assertMatchesRegularExpression('/^type: .*\bmulti-pass\b/m', $exported['problem.yaml']);
+        self::assertMatchesRegularExpression('/^\s+validation_passes: 26$/m', $exported['problem.yaml']);
+
+        // And re-importing that export must not silently downgrade it.
+        $reimported = $this->importZip($this->exportProblem($problem->getExternalid()), 'multipass-reimport.zip');
+        self::assertNotNull($reimported);
+        self::assertTrue($reimported->isMultipassProblem(), 'Re-imported problem should still be multi-pass');
+        self::assertEquals(26, $reimported->getMultipassLimit());
+    }
+
     public static function provideProblems(): \Generator
     {
         yield 'hello' => ['hello'];
