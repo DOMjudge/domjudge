@@ -2601,10 +2601,31 @@ class JudgeDaemon
                     . '  ...done in ' . $metadata['wall-time'] . 's (CPU: ' . $runtime . 's), result: ' . $result);
             }
 
+            $hasNextPass = file_exists($passdir . '/feedback/nextpass.in');
+
+            // The spec states we have to treat it is a judge error if
+            // `nextpass.in` is produced when exiting with any other code
+            // than 42.
+            if ($hasNextPass) {
+                $compareMeta = $this->readMetadata($passdir . '/compare.meta');
+                /** @var MetaData_Compare $compareMeta */
+                if ((int)$compareMeta['exitcode'] !== self::COMPARE_EXITCODE_CORRECT) {
+                    $description = sprintf(
+                        "compare script %s created 'nextpass.in' but exited with code %s, expected %d",
+                        $judgeTask['compare_script_id'],
+                        $compareMeta['exitcode'],
+                        self::COMPARE_EXITCODE_CORRECT
+                    );
+                    logmsg(LOG_ERR, $description);
+                    $this->disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
+                    return false;
+                }
+            }
+
             if ($result !== 'correct') {
                 break;
             }
-            if (file_exists($passdir . '/feedback/nextpass.in')) {
+            if ($hasNextPass) {
                 $input = $passdir . '/feedback/nextpass.in';
                 $nextPass = true;
             } else {
