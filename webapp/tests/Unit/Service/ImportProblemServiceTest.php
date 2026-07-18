@@ -5,6 +5,7 @@ namespace App\Tests\Unit\Service;
 use App\Entity\Problem;
 use App\Service\ImportProblemService;
 use App\Tests\Unit\BaseTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use ZipArchive;
 
@@ -305,6 +306,42 @@ YAML;
         $this->assertTrue($ret);
         $this->assertEmpty($messages);
         $this->assertEquals(7, $problem->getMultipassLimit());
+    }
+
+    /**
+     * @return array<string, string[]>
+     */
+    public static function provideInvalidValidationPasses(): array
+    {
+        return [
+            'one pass' => ['1'],
+            'zero passes' => ['0'],
+            'negative' => ['-3'],
+            'not an integer' => ['2.5'],
+            'not a number' => ["'many'"],
+        ];
+    }
+
+    #[DataProvider('provideInvalidValidationPasses')]
+    public function testInvalidMultipassLimit(string $validationPasses): void
+    {
+        $yaml = <<<YAML
+name: test
+type: pass-fail multi-pass
+limits:
+  validation_passes: $validationPasses
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertFalse($ret);
+        $this->assertCount(1, $messages['danger']);
+        $this->assertStringContainsString('validation_passes must be an integer >= 2', $messages['danger'][0]);
+        // parseYaml applies all collected properties only once it succeeds, so
+        // the problem is left untouched, i.e. not even multi-pass.
+        $this->assertFalse($problem->isMultipassProblem());
     }
 
     public function testMaximalProblem(): void

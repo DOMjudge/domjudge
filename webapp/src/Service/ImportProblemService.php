@@ -1274,7 +1274,16 @@ readonly class ImportProblemService
                 $yamlProblemProperties['outputlimit'] = 1024 * $yamlData['limits']['output'];
             }
             if (isset($yamlData['limits']['validation_passes'])) {
-                $yamlProblemProperties['multipassLimit'] = $yamlData['limits']['validation_passes'];
+                $validationPasses = $yamlData['limits']['validation_passes'];
+                // The spec requires this to be an int >= 2.
+                if (!is_int($validationPasses) || $validationPasses < 2) {
+                    $messages['danger'][] = sprintf(
+                        "problem.yaml: limits.validation_passes must be an integer >= 2, got '%s'.",
+                        is_scalar($validationPasses) ? (string)$validationPasses : gettype($validationPasses)
+                    );
+                    return false;
+                }
+                $yamlProblemProperties['multipassLimit'] = $validationPasses;
             }
         }
 
