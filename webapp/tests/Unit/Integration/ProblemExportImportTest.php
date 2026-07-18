@@ -81,7 +81,7 @@ class ProblemExportImportTest extends BaseTestCase
         return $response->getContent();
     }
 
-    private function importZip(string $zipContent): ?Problem
+    private function importZip(string $zipContent, string $zipName = 'roundtrip-test.zip'): ?Problem
     {
         $tmpFile = tempnam(sys_get_temp_dir(), 'domjudge-test-') . '.zip';
         file_put_contents($tmpFile, $zipContent);
@@ -99,7 +99,7 @@ class ProblemExportImportTest extends BaseTestCase
 
         $problem = $importService->importZippedProblem(
             $zip,
-            'roundtrip-test.zip',
+            $zipName,
             null,
             $contest,
             $messages
