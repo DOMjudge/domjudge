@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-void sigterm() {
+void sigterm(int sig) {
   assert(open("judge.txt", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR) != -1);
   _exit(42);
 }
