@@ -82,6 +82,11 @@ class JudgingRun extends AbstractRun
     )]
     private string|float|null $score = null;
 
+    /**
+     * The pass this run's result came from, i.e. the last pass that ran. NULL
+     * for problems that are not multi-pass. The details of every individual
+     * pass are in $passes.
+     */
     #[ORM\Column(
         nullable: true,
         options: ['comment' => 'Pass number for multipass problems', 'unsigned' => true, 'default' => null]
@@ -110,6 +115,16 @@ class JudgingRun extends AbstractRun
     #[Serializer\Exclude]
     private Collection $output;
 
+    /**
+     * @var Collection<int, JudgingRunPass>
+     *
+     * Only populated for multi-pass problems; see JudgingRunPass.
+     */
+    #[ORM\OneToMany(targetEntity: JudgingRunPass::class, mappedBy: 'run', cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\OrderBy(['pass' => 'ASC'])]
+    #[Serializer\Exclude]
+    private Collection $passes;
+
     #[ORM\ManyToOne(inversedBy: 'judging_runs')]
     #[ORM\JoinColumn(name: 'judgetaskid', referencedColumnName: 'judgetaskid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
@@ -126,6 +141,7 @@ class JudgingRun extends AbstractRun
     public function __construct()
     {
         $this->output = new ArrayCollection();
+        $this->passes = new ArrayCollection();
     }
 
     public function getRunid(): int
@@ -308,5 +324,20 @@ class JudgingRun extends AbstractRun
     public function getPass(): ?int
     {
         return $this->pass;
+    }
+
+    public function addPass(JudgingRunPass $pass): JudgingRun
+    {
+        $this->passes->add($pass);
+        $pass->setRun($this);
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, JudgingRunPass>
+     */
+    public function getPasses(): Collection
+    {
+        return $this->passes;
     }
 }
