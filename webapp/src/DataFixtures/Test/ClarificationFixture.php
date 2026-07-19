@@ -6,9 +6,10 @@ use App\Entity\Contest;
 use App\Entity\Clarification;
 use App\Entity\Problem;
 use App\Entity\Team;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class ClarificationFixture extends AbstractTestDataFixture
+class ClarificationFixture extends AbstractTestDataFixture implements DependentFixtureInterface
 {
     public function load(ObjectManager $manager): void
     {
@@ -16,6 +17,8 @@ class ClarificationFixture extends AbstractTestDataFixture
         $contest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
         /** @var Team $team */
         $team = $manager->getRepository(Team::class)->findOneBy(['name' => 'Example teamname']);
+        /** @var Team $anotherTeam */
+        $anotherTeam = $manager->getRepository(Team::class)->findOneBy(['externalid' => 'nav-alpha']);
         /** @var Problem $problem */
         $problem = $manager->getRepository(Problem::class)->findOneBy(['externalid' => 'hello']);
 
@@ -55,7 +58,16 @@ class ClarificationFixture extends AbstractTestDataFixture
             ->setBody('What is 2+2?')
             ->setAnswered(true);
 
-        foreach ([$unhandledClarification, $juryGeneral, $juryGeneralToTeam, $handledClarification] as $index => $clar) {
+        $unhandledClarificationAnotherTeam = new Clarification();
+        $unhandledClarificationAnotherTeam
+            ->setContest($contest)
+            ->setSubmittime(1518385739.901348000)
+            ->setSender($anotherTeam)
+            ->setProblem($problem)
+            ->setBody('Is it encouraged to read the problem statement carefully?')
+            ->setAnswered(false);
+
+        foreach ([$unhandledClarification, $juryGeneral, $juryGeneralToTeam, $handledClarification, $unhandledClarificationAnotherTeam] as $index => $clar) {
             $manager->persist($clar);
             $manager->flush();
             $this->addReference(sprintf('%s:%d', static::class, $index), $clar);
@@ -77,5 +89,10 @@ class ClarificationFixture extends AbstractTestDataFixture
 //        $handledClarification = $manager->getRepository(Clarification::class)->findOneBy(['body' => 'You have a fast calculator in front of you.']);
         $handledClarification->addReply($answerToExistingClar);
         $manager->flush();
+    }
+
+    public function getDependencies(): array
+    {
+        return [NavigationTeamsFixture::class];
     }
 }
