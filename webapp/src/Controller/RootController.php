@@ -2,12 +2,17 @@
 
 namespace App\Controller;
 
+use App\Service\AuthorizedUserService;
+use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Extra\Markdown\MarkdownRuntime;
@@ -15,20 +20,30 @@ use Twig\Extra\Markdown\MarkdownRuntime;
 #[Route(path: '')]
 class RootController extends BaseController
 {
+    public function __construct(
+        protected readonly AuthorizedUserService $authService,
+        DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        EventLogService $eventLog,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLog, $dj, $kernel);
+    }
+
     #[Route(path: '', name: 'root')]
     public function redirectAction(AuthorizationCheckerInterface $authorizationChecker): RedirectResponse
     {
         if ($authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
-            if ($this->dj->checkrole('jury')) {
+            if ($this->authService->checkRole('jury')) {
                 return $this->redirectToRoute('jury_index');
             }
-            if ($this->dj->checkrole('team', false)) {
+            if ($this->authService->checkRole('team', false)) {
                 return $this->redirectToRoute('team_index');
             }
-            if ($this->dj->checkrole('balloon')) {
+            if ($this->authService->checkRole('balloon')) {
                 return $this->redirectToRoute('jury_balloons_legacy');
             }
-            if ($this->dj->checkrole('clarification_rw')) {
+            if ($this->authService->checkRole('clarification_rw')) {
                 return $this->redirectToRoute('jury_clarifications_legacy');
             }
         }

@@ -16,6 +16,7 @@ use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Form\Type\RejudgingType;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -46,6 +47,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class RejudgingController extends BaseController
 {
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         EntityManagerInterface $em,
         protected readonly EventLogService $eventLogService,
         DOMJudgeService $dj,
@@ -721,12 +723,12 @@ class RejudgingController extends BaseController
             throw new BadRequestHttpException('No table or id passed for selection in rejudging');
         }
 
-        if ($includeAll && !$this->dj->checkrole('admin')) {
+        if ($includeAll && !$this->authService->checkRole('admin')) {
             throw new BadRequestHttpException('Rejudging pending/correct submissions requires admin rights');
         }
 
         // Special case 'submission' for admin overrides.
-        if ($this->dj->checkrole('admin') && ($table == 'submission')) {
+        if ($this->authService->checkRole('admin') && ($table == 'submission')) {
             $includeAll = true;
         } elseif ($table === 'rejudging') {
             $rejudging = $this->em->getRepository(Rejudging::class)->find($id);

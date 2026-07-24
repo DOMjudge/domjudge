@@ -29,6 +29,7 @@ class RejudgingService
     final protected const APPLY_PROGRESS_WITH_SCOREBOARD_UPDATE = 95;
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
         protected readonly ScoreboardService $scoreboardService,
@@ -75,7 +76,7 @@ class RejudgingService
 
         $rejudging = new Rejudging();
         $rejudging
-            ->setStartUser($this->dj->getUser())
+            ->setStartUser($this->authService->getUser())
             ->setStarttime(Utils::now())
             ->setReason($reason)
             ->setAutoApply($autoApply);
@@ -417,7 +418,7 @@ class RejudgingService
         // Update the rejudging itself.
         /** @var Rejudging $rejudging */
         $rejudging = $this->em->getRepository(Rejudging::class)->find($rejudgingId);
-        $user      = $this->em->getRepository(User::class)->find($this->dj->getUser()->getUserid());
+        $user      = $this->em->getRepository(User::class)->find($this->authService->getUser()->getUserid());
         $rejudging
             ->setEndtime(Utils::now())
             ->setFinishUser($user)

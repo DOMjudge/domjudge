@@ -17,6 +17,7 @@ use App\Entity\Problem;
 use App\Entity\Testcase;
 use App\Entity\TestcaseAggregationType;
 use App\Entity\TestcaseGroup;
+use App\Service\AuthorizedUserService;
 use App\Service\SubmissionService;
 use Generator;
 use InvalidArgumentException;
@@ -1121,6 +1122,7 @@ class SubmissionServiceTest extends KernelTestCase
     private function createSubmissionService(): SubmissionService
     {
         return new SubmissionService(
+            $this->createMock(AuthorizedUserService::class),
             $this->createMock(EntityManagerInterface::class),
             $this->createMock(LoggerInterface::class),
             $this->createMock(DOMJudgeService::class),

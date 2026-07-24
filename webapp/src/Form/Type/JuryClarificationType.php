@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Clarification;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,6 +28,7 @@ class JuryClarificationType extends AbstractType
     private $clarid;
 
     public function __construct(
+        private readonly AuthorizedUserService $authService,
         private readonly EntityManagerInterface $em,
         private readonly ConfigurationService $config,
         private readonly DOMJudgeService $dj,
@@ -154,7 +156,7 @@ class JuryClarificationType extends AbstractType
                 ->getSingleResult()['jury_member'];
 
             // If jury member changed, and we are not currently assigned, warn.
-            if ($value !== $juryMember && $this->dj->getUser()->getUserIdentifier() !== $juryMember) {
+            if ($value !== $juryMember && $this->authService->getUser()->getUserIdentifier() !== $juryMember) {
                 $context->buildViolation("Jury Member '%jury%' claimed this clarification in the meantime.
                                           Please resubmit if you want to continue.")
                         ->setParameter('%jury%', $juryMember)

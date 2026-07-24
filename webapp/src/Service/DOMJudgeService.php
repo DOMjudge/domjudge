@@ -28,7 +28,6 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
-use App\Entity\User;
 use App\Utils\FreezeData;
 use App\Utils\UpdateStrategy;
 use App\Utils\Utils;
@@ -62,7 +61,6 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Twig\Attribute\AsTwigFilter;
@@ -104,12 +102,12 @@ class DOMJudgeService
     ];
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         protected readonly EntityManagerInterface $em,
         protected readonly BalloonService $balloonService,
         protected readonly LoggerInterface $logger,
         protected readonly RequestStack $requestStack,
         protected readonly ParameterBagInterface $params,
-        protected readonly AuthorizationCheckerInterface $authorizationChecker,
         protected readonly TokenStorageInterface $tokenStorage,
         protected readonly HttpKernelInterface $httpKernel,
         protected readonly ConfigurationService $config,
@@ -246,43 +244,9 @@ class DOMJudgeService
         return $this->em->getRepository(Problem::class)->find($probid);
     }
 
-    public function checkrole(string $rolename, bool $check_superset = true): bool
-    {
-        $user = $this->getUser();
-        if ($user === null) {
-            return false;
-        }
-
-        if ($check_superset) {
-            if ($this->authorizationChecker->isGranted('ROLE_ADMIN') &&
-                ($rolename == 'team' && $user->getTeam() != null)) {
-                return true;
-            }
-        }
-        return $this->authorizationChecker->isGranted('ROLE_' . strtoupper($rolename));
-    }
-
     public function getClientIp(): string
     {
         return $this->requestStack->getMainRequest()->getClientIp();
-    }
-
-    public function getUser(): ?User
-    {
-        $token = $this->tokenStorage->getToken();
-        if ($token == null) {
-            return null;
-        }
-
-        $user = $token->getUser();
-
-        // Ignore user objects if they aren't an App user.
-        // Covers cases where users are not logged in.
-        if (!is_a($user, 'App\Entity\User')) {
-            return null;
-        }
-
-        return $user;
     }
 
     /**
@@ -342,7 +306,7 @@ class DOMJudgeService
      */
     public function getUnreadClarifications(): array
     {
-        $user           = $this->getUser();
+        $user           = $this->authService->getUser();
         $team           = $user->getTeam();
         $clarifications = $team->getUnreadClarifications();
         $contest        = $this->getCurrentContest($team->getTeamId());
@@ -366,7 +330,7 @@ class DOMJudgeService
      */
     public function getJudgingNotifications(): array
     {
-        $user    = $this->getUser();
+        $user    = $this->authService->getUser();
         $team    = $user->getTeam();
         if ($team === null) {
             return [];
@@ -421,7 +385,7 @@ class DOMJudgeService
         $down_external_contest_source  = null;
         $external_source_warning_count = [];
 
-        if ($this->checkRole('jury')) {
+        if ($this->authService->checkRole('jury')) {
             if ($contest) {
                 $clarifications = $this->em->createQueryBuilder()
                     ->select('clar.externalid', 'clar.body')
@@ -455,7 +419,7 @@ class DOMJudgeService
             $rejudgings = $rejudgings->getQuery()->getResult();
         }
 
-        if ($this->checkrole('admin')) {
+        if ($this->authService->checkRole('admin')) {
             $internal_errors = $this->em->createQueryBuilder()
                 ->select('ie.errorid', 'ie.description')
                 ->from(InternalError::class, 'ie')
@@ -516,7 +480,7 @@ class DOMJudgeService
             }
         }
 
-        if ($this->checkrole('balloon') && $contest) {
+        if ($this->authService->checkRole('balloon') && $contest) {
             $balloons = array_map(function ($balloon) {
                 return [
                     'balloonid' => $balloon['data']['balloonid'],
@@ -542,7 +506,7 @@ class DOMJudgeService
     /**
      * Run the given callable with all roles enabled.
      *
-     * This will result in all calls to checkrole() to return true.
+     * This will result in all calls to checkRole() to return true.
      */
     public function withAllRoles(callable $callable, ?UserInterface $user = null): void
     {
@@ -581,7 +545,7 @@ class DOMJudgeService
         if (!empty($forceUsername)) {
             $user = $forceUsername;
         } else {
-            $user = $this->getUser() ? $this->getUser()->getUsername() : null;
+            $user = $this->authService->getUser() ? $this->authService->getUser()->getUsername() : null;
         }
 
         $auditLog = new AuditLog();
@@ -809,7 +773,7 @@ class DOMJudgeService
         ?string $language,
         ?bool $asTeam = false,
     ): array {
-        $user = $this->getUser();
+        $user = $this->authService->getUser();
         $team = $user->getTeam();
         if ($asTeam && $team !== null) {
             $teamid = $team->getLabel() ?? $team->getExternalid();

@@ -10,6 +10,7 @@ use App\Entity\Contest;
 use App\Entity\Event;
 use App\Entity\ScoreboardType;
 use App\Entity\TeamCategory;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -36,13 +37,14 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 class ScoreboardController extends AbstractApiController
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        AuthorizedUserService $authService,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         protected readonly ScoreboardService $scoreboardService
     ) {
-        parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
+        parent::__construct($authService, $em, $dj, $config, $eventLogService);
     }
 
     /**
@@ -108,7 +110,7 @@ class ScoreboardController extends AbstractApiController
         #[MapQueryParameter]
         bool $strict = false,
     ): Scoreboard {
-        if (!$this->config->get('enable_ranking') && !$this->dj->checkrole('jury')) {
+        if (!$this->config->get('enable_ranking') && !$this->authService->checkRole('jury')) {
             throw new BadRequestHttpException('Scoreboard is not available.');
         }
 
@@ -122,8 +124,8 @@ class ScoreboardController extends AbstractApiController
         if ($affiliation) {
             $filter->affiliations = [$affiliation];
         }
-        $public   = !$this->dj->checkrole('api_reader');
-        if ($this->dj->checkrole('api_reader') && $publicInRequest !== null) {
+        $public   = !$this->authService->checkRole('api_reader');
+        if ($this->authService->checkRole('api_reader') && $publicInRequest !== null) {
             $public = $publicInRequest;
         }
         if ($sortorder === null) {

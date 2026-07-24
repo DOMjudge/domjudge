@@ -155,7 +155,7 @@ class ClarificationController extends AbstractRestController
         }
 
         // By default, use the team of the user
-        $fromTeam = $this->isGranted('ROLE_API_WRITER') ? null : $this->dj->getUser()->getTeam();
+        $fromTeam = $this->isGranted('ROLE_API_WRITER') ? null : $this->authService->getUser()->getTeam();
         if ($fromTeamId = $clarificationPost->fromTeamId) {
             // If the user is an admin or API writer, allow it to specify the team
             if ($this->isGranted('ROLE_API_WRITER')) {
@@ -196,7 +196,7 @@ class ClarificationController extends AbstractRestController
                 ->andWhere('c.contest = :contest')
                 ->setParameter('clarification', $replyToId)
                 ->setParameter('contest', $contestId);
-            if ($this->dj->checkrole('team')) {
+            if ($this->authService->checkRole('team')) {
                 $qb
                     ->andWhere('c.sender = :team OR c.recipient = :team OR (c.sender IS NULL AND c.recipient IS NULL)')
                     ->setParameter('team', $fromTeam);
@@ -304,12 +304,12 @@ class ClarificationController extends AbstractRestController
             ->setParameter('cid', $this->getContestId($request))
             ->orderBy('clar.clarid');
 
-        if (!$this->dj->checkrole('api_reader') &&
-            !$this->dj->checkrole('judgehost')) {
-            if ($this->dj->checkrole('team')) {
+        if (!$this->authService->checkRole('api_reader') &&
+            !$this->authService->checkRole('judgehost')) {
+            if ($this->authService->checkRole('team')) {
                 $queryBuilder
                     ->andWhere('clar.sender = :team OR clar.recipient = :team OR (clar.sender IS NULL AND clar.recipient IS NULL)')
-                    ->setParameter('team', $this->dj->getUser()->getTeam());
+                    ->setParameter('team', $this->authService->getUser()->getTeam());
             } else {
                 $queryBuilder
                     ->andWhere('clar.sender IS NULL')
@@ -320,7 +320,7 @@ class ClarificationController extends AbstractRestController
         // For non-API-reader users, only expose the problems after the contest has started.
         // `WF Access Policy` allows for clarifications before the contest, but not to disclose the problem
         // so referencing them in clarifications would violate referential integrity.
-        if (!$this->dj->checkrole('api_reader')) {
+        if (!$this->authService->checkRole('api_reader')) {
             $queryBuilder->andWhere('c.starttime < :now OR clar.problem IS NULL')
                 ->setParameter('now', Utils::now());
         }

@@ -12,6 +12,7 @@ use App\Entity\SubmissionFile;
 use App\Entity\SubmissionSource;
 use App\Entity\TeamCategory;
 use App\Entity\User;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -49,13 +50,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class SubmissionController extends AbstractRestController
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
+        AuthorizedUserService $authService,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         protected readonly SubmissionService $submissionService
     ) {
-        parent::__construct($entityManager, $dj, $config, $eventLogService);
+        parent::__construct($authService, $em, $dj, $config, $eventLogService);
     }
 
     /**
@@ -135,7 +137,7 @@ class SubmissionController extends AbstractRestController
         $languageId = $addSubmission->language ?? $addSubmission->languageId;
 
         // By default, use the user and team of the user.
-        $user = $this->dj->getUser();
+        $user = $this->authService->getUser();
         $team = $user->getTeam();
         $teamId = $addSubmission->teamId;
         if ($teamId) {
@@ -465,19 +467,19 @@ class SubmissionController extends AbstractRestController
         // If an ID has not been given directly, only show submissions before contest end.
         // This allows us to use eventlog on too-late submissions while not exposing them in the API directly.
         if (!$request->attributes->has('id') && !$request->query->has('ids') &&
-            !($this->dj->checkrole('admin') || $this->dj->checkrole('judgehost'))) {
+            !($this->authService->checkRole('admin') || $this->authService->checkRole('judgehost'))) {
             $queryBuilder->andWhere('s.submittime < c.endtime');
         }
 
-        if (!$this->dj->checkrole('api_reader') &&
-            !$this->dj->checkrole('judgehost')) {
+        if (!$this->authService->checkRole('api_reader') &&
+            !$this->authService->checkRole('judgehost')) {
             $queryBuilder
                 ->join('t.categories', 'cat', Join::WITH, 'BIT_AND(cat.types, :scoring) = :scoring')
                 ->setParameter('scoring', TeamCategory::TYPE_SCORING);
-            if ($this->dj->checkrole('team')) {
+            if ($this->authService->checkRole('team')) {
                 $queryBuilder
                     ->andWhere('cat.visible = 1 OR s.team = :team')
-                    ->setParameter('team', $this->dj->getUser()->getTeam());
+                    ->setParameter('team', $this->authService->getUser()->getTeam());
             } else {
                 // Hide all submissions made by non-public teams.
                 $queryBuilder->andWhere('cat.visible = 1');

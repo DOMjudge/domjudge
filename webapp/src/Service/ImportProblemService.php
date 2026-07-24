@@ -39,6 +39,7 @@ use ZipArchive;
 readonly class ImportProblemService
 {
     public function __construct(
+        protected AuthorizedUserService  $authService,
         protected EntityManagerInterface $em,
         protected LoggerInterface        $logger,
         protected DOMJudgeService        $dj,
@@ -701,7 +702,7 @@ readonly class ImportProblemService
         // Submit reference solutions.
         if ($contest === null) {
             $messages['warning'][] = 'No jury solutions added: problem is not linked to a contest (yet).';
-        } elseif (!$this->dj->getUser()->getTeam()) {
+        } elseif (!$this->authService->getUser()->getTeam()) {
             $messages['warning'][] = 'No jury solutions added: must associate team with your user first.';
         } elseif ($contestProblem->getAllowSubmit()) {
             $subs_with_unknown_lang = [];
@@ -839,8 +840,8 @@ readonly class ImportProblemService
                             $expectedResults = [$expectedResult];
                         }
                     }
-                    $jury_team_id = $this->dj->getUser()->getTeam()->getTeamid();
-                    $jury_user = $this->dj->getUser();
+                    $jury_team_id = $this->authService->getUser()->getTeam()->getTeamid();
+                    $jury_user = $this->authService->getUser();
                     if (isset($submission_details[$path]['team'])) {
                         /** @var Team|null $json_team */
                         $json_team = $this->em->getRepository(Team::class)

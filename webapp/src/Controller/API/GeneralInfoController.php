@@ -8,6 +8,7 @@ use App\DataTransferObject\ApiVersion;
 use App\DataTransferObject\DomJudgeApiInfo;
 use App\DataTransferObject\ExtendedContestStatus;
 use App\Entity\User;
+use App\Service\AuthorizedUserService;
 use App\Service\CheckConfigService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -46,6 +47,7 @@ class GeneralInfoController extends AbstractFOSRestController
     final public const CCS_SPEC_API_URL = 'https://ccs-specs.icpc.io/2023-06/contest_api';
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
@@ -155,7 +157,7 @@ class GeneralInfoController extends AbstractFOSRestController
     )]
     public function getUserAction(): User
     {
-        return $this->dj->getUser();
+        return $this->authService->getUser();
     }
 
     /**
@@ -180,7 +182,7 @@ class GeneralInfoController extends AbstractFOSRestController
         #[MapQueryParameter]
         ?string $name = null
     ): array {
-        $onlypublic = !($this->dj->checkrole('jury') || $this->dj->checkrole('judgehost'));
+        $onlypublic = !($this->authService->checkRole('jury') || $this->authService->checkRole('judgehost'));
 
         if ($name) {
             try {

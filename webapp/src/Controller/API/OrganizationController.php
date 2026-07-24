@@ -5,6 +5,7 @@ namespace App\Controller\API;
 use App\DataTransferObject\AddOrganization;
 use App\Entity\TeamAffiliation;
 use App\Service\AssetUpdateService;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -39,13 +40,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class OrganizationController extends AbstractRestController
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
+        AuthorizedUserService $authService,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         protected readonly AssetUpdateService $assetUpdater
     ) {
-        parent::__construct($entityManager, $dj, $config, $eventLogService);
+        parent::__construct($authService, $em, $dj, $config, $eventLogService);
     }
 
     /**

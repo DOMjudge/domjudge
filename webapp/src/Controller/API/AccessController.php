@@ -77,22 +77,22 @@ class AccessController extends AbstractApiController
         ];
 
         // Add files to submissions if allowed
-        if ($this->dj->checkrole('api_source_reader')) {
+        if ($this->authService->checkRole('api_source_reader')) {
             $submissionsProperties[] = 'files';
         }
 
         $capabilities = [];
 
         // Add capabilities
-        if ($this->dj->checkrole('api_writer')) {
+        if ($this->authService->checkRole('api_writer')) {
             $capabilities[] = 'contest_start';
             $capabilities[] = 'contest_thaw';
         }
-        if ($this->dj->checkrole('team') && $this->dj->getUser()->getTeam()) {
+        if ($this->authService->checkRole('team') && $this->authService->getUser()->getTeam()) {
             $capabilities[] = 'team_submit';
             $capabilities[] = 'team_clar';
         }
-        if ($this->dj->checkrole('api_writer')) {
+        if ($this->authService->checkRole('api_writer')) {
             $capabilities[] = 'proxy_submit';
             $capabilities[] = 'proxy_clar';
             $capabilities[] = 'admin_submit';

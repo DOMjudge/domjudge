@@ -94,7 +94,7 @@ class AccountController extends AbstractRestController
         // Get the contest ID to make sure the contest exists.
         $this->getContestId($request);
 
-        $user = $this->dj->getUser();
+        $user = $this->authService->getUser();
         if ($user === null) {
             throw new NotFoundHttpException();
         }

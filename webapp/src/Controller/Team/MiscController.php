@@ -6,6 +6,7 @@ use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Clarification;
 use App\Form\Type\PrintType;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -37,6 +38,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class MiscController extends BaseController
 {
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         EntityManagerInterface $em,
@@ -55,7 +57,7 @@ class MiscController extends BaseController
     #[Route(path: '', name: 'team_index')]
     public function homeAction(Request $request): Response
     {
-        $user    = $this->dj->getUser();
+        $user    = $this->authService->getUser();
         $team    = $user->getTeam();
         $teamId  = $team->getTeamid();
         $contest = $this->dj->getCurrentContest($teamId);
@@ -211,7 +213,7 @@ class MiscController extends BaseController
     #[Route(path: '/problemset', name: 'team_contest_problemset')]
     public function contestProblemsetAction(): StreamedResponse
     {
-        $user    = $this->dj->getUser();
+        $user    = $this->authService->getUser();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException('Contest text not found or not available');

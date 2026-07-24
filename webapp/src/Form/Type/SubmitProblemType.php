@@ -4,6 +4,7 @@ namespace App\Form\Type;
 
 use App\Entity\Language;
 use App\Entity\Problem;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,6 +26,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 class SubmitProblemType extends AbstractType
 {
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly EntityManagerInterface $em
@@ -33,7 +35,7 @@ class SubmitProblemType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $submissionMode = $options['submission_mode'];
-        $user           = $this->dj->getUser();
+        $user           = $this->authService->getUser();
         $contest        = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
 
         if ($submissionMode === 'paste') {

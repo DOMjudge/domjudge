@@ -10,6 +10,7 @@ use App\Entity\ContestProblem;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
 use App\Entity\ScoreboardType;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -47,14 +48,15 @@ use Symfony\Component\Yaml\Yaml;
 class ProblemController extends AbstractRestController implements QueryObjectTransformer
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        AuthorizedUserService $authService,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         protected readonly ImportProblemService $importProblemService,
         protected readonly ImportExportService $importExportService
     ) {
-        parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
+        parent::__construct($authService, $em, $dj, $config, $eventLogService);
     }
 
     /**
@@ -517,7 +519,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             ->groupBy('cp.problem');
 
         // For non-API-reader users, only expose the problems after the contest has started.
-        if (!$this->dj->checkrole('api_reader') && $contest->getStartTimeObject()->getTimestamp() > time()) {
+        if (!$this->authService->checkRole('api_reader') && $contest->getStartTimeObject()->getTimestamp() > time()) {
             $queryBuilder->andWhere('1 = 0');
         }
 
@@ -538,7 +540,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         /** @var ContestProblem $problem */
         $problem       = $object[0];
         $testDataCount = (int)$object['testdatacount'];
-        if ($this->dj->checkrole('jury')) {
+        if ($this->authService->checkRole('jury')) {
             return new ContestProblemWrapper($problem, $testDataCount);
         } else {
             return $problem;

@@ -7,6 +7,7 @@ use App\Entity\AbstractJudgement;
 use App\Entity\Contest;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -42,12 +43,13 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     private bool $useExternalJudgements = false;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        AuthorizedUserService $authService,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService
     ) {
-        parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
+        parent::__construct($authService, $em, $dj, $config, $eventLogService);
 
         $this->verdicts = $this->config->getVerdicts(['final', 'error']);
     }
@@ -141,8 +143,8 @@ class JudgementController extends AbstractRestController implements QueryObjectT
                 ->setParameter('cid', $contestId);
         }
 
-        $roleAllowsVisibility = $this->dj->checkrole('api_reader')
-            || $this->dj->checkrole('judgehost');
+        $roleAllowsVisibility = $this->authService->checkRole('api_reader')
+            || $this->authService->checkRole('judgehost');
         if ($request->query->has('result')) {
             $queryBuilder
                 ->andWhere('j.result = :result')
@@ -154,7 +156,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
         if (!$roleAllowsVisibility) {
             $queryBuilder
                 ->andWhere('s.team = :team')
-                ->setParameter('team', $this->dj->getUser()->getTeam());
+                ->setParameter('team', $this->authService->getUser()->getTeam());
         }
 
         if ($request->query->has('submission_id')) {

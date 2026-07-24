@@ -24,6 +24,7 @@ use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\TestcaseGroup;
 use App\Form\Type\SubmissionsFilterType;
+use App\Service\AuthorizedUserService;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -64,6 +65,7 @@ class SubmissionController extends BaseController
     use JudgeRemainingTrait;
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         EntityManagerInterface $em,
         protected readonly EventLogService $eventLogService,
         DOMJudgeService $dj,
@@ -904,7 +906,7 @@ class SubmissionController extends BaseController
     }
 
     private function allowEdit(): bool {
-        return $this->dj->getUser()->getTeam() && $this->dj->checkrole('team');
+        return $this->authService->getUser()->getTeam() && $this->authService->checkRole('team');
     }
 
     /**
@@ -1155,7 +1157,7 @@ class SubmissionController extends BaseController
                 $filesToSubmit[] = new UploadedFile($tmpfname, $file->getFilename(), null, null, true);
             }
 
-            $team = $this->dj->getUser()->getTeam();
+            $team = $this->authService->getUser()->getTeam();
             /** @var Language $language */
             $language   = $submittedData['language'];
             $entryPoint = $submittedData['entry_point'];
@@ -1164,7 +1166,7 @@ class SubmissionController extends BaseController
             }
             $submittedSubmission = $this->submissionService->submitSolution(
                 $team,
-                $this->dj->getUser(),
+                $this->authService->getUser(),
                 $submittedData['problem'],
                 $submission->getContest(),
                 $language,
@@ -1282,7 +1284,7 @@ class SubmissionController extends BaseController
             $comment  = $request->request->get('comment');
             $judging
                 ->setVerified($verified)
-                ->setJuryMember($verified ? $this->dj->getUser()->getUserIdentifier() : null)
+                ->setJuryMember($verified ? $this->authService->getUser()->getUserIdentifier() : null)
                 ->setVerifyComment($comment);
 
             $this->em->flush();
@@ -1347,7 +1349,7 @@ class SubmissionController extends BaseController
             $comment  = $request->request->get('comment');
             $judgement
                 ->setVerified($verified)
-                ->setJuryMember($verified ? $this->dj->getUser()->getUserIdentifier() : null)
+                ->setJuryMember($verified ? $this->authService->getUser()->getUserIdentifier() : null)
                 ->setVerifyComment($comment);
 
             $this->em->flush();
@@ -1370,7 +1372,7 @@ class SubmissionController extends BaseController
         Request $request,
         ?string &$claimWarning
     ): ?RedirectResponse {
-        $user   = $this->dj->getUser();
+        $user   = $this->authService->getUser();
         $action = ($request->get('claim') || $request->get('claimdiff')) ? 'claim' : 'unclaim';
 
         $type = ($judging instanceof ExternalJudgement) ?'shadow difference' : 'submission';
