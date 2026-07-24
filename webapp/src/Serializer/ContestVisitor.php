@@ -5,6 +5,7 @@ namespace App\Serializer;
 use App\DataTransferObject\FileWithName;
 use App\DataTransferObject\ImageFile;
 use App\Entity\Contest;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Utils\Utils;
@@ -17,8 +18,9 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 readonly class ContestVisitor implements EventSubscriberInterface
 {
     public function __construct(
-        protected ConfigurationService $config,
-        protected DOMJudgeService      $dj,
+        protected AuthorizedUserService $authService,
+        protected ConfigurationService  $config,
+        protected DOMJudgeService       $dj,
     ) {}
 
     /**
@@ -63,8 +65,8 @@ readonly class ContestVisitor implements EventSubscriberInterface
             $contest->setBannerForApi();
         }
 
-        $hasAccess = $this->dj->checkrole('jury') ||
-            $this->dj->checkrole('api_reader') ||
+        $hasAccess = $this->authService->checkRole('jury') ||
+            $this->authService->checkRole('api_reader') ||
             $contest->getFreezeData()->started();
 
         // Problem statement

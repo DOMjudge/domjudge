@@ -63,6 +63,7 @@ class SubmissionService
     ];
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         protected readonly EntityManagerInterface $em,
         protected readonly LoggerInterface $logger,
         protected readonly DOMJudgeService $dj,
@@ -752,7 +753,7 @@ class SubmissionService
     public function getRateLimitStatus(Team $team, Contest $contest): array
     {
         $rateLimits = $this->config->get('submission_rate_limit');
-        if (empty($rateLimits) || $this->dj->checkrole('jury')) {
+        if (empty($rateLimits) || $this->authService->checkRole('jury')) {
             return [];
         }
 
@@ -921,7 +922,7 @@ class SubmissionService
         $sourceSize = $this->config->get('sourcesize_limit');
 
         $freezeData = new FreezeData($contest);
-        if (!$this->dj->checkrole('jury') && !$freezeData->started()) {
+        if (!$this->authService->checkRole('jury') && !$freezeData->started()) {
             throw new AccessDeniedHttpException(
                 sprintf("The contest is closed, no submissions accepted. [c%d]", $contest->getCid()));
         }
@@ -959,7 +960,7 @@ class SubmissionService
             }
         }
 
-        if ($this->dj->checkrole('jury') && $entryPoint == '__auto__') {
+        if ($this->authService->checkRole('jury') && $entryPoint == '__auto__') {
             // Fall back to auto detection when we're importing jury submissions.
             $entryPoint = null;
         }
@@ -973,12 +974,12 @@ class SubmissionService
             }
         }
 
-        if (!$this->dj->checkrole('jury') && !$team->getEnabled()) {
+        if (!$this->authService->checkRole('jury') && !$team->getEnabled()) {
             throw new BadRequestHttpException(
                 sprintf("Team '%d' not found in database or not enabled.", $team->getTeamid()));
         }
 
-        if ($user && !$this->dj->checkrole('jury') && !$user->getEnabled()) {
+        if ($user && !$this->authService->checkRole('jury') && !$user->getEnabled()) {
             throw new BadRequestHttpException(
                 sprintf("User '%d' not found in database or not enabled.", $user->getUserid()));
         }
@@ -1071,7 +1072,7 @@ class SubmissionService
         // submissions that come through the API, e.g. when doing a replay of an old contest.
         $expectedResults = null;
         $expectedScore = null;
-        if ($this->dj->checkrole('jury') && $source === SubmissionSource::PROBLEM_IMPORT) {
+        if ($this->authService->checkRole('jury') && $source === SubmissionSource::PROBLEM_IMPORT) {
             $annotation = null;
             foreach ($files as $file) {
                 $fileAnnotation = self::parseExpectedAnnotation(
@@ -1119,7 +1120,7 @@ class SubmissionService
 
         // Add expected results/score from source. We only do this for jury submissions
         // to prevent accidental auto-verification of team submissions.
-        if ($this->dj->checkrole('jury')) {
+        if ($this->authService->checkRole('jury')) {
             if (!empty($expectedResults)) {
                 $submission->setExpectedResults($expectedResults);
             }

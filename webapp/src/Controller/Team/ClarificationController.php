@@ -8,6 +8,7 @@ use App\Entity\Contest;
 use App\Entity\Problem;
 use App\Entity\Team;
 use App\Form\Type\TeamClarificationType;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -35,6 +36,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class ClarificationController extends BaseController
 {
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         EntityManagerInterface $em,
@@ -48,7 +50,7 @@ class ClarificationController extends BaseController
     #[Route(path: '/clarifications/by-problem/{probId}', name: 'team_clarification_by_prob')]
     public function viewByProblemAction(Request $request, string $probId): Response
     {
-        $user    = $this->dj->getUser();
+        $user    = $this->authService->getUser();
         $team    = $user->getTeam();
         $teamId  = $team->getTeamid();
         $contest = $this->dj->getCurrentContest($teamId);
@@ -110,7 +112,7 @@ class ClarificationController extends BaseController
     public function viewAction(Request $request, string $clarId): Response
     {
         $categories = $this->config->get('clar_categories');
-        $user       = $this->dj->getUser();
+        $user       = $this->authService->getUser();
         $team       = $user->getTeam();
         $contest    = $this->dj->getCurrentContest($team->getTeamid());
         /** @var Clarification|null $clarification */
@@ -191,7 +193,7 @@ class ClarificationController extends BaseController
     public function addAction(Request $request): Response
     {
         $categories = $this->config->get('clar_categories');
-        $user       = $this->dj->getUser();
+        $user       = $this->authService->getUser();
         $team       = $user->getTeam();
         $contest    = $this->dj->getCurrentContest($team->getTeamid());
         if (!$contest) {

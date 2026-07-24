@@ -17,6 +17,7 @@ use App\Entity\TestcaseContent;
 use App\Form\Type\ProblemAttachmentType;
 use App\Form\Type\ProblemType;
 use App\Form\Type\ProblemUploadType;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -53,6 +54,7 @@ class ProblemController extends BaseController
     use JudgeRemainingTrait;
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         EntityManagerInterface $em,
         DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
@@ -249,7 +251,7 @@ class ProblemController extends BaseController
     #[Route(path: '/problemset', name: 'jury_problemset')]
     public function problemsetAction(StatisticsService $stats): Response
     {
-        $teamId = $this->dj->getUser()->getTeam()?->getTeamid();
+        $teamId = $this->authService->getUser()->getTeam()?->getTeamid();
         return $this->render('jury/problemset.html.twig',
             $this->dj->getTwigDataForProblemsAction($stats, teamId: $teamId, forJury: true));
     }

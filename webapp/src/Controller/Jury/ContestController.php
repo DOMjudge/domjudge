@@ -21,6 +21,7 @@ use App\Form\Type\ContestType;
 use App\Form\Type\FinalizeContestType;
 use App\Form\Type\RemovedIntervalType;
 use App\Service\AssetUpdateService;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -53,6 +54,7 @@ class ContestController extends BaseController
     use JudgeRemainingTrait;
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         EntityManagerInterface $em,
         DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
@@ -807,7 +809,7 @@ class ContestController extends BaseController
         }
 
         if (empty($contest->getFinalizecomment())) {
-            $contest->setFinalizecomment(sprintf('Finalized by: %s', $this->dj->getUser()->getName()));
+            $contest->setFinalizecomment(sprintf('Finalized by: %s', $this->authService->getUser()->getName()));
         }
         $form = $this->createForm(FinalizeContestType::class, $contest);
 

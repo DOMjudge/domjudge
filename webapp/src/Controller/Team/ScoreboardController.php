@@ -5,6 +5,7 @@ namespace App\Controller\Team;
 use App\Controller\BaseController;
 use App\Controller\ScoreboardSubmissionsTrait;
 use App\Entity\Team;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -32,6 +33,7 @@ class ScoreboardController extends BaseController
     use ScoreboardSubmissionsTrait;
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly ScoreboardService $scoreboardService,
@@ -51,7 +53,7 @@ class ScoreboardController extends BaseController
             throw new BadRequestHttpException('Scoreboard is not available.');
         }
 
-        $user       = $this->dj->getUser();
+        $user       = $this->authService->getUser();
         $response   = new Response();
         $contest    = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         $refreshUrl = $this->generateUrl('team_scoreboard');
@@ -70,7 +72,7 @@ class ScoreboardController extends BaseController
     #[Route(path: '/scoreboard/submissions/team/{teamId}/problem/{problemId}', name: 'team_submissions')]
     public function submissionsAction(string $teamId, string $problemId): Response
     {
-        $user    = $this->dj->getUser();
+        $user    = $this->authService->getUser();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
 
         if (!$contest) {
@@ -83,7 +85,7 @@ class ScoreboardController extends BaseController
     #[Route(path: '/scoreboard/submissions-data/team/{teamId}/problem/{problemId}.json', name: 'team_submissions_data_cell')]
     public function submissionsDataAction(string $teamId, string $problemId): JsonResponse
     {
-        $user    = $this->dj->getUser();
+        $user    = $this->authService->getUser();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
 
         if (!$contest) {
@@ -110,7 +112,7 @@ class ScoreboardController extends BaseController
                          ->setParameter('teamId', $teamId)
                          ->getQuery()
                          ->getOneOrNullResult();
-        if ($team?->getHidden() && $teamId !== $this->dj->getUser()->getTeam()->getExternalid()) {
+        if ($team?->getHidden() && $teamId !== $this->authService->getUser()->getTeam()->getExternalid()) {
             $team = null;
         }
         $showFlags        = (bool)$this->config->get('show_flags');

@@ -3,6 +3,7 @@
 namespace App\Twig;
 
 use App\Entity\TeamCategory;
+use App\Service\AuthorizedUserService;
 use App\Service\AwardService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -25,6 +26,7 @@ class TwigGlobalsExtension extends AbstractExtension implements GlobalsInterface
      * @param array<int, bool> $renderedSources
      */
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly Environment $twig,
@@ -46,7 +48,7 @@ class TwigGlobalsExtension extends AbstractExtension implements GlobalsInterface
         $refresh_cookie = $this->dj->getCookie("domjudge_refresh");
         $refresh_flag   = ($refresh_cookie == null || (bool)$refresh_cookie);
 
-        $user = $this->dj->getUser();
+        $user = $this->authService->getUser();
         $team = $user?->getTeam();
 
         $selfRegistrationCategoriesCount = $this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);

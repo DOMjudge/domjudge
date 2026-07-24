@@ -4,6 +4,7 @@ namespace App\Controller\API;
 
 use App\DataTransferObject\Award;
 use App\Entity\Contest;
+use App\Service\AuthorizedUserService;
 use App\Service\AwardService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -29,14 +30,15 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class AwardsController extends AbstractApiController
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        AuthorizedUserService $authService,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         protected readonly ScoreboardService $scoreboardService,
         protected readonly AwardService $awards
     ) {
-        parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
+        parent::__construct($authService, $em, $dj, $config, $eventLogService);
     }
 
     /**
@@ -90,13 +92,13 @@ class AwardsController extends AbstractApiController
      */
     protected function getContestAndScoreboard(Request $request): array
     {
-        $public = !$this->dj->checkrole('api_reader');
-        if ($this->dj->checkrole('api_reader') && $request->query->has('public')) {
+        $public = !$this->authService->checkRole('api_reader');
+        if ($this->authService->checkRole('api_reader') && $request->query->has('public')) {
             $public = $request->query->getBoolean('public');
         }
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
-        $isJury = $this->dj->checkrole('api_reader');
+        $isJury = $this->authService->checkRole('api_reader');
         $accessAllowed = ($isJury && $contest->getEnabled()) || (!$isJury && $contest->isActive());
         if (!$accessAllowed) {
             throw new AccessDeniedHttpException();

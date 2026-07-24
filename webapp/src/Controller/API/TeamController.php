@@ -7,6 +7,7 @@ use App\Entity\Contest;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Service\AssetUpdateService;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -42,13 +43,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class TeamController extends AbstractRestController
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
+        AuthorizedUserService $authService,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         protected readonly AssetUpdateService $assetUpdater
     ) {
-        parent::__construct($entityManager, $dj, $config, $eventLogService);
+        parent::__construct($authService, $em, $dj, $config, $eventLogService);
     }
 
     /**
@@ -86,7 +88,7 @@ class TeamController extends AbstractRestController
     )]
     public function listAction(Request $request): Response
     {
-        if (!$this->config->get('enable_ranking') && !$this->dj->checkrole('api_reader')) {
+        if (!$this->config->get('enable_ranking') && !$this->authService->checkRole('api_reader')) {
             throw new BadRequestHttpException("teams list not available.");
         }
         return parent::performListAction($request);
@@ -106,7 +108,7 @@ class TeamController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
     {
-        if (!$this->config->get('enable_ranking') && !$this->dj->checkrole('jury')) {
+        if (!$this->config->get('enable_ranking') && !$this->authService->checkRole('jury')) {
             throw new BadRequestHttpException("team not available.");
         }
         return parent::performSingleAction($request, $id);
@@ -129,7 +131,7 @@ class TeamController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function photoAction(Request $request, string $id): Response
     {
-        if (!$this->config->get('enable_ranking') && !$this->dj->checkrole('jury')) {
+        if (!$this->config->get('enable_ranking') && !$this->authService->checkRole('jury')) {
             throw new BadRequestHttpException("team photo not available.");
         }
         /** @var Team|null $team */
@@ -325,7 +327,7 @@ class TeamController extends AbstractRestController
                 ->setParameter('affiliation', $request->query->get('affiliation'));
         }
 
-        if (!$this->dj->checkrole('api_reader') || $request->query->getBoolean('public')) {
+        if (!$this->authService->checkRole('api_reader') || $request->query->getBoolean('public')) {
             $queryBuilder
                 // We need a separate join to filter on scoring categories, to filter on visible ones.
                 // `tc` is used as $team->getCategories, which is what we output on the API. We DO want

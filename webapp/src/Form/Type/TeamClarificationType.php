@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Clarification;
 use App\Entity\ContestProblem;
 use App\Service\ConfigurationService;
+use App\Service\AuthorizedUserService;
 use App\Service\DOMJudgeService;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -16,6 +17,7 @@ use Symfony\Component\Validator\Constraints\Length;
 class TeamClarificationType extends AbstractType
 {
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config
     ) {}
@@ -30,7 +32,7 @@ class TeamClarificationType extends AbstractType
         $subjects = [];
         /** @var string[] $categories */
         $categories = $this->config->get('clar_categories');
-        $user = $this->dj->getUser();
+        $user = $this->authService->getUser();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         if ($contest) {
             foreach ($categories as $categoryId => $categoryName) {

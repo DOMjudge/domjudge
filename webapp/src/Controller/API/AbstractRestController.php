@@ -69,15 +69,15 @@ abstract class AbstractRestController extends AbstractApiController
     ): Response {
         $view = $this->view($data);
 
-        // Set the DOMjudge service on the context, so we can use it for permissions.
-        $view->getContext()->setAttribute('domjudge_service', $this->dj);
+        // Set the authorizedUser service on the context, so we can use it for permissions.
+        $view->getContext()->setAttribute('authorized_user_service', $this->authService);
         $view->getContext()->setAttribute('config_service', $this->config);
 
         $groups = [static::GROUP_DEFAULT];
         if (!$request->query->has('strict') || !$request->query->getBoolean('strict')) {
             $groups[] = static::GROUP_NONSTRICT;
         }
-        if ($this->dj->checkrole('api_reader')) {
+        if ($this->authService->checkRole('api_reader')) {
             $groups[] = static::GROUP_RESTRICTED;
         }
         if (in_array(static::GROUP_NONSTRICT, $groups) && in_array(static::GROUP_RESTRICTED, $groups)) {

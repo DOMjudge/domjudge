@@ -4,6 +4,7 @@ namespace App\Serializer;
 
 use App\DataTransferObject\FileWithName;
 use App\Entity\Submission;
+use App\Service\AuthorizedUserService;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\EventDispatcher\Events;
@@ -14,6 +15,7 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
 readonly class SubmissionVisitor implements EventSubscriberInterface
 {
     public function __construct(
+        protected AuthorizedUserService  $authService,
         protected DOMJudgeService        $dj,
         protected EntityManagerInterface $em,
     ) {}
@@ -37,7 +39,7 @@ readonly class SubmissionVisitor implements EventSubscriberInterface
     {
         /** @var Submission $submission */
         $submission = $event->getObject();
-        if ($this->dj->checkrole('api_source_reader')) {
+        if ($this->authService->checkRole('api_source_reader')) {
             $route = $this->dj->apiRelativeUrl(
                 'v4_submission_files',
                 [
