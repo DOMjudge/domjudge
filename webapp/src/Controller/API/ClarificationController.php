@@ -154,26 +154,6 @@ class ClarificationController extends AbstractRestController
             $clarification->setProblem($problem->getProblem());
         }
 
-        if ($replyToId = $clarificationPost->replyToId) {
-            // Load the clarification.
-            /** @var Clarification|null $replyTo */
-            $replyTo = $this->em->createQueryBuilder()
-                ->from(Clarification::class, 'c')
-                ->select('c')
-                ->andWhere('c.externalid = :clarification')
-                ->andWhere('c.contest = :contest')
-                ->setParameter('clarification', $replyToId)
-                ->setParameter('contest', $contestId)
-                ->getQuery()
-                ->getOneOrNullResult();
-
-            if ($replyTo === null) {
-                throw new BadRequestHttpException("Clarification '$replyToId' not found.");
-            }
-
-            $clarification->setInReplyTo($replyTo);
-        }
-
         // By default, use the team of the user
         $fromTeam = $this->isGranted('ROLE_API_WRITER') ? null : $this->dj->getUser()->getTeam();
         if ($fromTeamId = $clarificationPost->fromTeamId) {
@@ -206,6 +186,30 @@ class ClarificationController extends AbstractRestController
 
         if ($toTeam && $fromTeam) {
             throw new BadRequestHttpException('Can not send a clarification from and to a team.');
+        }
+
+        if ($replyToId = $clarificationPost->replyToId) {
+            $qb = $this->em->createQueryBuilder()
+                ->from(Clarification::class, 'c')
+                ->select('c')
+                ->andWhere('c.externalid = :clarification')
+                ->andWhere('c.contest = :contest')
+                ->setParameter('clarification', $replyToId)
+                ->setParameter('contest', $contestId);
+            if ($this->dj->checkrole('team')) {
+                $qb
+                    ->andWhere('c.sender = :team OR c.recipient = :team OR (c.sender IS NULL AND c.recipient IS NULL)')
+                    ->setParameter('team', $fromTeam);
+            }
+            // Load the clarification.
+            /** @var Clarification|null $replyTo */
+            $replyTo = $qb->getQuery()->getOneOrNullResult();
+
+            if ($replyTo === null) {
+                throw new BadRequestHttpException("Clarification '$replyToId' not found.");
+            }
+
+            $clarification->setInReplyTo($replyTo);
         }
 
         $time = Utils::now();
