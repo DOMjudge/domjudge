@@ -10,6 +10,8 @@
 !var/log/.gitkeep
 /vendor/
 /node_modules/
+/.yarn/
+.yarnrc.yml
 
 ###> phpunit/phpunit ###
 /phpunit.xml
