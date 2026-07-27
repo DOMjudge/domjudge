@@ -236,11 +236,22 @@ struct process_t {
     std::array<int, 3> stdio = {stdin_fd, stdout_fd, FDREDIR_NONE};
 
     auto exec_args = args;
-    if (cmd == "sudo" && exec_args.size() > 1 && exec_args[1].find("/runguard") != string::npos) {
-        // This is a hack, and can be improved significantly after implementing
-        // https://docs.google.com/document/d/1WZRwdvJUamsczYC7CpP3ZIBU8xG6wNqYqrNJf7osxYs/edit#heading=h.i7kgdnmw8qd7
-        exec_args.push_back("-U");
-        exec_args.push_back(std::to_string(getpid()));
+    if (cmd == "sudo") {
+      // Tell runguard our pid, so that it can signal us when the command hits
+      // its time limit. The option must be inserted directly behind the
+      // runguard path: the caller ends runguard's option list with a `--`, so
+      // appending would place it behind that separator, where runguard would
+      // pass it on to the command instead of parsing it.
+      // This is a hack, and can be improved significantly after implementing
+      // https://docs.google.com/document/d/1WZRwdvJUamsczYC7CpP3ZIBU8xG6wNqYqrNJf7osxYs/edit#heading=h.i7kgdnmw8qd7
+      auto runguard = std::find_if(exec_args.begin(), exec_args.end(), [](const string &arg) {
+        return arg.find("/runguard") != string::npos;
+      });
+      if (runguard == exec_args.end()) {
+        logmsg(LOG_DEBUG, "no runguard found in the arguments of #{}, not passing -U", index);
+      } else {
+        exec_args.insert(runguard + 1, {"-U", std::to_string(getpid())});
+      }
     }
 
     pid = execute(cmd, exec_args, stdio, false);
