@@ -6,7 +6,6 @@ use App\DataTransferObject\ContestStatus;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\AssetEntityInterface;
 use App\Entity\AuditLog;
-use App\Entity\Balloon;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;

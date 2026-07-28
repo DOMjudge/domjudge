@@ -2,7 +2,6 @@
 
 namespace App\Controller\Jury;
 
-use App\Entity\Contest;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
