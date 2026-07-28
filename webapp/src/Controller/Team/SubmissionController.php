@@ -210,13 +210,29 @@ class SubmissionController extends BaseController
         return [[$uploadedFile], $tmpFile];
     }
 
+    private function helperCheckVerificationRequired(int $submitId): bool
+    {
+        $globalRequired = (bool)$this->config->get('verification_required');
+        if ($globalRequired) {
+            return true;
+        }
+        return $this->em->createQueryBuilder()
+            ->from(Submission::class, 's')
+            ->join('s.contest_problem', 'cp')
+            ->select('cp.verification_required')
+            ->where('s.submission = :submitId')
+            ->setParameter('submitId', $submitId)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     /**
      * @throws NonUniqueResultException
      */
     #[Route(path: '/submission/{submitId<\d+>}', name: 'team_submission')]
     public function viewAction(Request $request, int $submitId): Response
     {
-        $verificationRequired = (bool)$this->config->get('verification_required');
+        $verificationRequired = $this->helperCheckVerificationRequired($submitId);
         $showCompile          = $this->config->get('show_compile');
         $showSampleOutput     = $this->config->get('show_sample_output');
         $allowDownload        = (bool)$this->config->get('allow_team_submission_download');

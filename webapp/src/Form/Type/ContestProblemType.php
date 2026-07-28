@@ -48,6 +48,11 @@ class ContestProblemType extends AbstractType
             'required' => false,
             'attr' => ContestType::TOGGLE_ATTRS,
         ]);
+        $builder->add('verificationRequired', CheckboxType::class, [
+            'label' => 'Manual verification',
+            'required' => false,
+            'attr' => ContestType::TOGGLE_ATTRS,
+        ]);
         $builder->add('color', TextType::class, [
             'required' => false,
             'label' => 'Colour',

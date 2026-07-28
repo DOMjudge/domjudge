@@ -59,6 +59,10 @@ class ContestProblem extends BaseApiEntity
     #[Serializer\Exclude]
     private bool $allowJudge = true;
 
+    #[ORM\Column(options: ['comment' => 'Is manual verification of judgings by jury required before publication?', 'default' => 0])]
+    #[Serializer\Exclude]
+    private bool $verificationRequired = false;
+
     #[ORM\Column(
         length: 32,
         nullable: true,
@@ -155,6 +159,17 @@ class ContestProblem extends BaseApiEntity
     public function getAllowJudge(): bool
     {
         return $this->allowJudge;
+    }
+
+    public function setVerificationRequired(bool $verificationRequired): ContestProblem
+    {
+        $this->verificationRequired = $verificationRequired;
+        return $this;
+    }
+
+    public function getVerificationRequired(): bool
+    {
+        return $this->verificationRequired;
     }
 
     public function setColor(?string $color): ContestProblem

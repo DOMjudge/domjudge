@@ -145,6 +145,7 @@
         <th>{{ form.problems.vars.prototype.points.vars.label }}</th>
         <th>{{ form.problems.vars.prototype.allowSubmit.vars.label | replace({" ":"<br>"}) | raw }}</th>
         <th>{{ form.problems.vars.prototype.allowJudge.vars.label | replace({" ":"<br>"}) | raw }}</th>
+        <th>{{ form.problems.vars.prototype.verificationRequired.vars.label | replace({" ":"<br>"}) | raw }}</th>
         <th>{{ form.problems.vars.prototype.color.vars.label }}</th>
         <th class="text-nowrap">{{ form.problems.vars.prototype.lazyEvalResults.vars.label }}</th>
         <th></th>
@@ -172,6 +173,10 @@
             <td>
                 {{ form_errors(problem.allowJudge) }}
                 {{ form_widget(problem.allowJudge, {label: false}) }}
+            </td>
+            <td>
+                {{ form_errors(problem.verificationRequired) }}
+                {{ form_widget(problem.verificationRequired, {label: false}) }}
             </td>
             <td>
                 {{ form_errors(problem.color) }}
