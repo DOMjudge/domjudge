@@ -3,7 +3,6 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
-use App\Entity\Contest;
 use App\Entity\ExternalSourceWarning;
 use App\Form\Type\ExternalSourceWarningsFilterType;
 use App\Service\ConfigurationService;

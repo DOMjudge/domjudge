@@ -8,11 +8,13 @@ use App\DataTransferObject\PatchContest;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Event;
+use App\Entity\TeamCategory;
 use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
+use App\Service\ScoreboardService;
 use App\Utils\EventFeedFormat;
 use App\Utils\Utils;
 use BadMethodCallException;
@@ -32,6 +34,7 @@ use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -46,10 +49,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
 use TypeError;
-
-use App\Entity\TeamCategory;
-use App\Service\ScoreboardService;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * @extends AbstractRestController<Contest, Contest>

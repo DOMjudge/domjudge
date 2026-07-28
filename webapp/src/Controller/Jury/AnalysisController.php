@@ -10,7 +10,6 @@ use App\Entity\Team;
 use App\Service\DOMJudgeService;
 use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Query\Expr;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
