@@ -141,10 +141,10 @@
     <thead>
     <tr>
         <th>{{ form.problems.vars.prototype.problem.vars.label }}</th>
-        <th>{{ form.problems.vars.prototype.shortname.vars.label }}</th>
+        <th>{{ form.problems.vars.prototype.shortname.vars.label | replace({" ":"<br>"}) | raw }}</th>
         <th>{{ form.problems.vars.prototype.points.vars.label }}</th>
-        <th>{{ form.problems.vars.prototype.allowSubmit.vars.label }}</th>
-        <th>{{ form.problems.vars.prototype.allowJudge.vars.label }}</th>
+        <th>{{ form.problems.vars.prototype.allowSubmit.vars.label | replace({" ":"<br>"}) | raw }}</th>
+        <th>{{ form.problems.vars.prototype.allowJudge.vars.label | replace({" ":"<br>"}) | raw }}</th>
         <th>{{ form.problems.vars.prototype.color.vars.label }}</th>
         <th class="text-nowrap">{{ form.problems.vars.prototype.lazyEvalResults.vars.label }}</th>
         <th></th>
