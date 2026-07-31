@@ -4,3 +4,6 @@ framework:
             app.clarification_sanitizer:
                 allow_safe_elements: true
                 allow_relative_medias: false
+                allow_relative_links: false
+                allowed_link_schemes: ['ignore_all']
+                allowed_media_schemes:  ['ignore_all']
