@@ -1074,7 +1074,7 @@ EOF;
             return $text;
         }
         $ret = preg_match_all("/[0-9A-Fa-f]{2}/", $col, $m);
-        if (!($ret && count($m[0]))) {
+        if (!$ret) {
             return $text;
         }
 
