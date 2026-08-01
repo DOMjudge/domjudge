@@ -13,36 +13,22 @@ add_header X-Robots-Tag "none" always;
 
 # Variables used in the nginx configuration
 set $domjudgeRoot @domserver_webappdir@/public;
-# Set this to '' instead of /domjudge when running in the root of your system
-set $prefix /domjudge;
+# The path prefix is derived from the configured base URL; it is empty when
+# DOMjudge runs in the root of your system.
+@ONLY_IF_PREFIX@set $prefix @URLPREFIX@;
+@ONLY_IF_ROOT@set $prefix '';
 
-# Uncomment to run it out of the root of your system
-# # Disallow opening .php files directly
-# location ~ ^/+[^/]+\.php$ { return 404; }
-# location / {
-# 	root $domjudgeRoot;
-# 	try_files $uri @domjudgeFront;
-#
-#	# Handle API requests separately to be able to split the log
-#	location /api/ {
-#		try_files $uri @domjudgeFrontApi;
-#		error_log /var/log/nginx/domjudge-api.log;
-#		access_log /var/log/nginx/domjudge-api.log;
-#	}
-# }
-
-# Or you can install it with a prefix
-location /domjudge { return 301 /domjudge/; }
+@ONLY_IF_PREFIX@location @URLPREFIX@ { return 301 @URLPREFIXSLASH@; }
 # Disallow opening .php files directly
-location ~ ^/domjudge/+[^/]+\.php$ { return 404; }
-location /domjudge/ {
+location ~ ^@URLPREFIXSLASH@+[^/]+\.php$ { return 404; }
+location @URLPREFIXSLASH@ {
 	root $domjudgeRoot;
-	rewrite ^/domjudge/(.*)$ /$1 break;
+@ONLY_IF_PREFIX@	rewrite ^@URLPREFIXSLASH@(.*)$ /$1 break;
 	try_files $uri @domjudgeFront;
 
 	# Handle API requests separately to be able to split the log
-	location /domjudge/api/ {
-		rewrite ^/domjudge/(.*)$ /$1 break;
+	location @URLPREFIXSLASH@api/ {
+@ONLY_IF_PREFIX@		rewrite ^@URLPREFIXSLASH@(.*)$ /$1 break;
 		try_files $uri @domjudgeFrontApi;
 	}
 }
