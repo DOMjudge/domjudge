@@ -101,7 +101,7 @@ development mode to have access to the profiling and debugging
 interfaces and extended logging. To run in development mode, create
 the file ``webapp/.env.local`` and add to it the setting
 ``APP_ENV=dev``. This is automatically done when running ``make
-maintainer-install`` when the file did not exist before.
+maintainer-conf`` when the file did not exist before.
 For more details see the `Symfony documentation`_.
 
 .. _Symfony documentation: https://symfony.com/doc/current/configuration/dot-env-changes.html
