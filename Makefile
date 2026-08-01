@@ -161,10 +161,11 @@ endif
 	@echo "Optionally:"
 	@echo "    - Install the create-cgroup service to setup the secure judging restrictions:"
 	@echo "        cp judge/create-cgroups.service /etc/systemd/system/"
-	@echo "    - Install the judgehost service:"
-	@echo "        cp judge/domjudge-judgedaemon@.service /etc/systemd/system/"
+	@echo "    - Install the judgehost service. The unit is named after this"
+	@echo "      instance, since it refers to this installation's paths:"
+	@echo "        cp judge/domjudge-judgedaemon@.service /etc/systemd/system/$(INSTANCE)-judgedaemon@.service"
 	@echo "    - You can enable the judgehost on CPU core 1 with:"
-	@echo "        systemctl enable domjudge-judgedaemon@1"
+	@echo "        systemctl enable $(INSTANCE)-judgedaemon@1"
 	@echo ""
 
 check-root:
@@ -283,13 +284,13 @@ inplace-install-l:
 	@echo "        And manually make sure the webserver has traversal access to: $(CURDIR)"
 	@echo "    - Configure webserver"
 	@echo "        Nginx + PHP-FPM:"
-	@echo "           ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/domjudge.conf"
-	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm.conf /etc/php/$(PHPVERSION)/fpm/pool.d/domjudge-fpm.conf"
+	@echo "           ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/$(INSTANCE).conf"
+	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm.conf /etc/php/$(PHPVERSION)/fpm/pool.d/$(INSTANCE)-fpm.conf"
 	@echo "           systemctl restart nginx"
 	@echo "           systemctl restart php-fpm"
 	@echo "        Apache 2:"
-	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/domjudge.conf"
-	@echo "           a2enconf domjudge"
+	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/$(INSTANCE).conf"
+	@echo "           a2enconf $(INSTANCE)"
 	@echo "           a2enmod rewrite headers"
 	@echo "           systemctl restart apache2"
 	@echo ""
@@ -345,18 +346,20 @@ endif
 		exit 1; \
 	fi
 
+# The installed file names are derived from the instance name so that
+# several in-place installs can coexist on one host.
 inplace-postinstall-apache: inplace-postinstall-permissions
 	@if [ ! -d "/etc/apache2/conf-enabled" ]; then echo "Couldn't find directory /etc/apache2/conf-enabled. Is apache installed?"; false; fi
-	ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/domjudge.conf
-	a2enconf domjudge
+	ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/$(INSTANCE).conf
+	a2enconf $(INSTANCE)
 	a2enmod rewrite headers
 	systemctl restart apache2
 
 inplace-postinstall-nginx: inplace-postinstall-permissions
 	@if [ ! -d "/etc/nginx/" ]; then echo "Couldn't find directory /etc/nginx/. Is nginx installed?"; false; fi
-	@cmd="ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/conf.d/domjudge.conf"; \
+	@cmd="ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/conf.d/$(INSTANCE).conf"; \
 	if [ -d "/etc/nginx/sites-enabled/" ]; then \
-		cmd="ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/domjudge.conf"; \
+		cmd="ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/$(INSTANCE).conf"; \
 	fi; echo $$cmd; $$cmd
 	systemctl restart nginx
 	@if [ ! -d "$(debpool)" ] && [ ! -d "$(fedpool)" ]; then \
@@ -368,13 +371,13 @@ inplace-postinstall-nginx: inplace-postinstall-permissions
 		service="php$(PHPVERSION)-fpm"; \
 	fi; \
 	service="systemctl restart $$service"; \
-	ln="ln -sf $(CURDIR)/etc/domjudge-fpm.conf $$phppool/domjudge-fpm.conf"; \
+	ln="ln -sf $(CURDIR)/etc/domjudge-fpm.conf $$phppool/$(INSTANCE)-fpm.conf"; \
 	echo $$ln; echo $$service; $$ln; $$service
 
 inplace-postinstall-judgedaemon:
-	cp $(CURDIR)/etc/sudoers-domjudge /etc/sudoers.d/domjudge
-	chown root:root /etc/sudoers.d/domjudge
-	chmod 0600 /etc/sudoers.d/domjudge
+	cp $(CURDIR)/etc/sudoers-domjudge /etc/sudoers.d/$(INSTANCE)
+	chown root:root /etc/sudoers.d/$(INSTANCE)
+	chmod 0600 /etc/sudoers.d/$(INSTANCE)
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 inplace-uninstall-l:
