@@ -55,6 +55,9 @@ WEBSERVER_GROUP = @WEBSERVER_GROUP@
 # Base URL of the DOMjudge web interfaces
 BASEURL         = @BASEURL@
 
+# API URL the judgehost credentials point at, derived from BASEURL.
+RESTAPIURL      = @RESTAPIURL@
+
 # Autoconf prefixes and paths
 FHS_ENABLED    = @FHS_ENABLED@
 
