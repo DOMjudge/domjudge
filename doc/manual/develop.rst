@@ -74,6 +74,82 @@ Note that these targets have to be executed *separately* and
 they replace the steps described in the chapters on installing
 the DOMserver or Judgehost.
 
+.. _parallel_instances:
+
+Running several checkouts side by side
+--------------------------------------
+When working on multiple branches at the same time, for example using
+``git worktree`` or ``jj workspace``, each checkout can have its own
+in-place installation. No extra flags are needed: ``make maintainer-conf``
+derives an *instance name* from the name of the directory the source tree
+lives in, and uses it for
+
+* the webserver and PHP-FPM configuration file names installed into
+  ``/etc``, and the name passed to ``a2enconf``;
+* the PHP-FPM pool name and its listening socket;
+* the nginx ``upstream`` name and the nginx variable holding the HTTPS
+  flag, both of which are global to nginx: a duplicate makes nginx refuse
+  to start;
+* the ``/etc/sudoers.d`` file name;
+* the default database name *and* database user.
+
+The directory name is lowercased, characters outside ``[a-z0-9-]`` are
+replaced by dashes, and the result is truncated to 24 characters. A
+checkout directory named ``domjudge`` keeps all the historic defaults, so
+existing installations are unaffected.
+
+Each instance also gets its own base URL, ``http://<instance>.localhost/``,
+serving DOMjudge from the root rather than from a ``/domjudge`` subpath.
+Distinct *hostnames* are used rather than distinct ports or paths on
+purpose: browsers do not scope cookies by port, and DOMjudge does not scope
+its session cookie to the base path, so two instances reachable under the
+same hostname would keep invalidating each other's sessions. On systems
+using systemd, ``nss-myhostname`` resolves any ``*.localhost`` name to
+127.0.0.1, so no ``/etc/hosts`` entries are needed.
+
+A named instance takes its ``server_name`` and its listening port from the
+base URL, but only when the URL names a port explicitly: an ``https`` base
+URL still yields ``listen 80``, since the generated server block speaks
+plain HTTP and terminating TLS is left to you.
+
+To override either value, pass it explicitly; ``CONFIGURE_FLAGS`` is
+appended last, so it takes precedence::
+
+  make maintainer-conf CONFIGURE_FLAGS="--with-instance-name=myname \
+      --with-baseurl=http://myname.localhost/"
+
+Then continue as usual, and set up a database for this instance::
+
+  make maintainer-install
+  sudo make inplace-postinstall-nginx     # or -apache
+  ./sql/dj_setup_database -u root [-r|-p ROOT_PASS] install
+
+A few things to be aware of:
+
+* The ``inplace-postinstall-*`` targets refuse to run when a file they
+  would install already belongs to a different source tree, or is not a
+  symlink and so was not put there by an in-place install at all. This
+  catches two checkouts whose directory names reduce to the same instance
+  name; give one of them an explicit ``--with-instance-name``.
+* If ``webapp/.env.local`` contains a ``DATABASE_URL`` line, it takes
+  precedence over ``etc/dbpasswords.secret``. Changing only the secrets
+  file then moves ``dj_setup_database`` and the tooling to the new
+  database while leaving the webapp on the old one. Keep the two in sync,
+  or remove the ``DATABASE_URL`` line.
+* ``misc-tools/check-systemd-sandbox`` may suggest a ``ReadWritePaths=``
+  override for your webserver or PHP-FPM service. That override is a
+  single file per service, so it must list the ``webapp/var`` and
+  ``output/tmp`` directories of *all* your checkouts on one line;
+  re-running ``systemctl edit`` overwrites the previous contents.
+* With Apache, an instance served from the root of the server takes over
+  ``DocumentRoot`` for the whole server. To run several of them, either
+  give each a distinct path prefix through ``--with-baseurl``, or move the
+  generated configuration into a ``VirtualHost`` block.
+* The judgehost side is deliberately not parameterised: the
+  ``domjudge-run-*`` users, the cgroups and the chroot directory are
+  shared by the whole machine. To judge against a particular instance,
+  point that judgedaemon's ``etc/restapi.secret`` at it.
+
 
 Makefile structure
 ------------------
