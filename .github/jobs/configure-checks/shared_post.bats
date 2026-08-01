@@ -243,6 +243,88 @@ source .github/jobs/configure-checks/functions.sh
   done
 }
 
+@test "Instance name is sanitized" {
+  setup
+  run run_configure
+  assert_line "checking instance name... domjudge"
+  assert_line " * instance name.......: domjudge"
+  # Uppercase and characters outside [a-z0-9-] are folded to dashes.
+  run run_configure "--with-instance-name=wt-Foo.Bar"
+  assert_line "checking instance name... wt-foo-bar"
+  # Truncated to 24 characters, without leaving a trailing dash.
+  run run_configure "--with-instance-name=a-very-long-worktree-name-that-exceeds-limits"
+  assert_line "checking instance name... a-very-long-worktree-nam"
+  # A name with nothing usable in it is an error rather than a silent
+  # fallback to the default instance.
+  run run_configure "--with-instance-name=___"
+  assert_line "checking instance name... configure: error: instance name '___' contains no usable characters; pass a valid --with-instance-name=NAME."
+  # Autoconf turns a valueless option into 'yes'/'no'; neither names an
+  # instance, so they must not become one.
+  run run_configure "--with-instance-name"
+  assert_line "checking instance name... configure: error: --with-instance-name requires a value, e.g. --with-instance-name=contest2."
+  run run_configure "--without-instance-name"
+  assert_line "checking instance name... configure: error: --with-instance-name requires a value, e.g. --with-instance-name=contest2."
+  run run_configure "--with-instance-name="
+  assert_line "checking instance name... configure: error: --with-instance-name requires a non-empty value, e.g. --with-instance-name=contest2."
+  # A later occurrence wins, so the makefiles can pass a derived default
+  # that the user overrides through CONFIGURE_FLAGS.
+  run run_configure "--with-instance-name=first --with-instance-name=second"
+  assert_line "checking instance name... second"
+}
+
+@test "Named instance gets its own webserver identifiers" {
+  setup
+  run run_configure "--with-instance-name=wt-foo --with-baseurl=http://wt-foo.localhost/"
+  assert_line "checking webserver host... wt-foo.localhost:80"
+  run make -C etc config
+  assert_success
+  # These nginx names are global; a duplicate makes nginx refuse to start.
+  run grep -q "^upstream wt-foo {" etc/nginx-conf
+  assert_success
+  run grep -q "fastcgi_param_https_wt_foo" etc/nginx-conf
+  assert_success
+  run grep -q "^server_name wt-foo.localhost;" etc/nginx-conf-inner
+  assert_success
+  # PHP-FPM pool name and socket.
+  run grep -q "^\[wt-foo\]" etc/domjudge-fpm.conf
+  assert_success
+  run grep -q "^listen = /var/run/php-fpm-wt-foo.sock" etc/domjudge-fpm.conf
+  assert_success
+
+  # An explicit port in the base URL is used, but an 'https' scheme must
+  # not silently become 'listen 443': the generated server block speaks
+  # plain HTTP, so it would answer TLS handshakes with cleartext.
+  run run_configure "--with-instance-name=wt-foo --with-baseurl=http://wt-foo.localhost:8080/"
+  assert_line "checking webserver host... wt-foo.localhost:8080"
+  run run_configure "--with-instance-name=wt-foo --with-baseurl=https://wt-foo.example.org/"
+  assert_line "checking webserver host... wt-foo.example.org:80"
+  run make -C etc config
+  assert_success
+  run grep -q "^	listen 80;" etc/nginx-conf
+  assert_success
+  # The commented-out TLS block still mentions 443; no active one may.
+  run grep -q "^	listen 443" etc/nginx-conf
+  assert_failure
+}
+
+@test "Default instance keeps the historic webserver identifiers" {
+  setup
+  run run_configure "--with-baseurl=http://localhost/domjudge/"
+  assert_line "checking webserver host... _default_:80"
+  run make -C etc config
+  assert_success
+  run grep -q "^upstream domjudge {" etc/nginx-conf
+  assert_success
+  run grep -q "fastcgi_param_https_variable" etc/nginx-conf
+  assert_success
+  run grep -q "^server_name _default_;" etc/nginx-conf-inner
+  assert_success
+  run grep -q "^\[domjudge\]" etc/domjudge-fpm.conf
+  assert_success
+  run grep -q "^listen = /var/run/php-fpm-domjudge.sock" etc/domjudge-fpm.conf
+  assert_success
+}
+
 @test "Change users" {
   setup
   run run_configure

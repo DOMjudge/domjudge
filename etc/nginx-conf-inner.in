@@ -3,7 +3,7 @@
 # inner nginx configuration for DOMjudge
 # This is in a separate file to not have duplicate config
 
-server_name _default_;
+server_name @URLSERVERNAME@;
 
 # set max upload size to infinite since PHP has a setting for this
 client_max_body_size 0;
@@ -35,14 +35,14 @@ location @URLPREFIXSLASH@ {
 
 location @domjudgeFront {
 	fastcgi_split_path_info ^(.+\.php)(/.*)$;
-	fastcgi_pass domjudge;
+	fastcgi_pass @INSTANCE@;
 	include fastcgi_params;
 	fastcgi_param SERVER_NAME $host;
 	fastcgi_param SCRIPT_FILENAME $domjudgeRoot/index.php;
 	fastcgi_param SCRIPT_NAME $prefix/index.php;
 	fastcgi_param REQUEST_URI $prefix$uri?$args;
 	fastcgi_param DOCUMENT_ROOT $domjudgeRoot;
-	fastcgi_param HTTPS $fastcgi_param_https_variable;
+	fastcgi_param HTTPS $@HTTPSVAR@;
 	# Prevents URIs that include the front controller. This will 404:
 	# http://domain.tld/app_dev.php/some-path
 	internal;
@@ -50,21 +50,21 @@ location @domjudgeFront {
 
 location @domjudgeFrontApi {
 	fastcgi_split_path_info ^(.+\.php)(/.*)$;
-	fastcgi_pass domjudge;
+	fastcgi_pass @INSTANCE@;
 	include fastcgi_params;
 	fastcgi_param SERVER_NAME $host;
 	fastcgi_param SCRIPT_FILENAME $domjudgeRoot/index.php;
 	fastcgi_param SCRIPT_NAME $prefix/index.php;
 	fastcgi_param REQUEST_URI $prefix$uri?$args;
 	fastcgi_param DOCUMENT_ROOT $domjudgeRoot;
-	fastcgi_param HTTPS $fastcgi_param_https_variable;
+	fastcgi_param HTTPS $@HTTPSVAR@;
 	# Prevents URIs that include the front controller. This will 404:
 	# http://domain.tld/app_dev.php/some-path
 	internal;
 
 	# Use a separate log file for the API
-	error_log /var/log/nginx/domjudge-api.log;
-	access_log /var/log/nginx/domjudge-api.log;
+	error_log /var/log/nginx/@INSTANCE@-api.log;
+	access_log /var/log/nginx/@INSTANCE@-api.log;
 }
 
 # The X-Frame-Options header defends against so-called 'clickjacking' attacks.
@@ -77,8 +77,8 @@ add_header Referrer-Policy "same-origin";
 add_header X-Content-Type-Options "nosniff";
 add_header X-XSS-Protection "1; mode=block";
 
-error_log /var/log/nginx/domjudge.log;
-access_log /var/log/nginx/domjudge.log;
+error_log /var/log/nginx/@INSTANCE@.log;
+access_log /var/log/nginx/@INSTANCE@.log;
 
 # When running a proxy or loadbalancer in front of this nginx instance,
 # you can use these directives to trust the proxy / loadbalancer and let
