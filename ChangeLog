@@ -19,6 +19,11 @@ Version 10.0.0DEV
  - Make penalty time a per contest setting.
  - `etc/genrestapicredentials` now uses the configured base URL instead of
    always writing `http://localhost/domjudge/api`.
+ - The path prefix in the generated webserver configuration is now derived
+   from `--with-baseurl` instead of always being `/domjudge`. Installations
+   configured with a base URL without a path, e.g.
+   `--with-baseurl=https://example.org/`, now get a webserver configuration
+   serving DOMjudge from the root rather than from `/domjudge`.
  - Configuration changes
    - `show_balloons_postfreeze` configuration variable superseded by
      `minimum_number_of_balloons` and `any_balloon_postfreeze`.
