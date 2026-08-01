@@ -186,6 +186,63 @@ source .github/jobs/configure-checks/functions.sh
   assert_line " * website base URL....: https://contest.example.org"
 }
 
+@test "URL path prefix is derived from the base URL" {
+  setup
+  # Without a base URL the historic default is kept.
+  run run_configure
+  assert_line "checking URL path prefix... /domjudge/"
+  run run_configure "--with-baseurl=https://contest.example.org/dj/"
+  assert_line "checking URL path prefix... /dj/"
+  # A base URL without a path serves DOMjudge from the root.
+  run run_configure "--with-baseurl=https://contest.example.org/"
+  assert_line "checking URL path prefix... /"
+  # An unparseable base URL is rejected.
+  run run_configure "--with-baseurl=not-a-url"
+  assert_line "checking URL path prefix... configure: error: could not parse base URL 'not-a-url'; expected e.g. 'https://example.com/domjudge/'."
+}
+
+@test "Webserver config follows the URL path prefix" {
+  setup
+  run run_configure "--with-baseurl=http://localhost/domjudge/"
+  run make -C etc config
+  assert_success
+  run grep -q "^Alias /domjudge " etc/apache.conf
+  assert_success
+  run grep -q "^set \$prefix /domjudge;" etc/nginx-conf-inner
+  assert_success
+  run grep -q "^location /domjudge { return 301 /domjudge/; }" etc/nginx-conf-inner
+  assert_success
+  run grep -q "^DocumentRoot " etc/apache.conf
+  assert_failure
+  # The prose describing the other case is dropped along with its directive.
+  run grep -q "takes over" etc/apache.conf
+  assert_failure
+
+  # Served from the root: Apache takes over the document root, and nginx
+  # needs an explicit empty string since 'set' requires two arguments.
+  run run_configure "--with-baseurl=http://localhost/"
+  run make -C etc config
+  assert_success
+  run grep -q "^DocumentRoot " etc/apache.conf
+  assert_success
+  run grep -q "^Alias " etc/apache.conf
+  assert_failure
+  run grep -q "only lets it occupy a subdir" etc/apache.conf
+  assert_failure
+  run grep -q "^set \$prefix '';" etc/nginx-conf-inner
+  assert_success
+  run grep -q "return 301" etc/nginx-conf-inner
+  assert_failure
+
+  # No sentinel markers or unsubstituted tokens may survive either way.
+  for file in apache.conf nginx-conf nginx-conf-inner domjudge-fpm.conf; do
+    run grep -q "ONLY_IF" "etc/$file"
+    assert_failure
+    run grep -qE "@[A-Za-z_]+@" "etc/$file"
+    assert_failure
+  done
+}
+
 @test "Change users" {
   setup
   run run_configure

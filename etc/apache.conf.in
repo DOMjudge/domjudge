@@ -53,12 +53,21 @@
 #</VirtualHost>
 
 
-### Alias config ###
+@ONLY_IF_PREFIX@### Alias config ###
+@ONLY_IF_ROOT@### Document root config ###
 #
-# Alternatively, use this instead of the VirtualHost above when you don't
-# want DOMjudge in the root, but only occupy a subdir, like this:
-# www.example.com/domjudge
-Alias /domjudge @domserver_webappdir@/public
+# The directive below is derived from the configured base URL.
+@ONLY_IF_PREFIX@# The base URL does not put DOMjudge in the root of this
+@ONLY_IF_PREFIX@# server, but only lets it occupy a subdir, like this:
+@ONLY_IF_PREFIX@# www.example.com/domjudge. Use one of the VirtualHost
+@ONLY_IF_PREFIX@# blocks above instead to give it a server of its own.
+@ONLY_IF_PREFIX@Alias @URLPREFIX@ @domserver_webappdir@/public
+@ONLY_IF_ROOT@# The base URL puts DOMjudge in the root of this server, so
+@ONLY_IF_ROOT@# it takes over the document root rather than occupying a
+@ONLY_IF_ROOT@# subdirectory. Note that this applies to the whole server;
+@ONLY_IF_ROOT@# move it into one of the VirtualHost blocks shown above if
+@ONLY_IF_ROOT@# that is not what you want.
+@ONLY_IF_ROOT@DocumentRoot @domserver_webappdir@/public
 
 ### General options ###
 #

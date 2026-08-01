@@ -275,6 +275,26 @@ else
 fi
 AC_SUBST(RESTAPIURL,$restapiurl)
 
+AC_MSG_CHECKING([URL path prefix])
+# Derive the path DOMjudge is served under from the base URL, so that the
+# webserver configuration and the base URL cannot drift apart. Fall back to
+# the historic default when no base URL was configured, so that the
+# generated files stay unchanged in that case.
+if test "x$BASEURL_UNCONFIGURED" = x1; then
+	urlsource='http://localhost/domjudge/'
+else
+	urlsource="$BASEURL"
+fi
+urlscheme=`echo "$urlsource" | sed -n 's,^\([[a-zA-Z][a-zA-Z0-9+.-]]*\)://.*,\1,p'`
+urlauth=`echo "$urlsource" | sed -e 's,^[[a-zA-Z][a-zA-Z0-9+.-]]*://,,' -e 's,/.*,,'`
+urlprefix=`echo "$urlsource" | sed -e 's,^[[a-zA-Z][a-zA-Z0-9+.-]]*://[[^/]]*,,' -e 's,//*$,,'`
+if test "x$urlscheme" = x || test "x$urlauth" = x; then
+	AC_MSG_ERROR([could not parse base URL '$urlsource'; expected e.g. 'https://example.com/domjudge/'.])
+fi
+AC_SUBST(URLPREFIX,$urlprefix)
+AC_SUBST(URLPREFIXSLASH,$urlprefix/)
+AC_MSG_RESULT([$urlprefix/])
+
 # Checks for programs.
 if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 AC_PROG_CXX
