@@ -5,14 +5,17 @@
 ### upstream ###
 #
 # always include this and make sure it points to the socket of PHP-FPM
-upstream domjudge {
-	server unix:/var/run/php-fpm-domjudge.sock; # if using with etc/domjudge-fpm.conf
+# The upstream is named after the instance, since its name is global to
+# nginx and a duplicate makes nginx refuse to start.
+upstream @INSTANCE@ {
+	server unix:/var/run/php-fpm-@INSTANCE@.sock; # if using with etc/domjudge-fpm.conf
 	#server unix:/run/php/php7.0-fpm.sock; # default on ubuntu servers
 }
 
 # Read the HTTPS field from the X-Forwarded-Proto field from any upstream proxy
 # Fall back to the internal $https variable if not set
-map $http_x_forwarded_proto $fastcgi_param_https_variable {
+# This variable is global to nginx too, hence the instance name in it.
+map $http_x_forwarded_proto $@HTTPSVAR@ {
 	default $https;
 	https 'on';
 }
@@ -21,8 +24,8 @@ map $http_x_forwarded_proto $fastcgi_param_https_variable {
 #
 
 server {
-	listen 80;
-	listen [::]:80;
+	listen @URLLISTEN@;
+	listen [::]:@URLLISTEN@;
 
 	# If you are reading from the event feed, make sure this is large enough.
 	# If you have a slow event feed reader, nginx needs to keep the connection
@@ -36,7 +39,7 @@ server {
 # server {
 # 	listen   80;
 # 	listen   [::]:80;
-# 	server_name _default_;
+# 	server_name @URLSERVERNAME@;
 # 	return 308 https://$host$request_uri;  # enforce https
 # }
 
@@ -44,7 +47,7 @@ server {
 # server {
 # 	listen   80;
 # 	listen   [::]:80;
-# 	server_name _default_;
+# 	server_name @URLSERVERNAME@;
 # 	return 426;  # do not allow plain HTTP
 # }
 
