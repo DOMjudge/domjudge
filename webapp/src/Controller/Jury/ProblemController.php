@@ -1274,7 +1274,7 @@ class ProblemController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{contestId}/{probId}/toggle/{type<judge|submit>}', name: 'jury_problem_toggle')]
+    #[Route(path: '/{contestId}/{probId}/toggle/{type<judge|submit|verification>}', name: 'jury_problem_toggle')]
     public function toggleSubmitAction(
         RouterInterface $router,
         Request $request,
@@ -1297,6 +1297,10 @@ class ProblemController extends BaseController
             case 'submit':
                 $contestProblem->setAllowSubmit($value);
                 $label = 'set allow submit';
+                break;
+            case 'verification':
+                $contestProblem->setVerificationRequired($value);
+                $label = 'set verification required';
                 break;
             default:
                 throw new BadRequestHttpException('Unknown toggle type');

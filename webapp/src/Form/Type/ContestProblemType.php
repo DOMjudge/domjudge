@@ -48,12 +48,17 @@ class ContestProblemType extends AbstractType
             'required' => false,
             'attr' => ContestType::TOGGLE_ATTRS,
         ]);
+        $builder->add('verificationRequired', CheckboxType::class, [
+            'label' => 'Manual verification',
+            'required' => false,
+            'attr' => ContestType::TOGGLE_ATTRS,
+        ]);
         $builder->add('color', TextType::class, [
             'required' => false,
             'label' => 'Colour',
             'attr' => [
                 'data-color-picker' => '',
-                'size' => 6,
+                'size' => 8,
             ],
         ]);
         $builder->add('lazyEvalResults', ChoiceType::class, [

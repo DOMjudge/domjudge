@@ -445,6 +445,7 @@
                             <th>Points</th>
                             <th>Allow<br>submit</th>
                             <th>Allow<br>judge</th>
+                            <th>Manual<br>verification</th>
                             <th>Color</th>
                             <th>Lazy eval</th>
                             <th></th>
@@ -465,6 +466,9 @@
                                 </td>
                                 <td>
                                     {% include 'jury/partials/problem_toggle.html.twig' with {contestProblem: problem, type: 'judge', enabled: problem.allowJudge} %}
+                                </td>
+                                <td>
+                                    {% include 'jury/partials/problem_toggle.html.twig' with {contestProblem: problem, type: 'verification', enabled: problem.verificationRequired} %}
                                 </td>
                                 {% if problem.color is empty %}
                                     <td><a href="{{ link }}">&nbsp;</a></td>
