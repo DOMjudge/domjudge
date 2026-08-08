@@ -686,7 +686,9 @@ class Problem extends BaseApiEntity implements
 
     public function addLanguage(Language $language): Problem
     {
-        $this->languages[] = $language;
+        if (!$this->languages->contains($language)) {
+            $this->languages[] = $language;
+        }
         return $this;
     }
 
@@ -701,6 +703,12 @@ class Problem extends BaseApiEntity implements
     public function removeLanguage(Language $language): Problem
     {
         $this->languages->removeElement($language);
+        return $this;
+    }
+
+    public function resetLanguages(): Problem
+    {
+        $this->languages->clear();
         return $this;
     }
 
