@@ -1127,6 +1127,22 @@ class JudgeDaemon
     }
 
     /**
+     * Recreate the result directory for a testcase attempt.
+     *
+     * A task can be returned and fetched again by the same judgedaemon. Never
+     * reuse output, feedback, or hardlinks from an earlier attempt.
+     */
+    private function resetTestcaseDirectory(string $testcasedir): bool
+    {
+        if ((file_exists($testcasedir) || is_link($testcasedir)) &&
+            !$this->runCommandSafe(['rm', '-rf', '--', $testcasedir])) {
+            return false;
+        }
+
+        return mkdir($testcasedir, 0755, true);
+    }
+
+    /**
      * Recursively adjust permission bits of $path and everything below it,
      * like `chmod -R`: the bits in $add are turned on, the bits in $remove are
      * turned off, all other bits (including setuid/setgid/sticky) are left
@@ -2435,6 +2451,10 @@ class JudgeDaemon
         $input = $tcfile['input'];
         $output = $tcfile['output'];
         $passLimit = $run_config['pass_limit'];
+        if (!$this->resetTestcaseDirectory($testcasedir)) {
+            error("Could not reset testcase result directory '$testcasedir'.");
+        }
+
         // All of those are to help PHPStan, it seems to not see that they are defined in the loop
         // and the loop always runs as tpassLimit >= $passCnt.
         $score = "";
