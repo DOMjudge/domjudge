@@ -63,14 +63,14 @@ fi
 endef
 
 node-dependencies:
-	${ \
+	@{ \
 		$(detect_yarn); \
 		$$YARN_CMD install; \
 		$(yarn_licenses_warn); \
 	}
 
 node-dependencies-dist:
-	${ \
+	@{ \
 		$(detect_yarn); \
 		$$YARN_CMD install; \
 		$(yarn_licenses_strict); \
