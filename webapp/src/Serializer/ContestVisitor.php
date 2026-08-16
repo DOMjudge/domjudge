@@ -4,6 +4,7 @@ namespace App\Serializer;
 
 use App\DataTransferObject\FileWithName;
 use App\DataTransferObject\ImageFile;
+use App\DataTransferObject\ImageTag;
 use App\Entity\Contest;
 use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
@@ -85,6 +86,7 @@ readonly class ContestVisitor implements EventSubscriberInterface
                 filename: 'banner.' . $extension,
                 width: $imageSize[0],
                 height: $imageSize[1],
+                tag: [ImageTag::LIGHT],
             ));
         } else {
             $contest->setBannerForApi();

@@ -3,6 +3,7 @@
 namespace App\Serializer;
 
 use App\DataTransferObject\ImageFile;
+use App\DataTransferObject\ImageTag;
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -64,6 +65,7 @@ readonly class TeamAffiliationVisitor implements EventSubscriberInterface
                     filename: 'country-flag-' . $size . '.svg',
                     width: $viewBoxSize[0],
                     height: $viewBoxSize[1],
+                    tag: [ImageTag::LIGHT, ImageTag::DARK],
                 );
             }
 
@@ -95,6 +97,7 @@ readonly class TeamAffiliationVisitor implements EventSubscriberInterface
                 filename: 'logo.' . $extension,
                 width: $imageSize[0],
                 height: $imageSize[1],
+                tag: [ImageTag::LIGHT],
             ));
         } else {
             $affiliation->setLogoForApi();

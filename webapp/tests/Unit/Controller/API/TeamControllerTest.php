@@ -73,6 +73,7 @@ class TeamControllerTest extends BaseTestCase
                 'href'     => "contests/demo/teams/$id/photo",
                 'mime'     => 'image/jpeg',
                 'filename' => 'photo.jpg',
+                'tag'      => ['light'],
                 'width'    => 320,
                 'height'   => 200,
             ]
