@@ -111,7 +111,7 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'demo',
             ['problem_id' => 'hello', 'language_id' => 'cpp', 'files' => 'this is not an array'],
-            "/files:\n.*This value should be of type array/"
+            "/files:\n.*This value should be of type App\\\\DataTransferObject\\\\AddSubmissionFile\[\]\|null\./"
         ];
         yield [
             'demo',
