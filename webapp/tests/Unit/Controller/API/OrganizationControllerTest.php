@@ -30,6 +30,7 @@ class OrganizationControllerTest extends BaseTestCase
                     'width'    => 640,
                     'height'   => 480,
                     'filename' => 'country-flag-4x3.svg',
+                    'tags'     => ['light', 'dark'],
                 ],
                 [
                     'href'     => 'country-flags/NLD/1x1',
@@ -37,6 +38,7 @@ class OrganizationControllerTest extends BaseTestCase
                     'width'    => 512,
                     'height'   => 512,
                     'filename' => 'country-flag-1x1.svg',
+                    'tags'     => ['light', 'dark'],
                 ],
             ],
             'logo'         => null,
@@ -53,6 +55,7 @@ class OrganizationControllerTest extends BaseTestCase
                     'width'    => 640,
                     'height'   => 480,
                     'filename' => 'country-flag-4x3.svg',
+                    'tags'     => ['light', 'dark'],
                 ],
                 [
                     'href'     => 'country-flags/DEU/1x1',
@@ -60,6 +63,7 @@ class OrganizationControllerTest extends BaseTestCase
                     'width'    => 512,
                     'height'   => 512,
                     'filename' => 'country-flag-1x1.svg',
+                    'tags'     => ['light', 'dark'],
                 ],
             ],
         ],
@@ -77,6 +81,18 @@ class OrganizationControllerTest extends BaseTestCase
     protected array $expectedAbsent = ['4242', 'nonexistent'];
 
     protected static array $fixtures = [SampleAffiliationsFixture::class];
+
+    public function testNoImageTagsBefore2026(): void
+    {
+        $this->withChangedConfiguration('ccs_api_version', '2023-06', function (): void {
+            $url = $this->helperGetEndpointURL($this->apiEndpoint, 'utrecht');
+            $organization = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+            self::assertNotEmpty($organization['country_flag']);
+            foreach ($organization['country_flag'] as $flag) {
+                self::assertArrayNotHasKey('tags', $flag);
+            }
+        });
+    }
 
     public function testList(): void
     {
@@ -148,6 +164,7 @@ class OrganizationControllerTest extends BaseTestCase
                 'href'     => "contests/demo/organizations/$id/logo",
                 'mime'     => 'image/png',
                 'filename' => 'logo.png',
+                'tags'     => ['light'],
                 'width'    => 181,
                 'height'   => 101,
             ]
