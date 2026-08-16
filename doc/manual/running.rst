@@ -116,7 +116,7 @@ happen in case of a :ref:`rejudging`).
   information leaking to contestants and observers. Use with caution!
 
 Balloons during frozen scoreboard
-`````````````````````
+`````````````````````````````````
 The global configuration option ``minimum_number_of_balloons`` will
 ignore a contest freeze for purposes of balloons and new correct
 submissions will trigger a balloon entry in the table. This only
