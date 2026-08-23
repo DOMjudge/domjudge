@@ -795,7 +795,7 @@ class ContestController extends BaseController
         }
 
         /** @var int[] $clarificationIds */
-        $clarificationIds = array_map(fn(array $data) => $data['clarid'], $this->em->createQueryBuilder()
+        $clarificationIds = array_map(fn(array $data) => $data['externalid'], $this->em->createQueryBuilder()
             ->from(Clarification::class, 'c')
             ->select('c.externalid')
             ->andWhere('c.contest = :contest')
