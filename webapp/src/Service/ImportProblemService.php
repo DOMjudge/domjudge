@@ -1196,8 +1196,12 @@ readonly class ImportProblemService
                     join(', ', $unknown_flags), $name);
             }
         }
-        if (isset($yamlData['output_validator_flags'])) {
-            $testcaseGroup->setOutputValidatorFlags($yamlData['output_validator_flags']);
+        foreach(['flags', 'args'] as $postFix) {
+            $output_validator_flags_key = 'output_validator_' . $postFix;
+            if (isset($yamlData[$output_validator_flags_key])) {
+                $testcaseGroup->setOutputValidatorFlags($yamlData[$output_validator_flags_key]);
+                break;
+            }
         }
         if (isset($yamlData['on_reject'])) {
             $testcaseGroup->setOnRejectContinue($yamlData['on_reject'] === 'continue');
@@ -1206,9 +1210,26 @@ readonly class ImportProblemService
     }
 
     /**
+     * @param string|array<mixed, mixed> $input
+     * @return string[]
+     */
+    public static function parseTypes(string|array $input): array
+    {
+        $final = [];
+        if (is_array($input)) {
+            foreach ($input as $possibleType) {
+                $final = array_merge($final, self::parseTypes($possibleType));
+            }
+        } else {
+            $final = array_merge($final, preg_split("/[\s,;]+/", $input));
+        }
+        return $final;
+    }
+
+    /**
      * Returns true iff the yaml could be parsed correctly.
      *
-     * @param array{danger?: string[], info?: string[]} $messages
+     * @param array{danger?: string[], warning?: string[], info?: string[]} $messages
      */
     public static function parseYaml(bool|string $problemYaml, array &$messages, string &$validationMode, PropertyAccessor $propertyAccessor, Problem $problem): bool
     {
@@ -1241,7 +1262,7 @@ readonly class ImportProblemService
 
         $validationMode = 'default';
         if (isset($yamlData['type'])) {
-            $types = explode(' ', $yamlData['type']);
+            $types = self::parseTypes($yamlData['type']);
             // Validation happens later when we set the properties.
             $yamlProblemProperties['typesAsString'] = $types;
             if (in_array('interactive', $types)) {
@@ -1251,8 +1272,12 @@ readonly class ImportProblemService
             $yamlProblemProperties['typesAsString'] = ['pass-fail'];
         }
 
-        if (isset($yamlData['validator_flags'])) {
-            $yamlProblemProperties['special_compare_args'] = $yamlData['validator_flags'];
+        foreach (['flags', 'args'] as $postFix) {
+            $validator_flags_key = 'validator_' . $postFix;
+            if (isset($yamlData[$validator_flags_key])) {
+                $yamlProblemProperties['special_compare_args'] = $yamlData[$validator_flags_key];
+                break;
+            }
         }
 
         if (isset($yamlData['validation'])
@@ -1290,6 +1315,33 @@ readonly class ImportProblemService
                     return false;
                 }
                 $yamlProblemProperties['multipassLimit'] = $validationPasses;
+            }
+        }
+
+        if (isset($yamlData['problem_format_version'])) {
+            $version = $yamlData['problem_format_version'];
+            if (in_array($version, ['legacy', '2025-09-draft', 'draft', '2025-09', '2023-07-draft'])) {
+                $messages['warning'][] = sprintf('problemspec %s support still experimental.', $version);
+            } elseif (!in_array($version, ['domjudge', 'icpc-legacy'])) {
+                // 2023-07-draft used in Unit tests
+                $messages['danger'][] = sprintf('Unknown problemspec %s.', $version);
+                return false;
+            }
+            // TODO: We don´t have any differences in those specs yet.
+        }
+
+        foreach(['uuid', 'author', 'version', 'credits', 'source', 'source_url', 'license',
+                 'rights_owner', 'embargo_until', 'keywords', 'constants'] as $ignoredField
+        ) {
+            if (isset($yamlData[$ignoredField])) {
+                $messages['info'][] = sprintf("'%s' field ignored.", $ignoredField);
+            }
+        }
+
+        foreach(['languages', 'allow_file_writing'] as $notImplementedField) {
+            if (isset($yamlData[$notImplementedField])) {
+                $messages['danger'][] = sprintf("'%s' option not implemented.", $notImplementedField);
+                return false;
             }
         }
 

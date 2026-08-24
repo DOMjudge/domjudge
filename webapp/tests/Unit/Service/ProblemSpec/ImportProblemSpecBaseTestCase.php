@@ -1,0 +1,970 @@
+<?php declare(strict_types=1);
+
+namespace App\Tests\Unit\Service\ProblemSpec;
+
+use App\Entity\Problem;
+use App\Service\ImportProblemService;
+use App\Tests\Unit\BaseTestCase;
+use Exception;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+use ZipArchive;
+
+abstract class ImportProblemSpecBaseTestCase extends BaseTestCase
+{
+    protected array $problemSpecVersion = [];
+    protected const string PROBLEMSPEC_VERSION = '';
+
+    protected function setUp(): void
+    {
+        self::bootKernel();
+    }
+
+    /**
+     * @param array{info?: string[], warning?: string[], danger?: string[]} $messages
+     * @param string[] $expected
+     */
+    private function assertProblemSpecWarning(string $version, array $messages, array $expected = ['warning']): void
+    {
+        if (!in_array($version, ['domjudge', 'icpc-legacy'])) {
+            foreach(['danger', 'info'] as $type) {
+                if (!in_array($type, $expected)) {
+                    if (isset($messages[$type])) {
+                        $this->assertEmpty($messages[$type]);
+                    }
+                }
+            }
+            $this->assertNotEmpty($messages['warning']);
+            $this->assertStringContainsString('problemspec ' . $version . ' support still experimental.', $messages['warning'][0]);
+        } elseif ($expected === ['warning']) {
+            $this->assertEmpty($messages);
+        }
+    }
+
+    public function testEmptyYaml(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = 'problem_format_version: ' . $version;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertProblemSpecWarning($version, $messages);
+            $this->assertTrue($ret);
+            $this->assertEquals('Unknown name', $problem->getName());
+        }
+    }
+
+    public function testMinimalYamlTest(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+problem_format_version: $version
+name: test
+unknown_key: "doesn't break anything"
+# no explicit type
+# no explicit validation
+# no explicit limits
+# no validator flags
+YAML;
+
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertProblemSpecWarning($version, $messages);
+            $this->assertEquals('test', $problem->getName());
+            $this->assertEquals('pass-fail', $problem->getTypesAsString());
+            $this->assertEquals('default', $validationMode);
+            $this->assertEquals(0, $problem->getTimelimit());
+            $this->assertEquals(null, $problem->getMemlimit());
+            $this->assertEquals(null, $problem->getOutputlimit());
+            $this->assertEquals(null, $problem->getSpecialCompareArgs());
+        }
+    }
+
+    /**
+     * @param string[] $current
+     * @param string[] $possible
+     * @param array<string, string> $restrictions
+     * @return array<string[]>
+     */
+    private function getDraftCombinations(
+        array $current, array $possible, array $restrictions
+    ): array {
+        $final = [];
+        foreach ($possible as $item) {
+            if (!in_array($item, $current)) {
+                $valid = true;
+                if (isset($restrictions[$item])) {
+                    foreach ($restrictions[$item] as $restriction) {
+                        if (in_array($restriction, $current)) {
+                            $valid = false;
+                            break;
+                        }
+                    }
+                }
+                if ($valid) {
+                    $new = $current;
+                    $new[] = $item;
+                    $unsortedList = $new;
+                    sort($new);
+                    if ($unsortedList === $new) {
+                        // The 2025-09-draft allows for sequence of strings & single string
+                        // Assume the single string can be split on whitespace into multiple valid options
+                        /*$tmp = [];
+                        foreach ($new as $item) {
+                            $tmp[$item] = $item;
+                        }
+                        $final[] = $tmp;
+                        $final[] = $new;*/
+                        $final[] = implode(" ", $new);
+                        /*if (count($new) > 1) {
+                            $final[] = implode("\t", $new);
+                        }*/
+                        $final = array_merge(
+                            $final,
+                            $this->getDraftCombinations($new, $possible, $restrictions)
+                        );
+                    }
+                }
+            }
+        }
+        return $final;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testTypesYamlTest(): void
+    {
+        if (static::PROBLEMSPEC_VERSION === 'icpc-legacy') {
+            $this->markTestSkipped("'type' field not implemented in 'icpc-legacy' problem specification.");
+        }
+        $typesStringLegacy = ['pass-fail', 'scoring'];
+        $typesStringDraft = $this->getDraftCombinations(
+            [],
+            [
+                'pass-fail',
+                'scoring',
+                'multi-pass',
+                'interactive',
+                'submit-answer',
+            ],
+            [
+                'pass-fail' => ['scoring'],
+                'scoring' => ['pass-fail'],
+                'multi-pass' => ['submit-answer'],
+                'interactive' => ['submit-answer'],
+                'submit-answer' => ['multi-pass', 'interactive'],
+            ]
+        );
+        $working_types = [];
+        foreach ($this->problemSpecVersion as $version) {
+            if (in_array(static::PROBLEMSPEC_VERSION, ['domjudge', 'legacy'])) {
+                $working_types = array_unique(array_merge($working_types, $typesStringLegacy));
+            }
+            if (in_array(static::PROBLEMSPEC_VERSION, ['domjudge', 'draft'])) {
+                $working_types = array_unique(array_merge($working_types, $typesStringDraft));
+            }
+            foreach($working_types as $type) {
+                $yaml = <<<YAML
+name: test
+problem_format_version: $version
+type: $type
+YAML;
+
+                $messages = [];
+                $validationMode = 'xxx';
+                $problem = new Problem();
+
+                $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+                $messageString = var_export($messages, true);
+                $this->assertProblemSpecWarning($version, $messages);
+                $this->assertTrue($ret, 'Parsing failed for type: ' . $type . ', messages: ' . $messageString);
+                $expectedTypes = explode(" ", $type);
+                $problemTypes = $problem->getTypesAsStringArray();
+                if (!in_array('scoring', $expectedTypes) &&
+                    !in_array('pass-fail', $expectedTypes)
+                ) {
+                    // Default to pass-fail if not explicitly set.
+                    $expectedTypes[] = 'pass-fail';
+                }
+                sort($expectedTypes);
+                sort($problemTypes);
+                $this->assertEquals(
+                    $expectedTypes, $problemTypes,
+                    'Found: "' . implode(' ', $problemTypes) . '" vs Expected: "' . implode(' ', $expectedTypes) . '"'
+                );
+            }
+        }
+    }
+
+    public function testUnknownProblemType(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+name: test
+type: invalid-type
+problem_format_version: $version
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertFalse($ret);
+            $this->assertProblemSpecWarning($version, $messages, ['warning', 'danger']);
+            $messagesString = var_export($messages, true);
+            $this->assertStringContainsString('Unknown problem type', $messagesString);
+        }
+    }
+
+    public function testInvalidProblemType(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            foreach ([
+                         'pass-fail scoring',
+                         'submit-answer multi-pass',
+                         'submit-answer interactive',
+                     ] as $type) {
+                $yaml = <<<YAML
+name: test
+problem_format_version: $version
+type: $type
+YAML;
+                $messages = [];
+                $validationMode = 'xxx';
+                $problem = new Problem();
+
+                $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+                $this->assertFalse($ret);
+                $messagesString = var_export($messages, true);
+                $this->assertStringContainsString('Invalid problem type', $messagesString);
+            }
+        }
+    }
+
+    public function testEnglishLanguages(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+problem_format_version: $version
+name: english
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertEquals('english', $problem->getName());
+            $this->assertProblemSpecWarning($version, $messages);
+        }
+    }
+
+    public function testMultipleLanguages(): void
+    {
+        // TODO: We should check if the problemstatement exists
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+problem_format_version: $version
+name:
+    de: deutsch
+    en: english
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertEquals('english', $problem->getName());
+            $this->assertProblemSpecWarning($version, $messages);
+        }
+    }
+
+    #[DataProvider('getIgnoredFields')]
+    public function testIgnoredFieldTest(string $ignoredField, bool $problematic): void
+    {
+        // Most of those fields are used in the problem setting journey
+        // in the future we can display those, but they would only be textfields
+        // for DOMjudge.
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+problem_format_version: $version
+name: test
+$ignoredField: some-ignored_string
+YAML;
+
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            if ($problematic) {
+                $this->assertFalse($ret);
+                $this->assertProblemSpecWarning($version, $messages, ['danger', 'warning']);
+                $this->assertStringContainsString(sprintf("'%s' option not implemented.", $ignoredField), $messages['danger'][0]);
+            } else {
+                $this->assertTrue($ret);
+                $this->assertProblemSpecWarning($version, $messages, ['info', 'warning']);
+                $this->assertStringContainsString(sprintf("'%s' field ignored.", $ignoredField), $messages['info'][0]);
+            }
+        }
+    }
+
+    public function testProblemVersionIgnoredTest(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+problem_format_version: $version
+name: test
+version: proofreading
+YAML;
+
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertProblemSpecWarning($version, $messages, ['info', 'warning']);
+            $this->assertStringContainsString("'version' field ignored.", $messages['info'][0]);
+        }
+    }
+
+    public function testValidatorFlags(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+name: test
+type: pass-fail
+validator_flags: 'float_tolerance 1E-6'
+problem_format_version: $version
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertProblemSpecWarning($version, $messages);
+            $this->assertEquals('float_tolerance 1E-6', $problem->getSpecialCompareArgs());
+        }
+    }
+
+    public function testValidatorArgs(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+name: test
+type: pass-fail
+problem_format_version: $version
+validator_args: 'float_tolerance 1E-7'
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertProblemSpecWarning($version, $messages);
+            $this->assertEquals('float_tolerance 1E-7', $problem->getSpecialCompareArgs());
+        }
+    }
+
+    public function testValidatorFlagsAndArgs(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+problem_format_version: $version
+name: test
+type: pass-fail
+validator_flags: 'float_tolerance 1E-8'
+validator_args: 'float_tolerance 1E-9'
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertProblemSpecWarning($version, $messages);
+            $this->assertEquals('float_tolerance 1E-8', $problem->getSpecialCompareArgs());
+        }
+    }
+
+    public function testCustomValidation(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            foreach (['custom', 'custom interactive', 'custom multi-pass'] as $mode) {
+                $yaml = <<<YAML
+    name: test
+    problem_format_version: $version
+    validation: $mode
+    YAML;
+                $messages = [];
+                $validationMode = 'xxx';
+                $problem = new Problem();
+
+                $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+                $this->assertTrue($ret);
+                $this->assertProblemSpecWarning($version, $messages);
+                $this->assertEquals($mode, $validationMode);
+                if ($mode === 'custom multi-pass') {
+                    $this->assertEquals('pass-fail, multi-pass', $problem->getTypesAsString());
+                    $this->assertEquals(2, $problem->getMultipassLimit());
+                } elseif ($mode === 'custom interactive') {
+                    $this->assertEquals('pass-fail, interactive', $problem->getTypesAsString());
+                } else {
+                    $this->assertEquals('pass-fail', $problem->getTypesAsString());
+                }
+            }
+        }
+    }
+
+    public function testTimeLimit(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+name: test
+problem_format_version: $version
+type: pass-fail
+limits:
+  time_limit: 5
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertProblemSpecWarning($version, $messages);
+            $this->assertEquals(5, $problem->getTimelimit());
+        }
+    }
+
+    public function testTimeLimitFloat(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+name: test
+problem_format_version: $version
+type: pass-fail
+limits:
+  time_limit: 2.5
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertProblemSpecWarning($version, $messages);
+            $this->assertEquals(2.5, $problem->getTimelimit());
+        }
+    }
+
+//    public function testTimeLimitNegativeRejected(): void
+//    {
+//        foreach($this->problemSpecVersion as $version) {
+//            $yaml = <<<YAML
+//name: test
+//problem_format_version: $version
+//limits:
+//  time_limit: -5
+//YAML;
+//            $zipFile = $this->createZipWithContents([
+//                'problem.yaml' => $yaml,
+//            ]);
+//
+//            $zip = new ZipArchive();
+//            $zip->open($zipFile);
+//
+//            /** @var ImportProblemService $service */
+//            $service = static::getContainer()->get(ImportProblemService::class);
+//            /** @var array{info: string[], warning: string[], danger: string[]} $messages */
+//            $messages = ['info' => [], 'warning' => [], 'danger' => []];
+//
+//            $result = $service->importZippedProblem($zip, 'test-problem.zip', null, null, $messages);
+//
+//            $zip->close();
+//            unlink($zipFile);
+//
+//            $this->assertNull($result);
+//            $this->assertNotEmpty($messages['danger']);
+//            $this->assertStringContainsString('timelimit: This value should be greater than 0', $messages['danger'][0]);
+//        }
+//    }
+
+//    public function testTimeLimitWithUnitsRejected(): void
+//    {
+//        foreach ($this->problemSpecVersion as $version) {
+//            $yaml = <<<YAML
+//name: test
+//problem_format_version: $version
+//limits:
+//  time_limit: 5m
+//YAML;
+//            $messages = [];
+//            $validationMode = 'xxx';
+//            $problem = new Problem();
+//
+//            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+//            $this->assertFalse($ret);
+//            $this->assertNotEmpty($messages['danger']);
+//            $this->assertStringContainsString('timelimit: Expected argument of type "float", "string" given', $messages['danger'][0]);
+//        }
+//    }
+
+    public function testMemoryLimit(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+name: test
+type: pass-fail
+problem_format_version: $version
+limits:
+  memory: 1234
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertProblemSpecWarning($version, $messages);
+            $this->assertEquals(1234 * 1024, $problem->getMemlimit());
+        }
+    }
+
+    public function testOutputLimit(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+name: test
+problem_format_version: $version
+type: pass-fail
+limits:
+  output: 4223
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertProblemSpecWarning($version, $messages);
+            $this->assertEquals(4223 * 1024, $problem->getOutputlimit());
+        }
+    }
+
+    public function testMultipassLimit(): void
+    {
+        foreach($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+name: test
+type: pass-fail multi-pass
+limits:
+  validation_passes: 7
+problem_format_version: $version
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertProblemSpecWarning($version, $messages);
+            $this->assertEquals(7, $problem->getMultipassLimit());
+        }
+    }
+
+    public function testMaximalProblem(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+name: test
+type: pass-fail
+problem_format_version: $version
+validation: custom multi-pass
+validator_flags: 'special flags'
+limits:
+  time_limit: 7
+  memory: 23
+  output: 42
+  validation_passes: 3
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertProblemSpecWarning($version, $messages);
+            $this->assertEquals('pass-fail, multi-pass', $problem->getTypesAsString());
+            $this->assertEquals('custom multi-pass', $validationMode);
+            $this->assertEquals(7, $problem->getTimelimit());
+            $this->assertEquals(23 * 1024, $problem->getMemlimit());
+            $this->assertEquals(42 * 1024, $problem->getOutputlimit());
+            $this->assertEquals(3, $problem->getMultipassLimit());
+            $this->assertEquals('special flags', $problem->getSpecialCompareArgs());
+        }
+    }
+
+
+    /*public function testKattisExample(): void
+    {
+        $yaml = <<<YAML
+problem_format_version: 2023-07-draft
+uuid: 5ca6ba5b-36d5-4eff-8aa7-d967cbc4375e
+source: Kattis
+license: cc by-sa
+
+type: interactive
+name:
+  en: Guess the Number
+  sv: Gissa talet
+
+# Override standard limits: say that the TLE solutions provided should
+# be at least 4 times above the time limit in order for us to be
+# happy.
+limits:
+  time_multipliers:
+    time_limit_to_tle: 4
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertProblemSpecWarning($version, $messages);
+        $this->assertEquals('Guess the Number', $problem->getName());
+        $this->assertEquals('pass-fail, interactive', $problem->getTypesAsString());
+        $this->assertEquals('custom interactive', $validationMode);
+        $this->assertEquals(0, $problem->getTimelimit());
+        $this->assertEquals(null, $problem->getMemlimit());
+        $this->assertEquals(null, $problem->getOutputlimit());
+    }*/
+
+    /*public function testParseTestCaseGroupMetaValidAcceptScore(): void
+    {
+        $yaml = "accept_score: 50";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $this->assertEmpty($messages['danger'] ?? []);
+        $this->assertEquals('50.000000000', $result->getAcceptScore());
+    }
+
+    public function testParseTestCaseGroupMetaNegativeAcceptScoreRejected(): void
+    {
+        $yaml = "accept_score: -10";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString('must not be negative', $messages['danger'][0]);
+    }
+
+    public function testParseTestCaseGroupMetaNonNumericAcceptScoreRejected(): void
+    {
+        $yaml = "accept_score: abc";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString("Invalid accept_score 'abc'", $messages['danger'][0]);
+    }
+
+    public function testParseTestCaseGroupMetaValidRange(): void
+    {
+        $yaml = "range: 0 100";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $this->assertEmpty($messages['danger'] ?? []);
+        $this->assertEquals('0.000000000', $result->getRangeLowerBound());
+        $this->assertEquals('100.000000000', $result->getRangeUpperBound());
+    }
+
+    public function testParseTestCaseGroupMetaNegativeRangeLowerBoundRejected(): void
+    {
+        $yaml = "range: -10 100";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString('bounds must not be negative', $messages['danger'][0]);
+    }
+
+    public function testParseTestCaseGroupMetaNegativeRangeUpperBoundRejected(): void
+    {
+        $yaml = "range: 0 -50";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString('bounds must not be negative', $messages['danger'][0]);
+    }
+
+    public function testParseTestCaseGroupMetaRangeLowerExceedsUpperRejected(): void
+    {
+        $yaml = "range: 100 50";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString('lower bound must not exceed upper bound', $messages['danger'][0]);
+    }
+
+    public function testParseTestCaseGroupMetaInvalidRangeFormatRejected(): void
+    {
+        $yaml = "range: 100";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString("Invalid range '100'", $messages['danger'][0]);
+    }
+
+    public function testParseTestCaseGroupMetaProblemSpecSpecifiedOutputValidatorFlagsAccepted(): void
+    {
+        $yaml = "output_validator_flags: --any arg -x should work";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
+    public function testParseTestCaseGroupMetaUnspecifiedOutputValidatorArgsAccepted(): void
+    {
+        $yaml = "output_validator_args: --any arg -x should work";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
+    public function testParseTestCaseGroupMetaProblemSpecSpecifiedOutputValidatorFlagsAndArgsSpecified(): void
+    {
+        $yaml = <<<YAML
+output_validator_flags: --any arg -x should work
+output_validator_args: --those args -must not work
+YAML;
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }*/
+
+
+    /**
+     * Create a temporary zip file with the given contents.
+     *
+     * @param array<string, string> $files Map of filename => content
+     */
+    private function createZipWithContents(array $files): string
+    {
+        $tempFile = tempnam(sys_get_temp_dir(), 'domjudge-test-') . '.zip';
+        $zip = new ZipArchive();
+        $zip->open($tempFile, ZipArchive::CREATE);
+        foreach ($files as $name => $content) {
+            $zip->addFromString($name, $content);
+        }
+        $zip->close();
+        return $tempFile;
+    }
+
+    public function testTimelimitFileWithUnitsRejected(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+name: test
+problem_format_version: $version
+YAML;
+            $zipFile = $this->createZipWithContents([
+                'problem.yaml' => $yaml,
+                '.timelimit' => '1s',
+            ]);
+
+            $zip = new ZipArchive();
+            $zip->open($zipFile);
+
+            /** @var ImportProblemService $service */
+            $service = static::getContainer()->get(ImportProblemService::class);
+            /** @var array{info: string[], warning: string[], danger: string[]} $messages */
+            $messages = ['info' => [], 'warning' => [], 'danger' => []];
+
+            $result = $service->importZippedProblem($zip, 'test-problem.zip', null, null, $messages);
+
+            $zip->close();
+            unlink($zipFile);
+
+            $this->assertNull($result);
+            $this->assertNotEmpty($messages['danger']);
+            $this->assertStringContainsString('Invalid time limit', $messages['danger'][0]);
+            $this->assertStringContainsString('1s', $messages['danger'][0]);
+        }
+    }
+
+//    public function testTimelimitFileZeroRejected(): void
+//    {
+//        foreach ($this->problemSpecVersion as $version) {
+//            $yaml = <<<YAML
+//name: test
+//problem_format_version: $version
+//YAML;
+//            $zipFile = $this->createZipWithContents([
+//                'problem.yaml' => $yaml,
+//                '.timelimit' => '0',
+//            ]);
+//
+//            $zip = new ZipArchive();
+//            $zip->open($zipFile);
+//
+//            /** @var ImportProblemService $service */
+//            $service = static::getContainer()->get(ImportProblemService::class);
+//            /** @var array{info: string[], warning: string[], danger: string[]} $messages */
+//            $messages = ['info' => [], 'warning' => [], 'danger' => []];
+//
+//            $result = $service->importZippedProblem($zip, 'test-problem.zip', null, null, $messages);
+//
+//            $zip->close();
+//            unlink($zipFile);
+//
+//            $this->assertNull($result);
+//            $this->assertNotEmpty($messages['danger']);
+//            $this->assertStringContainsString('timelimit: This value should be greater than 0', $messages['danger'][0]);
+//        }
+//    }
+//
+//    public function testTimelimitConflictDetected(): void
+//    {
+//        foreach ($this->problemSpecVersion as $version) {
+//            $yaml = <<<YAML
+//name: test
+//problem_format_version: $version
+//limits:
+//  time_limit: 5
+//YAML;
+//            $zipFile = $this->createZipWithContents([
+//                'problem.yaml' => $yaml,
+//                '.timelimit' => '10',
+//            ]);
+//
+//            $zip = new ZipArchive();
+//            $zip->open($zipFile);
+//
+//            /** @var ImportProblemService $service */
+//            $service = static::getContainer()->get(ImportProblemService::class);
+//            /** @var array{info: string[], warning: string[], danger: string[]} $messages */
+//            $messages = ['info' => [], 'warning' => [], 'danger' => []];
+//
+//            $result = $service->importZippedProblem($zip, 'test-problem.zip', null, null, $messages);
+//
+//            $zip->close();
+//            unlink($zipFile);
+//
+//            $this->assertNull($result);
+//            $this->assertNotEmpty($messages['danger']);
+//            $this->assertStringContainsString('Conflicting time limits', $messages['danger'][0]);
+//            $this->assertStringContainsString('10', $messages['danger'][0]);
+//            $this->assertStringContainsString('5', $messages['danger'][0]);
+//        }
+//    }
+
+//    public function testTimelimitNoConflictWhenMatching(): void
+//    {
+//        foreach ($this->problemSpecVersion as $version) {
+//            $yaml = <<<YAML
+//name: test
+//problem_format_version: $version
+//limits:
+//  time_limit: 5
+//YAML;
+//            $zipFile = $this->createZipWithContents([
+//                'problem.yaml' => $yaml,
+//                '.timelimit' => '5',
+//            ]);
+//
+//            $zip = new ZipArchive();
+//            $zip->open($zipFile);
+//
+//            /** @var ImportProblemService $service */
+//            $service = static::getContainer()->get(ImportProblemService::class);
+//            /** @var array{info: string[], warning: string[], danger: string[]} $messages */
+//            $messages = ['info' => [], 'warning' => [], 'danger' => []];
+//
+//            $result = $service->importZippedProblem($zip, 'test-problem.zip', null, null, $messages);
+//
+//            $zip->close();
+//            unlink($zipFile);
+//
+//            // Should succeed (no conflict)
+//            $this->assertInstanceOf(Problem::class, $result);
+//            $this->assertEmpty($messages['danger']);
+//            $this->assertEquals(5, $result->getTimelimit());
+//        }
+//    }
+
+    /*public function testParseTestCaseGroupMetaInvalidRangeTooManyValuesRejected(): void
+    {
+        $yaml = "range: 100 101 102";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString("Invalid range '100 101 102'", $messages['danger'][0]);
+    }*/
+    public function getIgnoredFields(): Generator
+    {
+        foreach ([
+            'uuid', 'author', 'version',
+            'credits', 'source', 'source_url',
+            'license', 'rights_owner', 'embargo_until',
+            'keywords', 'constants'
+        ] as $field) {
+            yield [$field, false];
+        }
+        foreach(['languages', 'allow_file_writing'] as $field) {
+            yield [$field, true];
+        }
+    }
+}

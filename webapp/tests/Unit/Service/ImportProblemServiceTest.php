@@ -39,6 +39,8 @@ unknown_key: "doesn't break anything"
 # no explicit validation
 # no explicit limits
 # no validator flags
+# the default for the problem_format_version is `legacy`
+# See: https://www.kattis.com/problem-package-format/spec/legacy.html#problem-format-version
 YAML;
 
         $messages = [];
@@ -57,8 +59,64 @@ YAML;
         $this->assertEquals(null, $problem->getSpecialCompareArgs());
     }
 
+    public function testExplicitProblemSpecVersionYamlTest(): void
+    {
+        foreach (['domjudge', 'legacy', 'icpc-legacy', '2025-09-draft', 'draft'] as $version) {
+            $yaml = <<<YAML
+problem_format_version: $version
+name: test
+# the default for the problem_format_version is `legacy`
+# See: https://www.kattis.com/problem-package-format/spec/legacy.html#problem-format-version
+YAML;
+
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertEquals('test', $problem->getName());
+            $this->assertEquals('pass-fail', $problem->getTypesAsString());
+            $this->assertEquals('default', $validationMode);
+            $this->assertEquals(0, $problem->getTimelimit());
+            $this->assertEquals(null, $problem->getMemlimit());
+            $this->assertEquals(null, $problem->getOutputlimit());
+            $this->assertEquals(null, $problem->getSpecialCompareArgs());
+            if (!in_array($version, ['domjudge', 'icpc-legacy'])) {
+                $this->assertEmpty($messages['danger']);
+                $this->assertNotEmpty($messages['warning']);
+                $this->assertStringContainsString('problemspec ' . $version . ' support still experimental.', $messages['warning'][0]);
+            } else {
+                $this->assertEmpty($messages);
+            }
+        }
+    }
+
+    public function testUnknownProblemSpecVersionYamlTest(): void
+    {
+        $unknownVersion = '2014-01';
+        $yaml = <<<YAML
+problem_format_version: $unknownVersion
+name: test
+# the default for the problem_format_version is `legacy`
+# See: https://www.kattis.com/problem-package-format/spec/legacy.html#problem-format-version
+YAML;
+
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString('Unknown problemspec ' . $unknownVersion . '.', $messages['danger'][0]);
+    }
+
     public function testTypesYamlTest(): void
     {
+        // TODO: Currently we don't reject newer syntax for older specs
+        // e.g. a icpc-legacy problem with type multi-pass is allowed.
+        // We should consider being more strict here.
         foreach ([
                      'pass-fail',
                      'scoring',
@@ -146,6 +204,41 @@ YAML;
         $this->assertTrue($ret);
         $this->assertEmpty($messages);
         $this->assertEquals('float_tolerance 1E-6', $problem->getSpecialCompareArgs());
+    }
+
+    public function testValidatorArgs(): void
+    {
+        $yaml = <<<YAML
+name: test
+type: pass-fail
+validator_args: 'float_tolerance 1E-7'
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertEmpty($messages);
+        $this->assertEquals('float_tolerance 1E-7', $problem->getSpecialCompareArgs());
+    }
+
+    public function testValidatorFlagsAndArgs(): void
+    {
+        $yaml = <<<YAML
+name: test
+type: pass-fail
+validator_flags: 'float_tolerance 1E-8'
+validator_args: 'float_tolerance 1E-9'
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertEmpty($messages);
+        $this->assertEquals('float_tolerance 1E-8', $problem->getSpecialCompareArgs());
     }
 
     public function testCustomValidation(): void
@@ -418,13 +511,17 @@ YAML;
 
         $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
         $this->assertTrue($ret);
-        $this->assertEmpty($messages);
         $this->assertEquals('Guess the Number', $problem->getName());
         $this->assertEquals('pass-fail, interactive', $problem->getTypesAsString());
         $this->assertEquals('custom interactive', $validationMode);
         $this->assertEquals(0, $problem->getTimelimit());
         $this->assertEquals(null, $problem->getMemlimit());
         $this->assertEquals(null, $problem->getOutputlimit());
+        $this->assertEmpty($messages['info']);
+        $this->assertEmpty($messages['danger']);
+        $this->assertNotEmpty($messages['warning']);
+        $this->assertCount(1, $messages['warning']);
+        $this->assertStringContainsString('problemspec 2023-07-draft support still experimental.', $messages['warning'][0]);
     }
 
     public function testParseTestCaseGroupMetaValidAcceptScore(): void
@@ -523,6 +620,49 @@ YAML;
         $this->assertNotEmpty($messages['danger']);
         $this->assertStringContainsString("Invalid range '100'", $messages['danger'][0]);
     }
+
+    public function testParseTestCaseGroupMetaProblemSpecSpecifiedOutputValidatorFlagsAccepted(): void
+    {
+        $yaml = "output_validator_flags: --any arg -x should work";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
+    public function testParseTestCaseGroupMetaUnspecifiedOutputValidatorArgsAccepted(): void
+    {
+        $yaml = "output_validator_args: --any arg -x should work";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
+    public function testParseTestCaseGroupMetaProblemSpecSpecifiedOutputValidatorFlagsAndArgsSpecified(): void
+    {
+        $yaml = <<<YAML
+output_validator_flags: --any arg -x should work
+output_validator_args: --those args -must not work
+YAML;
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
 
     /**
      * Create a temporary zip file with the given contents.
