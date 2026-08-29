@@ -331,7 +331,10 @@ class Problem extends BaseApiEntity implements
         return $this;
     }
 
-    public function getTypesAsString(): string
+    /**
+     * @return list<string>
+     */
+    public function getTypesAsStringArray(): array
     {
         $typeConstants = $this->getTypes();
         $typeStrings = [];
@@ -341,7 +344,12 @@ class Problem extends BaseApiEntity implements
             }
             $typeStrings[] = $this->typesToString[$type];
         }
-        return implode(', ', $typeStrings);
+        return $typeStrings;
+    }
+
+    public function getTypesAsString(): string
+    {
+        return implode(', ', $this->getTypesAsStringArray());
     }
 
     /**

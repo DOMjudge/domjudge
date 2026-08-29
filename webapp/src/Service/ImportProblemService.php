@@ -1206,6 +1206,27 @@ readonly class ImportProblemService
     }
 
     /**
+     * Allow to import the types both as arrays and as strings. Due
+     * to the recursion to make parsing of the strings easier this now
+     * also works for arrays inside arrays.
+     *
+     * @param string|array<mixed, mixed> $input
+     * @return string[]
+     */
+    private static function parseTypes(string|array $input): array
+    {
+        $final = [];
+        if (is_array($input)) {
+            foreach ($input as $possibleType) {
+                $final = array_merge($final, self::parseTypes($possibleType));
+            }
+        } else {
+            $final = array_merge($final, preg_split("/[\s,;]+/", $input));
+        }
+        return $final;
+    }
+
+    /**
      * Returns true iff the yaml could be parsed correctly.
      *
      * @param array{danger?: string[], info?: string[]} $messages
@@ -1241,7 +1262,7 @@ readonly class ImportProblemService
 
         $validationMode = 'default';
         if (isset($yamlData['type'])) {
-            $types = explode(' ', $yamlData['type']);
+            $types = self::parseTypes($yamlData['type']);
             // Validation happens later when we set the properties.
             $yamlProblemProperties['typesAsString'] = $types;
             if (in_array('interactive', $types)) {
@@ -1291,6 +1312,20 @@ readonly class ImportProblemService
                 }
                 $yamlProblemProperties['multipassLimit'] = $validationPasses;
             }
+        }
+
+        if (isset($yamlData['problem_format_version'])) {
+            $version = $yamlData['problem_format_version'];
+            if (in_array($version, ['legacy', '2025-09-draft', 'draft', '2025-09', '2023-07-draft'])) {
+                $messages['info'][] = sprintf("Problem format version '%s' support still experimental.", $version);
+            } elseif ($version !== 'icpc-legacy') {
+                // 2023-07-draft used in Unit tests
+                $messages['warning'][] = sprintf("Unknown problem format version '%s'.", $version);
+                return false;
+            }
+            // TODO: At the moment we only warn the user about unknown problem specifications and the experimental support.
+            // In the future we should either be more strict on only allowing properties available in the spec or warn the
+            // user on properties/values outside of the specified specification.
         }
 
         foreach ($yamlProblemProperties as $key => $value) {

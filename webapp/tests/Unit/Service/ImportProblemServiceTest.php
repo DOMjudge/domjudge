@@ -7,6 +7,7 @@ use App\Entity\ProblemStatementContent;
 use App\Service\ImportProblemService;
 use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
+use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use ZipArchive;
@@ -57,6 +58,47 @@ YAML;
         $this->assertEquals(null, $problem->getSpecialCompareArgs());
     }
 
+    /**
+     * @param array{info?: string[], warning?: string[], danger?: string[]} $messages
+     * @param string[] $expected
+     */
+    private function assertProblemSpecWarning(string $version, array $messages, array $expected = ['info']): void
+    {
+        foreach (['danger', 'warning'] as $type) {
+            if (!in_array($type, $expected)) {
+                if (isset($messages[$type])) {
+                    $this->assertEmpty($messages[$type]);
+                }
+            }
+        }
+        $this->assertNotEmpty($messages['info']);
+        $this->assertStringContainsString(
+            sprintf("Problem format version '%s' support still experimental.", $version),
+            $messages['info'][0]
+        );
+    }
+
+    #[DataProvider('problemSpecVersionProvider')]
+    public function testProblemPackageFormatTest(string $problemSpecificationVersion): void
+    {
+        $yaml = <<<YAML
+problem_format_version: $problemSpecificationVersion
+name: test
+YAML;
+
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        if ($problemSpecificationVersion === 'icpc-legacy') {
+            $this->assertEmpty($messages);
+        } else {
+            $this->assertProblemSpecWarning($problemSpecificationVersion, $messages);
+        }
+    }
+
     public function testTypesYamlTest(): void
     {
         foreach ([
@@ -91,6 +133,53 @@ YAML;
             $typesString = str_replace(' ', ', ', $type);
             $this->assertEquals($typesString, $problem->getTypesAsString());
         }
+    }
+
+    #[DataProvider('provideAlternativeTypeNotations')]
+    public function testTypesStringWithAlternativeChars(string $separator): void
+    {
+        $expectedTypes = ['pass-fail', 'interactive'];
+        $typesAsString = implode($separator, $expectedTypes);
+        $specVersion = 'draft';
+        $yaml = <<<YAML
+name: test
+problem_format_version: $specVersion
+type: $typesAsString
+YAML;
+
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $messageString = var_export($messages, true);
+        $this->assertTrue($ret, 'Parsing failed for type: ' . $typesAsString . ', messages: ' . $messageString);
+        $problemTypes = $problem->getTypesAsStringArray();
+        $this->assertEquals(
+            $expectedTypes, $problemTypes,
+            'Found: "' . implode(' ', $problemTypes) . '" vs Expected: "' . implode(' ', $expectedTypes) . '"'
+        );
+    }
+
+    /**
+     * @param string[] $expectedTypes
+     */
+    #[DataProvider('provideAlternativeArrayNotations')]
+    public function testTypesSequenceStrings(string $yaml, array $expectedTypes): void
+    {
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+        $typesAsString = implode(', ', $expectedTypes);
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $messageString = var_export($messages, true);
+        $this->assertTrue($ret, 'Parsing failed for type: ' . $typesAsString . ', messages: ' . $messageString);
+        $problemTypes = $problem->getTypesAsStringArray();
+        $this->assertEquals(
+            $expectedTypes, $problemTypes,
+            'Found: "' . implode(' ', $problemTypes) . '" vs Expected: "' . implode(' ', $expectedTypes) . '"'
+        );
     }
 
     public function testUnknownProblemType(): void
@@ -418,7 +507,7 @@ YAML;
 
         $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
         $this->assertTrue($ret);
-        $this->assertEmpty($messages);
+        $this->assertProblemSpecWarning('2023-07-draft', $messages);
         $this->assertEquals('Guess the Number', $problem->getName());
         $this->assertEquals('pass-fail, interactive', $problem->getTypesAsString());
         $this->assertEquals('custom interactive', $validationMode);
@@ -744,5 +833,61 @@ YAML;
         $this->assertNull($result);
         $this->assertNotEmpty($messages['danger']);
         $this->assertStringContainsString("Invalid range '100 101 102'", $messages['danger'][0]);
+    }
+
+    public static function problemSpecVersionProvider(): Generator
+    {
+        yield ['2025-09-draft'];
+        yield ['draft'];
+        yield ['legacy'];
+        yield ['icpc-legacy'];
+        yield ['2025-09'];
+    }
+
+
+    public static function provideAlternativeTypeNotations(): Generator
+    {
+        yield ["\t"];
+        yield [", "];
+        yield ["; "];
+    }
+
+    public static function provideAlternativeArrayNotations(): Generator
+    {
+        $specVersion = 'draft';
+        $yamlBasic = <<<YAML
+name: test
+problem_format_version: $specVersion
+YAML;
+        $simpleArray = <<<YAML
+$yamlBasic
+type:
+  - pass-fail
+YAML;
+        $mappedArray = <<<YAML
+$yamlBasic
+type:
+  pass-fail: pass-fail
+YAML;
+        $oneLineArray = <<<YAML
+$yamlBasic
+type: [pass-fail]
+YAML;
+        $malformedArray = <<<YAML
+$yamlBasic
+type: [pass-fail, [multi-pass, interactive]]
+YAML;
+        $combinedStringArray = <<<YAML
+$yamlBasic
+type:
+ - pass-fail
+ - multi-pass, interactive
+YAML;
+
+        foreach ([$simpleArray, $mappedArray, $oneLineArray] as $yamlFile) {
+            yield [$yamlFile, ['pass-fail']];
+        }
+        yield [$malformedArray, ['pass-fail', 'multi-pass', 'interactive']];
+        yield [$combinedStringArray, ['pass-fail', 'multi-pass', 'interactive']];
     }
 }
