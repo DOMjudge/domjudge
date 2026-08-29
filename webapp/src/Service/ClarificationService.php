@@ -55,7 +55,7 @@ readonly class ClarificationService
      */
     public function getClarifications(?string $externalContestId, string $currentQueue): array
     {
-        $queryBuilder = $this->getQueryBuilder(externalContestId: $externalContestId)
+        $queryBuilder = $this->getQueryBuilder(externalContestId: $externalContestId, includeProblemsOutsideContest: true)
             ->select('clar', 'c', 'cp')
             ->orderBy('clar.submittime', 'DESC')
             ->addOrderBy('clar.clarid', 'DESC');
@@ -85,12 +85,19 @@ readonly class ClarificationService
      * addressed to every other team on their own team pages. A null
      * `recipientTeamId` then limits the result to clarifications sent to
      * everyone.
+     *
+     * A clarification may reference a problem that is not (or no longer) part
+     * of its contest. Those are only meaningful to the jury, which renders them
+     * as unlinked, so by default they are left out: everything contest facing
+     * would otherwise expose a dangling problem id. Jury pages should pass
+     * `includeProblemsOutsideContest` to opt in to them.
      */
     public function getQueryBuilder(?string $externalContestId = null, ?int $internalContestId = null,
                                     ?string $externalClarificationId = null,
                                     ?string $problem = null,
                                     bool $onlyForRecipientTeam = false,
-                                    ?int $recipientTeamId = null
+                                    ?int $recipientTeamId = null,
+                                    bool $includeProblemsOutsideContest = false
     ): QueryBuilder {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Clarification::class, 'clar')
@@ -100,6 +107,12 @@ readonly class ClarificationService
             ->leftJoin('clar.recipient', 'r')
             ->leftJoin('clar.problem', 'p')
             ->leftJoin('c.problems', 'cp', Join::WITH, 'cp.problem = clar.problem');
+
+        if (!$includeProblemsOutsideContest) {
+            // `cp` is only set when the clarification's problem is part of its
+            // contest, so this drops the clarifications pointing elsewhere.
+            $queryBuilder->andWhere('clar.problem IS NULL OR cp.problem IS NOT NULL');
+        }
 
         if (!is_null($internalContestId)) {
             $queryBuilder

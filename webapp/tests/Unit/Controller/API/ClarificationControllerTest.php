@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Controller\API;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\ClarificationFixture;
+use App\DataFixtures\Test\ClarificationForProblemOutsideContestFixture;
 use App\DataFixtures\Test\NavigationTeamUsersFixture;
 use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\Entity\Clarification;
@@ -381,5 +382,21 @@ class ClarificationControllerTest extends BaseTestCase
         //     null,
         //     null,
         // ];
+    }
+
+    /**
+     * A clarification may only reference a problem of its own contest, so one
+     * pointing elsewhere must not reach the feed with a dangling problem_id.
+     */
+    public function testListDoesNotExposeClarificationForProblemOutsideContest(): void
+    {
+        $this->loadFixture(ClarificationForProblemOutsideContestFixture::class);
+
+        $contestId = $this->getDemoContestId();
+        $apiEndpoint = $this->apiEndpoint;
+        $clarificationsFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint", 200);
+
+        $bodies = array_column($clarificationsFromApi, 'text');
+        static::assertNotContains(ClarificationForProblemOutsideContestFixture::BODY, $bodies);
     }
 }

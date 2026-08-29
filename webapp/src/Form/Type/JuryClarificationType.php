@@ -157,7 +157,7 @@ class JuryClarificationType extends AbstractType
         ?string $contestId
     ): void {
         if ($clarid) {
-            $juryMember = $this->clarificationService->getQueryBuilder(externalContestId: $contestId, externalClarificationId: $clarid)
+            $juryMember = $this->clarificationService->getQueryBuilder(externalContestId: $contestId, externalClarificationId: $clarid, includeProblemsOutsideContest: true)
                 ->select('clar.jury_member')
                 ->getQuery()
                 ->getSingleResult()['jury_member'];

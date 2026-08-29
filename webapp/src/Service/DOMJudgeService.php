@@ -387,7 +387,7 @@ class DOMJudgeService
 
         if ($this->authService->checkRole('jury')) {
             if ($contest) {
-                $clarifications = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid())
+                $clarifications = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), includeProblemsOutsideContest: true)
                     ->select('clar.externalid', 'clar.body')
                     ->andWhere('clar.sender IS NOT NULL')
                     ->andWhere('clar.answered = false')
