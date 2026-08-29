@@ -56,7 +56,9 @@ readonly class ClarificationService
     public function getClarifications(?string $externalContestId, string $currentQueue): array
     {
         $queryBuilder = $this->getQueryBuilder(externalContestId: $externalContestId, includeProblemsOutsideContest: true)
-            ->select('clar', 'c', 'cp')
+            // `p` is rendered for every row, so fetch it along instead of
+            // lazy loading the problem of each clarification separately.
+            ->select('clar', 'c', 'cp', 'p')
             ->orderBy('clar.submittime', 'DESC')
             ->addOrderBy('clar.clarid', 'DESC');
 
