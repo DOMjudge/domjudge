@@ -777,8 +777,8 @@ class ContestController extends BaseController
                                   Utils::printtime($contest->getEndtime(), 'Y-m-d H:i:s (T)'));
         }
 
-        /** @var int[] $submissionIds */
-        $submissionIds = array_map(fn(array $data) => $data['submitid'], $this->em->createQueryBuilder()
+        /** @var string[] $submissionIds */
+        $submissionIds = array_map(fn(array $data) => $data['externalid'], $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
             ->select('s.externalid')
@@ -795,7 +795,7 @@ class ContestController extends BaseController
             $blockers[] = 'Unjudged submissions found: ' . implode(', ', $submissionIds);
         }
 
-        /** @var int[] $clarificationIds */
+        /** @var string[] $clarificationIds */
         $clarificationIds = array_map(fn(array $data) => $data['externalid'], $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid())
             ->select('clar.externalid')
             ->andWhere('clar.answered = false')
