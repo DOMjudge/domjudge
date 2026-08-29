@@ -95,7 +95,10 @@ class MiscController extends BaseController
                 paginated: false
             )[0];
 
-            $qb = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid())
+            $qb = $this->clarificationService->getQueryBuilder(
+                externalContestId: $contest->getExternalid(),
+                onlyForRecipientTeam: true,
+                recipientTeamId: $teamId)
                 ->select('clar', 'p')
                 // Needed to filter out team clarification requests.
                 ->andWhere('clar.sender IS NULL')

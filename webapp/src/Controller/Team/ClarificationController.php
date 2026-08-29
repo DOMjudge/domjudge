@@ -16,7 +16,6 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
@@ -77,7 +76,11 @@ class ClarificationController extends BaseController
         }
 
         /** @var Clarification[] $clarifications */
-        $clarifications = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), problem: strval($problem->getProbid()))
+        $clarifications = $this->clarificationService->getQueryBuilder(
+            externalContestId: $contest->getExternalid(),
+            problem: strval($problem->getProbid()),
+            onlyForRecipientTeam: true,
+            recipientTeamId: $teamId)
             ->select('clar', 'p')
             // Needed to filter out team clarification requests.
             ->andWhere('clar.sender IS NULL')
