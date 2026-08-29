@@ -247,10 +247,11 @@ class ClarificationController extends AbstractRestController
                 throw new BadRequestHttpException('ID does not match URI.');
             } elseif ($this->isGranted('ROLE_API_WRITER')) {
                 // Check if we already have a clarification with this ID
-                $existingClarification = $this->clarificationService->getQueryBuilder(internalContestId: $contestId, externalClarificationId: $clarificationId)
-                    ->select('clar')
-                    ->getQuery()
-                    ->getOneOrNullResult();
+                // Deliberately not the ClarificationService query builder: this
+                // asks whether the id is taken, not whether the current user may
+                // see the clarification holding it.
+                $existingClarification = $this->em->getRepository(Clarification::class)
+                    ->findOneBy(['contest' => $contestId, 'externalid' => $clarificationId]);
                 if ($existingClarification !== null) {
                     throw new BadRequestHttpException(sprintf("Clarification with ID '%s' already exists.", $clarificationId));
                 }
