@@ -73,3 +73,4 @@ Special thanks go to the following people for researching and
 responsibly disclosing a security vulnerability in DOMjudge:
 * Atsutoshi Kikuchi
 * Aidan Stephenson
+* teddyctf
