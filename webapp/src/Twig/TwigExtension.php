@@ -1073,26 +1073,10 @@ EOF;
         if (is_null($col)) {
             return $text;
         }
-        $ret = preg_match_all("/[0-9A-Fa-f]{2}/", $col, $m);
-        if (!$ret) {
-            return $text;
-        }
 
-        $m = current($m);
-        switch (count($m)) {
-            case 4:
-                // We also have opacity; load that and use
-                // RGB of case 3
-                $opacity = hexdec(array_pop($m));
-                // no-break
-            case 3:
-                $vals   = array_map(hexdec(...), $m);
-                $vals[] = $opacity;
+        [$red, $green, $blue] = Utils::parseHexColor($col);
 
-                return "rgba(" . implode(",", $vals) . ")";
-        }
-
-        return $text;
+        return sprintf('rgba(%d,%d,%d,%s)', $red, $green, $blue, $opacity);
     }
 
     #[AsTwigFilter('tsvField')]
