@@ -4,7 +4,9 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\ClarificationFixture;
 use App\Entity\Clarification;
+use App\Entity\Contest;
 use App\Tests\Unit\BaseTestCase;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 
 class ClarificationControllerTest extends BaseTestCase
@@ -119,5 +121,67 @@ class ClarificationControllerTest extends BaseTestCase
                                          'Technical issue');
         self::assertSelectorTextContains('div.card-text',
                                          'This is a clarification');
+    }
+
+    /**
+     * Test that a user with only the clarification_rw role sees the team
+     * clarifications, and not just the general ones.
+     */
+    public function testClarificationHandlerSeesTeamClarifications(): void
+    {
+        $this->roles = ['clarification_rw'];
+        $this->logOut();
+        $this->logIn();
+        $this->loadFixture(ClarificationFixture::class);
+
+        $this->verifyPageResponse('GET', '/jury/contests/demo/clarifications', 200);
+        self::assertSelectorTextContains('h2#newrequests ~ div.table-wrapper', 'Is it necessary to');
+        self::assertSelectorTextContains('h2#oldrequests ~ div.table-wrapper', 'What is 2+2?');
+
+        /** @var Clarification $clar */
+        $clar = static::getContainer()->get(EntityManagerInterface::class)
+            ->getRepository(Clarification::class)->findOneBy(['body' => 'What is 2+2?']);
+        $this->verifyPageResponse('GET', '/jury/contests/demo/clarifications/' . $clar->getExternalid(), 200);
+        self::assertSelectorTextContains('div.card-text', 'What is 2+2?');
+    }
+
+    /**
+     * External clarification ids are only unique per contest, so a second
+     * contest may reuse one. Looking one up must stay scoped to its contest.
+     */
+    public function testClarificationRequestViewWithExternalIdReusedByOtherContest(): void
+    {
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $demo = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+
+        // External ids are assigned from the internal id unless they are set
+        // explicitly, which is what an external CCS or the API does.
+        $em->persist((new Clarification())
+            ->setExternalid('shared-id')
+            ->setContest($demo)
+            ->setSubmittime(Utils::now())
+            ->setJuryMember('admin')
+            ->setBody('This one belongs to the demo contest')
+            ->setAnswered(true));
+
+        $otherContest = (new Contest())
+            ->setExternalid('other')
+            ->setName('Other contest')
+            ->setShortname('other')
+            ->setStarttimeString('2021-07-17 16:09:00 Europe/Amsterdam')
+            ->setEndtimeString('2021-07-17 16:11:00 Europe/Amsterdam');
+        $em->persist($otherContest);
+        $em->persist((new Clarification())
+            ->setExternalid('shared-id')
+            ->setContest($otherContest)
+            ->setSubmittime(Utils::now())
+            ->setJuryMember('admin')
+            ->setBody('This one belongs to the other contest')
+            ->setAnswered(true));
+        $em->flush();
+
+        $this->verifyPageResponse('GET', '/jury/contests/demo/clarifications/shared-id', 200);
+        self::assertSelectorTextContains('div.card-text', 'This one belongs to the demo contest');
     }
 }

@@ -4,7 +4,6 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
-use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judgehost;
@@ -22,6 +21,7 @@ use App\Form\Type\FinalizeContestType;
 use App\Form\Type\RemovedIntervalType;
 use App\Service\AssetUpdateService;
 use App\Service\AuthorizedUserService;
+use App\Service\ClarificationService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -57,6 +57,7 @@ class ContestController extends BaseController
         protected readonly AuthorizedUserService $authService,
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        protected readonly ClarificationService $clarificationService,
         protected readonly ConfigurationService $config,
         KernelInterface $kernel,
         protected readonly EventLogService $eventLogService,
@@ -795,12 +796,9 @@ class ContestController extends BaseController
         }
 
         /** @var int[] $clarificationIds */
-        $clarificationIds = array_map(fn(array $data) => $data['clarid'], $this->em->createQueryBuilder()
-            ->from(Clarification::class, 'c')
-            ->select('c.externalid')
-            ->andWhere('c.contest = :contest')
-            ->andWhere('c.answered = false')
-            ->setParameter('contest', $contest)
+        $clarificationIds = array_map(fn(array $data) => $data['externalid'], $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid())
+            ->select('clar.externalid')
+            ->andWhere('clar.answered = false')
             ->getQuery()
             ->getResult()
         );

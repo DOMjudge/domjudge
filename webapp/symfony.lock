@@ -275,9 +275,6 @@
     "psr/log": {
         "version": "1.1.0"
     },
-    "ralouphie/getallheaders": {
-        "version": "3.0.3"
-    },
     "ramsey/collection": {
         "version": "1.1.4"
     },

@@ -40,7 +40,7 @@ GNU/Linux, or one of its derivative distributions like Ubuntu::
         php-curl php-json php-xml php-zip composer ntp python3-yaml php-bcmath
 
 The following command can be used on Fedora, and related distributions like
-Red Hat Enterprise Linux and Rocky Linux (before V9)[#ds]_::
+Red Hat Enterprise Linux and Rocky Linux (before V9) For `php-ds` see: [#ds]_::
 
   sudo dnf install libcgroup-devel make acl zip unzip pv mariadb-server httpd \
         php-gd php-cli php-intl php-mbstring php-mysqlnd php-fpm \

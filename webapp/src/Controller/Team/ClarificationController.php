@@ -9,13 +9,13 @@ use App\Entity\Problem;
 use App\Entity\Team;
 use App\Form\Type\TeamClarificationType;
 use App\Service\AuthorizedUserService;
+use App\Service\ClarificationService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
@@ -38,11 +38,12 @@ class ClarificationController extends BaseController
     public function __construct(
         protected readonly AuthorizedUserService $authService,
         DOMJudgeService $dj,
-        protected readonly ConfigurationService $config,
         EntityManagerInterface $em,
+        KernelInterface $kernel,
+        protected readonly ClarificationService $clarificationService,
+        protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLogService,
         protected readonly FormFactoryInterface $formFactory,
-        KernelInterface $kernel,
     ) {
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
@@ -75,21 +76,16 @@ class ClarificationController extends BaseController
         }
 
         /** @var Clarification[] $clarifications */
-        $clarifications = $this->em->createQueryBuilder()
-            ->from(Clarification::class, 'c')
-            ->leftJoin('c.problem', 'p')
-            ->leftJoin('c.sender', 's')
-            ->leftJoin('c.recipient', 'r')
-            ->select('c', 'p')
-            ->andWhere('c.contest = :contest')
-            ->andWhere('c.sender IS NULL')
-            ->andWhere('c.recipient = :team OR c.recipient IS NULL')
-            ->andWhere('c.problem = :problem')
-            ->setParameter('contest', $contest)
-            ->setParameter('team', $team)
-            ->setParameter('problem', $problem)
-            ->addOrderBy('c.submittime', 'DESC')
-            ->addOrderBy('c.clarid', 'DESC')
+        $clarifications = $this->clarificationService->getQueryBuilder(
+            externalContestId: $contest->getExternalid(),
+            problem: strval($problem->getProbid()),
+            onlyForRecipientTeam: true,
+            recipientTeamId: $teamId)
+            ->select('clar', 'p')
+            // Needed to filter out team clarification requests.
+            ->andWhere('clar.sender IS NULL')
+            ->addOrderBy('clar.submittime', 'DESC')
+            ->addOrderBy('clar.clarid', 'DESC')
             ->getQuery()
             ->getResult();
 
@@ -111,21 +107,13 @@ class ClarificationController extends BaseController
     #[Route(path: '/clarifications/{clarId}', name: 'team_clarification')]
     public function viewAction(Request $request, string $clarId): Response
     {
-        $categories = $this->config->get('clar_categories');
+        $categories = $this->clarificationService->getClarificationCategories();
         $user       = $this->authService->getUser();
         $team       = $user->getTeam();
         $contest    = $this->dj->getCurrentContest($team->getTeamid());
         /** @var Clarification|null $clarification */
-        $clarification = $this->em->createQueryBuilder()
-            ->from(Clarification::class, 'c')
-            ->leftJoin('c.problem', 'p')
-            ->leftJoin('c.contest', 'co')
-            ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
-            ->select('c, p, co')
-            ->andWhere('c.contest = :contest')
-            ->andWhere('c.externalid = :clarId')
-            ->setParameter('contest', $contest)
-            ->setParameter('clarId', $clarId)
+        $clarification = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), externalClarificationId: $clarId)
+            ->select('clar, p, c')
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -192,7 +180,7 @@ class ClarificationController extends BaseController
     #[Route(path: '/clarifications/add', name: 'team_clarification_add', priority: 1)]
     public function addAction(Request $request): Response
     {
-        $categories = $this->config->get('clar_categories');
+        $categories = $this->clarificationService->getClarificationCategories();
         $user       = $this->authService->getUser();
         $team       = $user->getTeam();
         $contest    = $this->dj->getCurrentContest($team->getTeamid());
@@ -243,7 +231,7 @@ class ClarificationController extends BaseController
         } else {
             [, $problemId] = explode(Clarification::PROBLEM_BASED_SEPARATOR, $formData['subject']);
             $problem = $this->em->getRepository(Problem::class)->findByExternalId($problemId);
-            $queue = $this->config->get('clar_default_problem_queue');
+            $queue = $this->clarificationService->getClarificationDefaultProblemQueue();
             if ($queue === "") {
                 $queue = null;
             }

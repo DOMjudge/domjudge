@@ -6,7 +6,7 @@ use App\Entity\Clarification;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
 use App\Service\AuthorizedUserService;
-use App\Service\ConfigurationService;
+use App\Service\ClarificationService;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
@@ -24,19 +24,20 @@ class JuryClarificationType extends AbstractType
 {
     public const RECIPIENT_MUST_SELECT = 'domjudge-must-select';
 
-    /** @var string The clarification entity id if the entity exists in the database */
-    private $clarid;
-
     public function __construct(
         private readonly AuthorizedUserService $authService,
         private readonly EntityManagerInterface $em,
-        private readonly ConfigurationService $config,
+        private readonly ClarificationService $clarificationService,
         private readonly DOMJudgeService $dj,
     ) {}
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $this->clarid = $options['clarid'];
+        // Form types are shared services, so keep the per-form options in local
+        // variables and hand them to the validation callback below instead of
+        // storing them on `$this`.
+        $clarid = $options['clarid'];
+        $contestId = $options['contestId'];
         $recipientOptions = [
             '(select...)' => static::RECIPIENT_MUST_SELECT,
             'ALL' => '',
@@ -56,7 +57,7 @@ class JuryClarificationType extends AbstractType
         $subjectOptions = [];
         $subjectGroupBy = null;
 
-        $categories = $this->config->get('clar_categories');
+        $categories = $this->clarificationService->getClarificationCategories();
         $contest = $this->dj->getCurrentContest();
         $hasCurrentContest = $contest !== null;
         if ($hasCurrentContest) {
@@ -109,7 +110,7 @@ class JuryClarificationType extends AbstractType
             'group_by' => $subjectGroupBy,
         ]);
 
-        $maxLength = $this->config->get('clar_max_body_length');
+        $maxLength = $this->clarificationService->getClarificationMaximumBodyLength();
         $constraints = [];
         if ($maxLength > 0) {
             $constraints[] = new Length(max: $maxLength, maxMessage: 'Clarification body is too long: {{ value }} characters, maximum is {{ limit }}.');
@@ -124,7 +125,11 @@ class JuryClarificationType extends AbstractType
 
         $builder->add('jurymember', HiddenType::class, [
             'constraints' => [
-                new Callback($this->checkJuryMember(...))
+                new Callback(
+                    function (mixed $value, ExecutionContextInterface $context) use ($clarid, $contestId): void {
+                        $this->checkJuryMember($value, $context, $clarid, $contestId);
+                    }
+                )
             ]
         ]);
     }
@@ -133,6 +138,7 @@ class JuryClarificationType extends AbstractType
     {
         $resolver->setDefault('limit_to_team', null);
         $resolver->setDefault('clarid', null);
+        $resolver->setDefault('contestId', null);
     }
 
     private function getTeamLabel(Team $team): string
@@ -144,14 +150,15 @@ class JuryClarificationType extends AbstractType
         return sprintf('%s (%s)', $team->getEffectiveName(), $team->getExternalId());
     }
 
-    public function checkJuryMember(mixed $value, ExecutionContextInterface $context, mixed $payload): void
-    {
-        if ($this->clarid) {
-            $juryMember = $this->em->createQueryBuilder()
+    public function checkJuryMember(
+        mixed $value,
+        ExecutionContextInterface $context,
+        ?string $clarid,
+        ?string $contestId
+    ): void {
+        if ($clarid) {
+            $juryMember = $this->clarificationService->getQueryBuilder(externalContestId: $contestId, externalClarificationId: $clarid)
                 ->select('clar.jury_member')
-                ->from(Clarification::class, 'clar')
-                ->where('clar.externalid = :clarid')
-                ->setParameter('clarid', $this->clarid)
                 ->getQuery()
                 ->getSingleResult()['jury_member'];
 

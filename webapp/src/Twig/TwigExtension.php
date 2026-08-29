@@ -1211,10 +1211,10 @@ EOF;
         }
 
         if (isset($metadata['cpu-time'])) {
-            $result .= $metadata['cpu-time'] . 's CPU, ';
+            $result .= htmlspecialchars($metadata['cpu-time']) . 's CPU, ';
         }
         if (isset($metadata['wall-time'])) {
-            $result .= $metadata['wall-time'] . 's wall, ';
+            $result .= htmlspecialchars($metadata['wall-time']) . 's wall, ';
         }
         if (isset($metadata['memory-bytes'])) {
             $result .= '<i class="fas fa-memory" title="RAM"></i> '
@@ -1222,10 +1222,10 @@ EOF;
         }
         if (isset($metadata['exitcode'])) {
             $result .= '<i class="far fa-question-circle" title="exit-status"></i> '
-                . 'exit-code: ' . $metadata['exitcode'];
+                . 'exit-code: ' . htmlspecialchars($metadata['exitcode']);
         }
         if (isset($metadata['signal'])) {
-            $result .= ' signal: ' . $metadata['signal'];
+            $result .= ' signal: ' . htmlspecialchars($metadata['signal']);
         }
         $result .= '</span>';
         return $result;

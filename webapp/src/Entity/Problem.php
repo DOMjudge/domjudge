@@ -424,16 +424,12 @@ class Problem extends BaseApiEntity implements
     {
         $this->problemstatementFile = $problemstatementFile;
 
-        // Clear the problem statement to make sure the entity is modified.
-        $this->setProblemStatementContent(null);
-
         return $this;
     }
 
     public function setClearProblemstatement(bool $clearProblemstatement): Problem
     {
         $this->clearProblemstatement = $clearProblemstatement;
-        $this->setProblemStatementContent(null);
 
         return $this;
     }
@@ -586,10 +582,16 @@ class Problem extends BaseApiEntity implements
 
     public function setProblemStatementContent(?ProblemStatementContent $content): self
     {
-        $this->problemStatementContent = new ArrayCollection();
-        if ($content) {
-            $this->problemStatementContent->add($content);
+        foreach ($this->problemStatementContent->toArray() as $existingContent) {
+            if ($existingContent !== $content) {
+                $this->problemStatementContent->removeElement($existingContent);
+            }
+        }
+        if ($content !== null) {
             $content->setProblem($this);
+            if (!$this->problemStatementContent->contains($content)) {
+                $this->problemStatementContent->add($content);
+            }
         }
 
         return $this;
@@ -608,20 +610,31 @@ class Problem extends BaseApiEntity implements
             $this
                 ->setProblemStatementContent(null)
                 ->setProblemstatementType(null);
-        } elseif ($this->getProblemstatementFile()) {
-            $content              = file_get_contents($this->getProblemstatementFile()->getRealPath());
-            $clientName           = $this->getProblemstatementFile()->getClientOriginalName();
-            $problemStatementType = Utils::getTextType($clientName, $this->getProblemstatementFile()->getRealPath());
+
+            $this->problemstatementFile = null;
+            $this->clearProblemstatement = false;
+            return;
+        }
+
+        if ($this->getProblemstatementFile()) {
+            $file                 = $this->getProblemstatementFile();
+            $content              = file_get_contents($file->getRealPath());
+            $clientName           = $file->getClientOriginalName();
+            $problemStatementType = Utils::getTextType($clientName, $file->getRealPath());
 
             if (!isset($problemStatementType)) {
                 throw new Exception('Problem statement has unknown file type.');
             }
 
-            $problemStatementContent = (new ProblemStatementContent())
-                ->setContent($content);
+            $problemStatementContent = $this->getProblemStatementContent()
+                ?? (new ProblemStatementContent())->setProblem($this);
+            $problemStatementContent->setContent($content);
             $this
                 ->setProblemStatementContent($problemStatementContent)
                 ->setProblemstatementType($problemStatementType);
+
+            $this->problemstatementFile = null;
+            $this->clearProblemstatement = false;
         }
     }
 
@@ -673,7 +686,9 @@ class Problem extends BaseApiEntity implements
 
     public function addLanguage(Language $language): Problem
     {
-        $this->languages[] = $language;
+        if (!$this->languages->contains($language)) {
+            $this->languages[] = $language;
+        }
         return $this;
     }
 
@@ -688,6 +703,12 @@ class Problem extends BaseApiEntity implements
     public function removeLanguage(Language $language): Problem
     {
         $this->languages->removeElement($language);
+        return $this;
+    }
+
+    public function resetLanguages(): Problem
+    {
+        $this->languages->clear();
         return $this;
     }
 

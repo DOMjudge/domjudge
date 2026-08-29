@@ -1445,10 +1445,20 @@ int main(int argc, char **argv)
 			pump_pipes(&readfds, data_read, data_passed);
 		} while ( data_passed[1] + data_passed[2] > total_data );
 
-		/* Close the output files */
-		for(int i=1; i<=2; i++) {
-			ret = close(child_redirfd[i]);
-			if( ret!=0 ) die(errno,"closing output fd {}", i);
+		/* Always close stdout, also when it is our own without `-o':
+		   its EOF signals the end of the command's output to a
+		   downstream reader such as runpipe, which an interactive
+		   problem's validator relies on. */
+		ret = close(child_redirfd[STDOUT_FILENO]);
+		if ( ret!=0 ) die(errno,"closing output fd {}", STDOUT_FILENO);
+
+		/* Only close stderr when `-e' redirected it to a file. Without
+		   it, child_redirfd[2] aliases our own stderr and closing it
+		   would discard all logmsg()/warning()/die() output for the rest
+		   of our lifetime. */
+		if ( redir_stderr ) {
+			ret = close(child_redirfd[STDERR_FILENO]);
+			if( ret!=0 ) die(errno,"closing output fd {}", STDERR_FILENO);
 		}
 
 		if ( times(&endticks)==(clock_t) -1 ) {

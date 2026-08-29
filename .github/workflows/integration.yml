@@ -97,9 +97,8 @@ jobs:
           cd /tmp
           git clone --depth=1 https://github.com/Kattis/problemtools.git
           cd problemtools/examples
-          # Remove Python 2 submissions that will not pass validation.
-          rm different/submissions/accepted/different_py2.py \
-            different/submissions/slow_accepted/different_slow.py
+          # Remove Python 2 submission that will not pass validation.
+          rm different/submissions/accepted/different_py2.py
           # Add expected results magic string to submission missing it.
           sed -i '1i# @EXPECTED_RESULTS@: RUN_TIME_ERROR' oddecho/submissions/partially_accepted/sol.py
           for i in */problem.yaml; do

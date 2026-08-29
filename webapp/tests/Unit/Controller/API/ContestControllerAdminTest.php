@@ -8,6 +8,7 @@ use App\DataFixtures\Test\DemoPostUnfreezeContestFixture;
 use App\DataFixtures\Test\DemoPreEndContestFixture;
 use App\DataFixtures\Test\DemoPreStartContestFixture;
 use App\Entity\Contest;
+use App\Entity\ContestProblemsetContent;
 use App\Utils\Utils;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -158,6 +159,33 @@ EOF;
         return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
     }
 
+    /**
+     * @return array{0: UploadedFile, 1: string}
+     */
+    private function temporaryProblemsetFile(string $content, string $originalName = 'problemset.txt'): array
+    {
+        $tempFile = tempnam(sys_get_temp_dir(), 'contest-problemset-');
+        self::assertIsString($tempFile);
+        self::assertNotFalse(file_put_contents($tempFile, $content));
+
+        return [new UploadedFile($tempFile, $originalName, 'text/plain', null, true), $tempFile];
+    }
+
+    private function getSingleProblemsetContent(int|string $cid): ContestProblemsetContent
+    {
+        $contest = $this->getContest($cid);
+
+        /** @var ContestProblemsetContent[] $contents */
+        $contents = static::getContainer()->get(EntityManagerInterface::class)
+            ->getRepository(ContestProblemsetContent::class)
+            ->findBy(['contest' => $contest]);
+
+        self::assertCount(1, $contents);
+        self::assertInstanceOf(ContestProblemsetContent::class, $contents[0] ?? null);
+
+        return $contents[0];
+    }
+
     public function testBannerManagement(): void
     {
         // First, make sure we have no banner
@@ -258,6 +286,66 @@ EOF;
         // Verify we have no problemset anymore
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
         self::assertArrayNotHasKey('problemset', $object);
+    }
+
+    public function testProblemsetReplacementUpdatesExistingContent(): void
+    {
+        $id = 1;
+        if ($this->objectClassForExternalId !== null) {
+            $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
+        }
+
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, (string)$id);
+        $firstContent = "first problemset document\n";
+        $secondContent = "second problemset document\n";
+
+        [$firstProblemset, $firstPath] = $this->temporaryProblemsetFile($firstContent);
+        try {
+            $this->verifyApiJsonResponse(
+                'POST',
+                $url . '/problemset',
+                204,
+                $this->apiUser,
+                null,
+                ['problemset' => $firstProblemset]
+            );
+        } finally {
+            @unlink($firstPath);
+        }
+
+        $problemsetContent = $this->getSingleProblemsetContent($id);
+        self::assertSame($firstContent, $problemsetContent->getContent());
+
+        [$secondProblemset, $secondPath] = $this->temporaryProblemsetFile($secondContent);
+        try {
+            $this->verifyApiJsonResponse(
+                'PUT',
+                $url . '/problemset',
+                204,
+                $this->apiUser,
+                null,
+                ['problemset' => $secondProblemset]
+            );
+        } finally {
+            @unlink($secondPath);
+        }
+
+        $problemsetContent = $this->getSingleProblemsetContent($id);
+        self::assertSame($secondContent, $problemsetContent->getContent());
+
+        $contest = $this->getContest($id);
+        self::assertSame('txt', $contest->getContestProblemsetType());
+
+        $this->client->request('GET', '/api' . $url . '/problemset');
+        /** @var StreamedResponse $response */
+        $response = $this->client->getResponse();
+        self::assertSame(200, $response->getStatusCode());
+
+        ob_start();
+        $response->getCallback()();
+        $callbackData = ob_get_clean();
+
+        self::assertSame($secondContent, $callbackData);
     }
 
     #[DataProvider('provideChangeTimes')]

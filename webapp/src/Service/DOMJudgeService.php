@@ -6,7 +6,6 @@ use App\DataTransferObject\ContestStatus;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\AssetEntityInterface;
 use App\Entity\AuditLog;
-use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Executable;
@@ -103,6 +102,7 @@ class DOMJudgeService
 
     public function __construct(
         protected readonly AuthorizedUserService $authService,
+        protected readonly ClarificationService $clarificationService,
         protected readonly EntityManagerInterface $em,
         protected readonly BalloonService $balloonService,
         protected readonly LoggerInterface $logger,
@@ -387,13 +387,10 @@ class DOMJudgeService
 
         if ($this->authService->checkRole('jury')) {
             if ($contest) {
-                $clarifications = $this->em->createQueryBuilder()
+                $clarifications = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid())
                     ->select('clar.externalid', 'clar.body')
-                    ->from(Clarification::class, 'clar')
-                    ->andWhere('clar.contest = :contest')
-                    ->andWhere('clar.sender is not null')
-                    ->andWhere('clar.answered = 0')
-                    ->setParameter('contest', $contest)
+                    ->andWhere('clar.sender IS NOT NULL')
+                    ->andWhere('clar.answered = false')
                     ->getQuery()->getResult();
             }
 
@@ -1156,18 +1153,17 @@ class DOMJudgeService
                 $samples[$sample['probid']] = $sample['numsamples'];
             }
 
-            $raw_clars = $this->em->createQueryBuilder()
-                ->from(Clarification::class, 'clar')
+            $raw_clars = $this->clarificationService->getQueryBuilder(
+                externalContestId: $contest->getExternalid(),
+                // Only clars send to all teams or just this team.
+                // Even for jury/admin we don't want to show all clarifications to all teams.
+                onlyForRecipientTeam: true,
+                recipientTeamId: $teamId)
                 ->select('clar')
-                ->andWhere('clar.contest = :cid')
                 // Only clars associated with a problem.
                 ->andWhere('clar.problem IS NOT NULL')
                 // Only clars send from the jury.
                 ->andWhere('clar.sender IS NULL')
-                // Only clars send to all teams or just this team.
-                ->andWhere('clar.recipient IS NULL OR clar.recipient = :teamid')
-                ->setParameter('cid', $contest->getCid())
-                ->setParameter('teamid', $teamId)
                 ->orderBy('clar.submittime', 'DESC')
                 ->getQuery()
                 ->getResult();
