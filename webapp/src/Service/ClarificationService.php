@@ -76,9 +76,21 @@ readonly class ClarificationService
             ->getResult();
     }
 
+    /**
+     * Build a query for the clarifications the current user is allowed to see.
+     *
+     * Team facing pages should pass `onlyForRecipientTeam` so that they keep
+     * showing what the team sees: jury and admin users are exempt from the
+     * visibility restriction below, and would otherwise see the clarifications
+     * addressed to every other team on their own team pages. A null
+     * `recipientTeamId` then limits the result to clarifications sent to
+     * everyone.
+     */
     public function getQueryBuilder(?string $externalContestId = null, ?int $internalContestId = null,
                                     ?string $externalClarificationId = null,
-                                    ?string $problem = null
+                                    ?string $problem = null,
+                                    bool $onlyForRecipientTeam = false,
+                                    ?int $recipientTeamId = null
     ): QueryBuilder {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Clarification::class, 'clar')
@@ -106,7 +118,14 @@ readonly class ClarificationService
                 ->setParameter('clarification', $externalClarificationId);
         }
 
-        if (!$this->authService->checkRole('api_reader') &&
+        // Staff handling clarifications sees every clarification. Note that
+        // `clarification_rw` is implied by `jury` (and therefore by `api_reader`),
+        // but can also be granted on its own to someone who only answers
+        // clarifications and has no other jury permissions.
+        $isClarificationStaff = $this->authService->checkRole('api_reader') ||
+            $this->authService->checkRole('clarification_rw');
+
+        if (!$isClarificationStaff &&
             !$this->authService->checkRole('judgehost')) {
             if ($this->authService->checkRole('team')) {
                 $queryBuilder
@@ -119,15 +138,21 @@ readonly class ClarificationService
             }
         }
 
-        if (!$this->authService->checkRole('api_reader')) {
+        if (!$isClarificationStaff) {
             $queryBuilder
-                // For non-API-reader users, only expose the problems after the contest has started.
+                // For non-staff users, only expose the problems after the contest has started.
                 // `WF Access Policy` allows for clarifications before the contest, but not to disclose the problem
                 // so referencing them in clarifications would violate referential integrity.
                 ->andWhere('c.starttime < :now OR clar.problem IS NULL')
                 ->setParameter('now', Utils::now())
                 // Don't display future clarifications to non-jury users.
                 ->andWhere('clar.submittime <= :now');
+        }
+
+        if ($onlyForRecipientTeam) {
+            $queryBuilder
+                ->andWhere('clar.recipient IS NULL OR clar.recipient = :recipientTeam')
+                ->setParameter('recipientTeam', $recipientTeamId);
         }
 
         if (!is_null($problem)) {

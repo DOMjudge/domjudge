@@ -24,9 +24,6 @@ class JuryClarificationType extends AbstractType
 {
     public const RECIPIENT_MUST_SELECT = 'domjudge-must-select';
 
-    /** @var string The clarification entity id if the entity exists in the database */
-    private $clarid;
-
     public function __construct(
         private readonly AuthorizedUserService $authService,
         private readonly EntityManagerInterface $em,
@@ -36,7 +33,11 @@ class JuryClarificationType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $this->clarid = $options['clarid'];
+        // Form types are shared services, so keep the per-form options in local
+        // variables and hand them to the validation callback below instead of
+        // storing them on `$this`.
+        $clarid = $options['clarid'];
+        $contestId = $options['contestId'];
         $recipientOptions = [
             '(select...)' => static::RECIPIENT_MUST_SELECT,
             'ALL' => '',
@@ -124,7 +125,11 @@ class JuryClarificationType extends AbstractType
 
         $builder->add('jurymember', HiddenType::class, [
             'constraints' => [
-                new Callback($this->checkJuryMember(...))
+                new Callback(
+                    function (mixed $value, ExecutionContextInterface $context) use ($clarid, $contestId): void {
+                        $this->checkJuryMember($value, $context, $clarid, $contestId);
+                    }
+                )
             ]
         ]);
     }
@@ -133,6 +138,7 @@ class JuryClarificationType extends AbstractType
     {
         $resolver->setDefault('limit_to_team', null);
         $resolver->setDefault('clarid', null);
+        $resolver->setDefault('contestId', null);
     }
 
     private function getTeamLabel(Team $team): string
@@ -144,10 +150,14 @@ class JuryClarificationType extends AbstractType
         return sprintf('%s (%s)', $team->getEffectiveName(), $team->getExternalId());
     }
 
-    public function checkJuryMember(mixed $value, ExecutionContextInterface $context, mixed $payload): void
-    {
-        if ($this->clarid) {
-            $juryMember = $this->clarificationService->getQueryBuilder(externalClarificationId: $this->clarid)
+    public function checkJuryMember(
+        mixed $value,
+        ExecutionContextInterface $context,
+        ?string $clarid,
+        ?string $contestId
+    ): void {
+        if ($clarid) {
+            $juryMember = $this->clarificationService->getQueryBuilder(externalContestId: $contestId, externalClarificationId: $clarid)
                 ->select('clar.jury_member')
                 ->getQuery()
                 ->getSingleResult()['jury_member'];

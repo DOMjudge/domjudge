@@ -6,7 +6,6 @@ use App\DataTransferObject\ContestStatus;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\AssetEntityInterface;
 use App\Entity\AuditLog;
-use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Executable;
@@ -1154,16 +1153,17 @@ class DOMJudgeService
                 $samples[$sample['probid']] = $sample['numsamples'];
             }
 
-            $raw_clars = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid())
+            $raw_clars = $this->clarificationService->getQueryBuilder(
+                externalContestId: $contest->getExternalid(),
+                // Only clars send to all teams or just this team.
+                // Even for jury/admin we don't want to show all clarifications to all teams.
+                onlyForRecipientTeam: true,
+                recipientTeamId: $teamId)
                 ->select('clar')
                 // Only clars associated with a problem.
                 ->andWhere('clar.problem IS NOT NULL')
                 // Only clars send from the jury.
                 ->andWhere('clar.sender IS NULL')
-                // Only clars send to all teams or just this team.
-                // Even for jury/admin we don't want to show all clarifications to all teams
-                ->andWhere('clar.recipient IS NULL OR clar.recipient = :teamid')
-                ->setParameter('teamid', $teamId)
                 ->orderBy('clar.submittime', 'DESC')
                 ->getQuery()
                 ->getResult();

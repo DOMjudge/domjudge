@@ -14,7 +14,6 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -167,7 +166,7 @@ class ClarificationController extends BaseController
         $lastClarification = end($clarificationList);
         $formData['message'] = "> " . str_replace("\n", "\n> ", Utils::wrapUnquoted($lastClarification->getBody())) . "\n\n";
 
-        $form = $this->createForm(JuryClarificationType::class, $formData, ['limit_to_team' => $clarification->getSender(), 'clarid' => $id]);
+        $form = $this->createForm(JuryClarificationType::class, $formData, ['limit_to_team' => $clarification->getSender(), 'clarid' => $id, 'contestId' => $contestId]);
 
         $form->handleRequest($request);
 
@@ -245,7 +244,7 @@ class ClarificationController extends BaseController
 
         $parameters['queues'] = $queues;
         $parameters['answers'] = $clarificationAnswers;
-        $parameters['jurymember'] = $this->clarificationService->getQueryBuilder(externalClarificationId: $clarification->getExternalid())
+        $parameters['jurymember'] = $this->clarificationService->getQueryBuilder(externalContestId: $contestId, externalClarificationId: $clarification->getExternalid())
             ->select('clar.jury_member')
             ->getQuery()
             ->getSingleResult()['jury_member'];
@@ -274,7 +273,7 @@ class ClarificationController extends BaseController
             $formData['recipient'] = $teamto;
         }
 
-        $form = $this->createForm(JuryClarificationType::class, $formData);
+        $form = $this->createForm(JuryClarificationType::class, $formData, ['contestId' => $contestId]);
 
         $form->handleRequest($request);
 
