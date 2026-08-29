@@ -244,7 +244,7 @@ class ClarificationController extends BaseController
 
         $parameters['queues'] = $queues;
         $parameters['answers'] = $clarificationAnswers;
-        $parameters['jurymember'] = $this->clarificationService->getQueryBuilder(externalContestId: $contestId, externalClarificationId: $clarification->getExternalid())
+        $parameters['jurymember'] = $this->clarificationService->getQueryBuilder(externalContestId: $contestId, externalClarificationId: $clarification->getExternalid(), includeProblemsOutsideContest: true)
             ->select('clar.jury_member')
             ->getQuery()
             ->getSingleResult()['jury_member'];

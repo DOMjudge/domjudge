@@ -796,7 +796,7 @@ class ContestController extends BaseController
         }
 
         /** @var string[] $clarificationIds */
-        $clarificationIds = array_map(fn(array $data) => $data['externalid'], $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid())
+        $clarificationIds = array_map(fn(array $data) => $data['externalid'], $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), includeProblemsOutsideContest: true)
             ->select('clar.externalid')
             ->andWhere('clar.answered = false')
             ->getQuery()
