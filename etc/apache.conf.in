@@ -57,8 +57,8 @@
 #
 # Alternatively, use this instead of the VirtualHost above when you don't
 # want DOMjudge in the root, but only occupy a subdir, like this:
-# www.example.com/domjudge
-Alias /domjudge @domserver_webappdir@/public
+# www.example.com@domserver_webroot@
+Alias @domserver_webroot@ @domserver_webappdir@/public
 
 ### General options ###
 #

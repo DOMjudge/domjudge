@@ -93,6 +93,7 @@ domserver_tmpdir                 = @domserver_tmpdir@
 domserver_exampleprobdir         = @domserver_exampleprobdir@
 domserver_scoringexampleprobdir  = @domserver_scoringexampleprobdir@
 domserver_databasedumpdir        = @domserver_databasedumpdir@
+domserver_webroot                = @domserver_webroot@
 PHPVERSION                       = @PHPVERSION@
 
 judgehost_bindir          = @judgehost_bindir@
@@ -142,6 +143,7 @@ define substconfigvars
 	-e 's,@domserver_exampleprobdir[@],@domserver_exampleprobdir@,g' \
 	-e 's,@domserver_scoringexampleprobdir[@],@domserver_scoringexampleprobdir@,g' \
 	-e 's,@domserver_databasedumpdir[@],@domserver_databasedumpdir@,g' \
+	-e 's,@domserver_webroot[@],@domserver_webroot@,g' \
 	-e 's,@judgehost_bindir[@],@judgehost_bindir@,g' \
 	-e 's,@judgehost_etcdir[@],@judgehost_etcdir@,g' \
 	-e 's,@judgehost_libdir[@],@judgehost_libdir@,g' \

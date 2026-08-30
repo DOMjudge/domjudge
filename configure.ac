@@ -265,6 +265,19 @@ else
 fi
 AC_MSG_RESULT($BASEURL)
 
+AC_MSG_CHECKING([alias])
+AC_ARG_WITH([alias], [AS_HELP_STRING([--with-alias=alias],
+[Base path of the DOMjudge web interfaces. Example default:
+ "https://<URL>/domjudge/".])], [], [])
+AX_WITH_COMMENT(8,[       ])
+
+if test "x$with_alias" != x; then
+	AC_SUBST(domserver_webroot, $with_alias)
+else
+	AC_SUBST(domserver_webroot, "/domjudge")
+fi
+AC_MSG_RESULT($domserver_webroot)
+
 # Checks for programs.
 if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 AC_PROG_CXX
@@ -356,6 +369,7 @@ echo " * webserver group.....: $WEBSERVER_GROUP"
 fi
 echo ""
 echo " * website base URL....: $BASEURL"
+echo " * website alias.......: $domserver_webroot"
 echo ""
 echo -n " * documentation.......: AX_VAR_EXPAND($domjudge_docdir)"
 if test "x$DOC_BUILD_ENABLED" != xyes ; then
