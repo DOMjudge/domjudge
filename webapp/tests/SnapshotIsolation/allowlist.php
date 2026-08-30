@@ -21,9 +21,6 @@ return [
     // JudgehostWorkflowTest::testCheckVersionsRecordsTheReportedVersion
     'App\Controller\API\JudgehostController::checkVersions'
         => 'TODO: guard the language auto-promote write, drop the transaction.',
-    // Jury\SubmissionControllerTest::testVerifyAndUnverifyJudging
-    'App\Controller\Jury\SubmissionController::verifyAction'
-        => 'TODO: verify with one bulk UPDATE, no transaction.',
     // RejudgingServiceTest::testUpdateFirstToSolve
     'App\Service\RejudgingService::finishRejudging'
         => 'TODO: INSERT IGNORE of balloons after plain reads in the transaction.',
