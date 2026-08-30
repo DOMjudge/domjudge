@@ -212,6 +212,33 @@ class JudgehostWorkflowTest extends BaseTestCase
         self::assertFalse($judgehost->getHidden());
     }
 
+    /**
+     * A judgedaemon registers again when it restarts. Anything it had claimed and not
+     * finished is handed back so another judgehost can pick it up.
+     */
+    public function testRegisterGivesBackUnfinishedWork(): void
+    {
+        // A problem with several test cases, so that reporting one failing run decides the
+        // verdict under lazy evaluation while leaving the other runs unfinished. Only a
+        // judging that already has a verdict is handed back on registration.
+        $this->registerJudgehost();
+        $this->addSubmission(problem: 'boolfind');
+
+        $tasks = $this->fetchWork();
+        self::assertGreaterThan(1, count($tasks), 'expected a batch of judge tasks');
+
+        $this->reportRun((int)$tasks[0]['judgetaskid'], 'wrong-answer');
+        $judgeTaskId = (int)$tasks[1]['judgetaskid'];
+
+        $unfinished = $this->registerJudgehost();
+        self::assertNotEmpty($unfinished, 'the judgehost had unfinished work to hand back');
+
+        $em = $this->freshEm();
+        $judgeTask = $em->getRepository(JudgeTask::class)->find($judgeTaskId);
+        self::assertNull($judgeTask->getJudgehost(), 'the claim must be released');
+        self::assertNull($judgeTask->getStarttime(), 'the start time must be cleared with it');
+    }
+
     public function testFetchWorkClaimsTheTasksAndStartsTheJudging(): void
     {
         $tasks = $this->claimWorkForOneSubmission();
