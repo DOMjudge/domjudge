@@ -818,32 +818,18 @@ class JudgehostController extends AbstractFOSRestController
 
         if ($field_name !== null) {
             // Disable any outstanding judgetasks with the same script that have not been claimed yet.
-            $this->em->wrapInTransaction(function (EntityManagerInterface $em) use ($field_name, $disabled_id, $error): void {
-                $judgingids = $em->getConnection()->executeQuery(
-                    'SELECT DISTINCT jobid'
-                    . ' FROM judgetask'
-                    . ' WHERE ' . $field_name . ' = :id'
-                    . ' AND judgehostid IS NULL'
-                    . ' AND valid = 1',
-                    [
-                        'id' => $disabled_id,
-                    ]
-                )->fetchFirstColumn();
-                $judgings = $em->getRepository(Judging::class)->findBy(['judgingid' => $judgingids]);
-                foreach ($judgings as $judging) {
-                    /** @var Judging $judging */
-                    $judging->setInternalError($error);
-                }
-                $em->flush();
-                $em->getConnection()->executeStatement(
-                    'UPDATE judgetask SET valid=0'
-                    . ' WHERE ' . $field_name . ' = :id'
-                    . ' AND judgehostid IS NULL',
-                    [
-                        'id' => $disabled_id,
-                    ]
-                );
-            });
+            $this->em->getConnection()->executeStatement(
+                'UPDATE judgetask jt'
+                . ' JOIN judging j ON j.judgingid = jt.jobid'
+                . ' SET jt.valid = 0, j.errorid = :errorid'
+                . ' WHERE jt.' . $field_name . ' = :id'
+                . ' AND jt.judgehostid IS NULL'
+                . ' AND jt.valid = 1',
+                [
+                    'errorid' => $error->getErrorid(),
+                    'id' => $disabled_id,
+                ]
+            );
         }
 
         $this->dj->setInternalError($disabled, $contest, false);

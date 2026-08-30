@@ -21,9 +21,6 @@ return [
     // JudgehostWorkflowTest::testCheckVersionsRecordsTheReportedVersion
     'App\Controller\API\JudgehostController::checkVersions'
         => 'TODO: guard the language auto-promote write, drop the transaction.',
-    // JudgehostWorkflowTest::testInternalErrorForACompileScriptInvalidatesQueuedJudgeTasks
-    'App\Controller\API\JudgehostController::internalErrorAction'
-        => 'TODO: drop the transaction, use guarded bulk UPDATEs. The 1020 reported in #2848.',
     // Jury\SubmissionControllerTest::testVerifyAndUnverifyJudging
     'App\Controller\Jury\SubmissionController::verifyAction'
         => 'TODO: verify with one bulk UPDATE, no transaction.',
