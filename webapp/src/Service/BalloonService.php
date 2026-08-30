@@ -6,11 +6,9 @@ use App\Entity\Balloon;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judging;
-use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
@@ -55,32 +53,19 @@ readonly class BalloonService
             return;
         }
 
-        // Prevent duplicate balloons in case of multiple correct submissions.
-        $numCorrect = $this->em->createQueryBuilder()
-            ->from(Balloon::class, 'b')
-            ->select('COUNT(b.submission) AS numBalloons')
-            ->andWhere('b.problem = :probid')
-            ->andWhere('b.team = :teamid')
-            ->andWhere('b.contest = :cid')
-            ->setParameter('probid', $submission->getProblem())
-            ->setParameter('teamid', $submission->getTeam())
-            ->setParameter('cid', $submission->getContest())
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        if ($numCorrect == 0) {
-            $balloon = new Balloon();
-            $balloon->setSubmission($this->em->getReference(Submission::class, $submission->getSubmitid()));
-            $balloon->setTeam($this->em->getReference(Team::class, $submission->getTeamId()));
-            $balloon->setContest(
-                $this->em->getReference(Contest::class, $submission->getContest()->getCid()));
-            $balloon->setProblem($this->em->getReference(Problem::class, $submission->getProblemId()));
-            $this->em->persist($balloon);
-            try {
-                $this->em->flush();
-            } catch (UniqueConstraintViolationException) {
-            }
-        }
+        // Prevent duplicate balloons in case of multiple correct submissions. The unique key on
+        // (cid, teamid, probid) decides: checking first races with other judgehosts, and
+        // catching the violation instead would leave the entity manager closed for callers
+        // that are mid-transaction, such as RejudgingService::finishRejudging().
+        $this->em->getConnection()->executeStatement(
+            'INSERT IGNORE INTO balloon (submitid, teamid, probid, cid) VALUES (:submitid, :teamid, :probid, :cid)',
+            [
+                'submitid' => $submission->getSubmitid(),
+                'teamid' => $submission->getTeamId(),
+                'probid' => $submission->getProblemId(),
+                'cid' => $submission->getContest()->getCid(),
+            ]
+        );
     }
 
     /**
