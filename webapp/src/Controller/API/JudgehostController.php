@@ -625,7 +625,9 @@ class JudgehostController extends AbstractFOSRestController
             'output_run',
             'output_diff',
             'output_error',
-            'output_system'
+            'output_system',
+            'start_time',
+            'end_time'
         ];
 
         foreach ($required as $argument) {
