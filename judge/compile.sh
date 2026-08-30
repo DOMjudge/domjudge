@@ -181,8 +181,15 @@ fi
 
 # Check if the compile script auto-detected the entry point, and if
 # so, store it in the compile.meta for later reuse, e.g. in a replay.
-ENTRY_POINT_REGEX='[Dd]etected entry_point: '
-grep "$ENTRY_POINT_REGEX" compile.tmp | sed 's/^.*etected //' >>compile.meta
+# Only lines that start with the detection message are considered and only
+# the detected value is copied over, prefixed with the 'entry_point' key.
+# This prevents compiler output, which is under control of the submitter,
+# from injecting arbitrary keys into the metadata. When changing the regex
+# below, also update example_problems/hello/submissions/accepted/test-metadata-injection.c
+# which checks that such injections are rejected.
+ENTRY_POINT_REGEX='^(Info: )?[Dd]etected entry_point: '
+grep -E "$ENTRY_POINT_REGEX" compile.tmp | \
+	sed -E "s@$ENTRY_POINT_REGEX@entry_point: @" >>compile.meta
 
 logmsg $LOG_DEBUG "checking compilation exit-status"
 if grep '^time-result: .*timelimit' compile.meta >/dev/null 2>&1 ; then
@@ -204,7 +211,7 @@ fi
 # Remove any entry point detection message when compilation succeeded,
 # since we already stored it above and it only confuses contestants.
 # Ignore the exit code, since grep returns 1 when no line matched.
-grep -v "$ENTRY_POINT_REGEX" compile.tmp >>compile.out || true
+grep -vE "$ENTRY_POINT_REGEX" compile.tmp >>compile.out || true
 
 logmsg $LOG_INFO "Compilation successful"
 cleanexit 0
