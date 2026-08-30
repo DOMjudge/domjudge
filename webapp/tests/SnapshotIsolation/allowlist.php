@@ -21,9 +21,6 @@ return [
     // RejudgingServiceTest::testUpdateFirstToSolve
     'App\Service\RejudgingService::finishRejudging'
         => 'TODO: INSERT IGNORE of balloons after plain reads in the transaction.',
-    // No test: needs a judging in a rejudging with auto-apply.
-    'App\Controller\API\JudgehostController::updateJudgingAction'
-        => 'TODO: guard the compile-error claim, drop the transaction.',
 
     // JudgehostWorkflowTest::testCompletingAnAutoApplyRejudgingAppliesIt
     'App\Service\RejudgingService::createRejudging'

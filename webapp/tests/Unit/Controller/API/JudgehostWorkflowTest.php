@@ -343,6 +343,39 @@ class JudgehostWorkflowTest extends BaseTestCase
      */
     public function testCompletingAnAutoApplyRejudgingAppliesIt(): void
     {
+        [$originalJudgingId, $submissionId, $rejudgingId] = $this->rejudgeOneCorrectSubmission();
+
+        // Judge the submission again; the last run applies the rejudging.
+        $rejudgeTasks = $this->fetchWork();
+        self::assertNotEmpty($rejudgeTasks, 'the rejudging must produce new work');
+        self::assertNotSame('try_again', $rejudgeTasks[0]['type'] ?? null);
+        foreach ($rejudgeTasks as $task) {
+            $this->reportRun((int)$task['judgetaskid'], 'correct');
+        }
+
+        $em = $this->freshEm();
+
+        $newJudging = $this->judgingForTask((int)$rejudgeTasks[0]['judgetaskid']);
+        self::assertSame($rejudgingId, $newJudging->getRejudging()?->getRejudgingid());
+        self::assertTrue($newJudging->getValid(), 'the rejudged judging must become the valid one');
+
+        $superseded = $em->getRepository(Judging::class)->find($originalJudgingId);
+        self::assertFalse($superseded->getValid(), 'the original judging must be superseded');
+
+        $submission = $em->getRepository(Submission::class)->find($submissionId);
+        self::assertNull($submission->getRejudging(), 'applying releases the submission');
+
+        $rejudging = $em->getRepository(Rejudging::class)->find($rejudgingId);
+        self::assertNotNull($rejudging->getEndtime(), 'the rejudging must be finished');
+    }
+
+    /**
+     * Judge a submission, then start an auto-applying rejudging of it.
+     *
+     * @return array{int, int, int} original judging id, submission id, rejudging id
+     */
+    private function rejudgeOneCorrectSubmission(): array
+    {
         $originalTasks = $this->claimWorkForOneSubmission();
         foreach ($originalTasks as $task) {
             $this->reportRun((int)$task['judgetaskid'], 'correct');
@@ -382,20 +415,34 @@ class JudgehostWorkflowTest extends BaseTestCase
             $skipped
         );
         self::assertNotNull($rejudging, 'the rejudging should have been created');
-        $rejudgingId = $rejudging->getRejudgingid();
 
-        // Judge the submission again; the last run applies the rejudging.
+        return [$originalJudgingId, $submissionId, $rejudging->getRejudgingid()];
+    }
+
+    /**
+     * A compile error reported for a rejudged submission goes through
+     * updateJudgingAction's claim and then applies the rejudging, which is the only path that
+     * reaches both the guarded claim and the locked transaction behind it.
+     */
+    public function testCompileErrorOnARejudgingAppliesIt(): void
+    {
+        [$originalJudgingId, $submissionId, $rejudgingId] = $this->rejudgeOneCorrectSubmission();
+
         $rejudgeTasks = $this->fetchWork();
         self::assertNotEmpty($rejudgeTasks, 'the rejudging must produce new work');
         self::assertNotSame('try_again', $rejudgeTasks[0]['type'] ?? null);
-        foreach ($rejudgeTasks as $task) {
-            $this->reportRun((int)$task['judgetaskid'], 'correct');
-        }
+
+        $this->updateJudging((int)$rejudgeTasks[0]['judgetaskid'], [
+            'compile_success' => 0,
+            'output_compile' => base64_encode('syntax error'),
+            'compile_metadata' => base64_encode('meta'),
+        ]);
 
         $em = $this->freshEm();
 
         $newJudging = $this->judgingForTask((int)$rejudgeTasks[0]['judgetaskid']);
-        self::assertSame($rejudgingId, $newJudging->getRejudging()?->getRejudgingid());
+        self::assertSame(Judging::RESULT_COMPILER_ERROR, $newJudging->getResult());
+        self::assertSame('syntax error', $newJudging->getOutputCompile(true));
         self::assertTrue($newJudging->getValid(), 'the rejudged judging must become the valid one');
 
         $superseded = $em->getRepository(Judging::class)->find($originalJudgingId);

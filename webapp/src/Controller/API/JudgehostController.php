@@ -393,80 +393,81 @@ class JudgehostController extends AbstractFOSRestController
                 }
             } else {
                 $compileMetadata = $request->request->get('compile_metadata');
-                $this->em->wrapInTransaction(function () use (
-                    $judgehost,
-                    $judging,
-                    $query,
-                    $output_compile,
-                    $compileMetadata
-                ): void {
-                    if ($judging->getOutputCompile() === null) {
-                        $judging
-                            ->setOutputCompile($output_compile)
-                            ->setResult(Judging::RESULT_COMPILER_ERROR)
-                            ->setEndtime(Utils::now());
 
-                        if ($compileMetadata !== null) {
-                            $judging->setCompileMetadata(base64_decode($compileMetadata));
-                        }
-                        $this->em->flush();
+                // Claim the compile error with one guarded update: only the first judgehost to
+                // report one records it, with no window in which two believe they were first.
+                // The same statement invalidates the judgetasks, so none of them can be fetched
+                // for a judging that is already over. The metadata column is written
+                // unconditionally because the guard only passes while output_compile is still
+                // NULL, and the branch above writes both together.
+                $claimed = $this->em->getConnection()->executeStatement(
+                    'UPDATE judging j
+                        LEFT JOIN judgetask jt ON jt.jobid = j.judgingid
+                        SET j.output_compile = :output_compile,
+                            j.metadata = :compile_metadata,
+                            j.result = :result,
+                            j.endtime = :endtime,
+                            jt.valid = 0
+                      WHERE j.judgingid = :judgingid
+                        AND j.output_compile IS NULL',
+                    [
+                        'output_compile' => $output_compile,
+                        'compile_metadata' => $compileMetadata === null ? null : base64_decode($compileMetadata),
+                        'result' => Judging::RESULT_COMPILER_ERROR,
+                        'endtime' => Utils::now(),
+                        'judgingid' => $judging->getJudgingid(),
+                    ]
+                );
+                // The row was changed behind the entity manager's back.
+                $this->em->refresh($judging);
 
-                        if ($judging->getValid()) {
-                            $this->eventLogService->log('judging', $judging->getJudgingid(),
-                                EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
-                        }
+                if ($claimed) {
+                    if ($judging->getValid()) {
+                        $this->eventLogService->log('judging', $judging->getJudgingid(),
+                            EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
 
-                        // As EventLogService::log() will clear the entity manager, so the judging has
-                        // now become detached. We will have to reload it.
+                        // As EventLogService::log() will clear the entity manager, the judging
+                        // has now become detached. We will have to reload it.
                         /** @var Judging $judging */
                         $judging = $query->getOneOrNullResult();
-
-                        // Invalidate judgetasks.
-                        $this->em->getConnection()->executeStatement(
-                            'UPDATE judgetask SET valid=0'
-                            . ' WHERE jobid=:jobid',
-                            [
-                                'jobid' => $judging->getJudgingid(),
-                            ]
-                        );
-                        $this->em->flush();
-                    } elseif ($judging->getResult() !== Judging::RESULT_COMPILER_ERROR) {
-                        // The new result contradicts a former one, that's not good.
-                        // Since at least one other judgehost was successful, but we were not, assume that the
-                        // current judgehost is broken and disable it.
-                        $this->disableJudgehostForContradiction(
-                            $judging,
-                            $judgehost->getHostname(),
-                            (string)$output_compile
-                        );
-
-                        $this->em->flush();
                     }
+                } elseif ($judging->getResult() !== Judging::RESULT_COMPILER_ERROR) {
+                    // The new result contradicts a former one, that's not good.
+                    // Since at least one other judgehost was successful, but we were not, assume that the
+                    // current judgehost is broken and disable it.
+                    $this->disableJudgehostForContradiction(
+                        $judging,
+                        $judgehost->getHostname(),
+                        (string)$output_compile
+                    );
 
-                    $judgingId = $judging->getJudgingid();
-                    $contestId = $judging->getSubmission()->getContest()->getCid();
-                    $contestExternalid = $judging->getSubmission()->getContest()->getExternalid();
-                    $this->dj->auditlog('judging', (string)$judgingId, 'judged',
-                                        'compiler-error', $judgehost->getHostname(), $contestExternalid);
-
-                    $this->maybeUpdateActiveJudging($judging);
                     $this->em->flush();
-                    if (!$this->config->get('verification_required') &&
-                        $judging->getValid()) {
-                        $this->eventLogService->log('judging', $judgingId,
-                                                    EventLogService::ACTION_UPDATE, $contestId);
-                    }
+                }
 
-                    $submission = $judging->getSubmission();
-                    $contest    = $submission->getContest();
-                    $team       = $submission->getTeam();
-                    $problem    = $submission->getProblem();
-                    $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+                $judgingId = $judging->getJudgingid();
+                $contestId = $judging->getSubmission()->getContest()->getCid();
+                $contestExternalid = $judging->getSubmission()->getContest()->getExternalid();
+                $this->dj->auditlog('judging', (string)$judgingId, 'judged',
+                                    'compiler-error', $judgehost->getHostname(), $contestExternalid);
 
-                    $message = sprintf("submission %s, judging %d: compiler-error",
-                                       $submission->getExternalid(), $judging->getJudgingid());
-                    $this->dj->alert('reject', $message);
-                });
+                $this->maybeUpdateActiveJudging($judging);
+                if (!$this->config->get('verification_required') &&
+                    $judging->getValid()) {
+                    $this->eventLogService->log('judging', $judgingId,
+                                                EventLogService::ACTION_UPDATE, $contestId);
+                }
+
+                $submission = $judging->getSubmission();
+                $contest    = $submission->getContest();
+                $team       = $submission->getTeam();
+                $problem    = $submission->getProblem();
+                // Outside any transaction, as ScoreboardService requires: it takes a MariaDB
+                // advisory lock and would otherwise hold it across the caller's row locks.
+                $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+
+                $message = sprintf("submission %s, judging %d: compiler-error",
+                                   $submission->getExternalid(), $judging->getJudgingid());
+                $this->dj->alert('reject', $message);
             }
         } else {
             throw new BadRequestHttpException('Inconsistent data, no compilation data provided.');
