@@ -7,18 +7,45 @@
 
     <div class="container mb-5">
         <div class="row row-cols-1 row-cols-lg-2 g-4">
-            {% for lang in languages %}
+            {% for langarray in languages %}
+                {% set lang = langarray['language'] %}
+                {% set problems = langarray['problems'] %}
                 <div class="col">
                     <div class="card language-card">
                         <div class="card-body p-4">
                             <div class="mb-4">
                                 <h2 class="lang-name h4">{{ lang.name }}</h2>
-                                <div class="d-flex gap-2 mt-2">
+                                <div class="d-flex gap-2 mt-2 extensions-team-interface">
                                     {% for ext in lang.extensions %}
                                         <span class="extension-badge">.{{ ext }}</span>
                                     {% endfor %}
+                                    {% if limited %}
+                                        <div style="margin-left: auto; float: right; text-align: right;">
+                                            {% for problem in problems %}
+                                                {{ problem | problemBadge }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
+
+                            {% if limited %}
+                                <div class="mb-4">
+                                    <div class="section-label">
+                                        <i class="fas fa-book-open"></i> Problems
+                                    </div>
+                                    <div>
+                                        {% for problem in problems %}
+                                            {{ problem | problemBadge }}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="output_test" style="scrollbar-width: thin; scrollbar-gutter: stable both-edges; text-wrap: nowrap; overflow: scroll; max-height: 4em;">
+                                    {% for problem in problems %}
+                                        {{ problem | problemBadge }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
 
                             {% if lang.compilerVersion and lang.compilerVersionCommand %}
                                 <div class="mb-4">
