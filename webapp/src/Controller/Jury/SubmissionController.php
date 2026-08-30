@@ -1279,24 +1279,45 @@ class SubmissionController extends BaseController
         Request $request,
         int $judgingId
     ): RedirectResponse {
-        $this->em->wrapInTransaction(function () use ($eventLogService, $request, $judgingId): void {
-            /** @var Judging $judging */
-            $judging  = $this->em->getRepository(Judging::class)->find($judgingId);
-            $verified = $request->request->getBoolean('verified');
-            $comment  = $request->request->get('comment');
-            $judging
-                ->setVerified($verified)
-                ->setJuryMember($verified ? $this->authService->getUser()->getUserIdentifier() : null)
-                ->setVerifyComment($comment);
+        // Read the judging before the transaction, so that the update below is the first
+        // statement in it.
+        /** @var Judging|null $judging */
+        $judging = $this->em->getRepository(Judging::class)->find($judgingId);
+        if ($judging === null) {
+            throw new NotFoundHttpException(sprintf('Judging with ID %s not found', $judgingId));
+        }
+        $cid = $judging->getContest()->getCid();
+        $verified = $request->request->getBoolean('verified');
+        $comment  = $request->request->get('comment');
 
-            $this->em->flush();
-            $this->dj->auditlog('judging', (string)$judging->getJudgingid(),
+        $this->em->wrapInTransaction(function () use (
+            $eventLogService,
+            $judgingId,
+            $cid,
+            $verified,
+            $comment
+        ): void {
+            // A bulk update, as last writer wins is right for a manual verification.
+            $this->em->createQueryBuilder()
+                ->update(Judging::class, 'j')
+                ->set('j.verified', ':verified')
+                ->set('j.jury_member', ':juryMember')
+                ->set('j.verify_comment', ':verifyComment')
+                ->andWhere('j.judgingid = :judgingid')
+                ->setParameter('verified', $verified)
+                ->setParameter('juryMember', $verified ? $this->authService->getUser()->getUserIdentifier() : null)
+                ->setParameter('verifyComment', $comment)
+                ->setParameter('judgingid', $judgingId)
+                ->getQuery()
+                ->execute();
+
+            $this->dj->auditlog('judging', (string)$judgingId,
                                              $verified ? 'set verified' : 'set unverified');
 
             if ((bool)$this->config->get('verification_required')) {
                 // Log to event table (case of no verification required is handled
                 // in the REST API JudgehostController::addJudgingRunAction).
-                $eventLogService->log('judging', $judging->getJudgingid(), 'update', $judging->getContest()->getCid());
+                $eventLogService->log('judging', $judgingId, 'update', $cid);
             }
         });
 

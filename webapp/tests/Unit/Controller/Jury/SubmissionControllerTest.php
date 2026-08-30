@@ -153,4 +153,24 @@ class SubmissionControllerTest extends BaseTestCase
         self::assertFalse($judging->getVerified());
         self::assertNull($judging->getJuryMember(), 'unverifying must release the claim');
     }
+
+    /**
+     * When verification is required, the verification is also logged to the event feed.
+     */
+    public function testVerifyingLogsAnEventWhenVerificationIsRequired(): void
+    {
+        $judgingId = $this->addSubmission()->getJudgings()->first()->getJudgingid();
+
+        $this->withChangedConfiguration('verification_required', true, function () use ($judgingId): void {
+            $count = fn(): int => (int)$this->em()->getConnection()->fetchOne(
+                "SELECT COUNT(*) FROM event WHERE endpointtype = 'judgements' AND endpointid = ?",
+                [(string)$judgingId]
+            );
+            $before = $count();
+
+            $this->postVerify($judgingId, ['verified' => '1', 'comment' => 'looks right']);
+
+            self::assertGreaterThan($before, $count(), 'verifying must log an event for the judging');
+        });
+    }
 }
