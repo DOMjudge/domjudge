@@ -269,10 +269,10 @@ class TwigExtension
                 $icon = 'check';
                 break;
             default:
-                return $status;
+                return htmlspecialchars($status);
         }
         return sprintf('<i class="fas fa-%s-circle" aria-hidden="true"></i><span class="sr-only">%s</span>', $icon,
-                       $status);
+                       htmlspecialchars($status));
     }
 
     #[AsTwigFilter('countryFlag', isSafe: ['html'])]
@@ -469,7 +469,7 @@ class TwigExtension
             }
             $icon    = sprintf('<span class="badge text-bg-%s badge-testcase">%s</span>', $class, $text);
             $results .= sprintf('<a title="%s" href="#run-%d" %s>%s</a>',
-                join(', ', $titleElements), $testcase->getRank(),
+                htmlspecialchars(join(', ', $titleElements)), $testcase->getRank(),
                                 $isCorrect ? 'onclick="display_correctruns(true);"' : '', $icon);
         }
 
@@ -540,7 +540,8 @@ class TwigExtension
                 }
         }
 
-        return sprintf('<span class="sol %s">%s</span>', $valid ? $style : 'disabled', $result);
+        return sprintf('<span class="sol %s">%s</span>', $valid ? $style : 'disabled',
+                       htmlspecialchars($result));
     }
 
     #[AsTwigFilter('printValidJuryResult', isSafe: ['html'])]
@@ -791,6 +792,7 @@ class TwigExtension
             }
             $team      = $is_validator ? '<td></td>' : $content;
             $validator = $is_validator ? $content : '<td></td>';
+            $time      = htmlspecialchars($time);
             $body      .= "<tr>" . ($forTeam ? "" : "<td>$time</td>")
                           . $validator
                           . $team
@@ -945,7 +947,7 @@ JS;
 $(function() {
     const editorId = '%s';
     const diffId = '%s';
-    const submissionId = '%s';
+    const submissionId = %s;
     const models = %s;
     require(['vs/editor/editor.main'], () => {
         initDiffEditorTab(editorId, diffId, submissionId, models);
@@ -958,7 +960,7 @@ HTML;
             $editor,
             $editorId,
             $diffId,
-            $submissionId,
+            $this->serializer->serialize($submissionId, 'json'),
             $this->serializer->serialize($files, 'json'),
         );
     }
@@ -1052,7 +1054,11 @@ HTML;
         if ($description == null) {
             return '';
         }
-        $descriptionLines = explode("\n", $description);
+        // Escape every line on its own: the newlines are deliberately turned into <br>,
+        // but nothing else in the description may end up as markup. The data-attributes
+        // below are assigned to innerHTML by toggleExpand(), so they carry the same
+        // already-escaped content.
+        $descriptionLines = array_map(htmlspecialchars(...), explode("\n", $description));
         if (count($descriptionLines) <= 3) {
             return implode('<br>', $descriptionLines);
         } else {
@@ -1133,7 +1139,7 @@ EOF;
             $rgb,
             $border,
             $foreground,
-            $problem?->getShortname() ?? '?'
+            htmlspecialchars($problem?->getShortname() ?? '?')
         );
     }
 
@@ -1175,10 +1181,10 @@ EOF;
             $rgb,
             $border,
             $submissionsUrl,
-            $score->team->getExternalid(),
-            $problem->getExternalId(),
+            htmlspecialchars((string)$score->team->getExternalid()),
+            htmlspecialchars((string)$problem->getExternalId()),
             $foreground,
-            $problem->getShortname()
+            htmlspecialchars($problem->getShortname())
         );
         if (!$matrixItem->isCorrect) {
             if ($matrixItem->numSubmissionsPending > 0) {
@@ -1237,20 +1243,21 @@ EOF;
     {
         switch ($warning->getType()) {
             case ExternalSourceWarning::TYPE_UNSUPORTED_ACTION:
-                $action = $warning->getContent()['action'];
+                $action = htmlspecialchars((string)$warning->getContent()['action']);
                 return "Action $action not supported for this entity type";
             case ExternalSourceWarning::TYPE_DATA_MISMATCH:
                 $rows = [];
                 $null = '&lt;null&gt;';
                 foreach ($warning->getContent()['diff'] as $field => $diff) {
-                    $tdField    = "<td><code>$field</code></td>";
+                    $fieldEscaped = htmlspecialchars((string)$field);
+                    $tdField    = "<td><code>$fieldEscaped</code></td>";
                     $tdUs       = sprintf(
                         '<td><code>%s</code></td>',
-                        $diff['us'] ?? $null
+                        isset($diff['us']) ? htmlspecialchars((string)$diff['us']) : $null
                     );
                     $tdExternal = sprintf(
                         '<td><code>%s</code></td>',
-                        $diff['external'] ?? $null
+                        isset($diff['external']) ? htmlspecialchars((string)$diff['external']) : $null
                     );
                     $rows[]     = "<tr>{$tdField}{$tdUs}{$tdExternal}</tr>";
                 }
@@ -1270,8 +1277,8 @@ EOF;
             case ExternalSourceWarning::TYPE_DEPENDENCY_MISSING:
                 $rows = [];
                 foreach ($warning->getContent()['dependencies'] as $dependency) {
-                    $type   = $dependency['type'];
-                    $id     = $dependency['id'];
+                    $type   = htmlspecialchars((string)$dependency['type']);
+                    $id     = htmlspecialchars((string)$dependency['id']);
                     $rows[] = "<tr><td>$type</td><td>$id</td></tr>";
                 }
                 $header  = <<<'EOF'
@@ -1289,7 +1296,7 @@ EOF;
             case ExternalSourceWarning::TYPE_ENTITY_SHOULD_NOT_EXIST:
                 return '';
             case ExternalSourceWarning::TYPE_SUBMISSION_ERROR:
-                return $warning->getContent()['message'];
+                return htmlspecialchars((string)$warning->getContent()['message']);
         }
 
         return '';
