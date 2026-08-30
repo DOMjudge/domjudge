@@ -137,12 +137,16 @@ done
 
 logmsg $LOG_INFO "starting compile"
 
-# shellcheck disable=SC2236
-if [ ! -z "$ENTRY_POINT" ]; then
-	ENVIRONMENT_VARS="-V ENTRY_POINT=$ENTRY_POINT"
-fi
+# Collect the arguments for runguard in the positional parameters, which
+# currently hold the source files. The environment variables must not be
+# expanded unquoted: ENTRY_POINT originates from the submission and a value
+# containing whitespace would otherwise inject additional runguard options.
+set -- -- "/compile-script/$(basename "$COMPILE_SCRIPT")" program "$MEMLIMIT" "$@"
 if [ -n "$DEBUG" ]; then
-	ENVIRONMENT_VARS="$ENVIRONMENT_VARS -V DEBUG=$DEBUG"
+	set -- -V "DEBUG=$DEBUG" "$@"
+fi
+if [ -n "$ENTRY_POINT" ]; then
+	set -- -V "ENTRY_POINT=$ENTRY_POINT" "$@"
 fi
 
 # First compile to 'source' then rename to 'program' to avoid problems with
@@ -151,8 +155,7 @@ exitcode=0
 $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
 	-r "$PWD/.." -d "/compile" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT --no-core -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT \
-	-M "$WORKDIR/compile.meta" $ENVIRONMENT_VARS -- \
-	"/compile-script/$(basename "$COMPILE_SCRIPT")" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
+	-M "$WORKDIR/compile.meta" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 
 # Make sure that all files are owned by the current user/group, so
