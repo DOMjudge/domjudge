@@ -247,7 +247,7 @@ class JudgehostController extends AbstractFOSRestController
     #[IsGranted('ROLE_JUDGEHOST')]
     #[Rest\Put(path: '/update-judging/{hostname}/{judgetaskid<\d+>}')]
     #[OA\Response(
-        response: 200,
+        response: 204,
         description: 'When the judging has been updated'
     )]
     #[OA\RequestBody(
@@ -469,7 +469,7 @@ class JudgehostController extends AbstractFOSRestController
      */
     #[IsGranted('ROLE_JUDGEHOST')]
     #[Rest\Post(path: '/add-debug-info/{hostname}/{judgeTaskId<\d+>}')]
-    #[OA\Response(response: 200, description: 'When the debug info has been added')]
+    #[OA\Response(response: 204, description: 'When the debug info has been added')]
     public function addDebugInfo(
         Request $request,
         #[OA\PathParameter(description: 'The hostname of the judgehost that wants to add the debug info')]
