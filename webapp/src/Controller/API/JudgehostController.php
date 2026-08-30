@@ -858,31 +858,28 @@ class JudgehostController extends AbstractFOSRestController
     {
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ($judging) {
-            $this->em->wrapInTransaction(function () use ($judging, $judgehost): void {
-                /** @var JudgingRun $run */
-                foreach ($judging->getRuns() as $run) {
-                    if ($judgehost === null) {
-                        // This is coming from internal errors, reset the whole judging.
-                        $run->getJudgetask()
-                            ->setValid(false);
-                        continue;
-                    }
-
-                    // We do not have to touch any finished runs
-                    if ($run->getRunresult() !== null) {
-                        continue;
-                    }
-
-                    // For the other runs, we need to reset the judge task if it belongs to the current judgehost.
-                    if ($run->getJudgetask()->getJudgehost() && $run->getJudgetask()->getJudgehost()->getHostname() === $judgehost->getHostname()) {
-                        $run->getJudgetask()
-                            ->setJudgehost(null)
-                            ->setStarttime(null);
-                    }
-                }
-
-                $this->em->flush();
-            });
+            if ($judgehost === null) {
+                // This is coming from internal errors, reset the whole judging.
+                $this->em->getConnection()->executeStatement(
+                    'UPDATE judgetask SET valid = 0 WHERE jobid = :jobid',
+                    ['jobid' => $judgingId]
+                );
+            } else {
+                // Give back only the unfinished runs that this judgehost had claimed; runs
+                // that already have a result stay where they are.
+                $this->em->getConnection()->executeStatement(
+                    'UPDATE judgetask jt
+                        INNER JOIN judging_run jr ON jr.judgetaskid = jt.judgetaskid
+                        SET jt.judgehostid = NULL, jt.starttime = NULL
+                      WHERE jt.jobid = :jobid
+                        AND jt.judgehostid = :judgehostid
+                        AND jr.runresult IS NULL',
+                    [
+                        'jobid' => $judgingId,
+                        'judgehostid' => $judgehost->getJudgehostid(),
+                    ]
+                );
+            }
 
             if ($judgehost === null) {
                 // Invalidate old judging and create a new one - but without

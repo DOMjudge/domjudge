@@ -30,7 +30,4 @@ return [
     // No test: needs a judging in a rejudging with auto-apply.
     'App\Controller\API\JudgehostController::updateJudgingAction'
         => 'TODO: guard the compile-error claim, drop the transaction.',
-    // No test: JudgehostWorkflowTest reaches it with the entities already loaded.
-    'App\Controller\API\JudgehostController::giveBackJudging'
-        => 'TODO: replace the ORM loop with guarded bulk UPDATEs.',
 ];
