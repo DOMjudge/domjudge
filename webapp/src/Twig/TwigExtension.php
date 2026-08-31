@@ -769,17 +769,21 @@ class TwigExtension
             $is_validator = $log[$idx] == '>' || $log[$idx] == ']';
             if ($log[$idx] == ']' || $log[$idx] == '[') {
                 $content = '<td style="font-style:italic; color: dimgrey;">EOF from program</td>';
+                // An EOF marker consists of the header and the direction character only.
+                $idx++;
             } else {
                 $content = substr($log, $idx + 3, $len);
-                if (empty($content)) {
+                if ($content === '') {
+                    // Nothing left: the log was cut off right after this header.
                     break;
                 }
                 $content = htmlspecialchars($content);
                 $content = '<td class="output_text">'
                     . str_replace("\n", "\u{21B5}<br/>", $content)
                     . '</td>';
+                // Skip the direction character, the ": " separator, the message and its newline.
+                $idx += $len + 4;
             }
-            $idx       += $len + 4;
             $team      = $is_validator ? '<td></td>' : $content;
             $validator = $is_validator ? $content : '<td></td>';
             $body      .= "<tr>" . ($forTeam ? "" : "<td>$time</td>")
