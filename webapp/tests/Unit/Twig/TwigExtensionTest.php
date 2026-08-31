@@ -14,6 +14,7 @@ use App\Service\SubmissionService;
 use App\Twig\TwigExtension;
 use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Scoreboard\TeamScore;
+use Closure;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -49,16 +50,18 @@ class TwigExtensionTest extends TestCase
     private TwigExtension $twigExtension;
     private RouterInterface&MockObject $router;
     private SerializerInterface&MockObject $serializer;
+    private Environment&MockObject $twigEnvironment;
 
     protected function setUp(): void
     {
         $this->router     = $this->createMock(RouterInterface::class);
         $this->serializer = $this->createMock(SerializerInterface::class);
 
+        $this->twigEnvironment = $this->createMock(Environment::class);
         $this->twigExtension = new TwigExtension(
             $this->createMock(DOMJudgeService::class),
             $this->createMock(ConfigurationService::class),
-            $this->createMock(Environment::class),
+            $this->twigEnvironment,
             $this->createMock(EntityManagerInterface::class),
             $this->createMock(SubmissionService::class),
             $this->createMock(EventLogService::class),
@@ -294,6 +297,72 @@ class TwigExtensionTest extends TestCase
 
         // IP addresses are not shortened.
         yield 'ip addresses' => [['127.0.0.1', '127.0.0.2'], '127.0.0.{1,2}'];
+    }
+
+    /**
+     * The LaTeX of a document must come back in the order it was taken out of it.
+     */
+    public function testDomjudgeMarkdownToHtmlRestoresLatex(): void
+    {
+        $this->useMarkdownRuntime(static fn(string $markdown): string => "<p>$markdown</p>");
+
+        self::assertSame(
+            '<p>Let $a^2$ and $b^2$ be squares.</p>',
+            $this->twigExtension->domjudgeMarkdownToHTML('Let $a^2$ and $b^2$ be squares.')
+        );
+    }
+
+    /**
+     * A conversion that drops a placeholder leaves its LaTeX unused. That must not end up in
+     * the next document: a single page renders many clarifications through this filter.
+     */
+    public function testDomjudgeMarkdownToHtmlDoesNotLeakLatexBetweenDocuments(): void
+    {
+        $call = 0;
+        // The first conversion drops the placeholder, the second one keeps it.
+        $this->useMarkdownRuntime(static function (string $markdown) use (&$call): string {
+            return ++$call === 1 ? '' : "<p>$markdown</p>";
+        });
+
+        self::assertSame('', $this->twigExtension->domjudgeMarkdownToHTML('Dropped: $a^2$'));
+        self::assertSame(
+            '<p>Kept: $b^2$</p>',
+            $this->twigExtension->domjudgeMarkdownToHTML('Kept: $b^2$')
+        );
+    }
+
+    /**
+     * A conversion can also repeat a placeholder, asking for more LaTeX than was taken out of
+     * the document: a link reference definition referenced twice renders its title on both
+     * links. There is nothing left to restore for the repeats, which must not be fatal.
+     */
+    public function testDomjudgeMarkdownToHtmlSurvivesARepeatedPlaceholder(): void
+    {
+        $this->useMarkdownRuntime(static fn(string $markdown): string => "<p>$markdown|$markdown</p>");
+
+        self::assertSame(
+            '<p>Cost $5$|Cost </p>',
+            $this->twigExtension->domjudgeMarkdownToHTML('Cost $5$')
+        );
+    }
+
+    /**
+     * Let the markdown filter convert its input with the given callable.
+     *
+     * @param callable(string): string $convert
+     */
+    private function useMarkdownRuntime(callable $convert): void
+    {
+        $runtime = new class ($convert(...)) {
+            public function __construct(private readonly Closure $convert) {}
+
+            public function convert(string $body): string
+            {
+                return ($this->convert)($body);
+            }
+        };
+
+        $this->twigEnvironment->method('getRuntime')->willReturn($runtime);
     }
 
     /**

@@ -41,11 +41,6 @@ use Twig\Extra\Markdown\MarkdownRuntime;
 
 class TwigExtension
 {
-    /**
-     * @var array<string>
-     */
-    private array $latexFound;
-
     public function __construct(
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
@@ -1352,11 +1347,13 @@ EOF;
             $latexPlaceholder = Uuid::uuid4()->toString();
         }
 
+        /** @var array<string> $latexFound */
+        $latexFound = [];
         $markdown = preg_replace_callback(
             '/(\$[\s\S]*?\$)/',
-            function (array $matches) use ($latexPlaceholder): string {
+            function (array $matches) use ($latexPlaceholder, &$latexFound): string {
                 // Store and replace matches
-                $this->latexFound[] = $matches[1];
+                $latexFound[] = $matches[1];
                 return $latexPlaceholder;
             },
             $markdown
@@ -1368,7 +1365,12 @@ EOF;
 
         return preg_replace_callback(
             "/$latexPlaceholder/",
-            fn(): string => array_shift($this->latexFound), $markdown
+            // A placeholder the conversion dropped leaves one behind, so do not assume there
+            // is always LaTeX left to restore.
+            function () use (&$latexFound): string {
+                return array_shift($latexFound) ?? '';
+            },
+            $markdown
         );
     }
 }
