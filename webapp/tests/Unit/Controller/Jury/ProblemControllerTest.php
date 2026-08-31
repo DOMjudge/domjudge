@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\AddProblemAttachmentFixture;
+use App\DataFixtures\Test\PreviousSubmissionTestcaseRunsFixture;
 use App\Entity\Contest;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
@@ -298,5 +299,35 @@ class ProblemControllerTest extends JuryControllerTestCase
         $this->client->submitForm('Delete', []);
         $this->checkStatusAndFollowRedirect();
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
+    }
+
+    public function testDeleteProblemWithSubmissionsAndRuns(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        // 1. Load fixture with judging runs attached to testcases and judgings
+        $this->loadFixture(PreviousSubmissionTestcaseRunsFixture::class);
+
+        // 2. Also submit via service to create queue tasks & judge tasks
+        $this->addSubmission('DOMjudge', 'hello');
+
+        // 3. Verify the problem exists and has dependent data
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $problem = $em->getRepository(Problem::class)->findOneBy(['name' => 'Hello World']);
+        self::assertNotNull($problem);
+        $probId = $problem->getExternalid();
+
+        // 4. Request the delete confirmation page and submit the deletion
+        $this->verifyPageResponse('GET', "/jury/problems/$probId/delete", 200);
+        $this->client->submitForm('Delete', []);
+
+        // 5. Follow redirect and assert problem was cleanly removed
+        $this->checkStatusAndFollowRedirect();
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        self::assertSelectorNotExists('body:contains("Hello World")');
+        self::assertNull($em->getRepository(Problem::class)->findOneBy(['name' => 'Hello World']));
     }
 }
