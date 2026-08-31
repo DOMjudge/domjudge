@@ -807,16 +807,24 @@ class TwigExtension
         $lines_ref  = preg_split('/\n/', trim($runOutput['output_reference']));
 
         $diffs    = [];
-        $firstErr = count($lines_team) + 1;
+        $firstErr = PHP_INT_MAX;
         $lastErr  = -1;
-        $n        = min(count($lines_team), count($lines_ref));
+        // Walk over the lines of the longest output: a line missing from the other output is a
+        // difference too, and treating it as an empty line shows it as fully added or removed.
+        $n        = max(count($lines_team), count($lines_ref));
         for ($i = 0; $i < $n; $i++) {
-            $lcs = Utils::computeLcsDiff($lines_team[$i], $lines_ref[$i]);
+            $lcs = Utils::computeLcsDiff($lines_team[$i] ?? '', $lines_ref[$i] ?? '');
             if ($lcs[0] === true) {
                 $firstErr = min($firstErr, $i);
                 $lastErr  = max($lastErr, $i);
             }
             $diffs[] = $lcs[1];
+        }
+        if ($lastErr === -1) {
+            // Both outputs are identical line by line, so there is no difference to center the
+            // displayed window on. Show everything instead of an empty table.
+            $firstErr = 0;
+            $lastErr  = count($diffs) - 1;
         }
         $contextLines = 5;
         $firstErr     -= $contextLines;
