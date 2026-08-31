@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\NonSortOrderTeamCategoryFixture;
+use App\DataFixtures\Test\PreviousSubmissionTestcaseRunsFixture;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Entity\User;
@@ -206,5 +207,32 @@ class TeamControllerTest extends JuryControllerTestCase
         [$combinedValues, $element] = $this->helperProvideMergeAddEntity($teamToAdd);
         [$combinedValues, $element] = $this->helperProvideTranslateAddEntity($combinedValues, $element);
         $this->testCheckAddEntityAdmin($combinedValues, $element);
+    }
+
+    public function testDeleteTeamWithSubmissionsAndRuns(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        // 1. Populate submissions and runs for 'Example teamname'
+        $this->loadFixture(PreviousSubmissionTestcaseRunsFixture::class);
+        $this->addSubmission('Example teamname', 'fltcmp', 'demo');
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $team = $em->getRepository(Team::class)->findOneBy(['name' => 'Example teamname']);
+        self::assertNotNull($team);
+        $teamId = $team->getExternalid();
+
+        // 2. Request delete page and submit
+        $this->verifyPageResponse('GET', "/jury/teams/$teamId/delete", 200);
+        $this->client->submitForm('Delete', []);
+
+        // 3. Follow redirect and assert successful cascade removal
+        $this->checkStatusAndFollowRedirect();
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        self::assertSelectorNotExists('body:contains("Example teamname")');
+        self::assertNull($em->getRepository(Team::class)->findOneBy(['name' => 'Example teamname']));
     }
 }

@@ -295,13 +295,87 @@ abstract class BaseController extends AbstractController
 
                 $this->em->clear();
                 $entity = $this->em->getRepository(Problem::class)->find($entity->getProbid());
+            } elseif ($entity instanceof Contest) {
+                // Deleting a contest also has multiple cascading paths to child tables
+                // (e.g. judging_runs, external_runs, balloons). Pre-delete them to avoid
+                // diamond cascade locks / constraint errors in MySQL.
+                $this->em->getConnection()->executeQuery(
+                    'DELETE jr FROM judging_run jr
+                         INNER JOIN judging j ON jr.judgingid = j.judgingid
+                         WHERE j.cid = :cid',
+                    ['cid' => $entity->getCid()]
+                );
+
+                $this->em->getConnection()->executeQuery(
+                    'DELETE FROM external_run WHERE cid = :cid',
+                    ['cid' => $entity->getCid()]
+                );
+
+                $this->em->getConnection()->executeQuery(
+                    'DELETE FROM balloon WHERE cid = :cid',
+                    ['cid' => $entity->getCid()]
+                );
+
+                $this->em->getConnection()->executeQuery(
+                    'DELETE FROM submission WHERE cid = :cid',
+                    ['cid' => $entity->getCid()]
+                );
+
+                $this->em->clear();
+                $entity = $this->em->getRepository(Contest::class)->find($entity->getCid());
+            } elseif ($entity instanceof Team) {
+                // Pre-delete judging_runs, balloons, and submissions for the team to break diamond cascades.
+                $this->em->getConnection()->executeQuery(
+                    'DELETE jr FROM judging_run jr
+                         INNER JOIN judging j ON jr.judgingid = j.judgingid
+                         INNER JOIN submission s ON j.submitid = s.submitid
+                         WHERE s.teamid = :teamid',
+                    ['teamid' => $entity->getTeamid()]
+                );
+
+                $this->em->getConnection()->executeQuery(
+                    'DELETE FROM balloon WHERE teamid = :teamid',
+                    ['teamid' => $entity->getTeamid()]
+                );
+
+                $this->em->getConnection()->executeQuery(
+                    'DELETE FROM submission WHERE teamid = :teamid',
+                    ['teamid' => $entity->getTeamid()]
+                );
+
+                $this->em->clear();
+                $entity = $this->em->getRepository(Team::class)->find($entity->getTeamid());
+            } elseif ($entity instanceof ContestProblem) {
+                // Clean up orphaned scorecache entries and submissions for this contest-problem.
+                $this->em->getConnection()->executeQuery(
+                    'DELETE FROM scorecache WHERE cid = :cid AND probid = :probid',
+                    ['cid' => $entity->getCid(), 'probid' => $entity->getProbid()]
+                );
+
+                $this->em->getConnection()->executeQuery(
+                    'DELETE jr FROM judging_run jr
+                         INNER JOIN judging j ON jr.judgingid = j.judgingid
+                         INNER JOIN submission s ON j.submitid = s.submitid
+                         WHERE s.cid = :cid AND s.probid = :probid',
+                    ['cid' => $entity->getCid(), 'probid' => $entity->getProbid()]
+                );
+
+                $this->em->getConnection()->executeQuery(
+                    'DELETE FROM submission WHERE cid = :cid AND probid = :probid',
+                    ['cid' => $entity->getCid(), 'probid' => $entity->getProbid()]
+                );
+
+                $this->em->clear();
+                $entity = $this->em->getRepository(ContestProblem::class)->find([
+                    'cid' => $entity->getCid(),
+                    'probid' => $entity->getProbid(),
+                ]);
             }
             $this->em->remove($entity);
         });
 
         if ($entity instanceof Team) {
-            // No need to do this in a transaction, since the chance of a team
-            // with same ID being created at the same time is negligible.
+            // Clean up any remaining cache entries
             $this->em->getConnection()->executeQuery(
                 'DELETE FROM scorecache WHERE teamid = :teamid',
                 ['teamid' => $teamId]
