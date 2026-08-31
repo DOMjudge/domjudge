@@ -265,122 +265,122 @@ abstract class BaseController extends AbstractController
         }
 
         // Now actually delete the entity.
-        $this->em->wrapInTransaction(function () use ($entity): void {
-            if ($entity instanceof Problem) {
-                // Deleting a problem is a special case:
-                // Its dependent tables do not form a tree (but something like a diamond shape),
-                // and there are multiple cascading removal paths from problem to its dependent
-                // tables.
-                // Since MySQL does not define the order of cascading deletes, we need to
-                // first manually delete judging_runs and then cascade via
-                // submission to all of judging, judgeTasks and queueTasks.
-                // See also https://github.com/DOMjudge/domjudge/issues/243 and associated commits.
+        if ($entity instanceof Problem) {
+            // Deleting a problem is a special case:
+            // Its dependent tables do not form a tree (but something like a diamond shape),
+            // and there are multiple cascading removal paths from problem to its dependent
+            // tables.
+            // Since MySQL does not define the order of cascading deletes, we need to
+            // first manually delete judging_runs and then cascade via
+            // submission to all of judging, judgeTasks and queueTasks.
+            // See also https://github.com/DOMjudge/domjudge/issues/243 and associated commits.
 
-                // First delete judging_runs.
-                $this->em->getConnection()->executeQuery(
-                    'DELETE jr FROM judging_run jr
-                         INNER JOIN judging j ON jr.judgingid = j.judgingid
-                         INNER JOIN submission s ON j.submitid = s.submitid
-                         WHERE s.probid = :probid',
-                    ['probid' => $entity->getProbid()]
-                );
+            // First delete judging_runs.
+            $this->em->getConnection()->executeQuery(
+                'DELETE jr FROM judging_run jr
+                     INNER JOIN judging j ON jr.judgingid = j.judgingid
+                     INNER JOIN submission s ON j.submitid = s.submitid
+                     WHERE s.probid = :probid',
+                ['probid' => $entity->getProbid()]
+            );
 
-                // Then delete submissions which will cascade to judging, judgeTasks and queueTasks.
-                $this->em->getConnection()->executeQuery(
-                    'DELETE FROM submission WHERE probid = :probid',
-                    ['probid' => $entity->getProbid()]
-                );
+            // Then delete submissions which will cascade to judging, judgeTasks and queueTasks.
+            $this->em->getConnection()->executeQuery(
+                'DELETE FROM submission WHERE probid = :probid',
+                ['probid' => $entity->getProbid()]
+            );
 
-                // Lastly, delete internal errors that are "connected" to this problem.
-                $disabledJson = '{"kind":"problem","probid":' . $entity->getProbid() . '}';
-                $this->em->getConnection()->executeQuery(
-                    'DELETE FROM internal_error WHERE disabled = :disabled',
-                    ['disabled' => $disabledJson]
-                );
+            // Lastly, delete internal errors that are "connected" to this problem.
+            $disabledJson = '{"kind":"problem","probid":' . $entity->getProbid() . '}';
+            $this->em->getConnection()->executeQuery(
+                'DELETE FROM internal_error WHERE disabled = :disabled',
+                ['disabled' => $disabledJson]
+            );
 
-                $this->em->clear();
-                $entity = $this->em->getRepository(Problem::class)->find($entity->getProbid());
-            } elseif ($entity instanceof Contest) {
-                // Deleting a contest also has multiple cascading paths to child tables
-                // (e.g. judging_runs, external_runs, balloons). Pre-delete them to avoid
-                // diamond cascade locks / constraint errors in MySQL.
-                $this->em->getConnection()->executeQuery(
-                    'DELETE jr FROM judging_run jr
-                         INNER JOIN judging j ON jr.judgingid = j.judgingid
-                         WHERE j.cid = :cid',
-                    ['cid' => $entity->getCid()]
-                );
+            $this->em->clear();
+            $entity = $this->em->getRepository(Problem::class)->find($entity->getProbid());
+        } elseif ($entity instanceof Contest) {
+            // Deleting a contest also has multiple cascading paths to child tables
+            // (e.g. judging_runs, external_runs, balloons). Pre-delete them to avoid
+            // diamond cascade locks / constraint errors in MySQL.
+            $this->em->getConnection()->executeQuery(
+                'DELETE jr FROM judging_run jr
+                     INNER JOIN judging j ON jr.judgingid = j.judgingid
+                     WHERE j.cid = :cid',
+                ['cid' => $entity->getCid()]
+            );
 
-                $this->em->getConnection()->executeQuery(
-                    'DELETE FROM external_run WHERE cid = :cid',
-                    ['cid' => $entity->getCid()]
-                );
+            $this->em->getConnection()->executeQuery(
+                'DELETE FROM external_run WHERE cid = :cid',
+                ['cid' => $entity->getCid()]
+            );
 
-                $this->em->getConnection()->executeQuery(
-                    'DELETE FROM balloon WHERE cid = :cid',
-                    ['cid' => $entity->getCid()]
-                );
+            $this->em->getConnection()->executeQuery(
+                'DELETE FROM balloon WHERE cid = :cid',
+                ['cid' => $entity->getCid()]
+            );
 
-                $this->em->getConnection()->executeQuery(
-                    'DELETE FROM submission WHERE cid = :cid',
-                    ['cid' => $entity->getCid()]
-                );
+            $this->em->getConnection()->executeQuery(
+                'DELETE FROM submission WHERE cid = :cid',
+                ['cid' => $entity->getCid()]
+            );
 
-                $this->em->clear();
-                $entity = $this->em->getRepository(Contest::class)->find($entity->getCid());
-            } elseif ($entity instanceof Team) {
-                // Pre-delete judging_runs, balloons, and submissions for the team to break diamond cascades.
-                $this->em->getConnection()->executeQuery(
-                    'DELETE jr FROM judging_run jr
-                         INNER JOIN judging j ON jr.judgingid = j.judgingid
-                         INNER JOIN submission s ON j.submitid = s.submitid
-                         WHERE s.teamid = :teamid',
-                    ['teamid' => $entity->getTeamid()]
-                );
+            $this->em->clear();
+            $entity = $this->em->getRepository(Contest::class)->find($entity->getCid());
+        } elseif ($entity instanceof Team) {
+            // Pre-delete judging_runs, balloons, and submissions for the team to break diamond cascades.
+            $this->em->getConnection()->executeQuery(
+                'DELETE jr FROM judging_run jr
+                     INNER JOIN judging j ON jr.judgingid = j.judgingid
+                     INNER JOIN submission s ON j.submitid = s.submitid
+                     WHERE s.teamid = :teamid',
+                ['teamid' => $entity->getTeamid()]
+            );
 
-                $this->em->getConnection()->executeQuery(
-                    'DELETE FROM balloon WHERE teamid = :teamid',
-                    ['teamid' => $entity->getTeamid()]
-                );
+            $this->em->getConnection()->executeQuery(
+                'DELETE FROM balloon WHERE teamid = :teamid',
+                ['teamid' => $entity->getTeamid()]
+            );
 
-                $this->em->getConnection()->executeQuery(
-                    'DELETE FROM submission WHERE teamid = :teamid',
-                    ['teamid' => $entity->getTeamid()]
-                );
+            $this->em->getConnection()->executeQuery(
+                'DELETE FROM submission WHERE teamid = :teamid',
+                ['teamid' => $entity->getTeamid()]
+            );
 
-                $this->em->clear();
-                $entity = $this->em->getRepository(Team::class)->find($entity->getTeamid());
-            } elseif ($entity instanceof ContestProblem) {
-                $cid = $entity->getCid();
-                $probid = $entity->getProbid();
+            $this->em->clear();
+            $entity = $this->em->getRepository(Team::class)->find($entity->getTeamid());
+        } elseif ($entity instanceof ContestProblem) {
+            $cid = $entity->getCid();
+            $probid = $entity->getProbid();
 
-                // Clean up orphaned scorecache entries and submissions for this contest-problem.
-                $this->em->getConnection()->executeQuery(
-                    'DELETE FROM scorecache WHERE cid = :cid AND probid = :probid',
-                    ['cid' => $cid, 'probid' => $probid]
-                );
+            // Clean up orphaned scorecache entries and submissions for this contest-problem.
+            $this->em->getConnection()->executeQuery(
+                'DELETE FROM scorecache WHERE cid = :cid AND probid = :probid',
+                ['cid' => $cid, 'probid' => $probid]
+            );
 
-                $this->em->getConnection()->executeQuery(
-                    'DELETE jr FROM judging_run jr
-                         INNER JOIN judging j ON jr.judgingid = j.judgingid
-                         INNER JOIN submission s ON j.submitid = s.submitid
-                         WHERE s.cid = :cid AND s.probid = :probid',
-                    ['cid' => $cid, 'probid' => $probid]
-                );
+            $this->em->getConnection()->executeQuery(
+                'DELETE jr FROM judging_run jr
+                     INNER JOIN judging j ON jr.judgingid = j.judgingid
+                     INNER JOIN submission s ON j.submitid = s.submitid
+                     WHERE s.cid = :cid AND s.probid = :probid',
+                ['cid' => $cid, 'probid' => $probid]
+            );
 
-                $this->em->getConnection()->executeQuery(
-                    'DELETE FROM submission WHERE cid = :cid AND probid = :probid',
-                    ['cid' => $cid, 'probid' => $probid]
-                );
+            $this->em->getConnection()->executeQuery(
+                'DELETE FROM submission WHERE cid = :cid AND probid = :probid',
+                ['cid' => $cid, 'probid' => $probid]
+            );
 
-                $this->em->clear();
-                $entity = $this->em->getRepository(ContestProblem::class)->find([
-                    'contest' => $cid,
-                    'problem' => $probid,
-                ]);
-            }
-            $this->em->remove($entity);
-        });
+            $this->em->clear();
+            $entity = $this->em->getRepository(ContestProblem::class)->find([
+                'contest' => $cid,
+                'problem' => $probid,
+            ]);
+        }
+
+        $this->em->remove($entity);
+        $this->em->flush();
 
         if ($entity instanceof Team) {
             // Clean up any remaining cache entries

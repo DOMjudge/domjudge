@@ -27,9 +27,6 @@ return [
     // Jury\SubmissionControllerTest::testVerifyAndUnverifyJudging
     'App\Controller\Jury\SubmissionController::verifyAction'
         => 'TODO: verify with one bulk UPDATE, no transaction.',
-    // Jury\ProblemControllerTest::testMultiDeleteProblems
-    'App\Controller\BaseController::commitDeleteEntity'
-        => 'TODO: do the reads of cascaded deletes outside the transaction.',
     // RejudgingServiceTest::testUpdateFirstToSolve
     'App\Service\RejudgingService::finishRejudging'
         => 'TODO: INSERT IGNORE of balloons after plain reads in the transaction.',
