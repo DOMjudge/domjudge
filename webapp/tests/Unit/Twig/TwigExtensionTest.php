@@ -68,6 +68,97 @@ class TwigExtensionTest extends TestCase
     }
 
     /**
+     * @param string[] $expectedRows
+     */
+    #[DataProvider('provideInteractiveLog')]
+    public function testInteractiveLog(string $log, bool $forTeam, array $expectedRows): void
+    {
+        $html = $this->twigExtension->interactiveLog($log, forTeam: $forTeam);
+
+        self::assertSame($expectedRows, self::interactiveLogRows($html));
+    }
+
+    public static function provideInteractiveLog(): Generator
+    {
+        // A message as runpipe writes it: header, direction character, ": ", the message
+        // itself and a newline. The header records the size of the message only.
+        $message = static fn(string $time, string $message, string $direction): string
+            => sprintf("[%s/%d]%s: %s\n", $time, strlen($message), $direction, $message);
+        // An EOF marker is only a header and a direction character, with no message at all.
+        $eof = static fn(string $time, string $direction): string
+            => sprintf("[%s/0]%s", $time, $direction);
+
+        yield 'normal exchange' => [
+            'log'          => $message('  0.001s', "5\n", '>') . $message('  0.002s', "7\n", '<')
+                                  . $message('  0.123s', "ok\n", '>'),
+            'forTeam'      => false,
+            'expectedRows' => [
+                "  0.001s | 5\u{21B5}<br/> | ",
+                "  0.002s |  | 7\u{21B5}<br/>",
+                "  0.123s | ok\u{21B5}<br/> | ",
+            ],
+        ];
+
+        // An EOF marker is shorter than a message with an empty body, so skipping it as if it
+        // were one ate the first characters of the next header, mangling its timestamp.
+        yield 'EOF marker in the middle' => [
+            'log'          => $message('  0.001s', "5\n", '>') . $eof('  0.002s', ']')
+                                  . $message('  0.003s', "9\n", '<'),
+            'forTeam'      => false,
+            'expectedRows' => [
+                "  0.001s | 5\u{21B5}<br/> | ",
+                '  0.002s | EOF from program | ',
+                "  0.003s |  | 9\u{21B5}<br/>",
+            ],
+        ];
+
+        // "0" is a perfectly fine message, but it is falsy: it used to end the whole table.
+        yield 'message of a single zero byte' => [
+            'log'          => $message('  0.001s', '0', '<') . $message('  0.002s', "done\n", '>'),
+            'forTeam'      => false,
+            'expectedRows' => [
+                '  0.001s |  | 0',
+                "  0.002s | done\u{21B5}<br/> | ",
+            ],
+        ];
+
+        // A log cut off mid-message still shows what is left of it.
+        yield 'log cut off mid-message' => [
+            'log'          => $message('  0.001s', "5\n", '>') . '[  0.002s/10]<: trunc',
+            'forTeam'      => false,
+            'expectedRows' => [
+                "  0.001s | 5\u{21B5}<br/> | ",
+                '  0.002s |  | trunc',
+            ],
+        ];
+
+        // Teams do not get the timing column.
+        yield 'for team' => [
+            'log'          => $message('  0.001s', "5\n", '>') . $message('  0.002s', "7\n", '<'),
+            'forTeam'      => true,
+            'expectedRows' => [
+                "5\u{21B5}<br/> | ",
+                " | 7\u{21B5}<br/>",
+            ],
+        ];
+    }
+
+    /**
+     * Reduce the rendered log table to one entry per row, cells separated by " | ".
+     *
+     * @return string[]
+     */
+    private static function interactiveLogRows(string $html): array
+    {
+        preg_match_all('~<tr>((?:<td.*?</td>)+)</tr>~s', $html, $matches);
+
+        return array_map(static function (string $row): string {
+            preg_match_all('~<td[^>]*>(.*?)</td>~s', $row, $cells);
+            return implode(' | ', $cells[1]);
+        }, $matches[1]);
+    }
+
+    /**
      * Every notation Utils::convertToHex() accepts must render, including the
      * one and three digits per channel forms.
      */
