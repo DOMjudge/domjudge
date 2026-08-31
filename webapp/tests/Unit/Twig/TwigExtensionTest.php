@@ -70,6 +70,73 @@ class TwigExtensionTest extends TestCase
     /**
      * @param string[] $expectedRows
      */
+    #[DataProvider('provideRunDiff')]
+    public function testRunDiff(string $team, string $reference, array $expectedRows): void
+    {
+        $html = $this->twigExtension->runDiff([
+            'output_run'       => $team,
+            'output_reference' => $reference,
+        ]);
+
+        self::assertSame($expectedRows, self::diffRows($html));
+    }
+
+    public static function provideRunDiff(): Generator
+    {
+        // Lines the reference output does not have are shown as removed, and the other way
+        // around: a differing number of lines is a difference and must be visible.
+        yield 'team has extra lines' => ["1\n2\n3", "1", [
+            '1: 1',
+            '2: <del>2</del> <ins></ins>',
+            '3: <del>3</del> <ins></ins>',
+        ]];
+        yield 'team misses lines' => ["1", "1\n2\n3", [
+            '1: 1',
+            '2: <del></del> <ins>2</ins>',
+            '3: <del></del> <ins>3</ins>',
+        ]];
+
+        // Without a difference to center the window on, show everything rather than a table
+        // holding nothing but "[...]" markers.
+        $tenLines = implode("\n", range(1, 10));
+        yield 'identical outputs' => [$tenLines, $tenLines, [
+            '1: 1', '2: 2', '3: 3', '4: 4', '5: 5',
+            '6: 6', '7: 7', '8: 8', '9: 9', '10: 10',
+        ]];
+
+        // A difference in the middle keeps five lines of context on either side.
+        $twentyLines = implode("\n", range(1, 20));
+        yield 'difference in the middle' => [
+            str_replace("\n7\n", "\nWRONG\n", $twentyLines),
+            $twentyLines,
+            [
+                '[...]: ',
+                '2: 2', '3: 3', '4: 4', '5: 5', '6: 6',
+                '7: <del>WRONG</del> <ins>7</ins>',
+                '8: 8', '9: 9', '10: 10', '11: 11', '12: 12',
+                '[...]: ',
+            ],
+        ];
+    }
+
+    /**
+     * Reduce a rendered diff table to one "linenr: content" entry per row.
+     *
+     * @return string[]
+     */
+    private static function diffRows(string $html): array
+    {
+        preg_match_all(
+            '~<tr><td class="linenr">(.*?)</td><td>(.*?)</td></tr>~s',
+            $html, $matches, PREG_SET_ORDER
+        );
+
+        return array_map(fn(array $match): string => $match[1] . ': ' . trim($match[2]), $matches);
+    }
+
+    /**
+     * @param string[] $expectedRows
+     */
     #[DataProvider('provideInteractiveLog')]
     public function testInteractiveLog(string $log, bool $forTeam, array $expectedRows): void
     {
