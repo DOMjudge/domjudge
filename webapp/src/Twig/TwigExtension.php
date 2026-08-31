@@ -682,14 +682,9 @@ class TwigExtension
     #[AsTwigFilter('printHosts', isSafe: ['html'])]
     public function printHosts(array $hostnames): string
     {
-        $hostnames = array_values($hostnames);
         if (empty($hostnames)) {
             return "";
         }
-        if (count($hostnames) == 1) {
-            return $this->printHost($hostnames[0]);
-        }
-        $hostnames = array_unique($hostnames);
 
         $local_parts = [];
         foreach ($hostnames as $hostname) {
@@ -700,25 +695,35 @@ class TwigExtension
             }
             $local_parts[] = $hostname;
         }
+        // Hostnames in different domains can share their first label, so only deduplicate
+        // after shortening: duplicates here would be printed twice below.
+        $local_parts = array_values(array_unique($local_parts));
+
+        if (count($local_parts) == 1) {
+            return $this->printHost($local_parts[0]);
+        }
 
         // Extract the longest common prefix.
         $common_prefix = $this->getCommonPrefix($local_parts);
         $prefix_len = strlen($common_prefix);
 
-        // Extract the longest common suffix.
+        // Extract the longest common suffix, clipped so it cannot overlap the common prefix:
+        // for e.g. ["abab", "ab"] both would otherwise be the entire shortest string, which
+        // would print that string twice and lose the parts in between.
         $reversed = array_map(strrev(...), $local_parts);
         $common_suffix = strrev($this->getCommonPrefix($reversed));
-        $suffix_len = strlen($common_suffix);
+        $shortest_len = min(array_map(strlen(...), $local_parts));
+        $suffix_len = min(strlen($common_suffix), $shortest_len - $prefix_len);
+        $common_suffix = $suffix_len > 0 ? substr($common_suffix, -$suffix_len) : "";
 
-        // Extract the list of remaining parts. This list may contain empty values. If $common_prefix overlaps
-        // $common_suffix, then $common_prefix = $common_suffix = the entire string.
+        // Extract the list of remaining parts. This list may contain empty values.
         $middle_parts = array_map(fn($host) => substr($host, $prefix_len, strlen($host) - $prefix_len - $suffix_len), $local_parts);
         // Usually the middle parts contain numbers, so use natural sort for them.
         usort($middle_parts, strnatcmp(...));
 
         if (empty($common_prefix) && empty($common_suffix)) {
             // No common prefix nor suffix: list all the names without "{}".
-            return implode(", ", array_map($this->printHost(...), $hostnames));
+            return implode(", ", array_map($this->printHost(...), $local_parts));
         } else {
             $hosts = $common_prefix . "{" . implode(",", $middle_parts) . "}" . $common_suffix;
             return $this->printHost($hosts, true);

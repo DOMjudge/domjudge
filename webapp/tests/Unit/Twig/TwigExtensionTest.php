@@ -226,6 +226,44 @@ class TwigExtensionTest extends TestCase
     }
 
     /**
+     * @param string[] $hostnames
+     */
+    #[DataProvider('providePrintHosts')]
+    public function testPrintHosts(array $hostnames, string $expected): void
+    {
+        self::assertSame($expected, strip_tags($this->twigExtension->printHosts($hostnames)));
+    }
+
+    public static function providePrintHosts(): Generator
+    {
+        yield 'no hosts' => [[], ''];
+        yield 'single host is shortened' => [['judgehost-1.example.com'], 'judgehost-1'];
+
+        // The common prefix and suffix are factored out, the rest is sorted naturally.
+        yield 'common prefix' => [['judgehost-1', 'judgehost-2', 'judgehost-10'], 'judgehost-{1,2,10}'];
+        yield 'common suffix' => [['a-judgehost', 'b-judgehost'], '{a,b}-judgehost'];
+        yield 'both' => [['judge-1-host', 'judge-2-host'], 'judge-{1,2}-host'];
+
+        // Nothing in common: list the names in full.
+        yield 'nothing in common' => [['foo', 'bar'], 'foo, bar'];
+
+        // Hosts in different domains share their first label: only one name is left after
+        // shortening, so it must be printed once instead of as "judgehost{,}judgehost".
+        yield 'same label, other domain' => [
+            ['judgehost.example.com', 'judgehost.example.org'],
+            'judgehost',
+        ];
+        yield 'duplicate hostnames' => [['judgehost-1', 'judgehost-1'], 'judgehost-1'];
+
+        // The common prefix and suffix would overlap: the suffix is clipped so that no part
+        // of a hostname is printed twice, and "abab" is still recoverable from the output.
+        yield 'overlapping prefix and suffix' => [['abab', 'ab'], 'ab{,ab}'];
+
+        // IP addresses are not shortened.
+        yield 'ip addresses' => [['127.0.0.1', '127.0.0.2'], '127.0.0.{1,2}'];
+    }
+
+    /**
      * Every notation Utils::convertToHex() accepts must render, including the
      * one and three digits per channel forms.
      */
