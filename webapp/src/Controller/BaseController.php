@@ -314,90 +314,127 @@ abstract class BaseController extends AbstractController
     }
 
     /**
+     * Check foreign key relations and cascade impact for a single entity.
+     *
+     * @param array<string, array<string, array{'target': string, 'targetColumn': string, 'type': string}>> $relations
+     *
+     * @return array{isError: bool, primaryKeyData: int[], messages: string[], externalId: ?string}
+     */
+    protected function checkEntityDeleteConstraints(object $entity, array $relations): array {
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $inflector        = InflectorFactory::create()->build();
+        $readableType     = str_replace('_', ' ', Utils::tableForEntity($entity));
+        $metadata         = $this->em->getClassMetadata($entity::class);
+        $primaryKeyData   = [];
+        $messages         = [];
+
+        $externalId = $entity instanceof HasExternalIdInterface ? $entity->getExternalId() : null;
+
+        foreach ($metadata->getIdentifierColumnNames() as $primaryKeyColumn) {
+            $primaryKeyColumnValue = $propertyAccessor->getValue($entity, $primaryKeyColumn);
+            $primaryKeyData[]      = $primaryKeyColumnValue;
+
+            foreach ($relations as $table => $tableRelations) {
+                foreach ($tableRelations as $column => $constraint) {
+                    if ($constraint['targetColumn'] !== $primaryKeyColumn || $constraint['target'] !== $entity::class) {
+                        continue;
+                    }
+
+                    $count = (int)$this->em->createQueryBuilder()
+                        ->from($table, 't')
+                        ->select(sprintf('COUNT(t.%s) AS cnt', $column))
+                        ->andWhere(sprintf('t.%s = :value', $column))
+                        ->setParameter('value', $primaryKeyColumnValue)
+                        ->getQuery()
+                        ->getSingleScalarResult();
+
+                    if ($count === 0) {
+                        continue;
+                    }
+
+                    $parts              = explode('\\', $table);
+                    $targetEntityType   = $parts[count($parts) - 1];
+                    $targetReadableType = str_replace(
+                        '_', ' ',
+                        $inflector->tableize($inflector->pluralize($targetEntityType))
+                    );
+
+                    switch ($constraint['type']) {
+                        case 'CASCADE':
+                            $message = sprintf('Cascade to %s', $targetReadableType);
+                            $dependentEntities = $this->getDependentEntities($table, $relations);
+                            if (!empty($dependentEntities)) {
+                                $dependentEntitiesReadable = [];
+                                foreach ($dependentEntities as $dependentEntity) {
+                                    $parts = explode('\\', $dependentEntity);
+                                    $dependentEntityType = $parts[count($parts) - 1];
+                                    $dependentEntitiesReadable[] = str_replace(
+                                        '_', ' ',
+                                        $inflector->tableize($inflector->pluralize($dependentEntityType))
+                                    );
+                                }
+                                $message .= sprintf(
+                                    ', and possibly to dependent entities %s',
+                                    implode(', ', $dependentEntitiesReadable)
+                                );
+                            }
+                            $messages[] = $message;
+                            break;
+
+                        case 'SET NULL':
+                            $messages[] = sprintf('Create dangling references in %s', $targetReadableType);
+                            break;
+
+                        case null:
+                            return [
+                                'isError'        => true,
+                                'primaryKeyData' => $primaryKeyData,
+                                'messages'       => [
+                                    sprintf('%s with %s "%s" is still referenced in %s, cannot delete.',
+                                        ucfirst($readableType), $primaryKeyColumn, $primaryKeyColumnValue,
+                                        $targetReadableType),
+                                ],
+                                'externalId'     => $externalId,
+                            ];
+                    }
+                }
+            }
+        }
+
+        return [
+            'isError'        => false,
+            'primaryKeyData' => $primaryKeyData,
+            'messages'       => $messages,
+            'externalId'     => $externalId,
+        ];
+    }
+
+    /**
      * @param Object[] $entities
      * @param array<string, array<string, array{'target': string, 'targetColumn': string, 'type': string}>> $relations
      *
      * @return array{0: bool, 1: array<int[]>, 2: string[], 3: array<string>}
      */
     protected function buildDeleteTree(array $entities, array $relations): array {
-        $isError = false;
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $inflector = InflectorFactory::create()->build();
-        $readableType = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
-        $metadata = $this->em->getClassMetadata($entities[0]::class);
         $primaryKeyData = [];
         $externalIdData = [];
-        $messages = [];
+        $messages       = [];
+
         foreach ($entities as $entity) {
-            $primaryKeyDataTemp = [];
-            if ($entity instanceof HasExternalIdInterface) {
-                $externalIdData[] = $entity->getExternalId();
-            }
-            foreach ($metadata->getIdentifierColumnNames() as $primaryKeyColumn) {
-                $primaryKeyColumnValue = $propertyAccessor->getValue($entity, $primaryKeyColumn);
-                $primaryKeyDataTemp[] = $primaryKeyColumnValue;
+            $result = $this->checkEntityDeleteConstraints($entity, $relations);
 
-                // Check all relationships.
-                foreach ($relations as $table => $tableRelations) {
-                    foreach ($tableRelations as $column => $constraint) {
-                        // If the target class and column match, check if there are any entities with this value.
-                        if ($constraint['targetColumn'] === $primaryKeyColumn && $constraint['target'] === $entity::class) {
-                            $count = (int)$this->em->createQueryBuilder()
-                                ->from($table, 't')
-                                ->select(sprintf('COUNT(t.%s) AS cnt', $column))
-                                ->andWhere(sprintf('t.%s = :value', $column))
-                                ->setParameter('value', $primaryKeyColumnValue)
-                                ->getQuery()
-                                ->getSingleScalarResult();
-                            if ($count > 0) {
-                                $parts = explode('\\', $table);
-                                $targetEntityType = $parts[count($parts) - 1];
-                                $targetReadableType = str_replace(
-                                    '_', ' ',
-                                    $inflector->tableize($inflector->pluralize($targetEntityType))
-                                );
-
-                                switch ($constraint['type']) {
-                                    case 'CASCADE':
-                                        $message = sprintf('Cascade to %s', $targetReadableType);
-                                        $dependentEntities = $this->getDependentEntities($table, $relations);
-                                        if (!empty($dependentEntities)) {
-                                            $dependentEntitiesReadable = [];
-                                            foreach ($dependentEntities as $dependentEntity) {
-                                                $parts = explode('\\', $dependentEntity);
-                                                $dependentEntityType = $parts[count($parts) - 1];
-                                                $dependentEntitiesReadable[] = str_replace(
-                                                    '_', ' ',
-                                                    $inflector->tableize($inflector->pluralize($dependentEntityType))
-                                                );
-                                            }
-                                            $message .= sprintf(
-                                                ', and possibly to dependent entities %s',
-                                                implode(', ', $dependentEntitiesReadable)
-                                            );
-                                        }
-                                        $messages[] = $message;
-                                        break;
-                                    case 'SET NULL':
-                                        $messages[] = sprintf('Create dangling references in %s', $targetReadableType);
-                                        break;
-                                    case null:
-                                        $isError = true;
-                                        $messages = [
-                                            sprintf('%s with %s "%s" is still referenced in %s, cannot delete.',
-                                                ucfirst($readableType), $primaryKeyColumn, $primaryKeyColumnValue,
-                                                $targetReadableType),
-                                        ];
-                                        break 4;
-                                }
-                            }
-                        }
-                    }
-                }
+            if ($result['isError']) {
+                return [true, [$result['primaryKeyData']], $result['messages'], $result['externalId'] !== null ? [$result['externalId']] : []];
             }
-            $primaryKeyData[] = $primaryKeyDataTemp;
+
+            $primaryKeyData[] = $result['primaryKeyData'];
+            $messages         = array_merge($messages, $result['messages']);
+            if ($result['externalId'] !== null) {
+                $externalIdData[] = $result['externalId'];
+            }
         }
-        return [$isError, $primaryKeyData, array_values(array_unique($messages)), $externalIdData];
+
+        return [false, $primaryKeyData, array_values(array_unique($messages)), $externalIdData];
     }
 
     /**
@@ -520,23 +557,23 @@ abstract class BaseController extends AbstractController
     protected function getDependentEntities(string $entityClass, array $relations): array
     {
         $result = [];
+        $visited = [$entityClass];
         // We do a BFS through the list of tables.
         $queue = [$entityClass];
-        while (count($queue) > 0) {
-            $currentEntity = reset($queue);
-            unset($queue[array_search($currentEntity, $queue)]);
+        while (!empty($queue)) {
+            $currentEntity = array_shift($queue);
 
-            if (in_array($currentEntity, $result)) {
-                continue;
-            }
-            if ($currentEntity !== $entityClass) {
+            if ($currentEntity !== $entityClass && !in_array($currentEntity, $result, true)) {
                 $result[] = $currentEntity;
             }
 
             foreach ($relations as $nextEntity => $relatedEntities) {
                 foreach ($relatedEntities as $constraint) {
                     if ($constraint['target'] === $currentEntity && $constraint['type'] === 'CASCADE') {
-                        $queue[] = $nextEntity;
+                        if (!in_array($nextEntity, $visited, true)) {
+                            $visited[] = $nextEntity;
+                            $queue[] = $nextEntity;
+                        }
                     }
                 }
             }
