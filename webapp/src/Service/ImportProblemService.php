@@ -19,9 +19,11 @@ use App\Entity\TestcaseContent;
 use App\Entity\TestcaseGroup;
 use App\Utils\Utils;
 use Doctrine\DBAL\Exception as DBALException;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
@@ -42,6 +44,7 @@ readonly class ImportProblemService
     public function __construct(
         protected AuthorizedUserService  $authService,
         protected EntityManagerInterface $em,
+        protected ManagerRegistry        $registry,
         protected LoggerInterface        $logger,
         protected DOMJudgeService        $dj,
         protected ConfigurationService   $config,
@@ -705,18 +708,29 @@ readonly class ImportProblemService
                 count($removedAttachments), join(',', $removedAttachments));
         }
 
-        $this->em->wrapInTransaction(function () use ($testcases, $startRank): void {
-            $this->em->flush();
-            // Set actual ranks if needed.
-            if ($startRank !== 1) {
-                $rank = 1;
-                foreach ($testcases as $testcase) {
-                    $testcase->setRank($rank);
-                    $rank++;
+        try {
+            $this->em->wrapInTransaction(function () use ($testcases, $startRank): void {
+                $this->em->flush();
+                // Set actual ranks if needed.
+                if ($startRank !== 1) {
+                    $rank = 1;
+                    foreach ($testcases as $testcase) {
+                        $testcase->setRank($rank);
+                        $rank++;
+                    }
                 }
-            }
-            $this->em->flush();
-        });
+                $this->em->flush();
+            });
+        } catch (UniqueConstraintViolationException) {
+            // Two imports of the same problem picked the same temporary ranks: $startRank comes
+            // from an unlocked count. The failed flush left the entity manager closed, so reset
+            // it before anyone else touches it.
+            $this->registry->resetManager();
+            $messages['danger'][] = 'Another import of this problem is running at the same time. '
+                . 'The test cases were not changed; please try again.';
+
+            return null;
+        }
 
         $cid = $contest?->getCid();
         $probid = $problem->getProbid();
