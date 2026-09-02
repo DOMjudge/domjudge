@@ -47,16 +47,18 @@ class TwigExtensionTest extends TestCase
     private const XSS_PAYLOAD = '<img src=x onerror="alert(1)">';
 
     private TwigExtension $twigExtension;
+    private DOMJudgeService&MockObject $dj;
     private RouterInterface&MockObject $router;
     private SerializerInterface&MockObject $serializer;
 
     protected function setUp(): void
     {
+        $this->dj         = $this->createMock(DOMJudgeService::class);
         $this->router     = $this->createMock(RouterInterface::class);
         $this->serializer = $this->createMock(SerializerInterface::class);
 
         $this->twigExtension = new TwigExtension(
-            $this->createMock(DOMJudgeService::class),
+            $this->dj,
             $this->createMock(ConfigurationService::class),
             $this->createMock(Environment::class),
             $this->createMock(EntityManagerInterface::class),
@@ -72,6 +74,16 @@ class TwigExtensionTest extends TestCase
     }
 
 
+
+    public function testCustomAssetFilesOnlyAsksForFilesOfItsOwnType(): void
+    {
+        $this->dj->expects(self::once())
+            ->method('getAssetFiles')
+            ->with('js/custom', ['js'])
+            ->willReturn(['a.js', 'b.js']);
+
+        self::assertSame(['a.js', 'b.js'], $this->twigExtension->customAssetFiles('js'));
+    }
 
     public function testPrintMetadataNull(): void
     {

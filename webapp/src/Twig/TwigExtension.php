@@ -988,7 +988,7 @@ HTML;
     public function customAssetFiles(string $type): array
     {
         if (in_array($type, ['css', 'js'])) {
-            return $this->dj->getAssetFiles("$type/custom");
+            return $this->dj->getAssetFiles("$type/custom", [$type]);
         }
 
         return [];
