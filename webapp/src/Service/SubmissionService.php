@@ -5,6 +5,7 @@ namespace App\Service;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\ExternalJudgement;
 use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
@@ -19,6 +20,7 @@ use App\Entity\TestcaseGroup;
 use App\Entity\User;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -311,6 +313,104 @@ class SubmissionService
         }
 
         return $hierarchy;
+    }
+
+    /**
+     * Get the per-testcase results to show for the given submissions, keyed by submission ID.
+     *
+     * The results are those of the first judging (or external judgement when $external is set)
+     * of each submission, which is the one the submission list query joined. Testcases without
+     * a run yet are included with a null result.
+     *
+     * @param iterable<Submission> $submissions
+     * @return array<int, list<array<string, mixed>>>
+     */
+    public function getTestcaseResults(iterable $submissions, bool $external = false): array
+    {
+        $judgingIds = [];
+        $probIds    = [];
+        foreach ($submissions as $submission) {
+            $judgingIds[$submission->getSubmitid()] = $this->getTestcaseResultsJudgingId($submission, $external);
+            $probIds[$submission->getSubmitid()]    = $submission->getProblem()->getProbid();
+        }
+        if (empty($probIds)) {
+            return [];
+        }
+
+        $connection = $this->em->getConnection();
+
+        $testcasesByProblem = [];
+        $rows = $connection->fetchAllAssociative(
+            'SELECT probid, testcaseid, ranknumber, description, sample
+               FROM testcase
+              WHERE probid IN (:probids)
+              ORDER BY probid, ranknumber',
+            ['probids' => array_values(array_unique($probIds))],
+            ['probids' => ArrayParameterType::INTEGER]
+        );
+        foreach ($rows as $row) {
+            $testcasesByProblem[$row['probid']][] = $row;
+        }
+
+        $runs = [];
+        if ($usedJudgingIds = array_values(array_unique(array_filter($judgingIds)))) {
+            if ($external) {
+                $rows = $connection->fetchAllAssociative(
+                    'SELECT er.extjudgementid AS judgingid, er.testcaseid, er.result AS runresult
+                       FROM external_run er
+                      WHERE er.extjudgementid IN (:judgingids)',
+                    ['judgingids' => $usedJudgingIds],
+                    ['judgingids' => ArrayParameterType::INTEGER]
+                );
+            } else {
+                $rows = $connection->fetchAllAssociative(
+                    'SELECT r.judgingid, r.testcaseid, r.runresult, jh.hostname, jt.valid
+                       FROM judging_run r
+                       LEFT JOIN judgetask jt ON (r.judgetaskid = jt.judgetaskid)
+                       LEFT JOIN judgehost jh ON (jt.judgehostid = jh.judgehostid)
+                      WHERE r.judgingid IN (:judgingids)',
+                    ['judgingids' => $usedJudgingIds],
+                    ['judgingids' => ArrayParameterType::INTEGER]
+                );
+            }
+            foreach ($rows as $row) {
+                $runs[$row['judgingid']][$row['testcaseid']] = $row;
+            }
+        }
+
+        $results = [];
+        foreach ($probIds as $submitId => $probId) {
+            $results[$submitId] = [];
+            foreach ($testcasesByProblem[$probId] ?? [] as $testcase) {
+                $run    = $runs[$judgingIds[$submitId]][$testcase['testcaseid']] ?? null;
+                $result = [
+                    'runresult'   => $run['runresult'] ?? null,
+                    'ranknumber'  => $testcase['ranknumber'],
+                    'description' => $testcase['description'],
+                    'sample'      => $testcase['sample'],
+                ];
+                if (!$external) {
+                    $result['hostname'] = $run['hostname'] ?? null;
+                    $result['valid']    = $run['valid'] ?? null;
+                }
+                $results[$submitId][] = $result;
+            }
+        }
+
+        return $results;
+    }
+
+    private function getTestcaseResultsJudgingId(Submission $submission, bool $external): ?int
+    {
+        if ($external) {
+            /** @var ExternalJudgement|false $externalJudgement */
+            $externalJudgement = $submission->getExternalJudgements()->first();
+            return $externalJudgement ? $externalJudgement->getExtjudgementid() : null;
+        }
+
+        /** @var Judging|false $judging */
+        $judging = $submission->getJudgings()->first();
+        return $judging ? $judging->getJudgingid() : null;
     }
 
     /**

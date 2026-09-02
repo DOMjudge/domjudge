@@ -313,41 +313,40 @@ class TwigExtension
         return '';
     }
 
+    /**
+     * Testcase results per submission ID as fetched by prefetchTestcaseResults(), keyed by
+     * whether they are the external results.
+     *
+     * @var array<int, array<int, list<array<string, mixed>>>>
+     */
+    private array $testcaseResults = [];
+
+    /**
+     * Fetch the testcase results for all given submissions in one go, so the testcaseResults
+     * filter does not need to query per submission.
+     *
+     * @param iterable<Submission> $submissions
+     */
+    #[AsTwigFunction('prefetchTestcaseResults')]
+    public function prefetchTestcaseResults(iterable $submissions, bool $showExternal = false): void
+    {
+        $this->testcaseResults[(int)$showExternal] =
+            $this->submissionService->getTestcaseResults($submissions, $showExternal)
+            + ($this->testcaseResults[(int)$showExternal] ?? []);
+    }
+
     #[AsTwigFilter('testcaseResults', isSafe: ['html'])]
     public function testcaseResults(Submission $submission, ?bool $showExternal = false): string
     {
-        // We use a direct SQL query here for performance reasons
-        if ($showExternal) {
-            /** @var ExternalJudgement|null $externalJudgement */
-            $externalJudgement   = $submission->getExternalJudgements()->first() ?: null;
-            $externalJudgementId = $externalJudgement?->getExtjudgementid();
-            $probId              = $submission->getProblem()->getProbid();
-            $testcases           = $this->em->getConnection()->fetchAllAssociative(
-                'SELECT er.result as runresult, t.ranknumber, t.description, t.sample
-                  FROM testcase t
-                  LEFT JOIN external_run er ON (er.testcaseid = t.testcaseid
-                                              AND er.extjudgementid = :extjudgementid)
-                  WHERE t.probid = :probid ORDER BY ranknumber',
-                ['extjudgementid' => $externalJudgementId, 'probid' => $probId]);
-
-            $submissionDone = $externalJudgement && !empty($externalJudgement->getEndtime());
-        } else {
-            /** @var Judging|bool $judging */
-            $judging   = $submission->getJudgings()->first();
-            $judgingId = $judging ? $judging->getJudgingid() : null;
-            $probId    = $submission->getProblem()->getProbid();
-            $testcases = $this->em->getConnection()->fetchAllAssociative(
-                'SELECT r.runresult, jh.hostname, jt.valid, t.ranknumber, t.description, t.sample
-                  FROM testcase t
-                  LEFT JOIN judging_run r ON (r.testcaseid = t.testcaseid
-                                              AND r.judgingid = :judgingid)
-                  LEFT JOIN judgetask jt ON (r.judgetaskid = jt.judgetaskid)
-                  LEFT JOIN judgehost jh on (jt.judgehostid = jh.judgehostid)
-                  WHERE t.probid = :probid ORDER BY ranknumber',
-                ['judgingid' => $judgingId, 'probid' => $probId]);
-
-            $submissionDone = $judging && !empty($judging->getEndtime());
+        $showExternal = (bool)$showExternal;
+        if (!isset($this->testcaseResults[(int)$showExternal][$submission->getSubmitid()])) {
+            $this->prefetchTestcaseResults([$submission], $showExternal);
         }
+        $testcases = $this->testcaseResults[(int)$showExternal][$submission->getSubmitid()];
+
+        /** @var Judging|ExternalJudgement|false $judging */
+        $judging        = $showExternal ? $submission->getExternalJudgements()->first() : $submission->getJudgings()->first();
+        $submissionDone = $judging && !empty($judging->getEndtime());
 
         $total = count($testcases);
         $separator = '<span class="tc-sep"></span>';
