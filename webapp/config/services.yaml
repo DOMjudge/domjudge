@@ -28,3 +28,15 @@ services:
             - '../src/DependencyInjection'
             - '../src/Entity'
             - '../src/Kernel.php'
+
+when@test:
+    services:
+        # Detects code that fails under innodb_snapshot_isolation=ON, see
+        # tests/SnapshotIsolation/TransactionTracker.php. The low priority puts it outside
+        # DAMADoctrineTestBundle's middleware, so it sees the application's transactions
+        # instead of the one DAMA wraps around each test.
+        App\Tests\SnapshotIsolation\SnapshotIsolationMiddleware:
+            # Otherwise it is tagged a second time at the default priority.
+            autoconfigure: false
+            tags:
+                - { name: 'doctrine.middleware', priority: -100 }
