@@ -1,10 +1,14 @@
 // default_validator from kattis problemtools package
 // licensed under MIT license
 //
-// modified: float comparison
+// modified:
+// - removed undefined behaviour from cctype functions
+// - float comparison
+// - use more c++
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -13,17 +17,17 @@
 #include <cstdarg>
 #include <cctype>
 
-const int EXIT_AC = 42;
-const int EXIT_WA = 43;
+constexpr int EXIT_AC = 42;
+constexpr int EXIT_WA = 43;
 
 std::ifstream judgein, judgeans;
-FILE *judgemessage = NULL;
-FILE *diffpos = NULL;
+FILE *judgemessage = nullptr;
+FILE *diffpos = nullptr;
 int judgeans_pos, stdin_pos;
 int judgeans_line, stdin_line;
 
 /* The floating point type we use internally: */
-typedef long double flt;
+using flt = long double;
 
 void wrong_answer(const char *err, ...) {
 	va_list pvar;
@@ -48,12 +52,34 @@ void judge_error(const char *err, ...) {
 	assert(!"Judge Error");
 }
 
+bool issign(char c) {return c == '+' || c == '-';}
+bool isdigit(char c) {return c >= '0' && c <= '9';}
+bool isexp(char c) {return c == 'e' || c == 'E';}
 bool isfloat(const char *s, flt &val) {
-	char trash[20];
-	flt v;
-	if (sscanf(s, "%Lf%10s", &v, trash) != 1) return false;
-	val = v;
-	return true;
+	std::ptrdiff_t i = 0;
+	if (issign(s[i])) i++;
+	bool digits = isdigit(s[i]);
+	while (isdigit(s[i])) i++;
+	if (s[i] == '.') {
+		i++;
+		digits |= isdigit(s[i]);
+		while (isdigit(s[i])) i++;
+	}
+	if (!digits) return false;
+	if (isexp(s[i])) {
+		i++;
+		if (issign(s[i])) i++;
+		if (!isdigit(s[i])) return false;
+		while (isdigit(s[i])) i++;
+	}
+	if (s[i] != '\0') return false;
+
+	errno = 0;
+	char* end = nullptr;
+	flt v = std::strtold(s, &end);
+    if (end != s + i || errno != 0) return false;
+    val = v;
+    return true;
 }
 
 template <typename Stream>
@@ -74,16 +100,13 @@ FILE *openfeedback(const char *feedbackdir, const char *feedback, const char *wh
 }
 
 // The behavior of std::tolower on (signed) char is undefined.
-char tolower_char(char c)
-{
+char tolower_char(char c) {
     return static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
 }
 
-bool equal_case_insensitive(std::string a, std::string b)
-{
+bool equal_case_insensitive(std::string a, std::string b) {
 	for (char &c : a) c = tolower_char(c);
 	for (char &c : b) c = tolower_char(c);
-
 	return a==b;
 }
 
