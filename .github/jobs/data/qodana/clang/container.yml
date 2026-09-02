@@ -1,0 +1,16 @@
+FROM jetbrains/qodana-clang:2026.1
+
+RUN apt-get update \
+	&& apt-get install -y --reinstall debian-archive-keyring \
+  && apt-get full-upgrade -y
+
+#COPY .github/jobs/data/qodana/cpp/trixie /etc/apt/sources.list.d/
+COPY qodana/cpp/trixie.sources /etc/apt/sources.list.d/
+
+RUN apt-get update
+
+RUN apt-get install --no-install-recommends --no-install-suggests -y \
+	python3-pip libcgroup-dev gcc g++ \
+	&& rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install compiledb --break-system-packages

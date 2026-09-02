@@ -1,0 +1,11 @@
+linter: jetbrains/qodana-clang:2026.1
+bootstrap: |
+  sudo sed -i s/bookworm\ /bookworm\ trixie\ /g /etc/apt/sources.list.d/debian.sources
+  sudo apt-get update
+  sudo apt-get install --no-install-recommends --no-install-suggests -y python3-pip libcgroup-dev gcc g++ python3-pip
+  sudo pip3 install compiledb --break-system-packages
+  make configure
+  ./configure --with-domjudge-user=qodana
+  compiledb make judgehost
+  mkdir build
+  cp compile_commands.json build/

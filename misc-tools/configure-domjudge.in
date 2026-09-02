@@ -19,7 +19,7 @@ import requests
 import requests.utils
 import shutil
 import sys
-from typing import List, Set
+from typing import List, Set, Tuple
 
 sys.path.append('@domserver_libdir@')
 import dj_utils
@@ -31,7 +31,7 @@ def usage():
     exit(1)
 
 
-def compare_configs(expected_config: Set, actual_config: Set, num_spaces=4, key_mismatch_in_diff=False) -> (List, Set, Set):
+def compare_configs(expected_config: dict, actual_config: dict, num_spaces=4, key_mismatch_in_diff=False) -> Tuple[List, Set, Set]:
     diffs = []
     space_string = ' ' * num_spaces
     all_keys = set(expected_config.keys()) | set(actual_config.keys())

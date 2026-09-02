@@ -1,0 +1,26 @@
+linter: jetbrains/qodana-php:2025.3
+bootstrap: |
+  docker-php-ext-install bcmath gd intl mysqli pcntl zip
+  cd /data/project/webapp && composer install --no-interaction --ignore-platform-reqs --no-scripts
+exclude:
+  - name: BadExpressionStatementJS
+  - name: JSConsecutiveCommasInArrayLiteral
+  - name: JSDeprecatedSymbols
+  - name: JSDuplicatedDeclaration
+  - name: JSEqualityComparisonWithCoercion
+  - name: JSIgnoredPromiseFromCall
+  - name: JSJQueryEfficiency
+  - name: JSPrimitiveTypeWrapperUsage
+  - name: JSUndeclaredVariable
+  - name: JSUnnecessarySemicolon
+  - name: JSUnusedAssignment
+  - name: JSUnusedLocalSymbols
+  - name: JSVoidFunctionReturnValueUsed
+  - name: PhpAttributeCanBeAddedToOverriddenMemberInspection
+  - name: PhpDqlBuilderUnknownModelInspection
+  - name: PhpInternalEntityUsedInspection
+  - name: PhpRedundantCatchClauseInspection
+  - name: PhpUndefinedMethodInspection
+  - name: PhpUndefinedVariableInspection
+  - name: PhpUnusedSwitchBranchInspection
+  - name: RegExpDuplicateCharacterInClass

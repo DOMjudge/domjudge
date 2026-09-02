@@ -1,0 +1,17 @@
+linter: jetbrains/qodana-python:2026.1
+include:
+  - name: YAMLSchemaDeprecation
+  - name: YAMLDuplicatedKeys
+  - name: YAMLRecursiveAlias
+  - name: YAMLUnresolvedAlias
+  - name: YAMLUnusedAnchor
+  - name: RegExpAnonymousGroup
+  - name: RegExpEscapedMetaCharacter
+  - name: RegExpOctalEscape
+  - name: RegExpSimplifiable
+  - name: RegExpRedundantEscape
+  - name: PyAugmentAssignmentInspection
+  - name: PyArgumentListInspection
+  - name: PyTypeCheckerInspection
+  - name: DuplicatedCode
+  - name: Annotator

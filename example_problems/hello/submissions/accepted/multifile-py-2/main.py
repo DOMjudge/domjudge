@@ -8,5 +8,5 @@ preserved to match the public class names.
 
 import message
 
-foo = message.Message();
-foo.myPrint();
+foo = message.Message()
+foo.myPrint()

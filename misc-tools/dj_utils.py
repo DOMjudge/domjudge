@@ -116,6 +116,7 @@ def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
         name (str): the endpoint to call
         apifilename (str): the argument name for the file to upload
         file (str): the file to upload
+        data (dict): the data to post/upload
 
     Returns:
         The parsed endpoint contents.

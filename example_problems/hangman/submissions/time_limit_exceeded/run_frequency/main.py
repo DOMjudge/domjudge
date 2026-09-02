@@ -13,13 +13,13 @@ todo = input()
 new_guessed = todo.replace("_", ".")
 
 matches = []
-while matches == []:
+while not matches:
     # Try to find the word first, otherwise a partial fitting word
     for regex in [f"^{new_guessed}$", f"^.*{new_guessed}.*$"]:
         matches = [w for w in words if re.match(regex, w)]
-        if matches != []:
+        if matches:
             break
-    if matches == []:
+    if not matches:
         possible = list(sorted(set(guessed)))
         new_guessed = guessed.replace("_", ".").replace(possible[0], ".")
     else:
