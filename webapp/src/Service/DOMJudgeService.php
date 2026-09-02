@@ -1425,31 +1425,34 @@ class DOMJudgeService
     }
 
     /**
-     * Get asset files in the given directory with the given extension
+     * Get asset files in the given directory ending in one of the given extensions
      *
+     * @param string[] $extensions
      * @return string[]
      */
-    public function getAssetFiles(string $path): array
+    public function getAssetFiles(string $path, array $extensions): array
     {
-        if (isset($this->assetFilesCache[$path])) {
-            return $this->assetFilesCache[$path];
+        $cacheKey = $path . '|' . implode(',', $extensions);
+        if (isset($this->assetFilesCache[$cacheKey])) {
+            return $this->assetFilesCache[$cacheKey];
         }
 
         $customDir = sprintf('%s/public/%s', $this->params->get('kernel.project_dir'), $path);
         if (!is_dir($customDir)) {
-            return $this->assetFilesCache[$path] = [];
+            return $this->assetFilesCache[$cacheKey] = [];
         }
 
         $results = [];
         foreach (scandir($customDir) as $file) {
-            foreach (array_merge(['css','js'], static::MIMETYPE_TO_EXTENSION) as $extension) {
-                if (str_contains($file, '.' . $extension)) {
+            foreach ($extensions as $extension) {
+                if (str_ends_with($file, '.' . $extension)) {
                     $results[] = $file;
+                    break;
                 }
             }
         }
 
-        return $this->assetFilesCache[$path] = $results;
+        return $this->assetFilesCache[$cacheKey] = $results;
     }
 
     /**
@@ -1475,7 +1478,7 @@ class DOMJudgeService
         }
 
         if (isset($dir)) {
-            $assets = $this->getAssetFiles($dir);
+            $assets = $this->getAssetFiles($dir, array_values(static::MIMETYPE_TO_EXTENSION));
             foreach (static::MIMETYPE_TO_EXTENSION as $extension) {
                 if ($forceExtension === $extension || (!$forceExtension && in_array($name . '.' . $extension, $assets))) {
                     return sprintf('%s%s/%s.%s', $prefix, $dir, $name, $extension);
