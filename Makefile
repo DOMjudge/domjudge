@@ -194,7 +194,10 @@ paths.mk:
 # Configure for running in source tree, not meant for normal use:
 maintainer-conf: inplace-conf-common dependencies-dev
 inplace-conf: inplace-conf-common dependencies
-inplace-conf-common: dist
+# In-place installs are not distributions: maintainer-conf and inplace-conf
+# install their respective dependencies (dev vs non-dev) above, and 'make domserver'
+# builds the default data archives. Only the configure script is needed here.
+inplace-conf-common: configure
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
 	            --with-domserver_root=$(CURDIR) \
 	            --with-judgehost_root=$(CURDIR) \
