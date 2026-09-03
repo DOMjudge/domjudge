@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\Attribute\ReleaseSessionLock;
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
@@ -93,6 +94,7 @@ class SubmissionController extends BaseController
     }
 
     #[Route(path: '/contests/{contestId}/submissions', name: 'jury_submissions')]
+    #[ReleaseSessionLock]
     public function indexAction(
         Request $request,
         string $contestId,

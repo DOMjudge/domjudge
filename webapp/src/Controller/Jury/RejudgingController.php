@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\Attribute\ReleaseSessionLock;
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Contest;
@@ -184,6 +185,7 @@ class RejudgingController extends BaseController
      * @throws NonUniqueResultException
      */
     #[Route(path: '/{rejudgingId<\d+>}', name: 'jury_rejudging')]
+    #[ReleaseSessionLock]
     public function viewAction(
         Request $request,
         SubmissionService $submissionService,
@@ -197,9 +199,6 @@ class RejudgingController extends BaseController
         #[MapQueryParameter(name: 'show_statistics')]
         ?bool $showStatistics = null,
     ): Response {
-        // Close the session, as this might take a while and we don't need the session below.
-        $this->requestStack->getSession()->save();
-
         /** @var Rejudging|null $rejudging */
         $rejudging = $this->em->createQueryBuilder()
             ->from(Rejudging::class, 'r')
