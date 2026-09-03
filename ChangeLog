@@ -17,8 +17,20 @@ Version 10.0.0DEV
    API requests without file uploads to make them work with PUT/PATCH requests.
  - Removed email collection for selfregistered users.
  - Make penalty time a per contest setting.
+ - Added `--with-instance-name` to configure, allowing multiple DOMjudge
+   installations to coexist on one host. It determines the webserver and
+   PHP-FPM configuration file names, the PHP-FPM pool and socket, the nginx
+   upstream, and the default database name and user. For in-place
+   (maintainer mode) installs it is derived from the directory name, so
+   that several checkouts or worktrees can each have their own
+   installation without any extra configuration.
  - `etc/genrestapicredentials` now uses the configured base URL instead of
    always writing `http://localhost/domjudge/api`.
+ - The path prefix in the generated webserver configuration is now derived
+   from `--with-baseurl` instead of always being `/domjudge`. Installations
+   configured with a base URL without a path, e.g.
+   `--with-baseurl=https://example.org/`, now get a webserver configuration
+   serving DOMjudge from the root rather than from `/domjudge`.
  - Configuration changes
    - `show_balloons_postfreeze` configuration variable superseded by
      `minimum_number_of_balloons` and `any_balloon_postfreeze`.

@@ -275,6 +275,95 @@ else
 fi
 AC_SUBST(RESTAPIURL,$restapiurl)
 
+AC_MSG_CHECKING([instance name])
+AC_ARG_WITH([instance-name], [AS_HELP_STRING([--with-instance-name=NAME],
+[Short identifier for this DOMjudge instance (default: "domjudge"). Used
+ for the webserver and PHP-FPM configuration file names, the PHP-FPM pool
+ and socket, the nginx upstream, and the default database name and user.
+ Set this to run several instances side by side on one host.])], [], [])
+AX_WITH_COMMENT(9,[        ])
+
+# '--with-instance-name' without a value and '--without-instance-name' set
+# this to autoconf's 'yes'/'no' sentinels, and '--with-instance-name=' sets
+# it to the empty string. None of those name an instance, and silently
+# installing as 'yes' or as the default instance would take over another
+# installation's configuration, so refuse them.
+if test "x$with_instance_name" = xyes || test "x$with_instance_name" = xno; then
+	AC_MSG_ERROR([--with-instance-name requires a value, e.g. --with-instance-name=contest2.])
+fi
+if test "${with_instance_name+set}" = set && test "x$with_instance_name" = x; then
+	AC_MSG_ERROR([--with-instance-name requires a non-empty value, e.g. --with-instance-name=contest2.])
+fi
+if test "x$with_instance_name" != x; then
+	instance_raw="$with_instance_name"
+else
+	instance_raw="domjudge"
+fi
+# Sanitize into something usable as a file name, an nginx upstream name and
+# a database user: lowercase, only [a-z0-9-], no repeated, leading or
+# trailing dashes. Truncated to 24 characters because the database user is
+# derived from this and MySQL limits user names to 32 characters.
+instance=`echo "$instance_raw" | tr 'A-Z' 'a-z' | \
+	sed -e 's/[[^a-z0-9-]][[^a-z0-9-]]*/-/g' -e 's/--*/-/g' \
+	    -e 's/^-//' -e 's/-$//' | cut -c1-24 | sed -e 's/-$//'`
+if test "x$instance" = x; then
+	AC_MSG_ERROR([instance name '$instance_raw' contains no usable characters; pass a valid --with-instance-name=NAME.])
+fi
+AC_SUBST(INSTANCE,$instance)
+# nginx variable names accept only [A-Za-z0-9_].
+instance_id=`echo "$instance" | tr -- '-' '_'`
+AC_MSG_RESULT($instance)
+
+AC_MSG_CHECKING([URL path prefix])
+# Derive the path DOMjudge is served under from the base URL, so that the
+# webserver configuration and the base URL cannot drift apart. Fall back to
+# the historic default when no base URL was configured, so that the
+# generated files stay unchanged in that case.
+if test "x$BASEURL_UNCONFIGURED" = x1; then
+	urlsource='http://localhost/domjudge/'
+else
+	urlsource="$BASEURL"
+fi
+urlscheme=`echo "$urlsource" | sed -n 's,^\([[a-zA-Z][a-zA-Z0-9+.-]]*\)://.*,\1,p'`
+urlauth=`echo "$urlsource" | sed -e 's,^[[a-zA-Z][a-zA-Z0-9+.-]]*://,,' -e 's,/.*,,'`
+urlprefix=`echo "$urlsource" | sed -e 's,^[[a-zA-Z][a-zA-Z0-9+.-]]*://[[^/]]*,,' -e 's,//*$,,'`
+if test "x$urlscheme" = x || test "x$urlauth" = x; then
+	AC_MSG_ERROR([could not parse base URL '$urlsource'; expected e.g. 'https://example.com/domjudge/'.])
+fi
+AC_SUBST(URLPREFIX,$urlprefix)
+AC_SUBST(URLPREFIXSLASH,$urlprefix/)
+AC_MSG_RESULT([$urlprefix/])
+
+AC_MSG_CHECKING([webserver host])
+urlhost=`echo "$urlauth" | sed -e 's,:[[0-9]]*$,,'`
+urlport=`echo "$urlauth" | sed -n 's,.*:\([[0-9]][[0-9]]*\)$,\1,p'`
+# Only an explicit port in the base URL selects the port to listen on. The
+# scheme must not: the generated server block speaks plain HTTP, so an
+# 'https' base URL turning into 'listen 443' would answer TLS handshakes
+# with cleartext. Terminating TLS is left to the administrator, see the
+# commented-out blocks in etc/nginx-conf.in.
+if test "x$urlport" = x; then
+	urlport=80
+fi
+# The default instance stays the catch-all server on port 80, as it has
+# always been. Only named instances get their own server_name and port, so
+# that several of them can coexist in a single webserver. The nginx
+# variable holding the HTTPS flag is global to nginx as well, so it has to
+# differ per instance; the default instance keeps its historic name.
+if test "x$instance" = xdomjudge; then
+	urlservername='_default_'
+	urllisten=80
+	httpsvar='fastcgi_param_https_variable'
+else
+	urlservername="$urlhost"
+	urllisten="$urlport"
+	httpsvar="fastcgi_param_https_$instance_id"
+fi
+AC_SUBST(URLSERVERNAME,$urlservername)
+AC_SUBST(URLLISTEN,$urllisten)
+AC_SUBST(HTTPSVAR,$httpsvar)
+AC_MSG_RESULT([$urlservername:$urllisten])
+
 # Checks for programs.
 if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 AC_PROG_CXX
@@ -366,6 +455,7 @@ echo " * webserver group.....: $WEBSERVER_GROUP"
 fi
 echo ""
 echo " * website base URL....: $BASEURL"
+echo " * instance name.......: $INSTANCE"
 echo ""
 echo -n " * documentation.......: AX_VAR_EXPAND($domjudge_docdir)"
 if test "x$DOC_BUILD_ENABLED" != xyes ; then
