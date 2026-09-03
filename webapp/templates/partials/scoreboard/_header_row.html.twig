@@ -1,17 +1,16 @@
-<tr class="scoreheader" data-static="{{ static }}" {% if isMobile %}style="font-size: 75%;"{% endif %}>
+<tr class="scoreheader" data-static="{{ static }}">
     {% if enable_ranking %}
-        <th title="rank" scope="col" {% if not isMobile and medalsEnabled %}colspan="2"{% endif %}>rank</th>
+        <th title="rank" scope="col" {% if medalsEnabled %}colspan="2"{% endif %}>rank</th>
     {% endif %}
-    <th title="team name" scope="col" colspan="{{ teamColspan }}">team</th>
+    <th title="team name" scope="col" class="scorehead-team" colspan="{{ teamColspan }}">team</th>
     {% if enable_ranking %}
         {% if scoringScoreboard %}
             <th title="points" colspan="1" scope="col">score</th>
         {% else %}
-            <th title="# solved / penalty time" colspan="{{ isMobile ? 1 : 2 }}" scope="col">score</th>
+            <th title="# solved / penalty time" colspan="2" scope="col">score</th>
         {% endif %}
     {% endif %}
-    {% if not isMobile and (showTeamSubmissions or jury) %}
-        {# Problem headers - desktop only #}
+    {% if showTeamSubmissions or jury %}
         {% for problem in problems %}
             {% set link = null %}
             {% set target = '_self' %}

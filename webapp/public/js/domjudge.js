@@ -285,29 +285,10 @@ function getSelectedTeams()
     return JSON.parse(cookieVal);
 }
 
-function getScoreboards(mobile)
+function getScoreboardRows()
 {
-    const scoreboards = document.getElementsByClassName("scoreboard");
-    if (scoreboards === null || scoreboards[0] === null || scoreboards[0] === undefined) {
-        return null;
-    }
-    let scoreboardRows = {};
-    const mobileScoreboardClass = 'mobile-scoreboard';
-    const desktopScoreboardClass = 'desktop-scoreboard';
-    for (let i = 0; i < scoreboards.length; i++) {
-        if (scoreboards[i].classList.contains(mobileScoreboardClass)) {
-            scoreboardRows.mobile = scoreboards[i].rows;
-        } else if (scoreboards[i].classList.contains(desktopScoreboardClass)) {
-            scoreboardRows.desktop = scoreboards[i].rows;
-        }
-    }
-    if (mobile === undefined) {
-        return scoreboardRows;
-    } else if (mobile) {
-        return scoreboardRows.mobile;
-    } else {
-        return scoreboardRows.desktop;
-    }
+    const scoreboard = document.querySelector(".main-scoreboard");
+    return scoreboard ? scoreboard.rows : null;
 }
 
 function getRank(row)
@@ -333,14 +314,13 @@ function getTeamname(row)
     return row.getAttribute("data-team-id");
 }
 
-function toggle(id, show, mobile)
+function toggle(id, show)
 {
-    var scoreboard = getScoreboards(mobile);
+    var scoreboard = getScoreboardRows();
     if (scoreboard === null) return;
 
     // Filter out all rows that do not have a data-team-id attribute or have
     // the class `scoreheader`.
-    // The mobile scoreboard has them, and we need to ignore them.
     scoreboard = Array.from(scoreboard)
         .filter(
             row => row.getAttribute("data-team-id")
@@ -398,111 +378,78 @@ function toggle(id, show, mobile)
     });
 }
 
-function getHeart(rank, row, id, isFav, mobile)
+function getHeart(rank, row, id, isFav)
 {
     var iconClass = isFav ? "fas fa-heart" : "far fa-heart";
-    return "<span class=\"heart " + iconClass + "\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + "," + mobile + ")\"></span>";
+    return "<span class=\"heart " + iconClass + "\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\"></span>";
 }
 
 function initFavouriteTeams()
 {
-    const scoreboards = getScoreboards();
-    if (scoreboards === null) {
+    const scoreboard = getScoreboardRows();
+    if (scoreboard === null) {
         return;
     }
 
     var favTeams = getSelectedTeams();
-    Object.keys(scoreboards).forEach(function(key) {
-        var toAdd = new Array();
-        var toAddMobile = new Array();
-        var cntFound = 0;
-        var lastRank = 0;
-        const scoreboard = scoreboards[key];
-        const mobile = key === 'mobile';
-        let teamIndex = 1;
-        for (var j = 0; j < scoreboard.length; j++) {
-            var found = false;
-            var teamname = getTeamname(scoreboard[j]);
-            if (teamname === null) {
-                continue;
-            }
-            let rankElement;
-            if (mobile) {
-                rankElement = getRank(scoreboard[j + 1]);
-            } else {
-                rankElement = getRank(scoreboard[j]);
-            }
-            var heartCol = getHeartCol(scoreboard[j]);
-            if (!heartCol) {
-                continue;
-            }
-            var rank = rankElement.innerHTML.trim();
-            for (var i = 0; i < favTeams.length; i++) {
-                if (teamname === favTeams[i]) {
-                    found = true;
-                    heartCol.innerHTML = getHeart(rank, scoreboard[j], teamIndex, found, mobile);
-                    toAdd[cntFound] = scoreboard[j].cloneNode(true);
-                    if (mobile) {
-                        toAddMobile[cntFound] = scoreboard[j + 1].cloneNode(true);
-                    }
-                    if (rank.length === 0) {
-                        // make rank explicit in case of tie
-                        if (mobile) {
-                            getRank(toAddMobile[cntFound]).innerHTML += lastRank;
-                        } else {
-                            getRank(toAdd[cntFound]).innerHTML += lastRank;
-                        }
-                    }
-                    scoreboard[j].style.background = "lightyellow";
-                    const whiteCells = scoreboard[j].querySelectorAll('.cl_FFFFFF');
-                    for (let k = 0; k < whiteCells.length; k++) {
-                        const whiteCell = whiteCells[k];
-                        whiteCell.classList.remove('cl_FFFFFF');
-                        whiteCell.classList.add('cl_FFFFE0');
-                    }
-                    if (mobile) {
-                        scoreboard[j + 1].style.background = "lightyellow";
-                    }
-                    cntFound++;
-                    break;
+    var toAdd = new Array();
+    var cntFound = 0;
+    var lastRank = 0;
+    let teamIndex = 1;
+    for (var j = 0; j < scoreboard.length; j++) {
+        var found = false;
+        var teamname = getTeamname(scoreboard[j]);
+        if (teamname === null) {
+            continue;
+        }
+        var heartCol = getHeartCol(scoreboard[j]);
+        if (!heartCol) {
+            continue;
+        }
+        var rank = getRank(scoreboard[j]).innerHTML.trim();
+        for (var i = 0; i < favTeams.length; i++) {
+            if (teamname === favTeams[i]) {
+                found = true;
+                heartCol.innerHTML = getHeart(rank, scoreboard[j], teamIndex, found);
+                toAdd[cntFound] = scoreboard[j].cloneNode(true);
+                if (rank.length === 0) {
+                    // make rank explicit in case of tie
+                    getRank(toAdd[cntFound]).innerHTML += lastRank;
                 }
-            }
-            if (!found) {
-                heartCol.innerHTML = getHeart(rank, scoreboard[j], teamIndex, found, mobile);
-            }
-            if (rank !== "") {
-                lastRank = rank;
-            }
-
-            teamIndex++;
-        }
-
-        let addCounter = 1;
-        const copyRow = function (i, copy, addTopBorder, addBottomBorder, noMiddleBorder) {
-            let style = "";
-            if (noMiddleBorder) {
-                style += "border-bottom-width: 0;";
-            }
-            if (addTopBorder && i === 0) {
-                style += "border-top: 2px solid black;";
-            }
-            if (addBottomBorder && i === cntFound - 1) {
-                style += "border-bottom: thick solid black;";
-            }
-            copy.setAttribute("style", style);
-            const tbody = scoreboard[1].parentNode;
-            tbody.insertBefore(copy, scoreboard[addCounter]);
-            addCounter++;
-        }
-
-        // copy favourite teams to the top of the scoreboard
-        for (let i = 0; i < cntFound; i++) {
-            copyRow(i, toAdd[i], true, !mobile, mobile);
-            if (mobile) {
-                copyRow(i, toAddMobile[i], false, true, false);
+                scoreboard[j].style.background = "lightyellow";
+                const whiteCells = scoreboard[j].querySelectorAll('.cl_FFFFFF');
+                for (let k = 0; k < whiteCells.length; k++) {
+                    const whiteCell = whiteCells[k];
+                    whiteCell.classList.remove('cl_FFFFFF');
+                    whiteCell.classList.add('cl_FFFFE0');
+                }
+                cntFound++;
+                break;
             }
         }
-    });
+        if (!found) {
+            heartCol.innerHTML = getHeart(rank, scoreboard[j], teamIndex, found);
+        }
+        if (rank !== "") {
+            lastRank = rank;
+        }
+
+        teamIndex++;
+    }
+
+    // copy favourite teams to the top of the scoreboard
+    const tbody = scoreboard[1].parentNode;
+    for (let i = 0; i < cntFound; i++) {
+        let style = "";
+        if (i === 0) {
+            style += "border-top: 2px solid black;";
+        }
+        if (i === cntFound - 1) {
+            style += "border-bottom: thick solid black;";
+        }
+        toAdd[i].setAttribute("style", style);
+        tbody.insertBefore(toAdd[i], scoreboard[1 + i]);
+    }
 }
 
 // This function is a specific addition for using DOMjudge within a
@@ -920,10 +867,11 @@ function pinScoreheader()
     }
     var static_scoreboard = $scoreHeader.data('static');
     if (!static_scoreboard) {
-        $('.scoreheader th').css('top', $('.fixed-top').css('height'));
+        var $sticky = $scoreHeader.closest('thead').add($scoreHeader.find('th'));
+        $sticky.css('top', $('.fixed-top').css('height'));
         if ('ResizeObserver' in window) {
             var resizeObserver = new ResizeObserver(() => {
-                $scoreHeader.find('th').css('top', $('.fixed-top').css('height'));
+                $sticky.css('top', $('.fixed-top').css('height'));
             });
             resizeObserver.observe($('.fixed-top')[0]);
         }
@@ -1136,49 +1084,12 @@ function initializeKeyboardShortcuts() {
     });
 }
 
-// Make sure the items in the desktop scoreboard fit
-document.querySelectorAll(".desktop-scoreboard .forceWidth:not(.toolong)").forEach(el => {
+// Make sure the team names in the scoreboard fit
+document.querySelectorAll(".main-scoreboard .forceWidth:not(.toolong)").forEach(el => {
     if (el instanceof Element && el.scrollWidth > el.offsetWidth) {
         el.classList.add("toolong");
     }
 });
-
-/**
- * Helper method to resize mobile team names and problem badges
- */
-function resizeMobileTeamNamesAndProblemBadges() {
-    // Make team names fit on the screen, but only when the mobile
-    // scoreboard is visible
-    const mobileScoreboard = document.querySelector('.mobile-scoreboard');
-    if (mobileScoreboard.offsetWidth === 0) {
-        return;
-    }
-    const windowWidth = document.body.offsetWidth;
-    const teamNameMaxWidth = Math.max(10, windowWidth - 150);
-    const problemBadgesMaxWidth = Math.max(10, windowWidth - 78);
-    document.querySelectorAll(".mobile-scoreboard .forceWidth:not(.toolong)").forEach(el => {
-        el.classList.remove("toolong");
-        el.style.maxWidth = teamNameMaxWidth + 'px';
-        if (el instanceof Element && el.scrollWidth > el.offsetWidth) {
-            el.classList.add("toolong");
-        } else {
-            el.classList.remove("toolong");
-        }
-    });
-    document.querySelectorAll(".mobile-scoreboard .mobile-problem-badges:not(.toolong)").forEach(el => {
-        el.classList.remove("toolong");
-        el.style.maxWidth = problemBadgesMaxWidth + 'px';
-        if (el instanceof Element && el.scrollWidth > el.offsetWidth) {
-            el.classList.add("toolong");
-            const scale = el.offsetWidth / el.scrollWidth;
-            const offset = -1 * (el.scrollWidth - el.offsetWidth) / 2;
-            el.style.transform = `scale(${scale}) translateX(${offset}px)`;
-        } else {
-            el.classList.remove("toolong");
-            el.style.transform = null;
-        }
-    });
-}
 
 function createSubmissionGraph(submissionStats, contestStartTime, contestDurationSeconds, submissions, minBucketCount = 30, maxBucketCount = 301) {
     const units = [
@@ -1267,11 +1178,6 @@ function createSubmissionGraph(submissionStats, contestStartTime, contestDuratio
 }
 
 $(function() {
-    if (document.querySelector('.mobile-scoreboard')) {
-        window.addEventListener('resize', resizeMobileTeamNamesAndProblemBadges);
-        resizeMobileTeamNamesAndProblemBadges();
-    }
-
     // For dropdown menus inside dropdown menus we need to make sure the outer
     // dropdown stays open when the inner dropdown is opened.
     const dropdowns = document.querySelectorAll('.dropdown-item.dropdown-toggle')
