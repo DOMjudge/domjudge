@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use Doctrine\ORM\Query\Expr\Join;
+use App\Attribute\ReleaseSessionLock;
 use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Entity\Submission;
@@ -28,6 +29,7 @@ class AnalysisController extends AbstractController
     ) {}
 
     #[Route(path: '', name: 'analysis_index')]
+    #[ReleaseSessionLock]
     public function indexAction(
         #[MapQueryParameter]
         ?string $view = null
@@ -83,6 +85,7 @@ class AnalysisController extends AbstractController
     }
 
     #[Route(path: '/team/{team}', name: 'analysis_team')]
+    #[ReleaseSessionLock]
     public function teamAction(
         #[MapEntity(mapping: ['team' => 'externalid'])]
         Team $team,
@@ -101,6 +104,7 @@ class AnalysisController extends AbstractController
     }
 
     #[Route(path: '/problem/{probid}', name: 'analysis_problem')]
+    #[ReleaseSessionLock]
     public function problemAction(
         #[MapEntity(mapping: ['probid' => 'externalid'])]
         Problem $problem,
@@ -124,6 +128,7 @@ class AnalysisController extends AbstractController
     }
 
     #[Route(path: '/languages', name: 'analysis_languages')]
+    #[ReleaseSessionLock]
     public function languagesAction(
         #[MapQueryParameter]
         ?string $view = null

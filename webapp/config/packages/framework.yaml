@@ -31,4 +31,4 @@ when@test:
     framework:
         test: true
         session:
-            storage_factory_id: session.storage.factory.mock_file
+            storage_factory_id: App\Tests\Session\RecordingSessionStorageFactory
