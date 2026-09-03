@@ -6,7 +6,7 @@ include $(TOPDIR)/Makefile.global
 EXECDIRS=$(shell find files -mindepth 2 -maxdepth 2 -type d)
 ZIPFILES=$(EXECDIRS:=.zip)
 
-domserver: dj_setup_database
+domserver: dj_setup_database $(ZIPFILES)
 
 build-scripts:
 	@for d in $(EXECDIRS) ; do \
