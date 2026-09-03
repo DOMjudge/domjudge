@@ -41,7 +41,7 @@
     {% set extra = extra ~ ' data-problem-id="' ~ problem.externalid ~ '"' %}
 {% endif %}
 
-<td class="score_cell">
+<td class="score_cell" data-problem="{{ problem.shortname | escape('html_attr') }}" style="{{ problem | problemBadgeVars }}">
     {% if numSubmissions != '0' %}
         <a {% if link %}href="{{ link }}"{% endif %} {% if extra %}{{ extra | raw }}{% endif %}>
             <div

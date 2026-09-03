@@ -25,7 +25,7 @@
                 {% set affiliationId = score.team.affiliation.externalid %}
                 {% set affiliationImage = affiliationId | assetPath('affiliation') %}
                 {% if affiliationImage %}
-                    <img loading="lazy" {% if isMobile %}width="16px" height="16px"{% else %}class="affiliation-logo"{% endif %}
+                    <img loading="lazy" class="affiliation-logo"
                          src="{{ asset(affiliationImage) }}" alt="{{ score.team.affiliation.name }}"
                          title="{{ score.team.affiliation.name }}">
                 {% else %}
