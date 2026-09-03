@@ -736,6 +736,22 @@ class TwigExtensionTest extends TestCase
     }
 
     /**
+     * The style lands in a <style> block on the scoreboard, so a colour that cannot be parsed
+     * must fall back to the default instead of being passed through.
+     */
+    public function testProblemBadgeStyleIgnoresAnUnparseableColour(): void
+    {
+        $problem = $this->createMock(ContestProblem::class);
+        $problem->method('getColor')->willReturn('"><script>alert(1)</script>');
+
+        $style = $this->twigExtension->problemBadgeStyle($problem);
+
+        self::assertStringNotContainsString('<', $style);
+        self::assertStringNotContainsString('"', $style);
+        self::assertStringContainsString('background-color: #F5F5F5', $style);
+    }
+
+    /**
      * The scoreboard variant of the badge escapes the same label, and additionally puts the
      * team and problem external ids into data-attributes.
      */

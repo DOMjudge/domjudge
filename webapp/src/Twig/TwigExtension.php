@@ -1117,6 +1117,19 @@ EOF;
     #[AsTwigFilter('problemBadge', isSafe: ['html'])]
     public function problemBadge(?ContestProblem $problem, bool $grayedOut = false): string
     {
+        return sprintf(
+            '<span class="badge problem-badge" style="%s"><span>%s</span></span>',
+            $this->problemBadgeStyle($problem, $grayedOut),
+            htmlspecialchars($problem?->getShortname() ?? '?')
+        );
+    }
+
+    /**
+     * The CSS declarations that give a badge the colour of the given problem.
+     */
+    #[AsTwigFilter('problemBadgeStyle')]
+    public function problemBadgeStyle(?ContestProblem $problem, bool $grayedOut = false): string
+    {
         $rgb = Utils::convertToHex($problem?->getColor() ?? '#ffffff');
         if ($grayedOut || empty($rgb)) {
             $rgb = Utils::convertToHex('whitesmoke');
@@ -1128,13 +1141,7 @@ EOF;
             $foreground = 'silver';
             $border = 'linen';
         }
-        return sprintf(
-            '<span class="badge problem-badge" style="background-color: %s; border: 1px solid %s"><span style="color: %s;">%s</span></span>',
-            $rgb,
-            $border,
-            $foreground,
-            htmlspecialchars($problem?->getShortname() ?? '?')
-        );
+        return sprintf('background-color: %s; border: 1px solid %s; color: %s;', $rgb, $border, $foreground);
     }
 
     #[AsTwigFilter('problemBadgeMaybe', isSafe: ['html'])]
