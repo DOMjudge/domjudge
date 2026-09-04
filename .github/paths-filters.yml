@@ -1,0 +1,110 @@
+# Which files matter to which CI jobs.
+#
+# Each heavy workflow starts with the reusable job in
+# .github/workflows/changes.yml, which runs dorny/paths-filter with these
+# filters. The expensive jobs then carry
+#
+#     needs: changes
+#     if: ${{ !cancelled() && needs.changes.outputs.<filter> != 'false' }}
+#
+# so a PR that only touches the manual does not build runguard, and a
+# PR that only touches the judgedaemon does not run the web tests. A job
+# skipped this way still counts as a passed required status check.
+#
+# Every filter includes the CI definitions themselves, so a change to a
+# workflow or to the scripts under .github/jobs always runs everything.
+#
+# Keep the lists generous: a job that runs needlessly costs minutes, a
+# job that is skipped wrongly lets a regression through.
+
+# The CI definitions.
+ci: &ci
+  - '.github/**'
+
+# The autotools and make plumbing that every install goes through, plus
+# the C++ library linked into the judge binaries.
+build: &build
+  - 'configure.ac'
+  - 'bootstrap'
+  - 'config.guess'
+  - 'config.sub'
+  - 'install-sh'
+  - 'm4/**'
+  - 'paths.mk.in'
+  - 'Makefile.global'
+  - '**/Makefile'
+  - 'etc/**'
+  - 'lib/**'
+
+# The judgehost: runguard, runpipe, the judgedaemon and the chroot
+# tooling, and the default executables the judgedaemon runs.
+judge: &judge
+  - *ci
+  - *build
+  - 'judge/**'
+  - 'misc-tools/**'
+  - 'sql/files/**'
+
+# The judgedaemon's PHP unit tests load its config from etc/ and the PHP
+# libraries from lib/, and install composer dependencies from webapp.
+judge-unit:
+  - *ci
+  - 'judge/**'
+  - 'etc/**'
+  - 'lib/**'
+  - 'webapp/composer.json'
+  - 'webapp/composer.lock'
+
+# Building the chroot needs the judgehost build, dj_make_chroot and the
+# bats assertion helper from submit/.
+chroot:
+  - *ci
+  - *build
+  - 'misc-tools/**'
+  - 'submit/**'
+
+# The configure checks build a judgehost and a domserver. The latter
+# only reaches into webapp for its Makefile and composer autoloader,
+# and the bats suites load the assertion helper from submit/.
+autoconf:
+  - *judge
+  - 'submit/**'
+  - 'webapp/Makefile'
+  - 'webapp/composer.json'
+  - 'webapp/composer.lock'
+
+# Everything phpstan.dist.neon analyses, and the configuration itself.
+phpstan:
+  - *ci
+  - 'etc/**'
+  - 'judge/**'
+  - 'lib/**'
+  - 'webapp/**'
+  - 'phpstan*.neon'
+
+# The default compare script and its test.
+compare:
+  - *ci
+  - 'misc-tests/**'
+  - 'sql/files/defaultdata/compare/**'
+
+# The web application and everything a domserver install ships,
+# including the import scripts in misc-tools that load the example
+# problems the tests run against.
+webapp: &webapp
+  - *ci
+  - *build
+  - 'webapp/**'
+  - 'sql/**'
+  - 'submit/**'
+  - 'misc-tools/**'
+  - 'example_problems/**'
+  - 'example_scoring_problems/**'
+  - 'doc/examples/**'
+
+# Anything that ends up in a domserver or judgehost install, for the
+# integration test that exercises both.
+code:
+  - *judge
+  - *webapp
+  - 'misc-tests/**'

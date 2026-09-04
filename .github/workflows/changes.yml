@@ -1,0 +1,52 @@
+# Reusable job that tells the other workflows which parts of the tree a
+# change touches, so they can skip the jobs it cannot affect. The filters
+# live in .github/paths-filters.yml.
+name: Detect changed paths
+on:
+  workflow_call:
+    outputs:
+      judge:
+        value: ${{ jobs.changes.outputs.judge }}
+      judge-unit:
+        value: ${{ jobs.changes.outputs.judge-unit }}
+      chroot:
+        value: ${{ jobs.changes.outputs.chroot }}
+      compare:
+        value: ${{ jobs.changes.outputs.compare }}
+      phpstan:
+        value: ${{ jobs.changes.outputs.phpstan }}
+      autoconf:
+        value: ${{ jobs.changes.outputs.autoconf }}
+      webapp:
+        value: ${{ jobs.changes.outputs.webapp }}
+      code:
+        value: ${{ jobs.changes.outputs.code }}
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      judge: ${{ steps.filter.outputs.judge }}
+      judge-unit: ${{ steps.filter.outputs.judge-unit }}
+      chroot: ${{ steps.filter.outputs.chroot }}
+      compare: ${{ steps.filter.outputs.compare }}
+      phpstan: ${{ steps.filter.outputs.phpstan }}
+      autoconf: ${{ steps.filter.outputs.autoconf }}
+      webapp: ${{ steps.filter.outputs.webapp }}
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      # paths-filter reads the filter file from the checkout. On a pull
+      # request it lists the changed files through the API; in the merge
+      # queue it diffs the group's base and head, fetching the base commit
+      # itself, so a shallow checkout is enough.
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: .github/paths-filters.yml
+          # Without this the merge queue would be compared against the
+          # default branch, which is wrong for release branches.
+          base: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || '' }}
