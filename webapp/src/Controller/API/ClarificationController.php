@@ -7,7 +7,13 @@ use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
+use App\Service\AuthorizedUserService;
+use App\Service\ClarificationService;
+use App\Service\ConfigurationService;
+use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Utils\Utils;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -34,6 +40,17 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
 class ClarificationController extends AbstractRestController
 {
+    public function __construct(
+        AuthorizedUserService $authService,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
+        ConfigurationService $config,
+        EventLogService $eventLogService,
+        protected readonly ClarificationService $clarificationService,
+    ) {
+        parent::__construct($authService, $em, $dj, $config, $eventLogService);
+    }
+
     /**
      * Get all the clarifications for this contest.
      *
@@ -115,7 +132,7 @@ class ClarificationController extends AbstractRestController
         Request $request,
         ?string $id
     ): Response {
-        $maxLength = $this->config->get('clar_max_body_length');
+        $maxLength = $this->clarificationService->getClarificationMaximumBodyLength();
         if ($maxLength > 0 && mb_strlen($clarificationPost->text) > $maxLength) {
             throw new BadRequestHttpException(
                 sprintf('Clarification body is too long: %d characters, maximum is %d.', mb_strlen($clarificationPost->text), $maxLength)
@@ -154,28 +171,8 @@ class ClarificationController extends AbstractRestController
             $clarification->setProblem($problem->getProblem());
         }
 
-        if ($replyToId = $clarificationPost->replyToId) {
-            // Load the clarification.
-            /** @var Clarification|null $replyTo */
-            $replyTo = $this->em->createQueryBuilder()
-                ->from(Clarification::class, 'c')
-                ->select('c')
-                ->andWhere('c.externalid = :clarification')
-                ->andWhere('c.contest = :contest')
-                ->setParameter('clarification', $replyToId)
-                ->setParameter('contest', $contestId)
-                ->getQuery()
-                ->getOneOrNullResult();
-
-            if ($replyTo === null) {
-                throw new BadRequestHttpException("Clarification '$replyToId' not found.");
-            }
-
-            $clarification->setInReplyTo($replyTo);
-        }
-
         // By default, use the team of the user
-        $fromTeam = $this->isGranted('ROLE_API_WRITER') ? null : $this->dj->getUser()->getTeam();
+        $fromTeam = $this->isGranted('ROLE_API_WRITER') ? null : $this->authService->getUser()->getTeam();
         if ($fromTeamId = $clarificationPost->fromTeamId) {
             // If the user is an admin or API writer, allow it to specify the team
             if ($this->isGranted('ROLE_API_WRITER')) {
@@ -208,6 +205,21 @@ class ClarificationController extends AbstractRestController
             throw new BadRequestHttpException('Can not send a clarification from and to a team.');
         }
 
+        if ($replyToId = $clarificationPost->replyToId) {
+            $qb = $this->clarificationService->getQueryBuilder(internalContestId: $contestId, externalClarificationId: $replyToId)
+                ->select('clar');
+
+            // Load the clarification.
+            /** @var Clarification|null $replyTo */
+            $replyTo = $qb->getQuery()->getOneOrNullResult();
+
+            if ($replyTo === null) {
+                throw new BadRequestHttpException("Clarification '$replyToId' not found.");
+            }
+
+            $clarification->setInReplyTo($replyTo);
+        }
+
         $time = Utils::now();
         if ($contest->getStartTime() > $time) {
             throw new BadRequestHttpException(
@@ -235,15 +247,11 @@ class ClarificationController extends AbstractRestController
                 throw new BadRequestHttpException('ID does not match URI.');
             } elseif ($this->isGranted('ROLE_API_WRITER')) {
                 // Check if we already have a clarification with this ID
-                $existingClarification = $this->em->createQueryBuilder()
-                    ->from(Clarification::class, 'c')
-                    ->select('c')
-                    ->andWhere('(c.externalid IS NULL AND c.clarid = :clarid) OR c.externalid = :clarid')
-                    ->andWhere('c.contest = :contest')
-                    ->setParameter('clarid', $clarificationId)
-                    ->setParameter('contest', $contestId)
-                    ->getQuery()
-                    ->getOneOrNullResult();
+                // Deliberately not the ClarificationService query builder: this
+                // asks whether the id is taken, not whether the current user may
+                // see the clarification holding it.
+                $existingClarification = $this->em->getRepository(Clarification::class)
+                    ->findOneBy(['contest' => $contestId, 'externalid' => $clarificationId]);
                 if ($existingClarification !== null) {
                     throw new BadRequestHttpException(sprintf("Clarification with ID '%s' already exists.", $clarificationId));
                 }
@@ -254,9 +262,9 @@ class ClarificationController extends AbstractRestController
 
         $clarification
             ->setExternalid($clarificationId)
-            ->setQueue($this->config->get('clar_default_problem_queue'));
+            ->setQueue($this->clarificationService->getClarificationDefaultProblemQueue());
 
-        if (!$clarification->getProblem() && $clarificationCategories = $this->config->get('clar_categories')) {
+        if (!$clarification->getProblem() && $clarificationCategories = $this->clarificationService->getClarificationCategories()) {
             $clarificationCategoryNames = array_keys($clarificationCategories);
             $clarification->setCategory(reset($clarificationCategoryNames));
         }
@@ -286,48 +294,11 @@ class ClarificationController extends AbstractRestController
 
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        $queryBuilder = $this->em->createQueryBuilder()
-            ->from(Clarification::class, 'clar')
-            ->join('clar.contest', 'c')
-            ->leftJoin('clar.in_reply_to', 'reply')
-            ->leftJoin('clar.sender', 's')
-            ->leftJoin('clar.recipient', 'r')
-            ->leftJoin('clar.problem', 'p')
-            ->innerJoin('c.problems', 'cp')
+        $contestId = $this->getContestId($request);
+        $problem = $request->query->get('problem');
+        return $this->clarificationService->getQueryBuilder(internalContestId: $contestId, problem: $problem)
             ->select('clar, c, r, reply, p')
-            ->andWhere('clar.contest = :cid')
-            ->andWhere('clar.problem IS NULL OR clar.problem = cp.problem')
-            ->setParameter('cid', $this->getContestId($request))
             ->orderBy('clar.clarid');
-
-        if (!$this->dj->checkrole('api_reader') &&
-            !$this->dj->checkrole('judgehost')) {
-            if ($this->dj->checkrole('team')) {
-                $queryBuilder
-                    ->andWhere('clar.sender = :team OR clar.recipient = :team OR (clar.sender IS NULL AND clar.recipient IS NULL)')
-                    ->setParameter('team', $this->dj->getUser()->getTeam());
-            } else {
-                $queryBuilder
-                    ->andWhere('clar.sender IS NULL')
-                    ->andWhere('clar.recipient IS NULL');
-            }
-        }
-
-        // For non-API-reader users, only expose the problems after the contest has started.
-        // `WF Access Policy` allows for clarifications before the contest, but not to disclose the problem
-        // so referencing them in clarifications would violate referential integrity.
-        if (!$this->dj->checkrole('api_reader')) {
-            $queryBuilder->andWhere('c.starttime < :now OR clar.problem IS NULL')
-                ->setParameter('now', Utils::now());
-        }
-
-        if ($request->query->has('problem')) {
-            $queryBuilder
-                ->andWhere('clar.problem = :problem')
-                ->setParameter('problem', $request->query->get('problem'));
-        }
-
-        return $queryBuilder;
     }
 
     protected function getIdField(): string

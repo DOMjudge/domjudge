@@ -29,6 +29,7 @@ class RejudgingService
     final protected const APPLY_PROGRESS_WITH_SCOREBOARD_UPDATE = 95;
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
         protected readonly ScoreboardService $scoreboardService,
@@ -75,7 +76,7 @@ class RejudgingService
 
         $rejudging = new Rejudging();
         $rejudging
-            ->setStartUser($this->dj->getUser())
+            ->setStartUser($this->authService->getUser())
             ->setStarttime(Utils::now())
             ->setReason($reason)
             ->setAutoApply($autoApply);
@@ -95,6 +96,10 @@ class RejudgingService
         $singleJudging = (count($judgings) == 1);
         $index = 0;
         $first = true;
+        // We can be handed more than one judging of the same submission, for
+        // example when a submission ended up with several valid judgings. Only
+        // rejudge each submission once by tracking them as seen.
+        $seenSubmissions = [];
         foreach ($judgings as $judging) {
             $submission = $judging->getSubmission();
             $contestProblem = $submission->getContestProblem();
@@ -102,28 +107,38 @@ class RejudgingService
 
             $index++;
             if (
-                // Record and skip submission/judging if it is already part of another judging or is not allowed
-                // to be judged.
+                // Record and skip submission/judging if it is already part of
+                // another judging or is not allowed to be judged.
                 $submission->getRejudging() !== null
+                || isset($seenSubmissions[$submission->getSubmitid()])
                 || !$contestProblem->getAllowJudge()
                 || !$language->getAllowJudge()
             ) {
                 $skipped[] = $judging;
                 continue;
             }
+            $seenSubmissions[$submission->getSubmitid()] = true;
 
 
             // $this->>em->wrapInTransaction flushes the entity manager, which is pretty slow.
             // So use the direct connection transaction API here.
             $this->em->getConnection()->beginTransaction();
 
-            $this->em->getConnection()->executeStatement(
+            // Claim the submission. The check above ran before this transaction, so another
+            // rejudging may have taken it since; going on regardless would create judge tasks
+            // for a submission somebody else owns.
+            $claimed = $this->em->getConnection()->executeStatement(
                 'UPDATE submission SET rejudgingid = :rejudgingid WHERE submitid = :submitid AND rejudgingid IS NULL',
                 [
                     'rejudgingid' => $rejudging->getRejudgingid(),
                     'submitid' => $judging->getSubmissionId(),
                 ]
             );
+            if (!$claimed) {
+                $this->em->getConnection()->rollBack();
+                $skipped[] = $judging;
+                continue;
+            }
 
             if ($singleJudging) {
                 $teamid = $judging->getSubmission()->getTeamId();
@@ -411,7 +426,7 @@ class RejudgingService
         // Update the rejudging itself.
         /** @var Rejudging $rejudging */
         $rejudging = $this->em->getRepository(Rejudging::class)->find($rejudgingId);
-        $user      = $this->em->getRepository(User::class)->find($this->dj->getUser()->getUserid());
+        $user      = $this->em->getRepository(User::class)->find($this->authService->getUser()->getUserid());
         $rejudging
             ->setEndtime(Utils::now())
             ->setFinishUser($user)

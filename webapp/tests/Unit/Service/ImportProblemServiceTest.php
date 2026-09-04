@@ -2,9 +2,14 @@
 
 namespace App\Tests\Unit\Service;
 
+use App\Entity\Language;
 use App\Entity\Problem;
+use App\Entity\ProblemStatementContent;
 use App\Service\ImportProblemService;
 use App\Tests\Unit\BaseTestCase;
+use Doctrine\ORM\EntityManagerInterface;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use ZipArchive;
 
@@ -143,6 +148,41 @@ YAML;
         $this->assertTrue($ret);
         $this->assertEmpty($messages);
         $this->assertEquals('float_tolerance 1E-6', $problem->getSpecialCompareArgs());
+    }
+
+    public function testValidatorArgs(): void
+    {
+        $yaml = <<<YAML
+name: test
+type: pass-fail
+validator_args: 'float_tolerance 1E-7'
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertEmpty($messages);
+        $this->assertEquals('float_tolerance 1E-7', $problem->getSpecialCompareArgs());
+    }
+
+    public function testValidatorFlagsAndArgs(): void
+    {
+        $yaml = <<<YAML
+name: test
+type: pass-fail
+validator_flags: 'float_tolerance 1E-8'
+validator_args: 'float_tolerance 1E-9'
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertEmpty($messages);
+        $this->assertEquals('float_tolerance 1E-8', $problem->getSpecialCompareArgs());
     }
 
     public function testCustomValidation(): void
@@ -305,6 +345,42 @@ YAML;
         $this->assertTrue($ret);
         $this->assertEmpty($messages);
         $this->assertEquals(7, $problem->getMultipassLimit());
+    }
+
+    /**
+     * @return array<string, string[]>
+     */
+    public static function provideInvalidValidationPasses(): array
+    {
+        return [
+            'one pass' => ['1'],
+            'zero passes' => ['0'],
+            'negative' => ['-3'],
+            'not an integer' => ['2.5'],
+            'not a number' => ["'many'"],
+        ];
+    }
+
+    #[DataProvider('provideInvalidValidationPasses')]
+    public function testInvalidMultipassLimit(string $validationPasses): void
+    {
+        $yaml = <<<YAML
+name: test
+type: pass-fail multi-pass
+limits:
+  validation_passes: $validationPasses
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertFalse($ret);
+        $this->assertCount(1, $messages['danger']);
+        $this->assertStringContainsString('validation_passes must be an integer >= 2', $messages['danger'][0]);
+        // parseYaml applies all collected properties only once it succeeds, so
+        // the problem is left untouched, i.e. not even multi-pass.
+        $this->assertFalse($problem->isMultipassProblem());
     }
 
     public function testMaximalProblem(): void
@@ -485,6 +561,49 @@ YAML;
         $this->assertStringContainsString("Invalid range '100'", $messages['danger'][0]);
     }
 
+    public function testParseTestCaseGroupMetaProblemSpecSpecifiedOutputValidatorFlagsAccepted(): void
+    {
+        $yaml = "output_validator_flags: --any arg -x should work";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
+    public function testParseTestCaseGroupMetaUnspecifiedOutputValidatorArgsAccepted(): void
+    {
+        $yaml = "output_validator_args: --any arg -x should work";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
+    public function testParseTestCaseGroupMetaProblemSpecSpecifiedOutputValidatorFlagsAndArgsSpecified(): void
+    {
+        $yaml = <<<YAML
+output_validator_flags: --any arg -x should work
+output_validator_args: --those args -must not work
+YAML;
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
+
     /**
      * Create a temporary zip file with the given contents.
      *
@@ -622,6 +741,79 @@ YAML;
         $this->assertEquals(5, $result->getTimelimit());
     }
 
+    public function testProblemStatementReplacementOnReimport(): void
+    {
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        /** @var ImportProblemService $service */
+        $service = static::getContainer()->get(ImportProblemService::class);
+
+        $problemId = 'statement-import';
+        $problem = (new Problem())
+            ->setExternalid($problemId)
+            ->setName('Statement import')
+            ->setTimelimit(1);
+        $statement = (new ProblemStatementContent())
+            ->setProblem($problem)
+            ->setContent("old statement\n");
+        $problem
+            ->setProblemStatementContent($statement)
+            ->setProblemstatementType('txt');
+        $em->persist($problem);
+        $em->flush();
+
+        $yaml = <<<YAML
+name: Statement import
+limits:
+  time_limit: 1
+YAML;
+        $newContent = "new statement from zip\n";
+        $zipFile = $this->createZipWithContents([
+            'problem.yaml' => $yaml,
+            'problem.txt' => $newContent,
+        ]);
+        $zip = new ZipArchive();
+        self::assertTrue($zip->open($zipFile));
+        /** @var array{info: string[], warning: string[], danger: string[]} $messages */
+        $messages = ['info' => [], 'warning' => [], 'danger' => []];
+        try {
+            $result = $service->importZippedProblem($zip, "$problemId.zip", $problem, null, $messages);
+        } finally {
+            $zip->close();
+            @unlink($zipFile);
+        }
+        self::assertInstanceOf(Problem::class, $result);
+        self::assertEmpty($messages['danger']);
+
+        $em->clear();
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
+        self::assertInstanceOf(Problem::class, $problem);
+        self::assertSame($newContent, $problem->getProblemstatement());
+        self::assertSame('txt', $problem->getProblemstatementType());
+        self::assertCount(1, $em->getRepository(ProblemStatementContent::class)->findBy(['problem' => $problem]));
+
+        // Re-importing without a statement keeps the existing reset semantics.
+        $zipFile = $this->createZipWithContents(['problem.yaml' => $yaml]);
+        $zip = new ZipArchive();
+        self::assertTrue($zip->open($zipFile));
+        $messages = ['info' => [], 'warning' => [], 'danger' => []];
+        try {
+            $result = $service->importZippedProblem($zip, "$problemId.zip", $problem, null, $messages);
+        } finally {
+            $zip->close();
+            @unlink($zipFile);
+        }
+        self::assertInstanceOf(Problem::class, $result);
+        self::assertEmpty($messages['danger']);
+
+        $em->clear();
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
+        self::assertInstanceOf(Problem::class, $problem);
+        self::assertNull($problem->getProblemStatementContent());
+        self::assertNull($problem->getProblemstatementType());
+        self::assertCount(0, $em->getRepository(ProblemStatementContent::class)->findBy(['problem' => $problem]));
+    }
+
     public function testParseTestCaseGroupMetaInvalidRangeTooManyValuesRejected(): void
     {
         $yaml = "range: 100 101 102";
@@ -632,5 +824,208 @@ YAML;
         $this->assertNull($result);
         $this->assertNotEmpty($messages['danger']);
         $this->assertStringContainsString("Invalid range '100 101 102'", $messages['danger'][0]);
+    }
+
+    #[DataProvider('provideLanguages')]
+    public function testLanguages(
+        array $expectedLanguages, ?array $secondUploadExpectedLanguages = null,
+        ?string $languagesString = null, ?string $secondUploadLanguagesString = null
+    ): void {
+        $problem = new Problem();
+        for ($i=0; $i<2; $i++) {
+            if ($i === 1) {
+                if ($secondUploadExpectedLanguages !== null) {
+                    $expectedLanguages = $secondUploadExpectedLanguages;
+                    $languagesString = $secondUploadLanguagesString;
+                }
+            }
+            if ($languagesString === null) {
+                $languagesString = implode(', ', $expectedLanguages);
+            }
+            $yaml = <<<YAML
+name: restricted languages
+languages: $languagesString
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+
+            /** @var ImportProblemService $service */
+            $service = static::getContainer()->get(ImportProblemService::class);
+
+            $ret = ImportProblemService::parseYaml(
+                $yaml, $messages, $validationMode,
+                PropertyAccess::createPropertyAccessor(), $problem,
+                fn(array $languageIds, array &$failedLanguageIds): array => $service->helperLanguages($languageIds, $failedLanguageIds),
+            );
+            $this->assertTrue($ret);
+            $this->assertEmpty($messages);
+            $problemLanguages = [];
+            foreach ($problem->getLanguages() as $language) {
+                $problemLanguages[] = $language->getExternalid();
+            }
+            sort($problemLanguages);
+            sort($expectedLanguages);
+            $this->assertEquals($expectedLanguages, $problemLanguages);
+        }
+    }
+
+    /**
+     * @param string[] $unknownLanguages
+     */
+    #[DataProvider('provideUnknownLanguages')]
+    public function testUnknownLanguageSpecified(array $unknownLanguages, ?string $unknownYamlLanguages = null): void{
+        if (!$unknownYamlLanguages) {
+            $unknownYamlLanguages = 'languages: ' . implode(', ', $unknownLanguages);
+        }
+        $yaml = <<<YAML
+name: restricted languages
+$unknownYamlLanguages
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        /** @var ImportProblemService $service */
+        $service = static::getContainer()->get(ImportProblemService::class);
+
+        $ret = ImportProblemService::parseYaml(
+            $yaml, $messages, $validationMode,
+            PropertyAccess::createPropertyAccessor(), $problem,
+            fn(array $languageIds, array &$failedLanguageIds): array => $service->helperLanguages($languageIds, $failedLanguageIds),
+        );
+        $this->assertFalse($ret);
+        $this->assertNotEmpty($messages);
+        $this->assertStringContainsString("Unknown language(s): '" . implode("', '", $unknownLanguages) . "'.", $messages['danger'][0]);
+    }
+
+    /**
+     * @param string[] $expectedLanguages
+     */
+    #[DataProvider('provideLanguagesAsArray')]
+    public function testLanguagesSpecifiedAsArray(string $yaml, array $expectedLanguages): void{
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        /** @var ImportProblemService $service */
+        $service = static::getContainer()->get(ImportProblemService::class);
+
+        $ret = ImportProblemService::parseYaml(
+            $yaml, $messages, $validationMode,
+            PropertyAccess::createPropertyAccessor(), $problem,
+            fn(array $languageIds, array &$failedLanguageIds): array => $service->helperLanguages($languageIds, $failedLanguageIds),
+        );
+
+        $this->assertTrue($ret);
+        $this->assertEmpty($messages);
+        $problemLanguages = [];
+        foreach ($problem->getLanguages() as $language) {
+            $problemLanguages[] = $language->getExternalid();
+        }
+        sort($problemLanguages);
+        sort($expectedLanguages);
+        $this->assertEquals($expectedLanguages, $problemLanguages);
+    }
+
+    public static function provideLanguages(): Generator
+    {
+        // Initial languages, second upload languages, special languageString, second special language string
+        yield [['ada']];
+        yield [['awk', 'r', 'sh']];
+        yield [['bash', 'c', 'cpp', 'csharp']];
+        yield [['haskell', 'java', 'javascript', 'kotlin', 'lua']];
+        yield [['ocaml', 'pascal', 'prolog', 'python3', 'ruby', 'rust']];
+        yield [['scala', 'swift']];
+        yield [[], null, 'all']; // This checks the implementation detail
+        //// See: https://www.kattis.com/problem-package-format/appendix/languages.html
+        //// (fortran => f95, pl => perl) in our setup.
+        //// yield [['fortran', 'perl']]
+        yield [['ada', 'r'], ['ada']];
+        yield [['ada'], ['ada', 'r']];
+        yield [['ada'], ['r']];
+        yield [[], ['ada'], 'all'];
+        yield [['ada'], [], null, 'all'];
+    }
+
+    public static function provideUnknownLanguages(): Generator
+    {
+        yield [['DOMtower']];
+        yield [['Huttese', 'Klingon']];
+        $yamlLanguages = <<<YAML
+languages: yes, true, false, 0, 1, null, 2.5
+YAML;
+        yield [['0', '1', '2.5', 'false', 'null', 'true', 'yes'], $yamlLanguages];
+        $yamlLanguages = <<<YAML
+languages:
+- yes
+- no
+- true
+- false
+- null
+- 0
+- 1
+- 10
+- 1.5
+YAML;
+        yield [['0', '1', '1.5', '10', 'false', 'no', 'null', 'true', 'yes'], $yamlLanguages];
+        $yamlLanguages = <<<YAML
+languages: [null, yes, no, true, false, 0, -1, 20]
+YAML;
+        yield [['-1', '0', '20', 'false', 'no', 'null', 'true', 'yes'], $yamlLanguages];
+        $yamlLanguages = <<<YAML
+languages: true
+YAML;
+        yield [['true'], $yamlLanguages];
+        $yamlLanguages = <<<YAML
+languages: 1.5
+YAML;
+        yield [['1.5'], $yamlLanguages];
+        $yamlLanguages = <<<YAML
+languages: null
+YAML;
+        yield [['null'], $yamlLanguages];
+    }
+
+    public static function provideLanguagesAsArray(): Generator
+    {
+        $yaml1 = <<<YAML
+name: restricted languages
+languages:
+  - ada
+YAML;
+        $yaml2 = <<<YAML
+name: restricted languages
+languages: [ada]
+YAML;
+        $yaml3 = <<<YAML
+name: restricted languages
+languages: ["ada"]
+YAML;
+        foreach ([$yaml1, $yaml2, $yaml3] as $yaml) {
+            yield [$yaml, ['ada']];
+        }
+        $yaml1 = <<<YAML
+name: restricted languages
+languages:
+  - ada
+  - bash
+YAML;
+        $yaml2 = <<<YAML
+name: restricted languages
+languages: [bash, ada]
+YAML;
+        $yaml3 = <<<YAML
+name: restricted languages
+languages: ["ada", bash]
+YAML;
+        $yaml4 = <<<YAML
+name: restricted languages
+languages:
+ ada: ada
+ bash: bash
+YAML;
+        foreach ([$yaml1, $yaml2, $yaml3, $yaml4] as $yaml) {
+            yield [$yaml, ['ada', 'bash']];
+        }
     }
 }

@@ -21,6 +21,8 @@ services:
   domjudge:
     image: docker.io/domjudge/domjudge-contributor
     hostname: domjudge-contributor
+    userns_mode: "keep-id:uid=1000,gid=1000"
+    user: "0:0"  # Explicitly set UID and GID to root for podman
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
       - .:${PWD}:cached

@@ -1,0 +1,32 @@
+<div class="container clarificationform">
+    {% include 'team/partials/clarification.html.twig' with {clarification: clarification } %}
+    {% for reply in clarification.replies | filter(reply => team.canViewClarification(reply)) %}
+        {% include 'team/partials/clarification.html.twig' with {clarification: reply } %}
+    {% endfor %}
+</div>
+
+{% if form is defined and form %}
+    <div class="collapse {% if not form.vars.valid %}show{% endif%} mt-3 container clarificationform" id="collapsereplyform">
+        <div class="card card-body">
+            {{ form_start(form) }}
+            {{ form_row(form.recipient) }}
+            <div class="mb-3">
+                {{ form_widget(form.message) }}
+                {{ form_errors(form.message) }}
+            </div>
+            <div class="mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <label class="rendered-preview-badge">rendered preview</label>
+                        <div id="messagepreview">Start typing to see a preview of your message</div>
+                    </div>
+                </div>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endif %}
+
+<script>
+    MathJax.typeset([document.getElementsByClassName('card-body')]);
+</script>

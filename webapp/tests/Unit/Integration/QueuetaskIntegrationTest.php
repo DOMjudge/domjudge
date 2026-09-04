@@ -13,6 +13,7 @@ use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
 use App\Entity\User;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -69,6 +70,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
             ->will($this->returnCallback($this->getConfig(...)));
 
         $dj = self::getContainer()->get(DOMJudgeService::class);
+        $authService = self::getContainer()->get(AuthorizedUserService::class);
         $this->em = self::getContainer()->get('doctrine')->getManager();
 
         $this->scoreboardService = new ScoreboardService(
@@ -76,6 +78,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
             self::getContainer()->get(LoggerInterface::class)
         );
         $this->submissionService = new SubmissionService(
+            $authService,
             $this->em,
             self::getContainer()->get(LoggerInterface::class),
             $dj,

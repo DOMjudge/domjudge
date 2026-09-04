@@ -6,9 +6,11 @@ use App\DataFixtures\Test\AddProblemAttachmentFixture;
 use App\Entity\Contest;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
+use App\Entity\ProblemStatementContent;
 use App\Entity\ContestProblem;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ProblemControllerTest extends JuryControllerTestCase
 {
@@ -69,12 +71,114 @@ class ProblemControllerTest extends JuryControllerTestCase
         return [$entity, $expected];
     }
 
+    /**
+     * @return array{0: UploadedFile, 1: string}
+     */
+    private static function temporaryProblemStatementFile(string $content): array
+    {
+        $tempFile = tempnam(sys_get_temp_dir(), 'problem-statement-');
+        self::assertIsString($tempFile);
+        self::assertNotFalse(file_put_contents($tempFile, $content));
+
+        return [new UploadedFile($tempFile, 'problem.txt', 'text/plain', null, true), $tempFile];
+    }
+
+    private function submitProblemEditForm(
+        string $problemId,
+        ?UploadedFile $statement = null,
+        bool $clearStatement = false
+    ): void {
+        $this->verifyPageResponse('GET', static::$baseUrl . "/$problemId/edit", 200);
+        $form = $this->getCurrentCrawler()->selectButton('Save')->form();
+        $formName = str_replace('[', '', static::$addForm);
+        if ($clearStatement) {
+            $form[$formName]['clearProblemstatement']->tick();
+        }
+
+        $rawValues = $form->getPhpValues();
+        $rawFiles = $form->getPhpFiles();
+        if ($statement !== null) {
+            $rawFiles[$formName] ??= [];
+            $rawFiles[$formName]['problemstatementFile'] = $statement;
+        }
+
+        $this->client->request($form->getMethod(), $form->getUri(), $rawValues, $rawFiles);
+        self::assertTrue(
+            $this->client->getResponse()->isRedirect(),
+            $this->client->getResponse()->getContent() ?: ''
+        );
+    }
+
     public function testDeleteExtraEntity(): void
     {
         $this->loadFixture(AddProblemAttachmentFixture::class);
         $attachmentId = $this->resolveReference(AddProblemAttachmentFixture::class . ':attachment', ProblemAttachment::class);
         static::$deleteExtra['deleteurl'] = "/jury/problems/attachments/$attachmentId/delete";
         parent::testDeleteExtraEntity();
+    }
+
+    public function testProblemStatementUploadPreserveReplaceAndDelete(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $problemId = 'statement-regression';
+        $problem = (new Problem())
+            ->setExternalid($problemId)
+            ->setName('Statement regression')
+            ->setTimelimit(1);
+        $em->persist($problem);
+        $em->flush();
+        $em->clear();
+
+        $firstContent = "first problem statement\n";
+        [$firstStatement, $firstPath] = self::temporaryProblemStatementFile($firstContent);
+        try {
+            $this->submitProblemEditForm($problemId, $firstStatement);
+        } finally {
+            @unlink($firstPath);
+        }
+
+        $em->clear();
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
+        self::assertInstanceOf(Problem::class, $problem);
+        self::assertSame($firstContent, $problem->getProblemstatement());
+        self::assertSame('txt', $problem->getProblemstatementType());
+        self::assertCount(1, $em->getRepository(ProblemStatementContent::class)->findBy(['problem' => $problem]));
+
+        // A normal edit without a new file must preserve the managed statement.
+        $this->submitProblemEditForm($problemId);
+        $em->clear();
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
+        self::assertInstanceOf(Problem::class, $problem);
+        self::assertSame($firstContent, $problem->getProblemstatement());
+        self::assertCount(1, $em->getRepository(ProblemStatementContent::class)->findBy(['problem' => $problem]));
+
+        $secondContent = "replacement problem statement\n";
+        [$secondStatement, $secondPath] = self::temporaryProblemStatementFile($secondContent);
+        try {
+            $this->submitProblemEditForm($problemId, $secondStatement);
+        } finally {
+            @unlink($secondPath);
+        }
+
+        $em->clear();
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
+        self::assertInstanceOf(Problem::class, $problem);
+        self::assertSame($secondContent, $problem->getProblemstatement());
+        self::assertSame('txt', $problem->getProblemstatementType());
+        self::assertCount(1, $em->getRepository(ProblemStatementContent::class)->findBy(['problem' => $problem]));
+
+        $this->submitProblemEditForm($problemId, clearStatement: true);
+        $em->clear();
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
+        self::assertInstanceOf(Problem::class, $problem);
+        self::assertNull($problem->getProblemStatementContent());
+        self::assertNull($problem->getProblemstatementType());
+        self::assertCount(0, $em->getRepository(ProblemStatementContent::class)->findBy(['problem' => $problem]));
     }
 
     public function testLockedContest(): void

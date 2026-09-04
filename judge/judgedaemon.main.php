@@ -1140,6 +1140,59 @@ class JudgeDaemon
     }
 
     /**
+     * Recursively adjust permission bits of $path and everything below it,
+     * like `chmod -R`: the bits in $add are turned on, the bits in $remove are
+     * turned off, all other bits (including setuid/setgid/sticky) are left
+     * untouched. Symbolic links are not followed, matching `chmod -R` and
+     * avoiding chmod'ing files outside the tree via a planted symlink.
+     * Returns false on the first failure.
+     */
+    private function chmodRecursive(string $path, int $add, int $remove): bool
+    {
+        if (is_link($path)) {
+            return true;
+        }
+        $perms = fileperms($path);
+        if ($perms === false) {
+            return false;
+        }
+        $newPerms = (($perms & 07777) | $add) & ~$remove;
+
+        // We can only recurse into a directory while we (its owner) may read and
+        // enter it (owner r+x, 0500). If it is already enterable, recurse first
+        // and chmod afterwards (post-order), so a change that revokes access
+        // still reaches the children first. Otherwise chmod first (pre-order),
+        // so a directory we are opening up becomes enterable before we descend.
+        // This keeps the walk correct for adding and removing any bits.
+        $isDir = is_dir($path);
+        $recurseFirst = $isDir && ($perms & 0500) === 0500;
+
+        if (!$recurseFirst && !chmod($path, $newPerms)) {
+            return false;
+        }
+        if ($isDir) {
+            $entries = scandir($path);
+            if ($entries === false) {
+                // Could not read the directory (e.g. a subdirectory the compare
+                // script left unreadable); report failure like `chmod -R` does.
+                return false;
+            }
+            foreach ($entries as $entry) {
+                if ($entry === '.' || $entry === '..') {
+                    continue;
+                }
+                if (!$this->chmodRecursive("$path/$entry", $add, $remove)) {
+                    return false;
+                }
+            }
+        }
+        if ($recurseFirst && !chmod($path, $newPerms)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * @param string[] $command_parts
      * @param int|DONT_CARE $retval
      */
@@ -1168,12 +1221,14 @@ class JudgeDaemon
             self::FD_STDERR => ['file', $stderr_target ?: '/dev/null', 'w'],
         ];
 
-        // For proc_open, we need to pass the command as a string for security
         $command_string = implode(' ', array_map(dj_escapeshellarg(...), $command_parts));
-
         logmsg(LOG_DEBUG, "Executing command: $command_string");
 
-        $process = proc_open($command_string, $descriptorspec, $pipes);
+        // Pass the command as an array so proc_open() execvp()'s it directly
+        // instead of running it through `/bin/sh -c`. This avoids one shell
+        // process per call and is safer, as no shell command line (that would
+        // need escaping) is ever constructed.
+        $process = proc_open($command_parts, $descriptorspec, $pipes);
         if (!is_resource($process)) {
             logmsg(LOG_ERR, "Failed to start process: $command_string");
             if ($stderr_temp !== null) {
@@ -1711,7 +1766,19 @@ class JudgeDaemon
             $compile_output .= "\n--------------------------------------------------------------------------------\n\n" .
                 "Internal errors reported:\n" . $internalError;
 
-            if (str_starts_with($internalError, 'compile script: ')) {
+            $diskSpacePattern = '/no space left on device/i';
+            $isDiskSpaceError = preg_match($diskSpacePattern, $internalError) ||
+                preg_match($diskSpacePattern, $compile_output);
+
+            if ($isDiskSpaceError) {
+                $free_space = disk_free_space(JUDGEDIR);
+                $free_abs = $free_space !== false
+                    ? sprintf("%01.2fGB", $free_space / (1024 * 1024 * 1024))
+                    : 'unknown';
+                $description = "Out of disk space during compilation on $this->myhost ($free_abs free). " .
+                    "Clean up or increase 'diskspace_error' threshold.";
+                $this->disable('judgehost', 'hostname', $this->myhost, $description, $judgeTask['judgetaskid'], $compile_output);
+            } elseif (str_starts_with($internalError, 'compile script: ')) {
                 $internalError = preg_replace('/^compile script: /', '', $internalError);
                 $description = "The compile script returned an error: $internalError";
                 $this->disable('compile_script', 'compile_script_id', $judgeTask['compile_script_id'], $description, $judgeTask['judgetaskid'], $compile_output);
@@ -2182,15 +2249,9 @@ class JudgeDaemon
                 // We need to set permissions explicitly for two reasons:
                 // `umask` might block them from being 0777, and for multi-pass problems there is the implicit contract
                 // of keeping files around between passes. This is ugly, but what the spec currently dictates.
-                // Cannot use `chmod` here directly because of recursion.
-                if (!$this->runCommandSafe(
-                    [
-                        'chmod',
-                        '-R',
-                        'go+w',
-                        'feedback',
-                    ]
-                )) {
+                // go+w: add the group- and other-write bits (0022) so the
+                // compare script (running as a different user) can write here.
+                if (!$this->chmodRecursive("$realWorkdir/feedback", 0022, 0)) {
                     logmsg(LOG_WARNING, "Could not chmod 'feedback' to go+w.");
                     return Verdict::INTERNAL_ERROR;
                 }
@@ -2200,7 +2261,7 @@ class JudgeDaemon
                 // TODO: Perhaps we should change this in the database to be an array of args?
                 $orig_compare_args = [];
                 if ($compare_args !== null && strlen($compare_args) > 0) {
-                    $orig_compare_args = explode(' ', $compare_args);
+                    $orig_compare_args = str_getcsv($compare_args, separator: ' ', escape: '');
                 }
 
                 $chroot_compare = $run_config['chroot'] ?? 'default';
@@ -2272,15 +2333,8 @@ class JudgeDaemon
                 )
             );
 
-            // Cannot use chmod directly here for recursion.
-            if (!$this->runCommandSafe(
-                [
-                    'chmod',
-                    '-R',
-                    'go-w',
-                    'feedback',
-                ]
-            )) {
+            // go-w: revoke the group- and other-write bits (0022) again.
+            if (!$this->chmodRecursive("$realWorkdir/feedback", 0, 0022)) {
                 logmsg(LOG_WARNING, "Could not chmod 'feedback' to go-w.");
                 return Verdict::INTERNAL_ERROR;
             }
@@ -2662,10 +2716,31 @@ class JudgeDaemon
                     . '  ...done in ' . $metadata['wall-time'] . 's (CPU: ' . $runtime . 's), result: ' . $result);
             }
 
+            $hasNextPass = file_exists($passdir . '/feedback/nextpass.in');
+
+            // The spec states we have to treat it is a judge error if
+            // `nextpass.in` is produced when exiting with any other code
+            // than 42.
+            if ($hasNextPass) {
+                $compareMeta = $this->readMetadata($passdir . '/compare.meta');
+                /** @var MetaData_Compare $compareMeta */
+                if ((int)$compareMeta['exitcode'] !== self::COMPARE_EXITCODE_CORRECT) {
+                    $description = sprintf(
+                        "compare script %s created 'nextpass.in' but exited with code %s, expected %d",
+                        $judgeTask['compare_script_id'],
+                        $compareMeta['exitcode'],
+                        self::COMPARE_EXITCODE_CORRECT
+                    );
+                    logmsg(LOG_ERR, $description);
+                    $this->disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
+                    return false;
+                }
+            }
+
             if ($result !== 'correct') {
                 break;
             }
-            if (file_exists($passdir . '/feedback/nextpass.in')) {
+            if ($hasNextPass) {
                 $input = $passdir . '/feedback/nextpass.in';
                 $nextPass = true;
             } else {
@@ -2673,7 +2748,7 @@ class JudgeDaemon
             }
         }
         if ($nextPass) {
-            $description = 'validator produced more passes than allowed ($passLimit)';
+            $description = "validator produced more passes than allowed ($passLimit)";
             $this->disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
             return false;
         }

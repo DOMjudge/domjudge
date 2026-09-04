@@ -7,6 +7,7 @@ use App\Entity\AbstractRun;
 use App\Entity\Contest;
 use App\Entity\ExternalRun;
 use App\Entity\JudgingRun;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -43,13 +44,13 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
     private ?bool $useExternalRuns = null;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        AuthorizedUserService $authService,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService
     ) {
-        parent::__construct($entityManager, $DOMJudgeService, $config,
-            $eventLogService);
+        parent::__construct($authService, $em, $dj, $config, $eventLogService);
 
         $this->verdicts = $this->config->getVerdicts();
     }

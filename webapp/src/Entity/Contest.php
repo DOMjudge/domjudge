@@ -1699,10 +1699,16 @@ class Contest extends BaseApiEntity implements
 
     public function setContestProblemsetContent(?ContestProblemsetContent $content): self
     {
-        $this->contestProblemsetContent = new ArrayCollection();
-        if ($content) {
-            $this->contestProblemsetContent->add($content);
+        foreach ($this->contestProblemsetContent->toArray() as $existingContent) {
+            if ($existingContent !== $content) {
+                $this->contestProblemsetContent->removeElement($existingContent);
+            }
+        }
+        if ($content !== null) {
             $content->setContest($this);
+            if (!$this->contestProblemsetContent->contains($content)) {
+                $this->contestProblemsetContent->add($content);
+            }
         }
 
         return $this;
@@ -1721,7 +1727,13 @@ class Contest extends BaseApiEntity implements
             $this
                 ->setContestProblemsetContent(null)
                 ->setContestProblemsetType(null);
-        } elseif ($this->getContestProblemsetFile()) {
+
+            $this->contestProblemsetFile = null;
+            $this->clearContestProblemset = false;
+            return;
+        }
+
+        if ($this->getContestProblemsetFile()) {
             $content               = file_get_contents($this->getContestProblemsetFile()->getRealPath());
             $clientName            = $this->getContestProblemsetFile()->getClientOriginalName();
             $contestProblemsetType = Utils::getTextType($clientName, $this->getContestProblemsetFile()->getRealPath());
@@ -1730,11 +1742,15 @@ class Contest extends BaseApiEntity implements
                 throw new Exception('Contest problemset has unknown file type.');
             }
 
-            $contestProblemsetContent = (new ContestProblemsetContent())
-                ->setContent($content);
+            $contestProblemsetContent = $this->getContestProblemsetContent()
+                ?? (new ContestProblemsetContent())->setContest($this);
+            $contestProblemsetContent->setContent($content);
             $this
                 ->setContestProblemsetContent($contestProblemsetContent)
                 ->setContestProblemsetType($contestProblemsetType);
+
+            $this->contestProblemsetFile = null;
+            $this->clearContestProblemset = false;
         }
     }
 
@@ -1795,16 +1811,12 @@ class Contest extends BaseApiEntity implements
     {
         $this->contestProblemsetFile = $contestProblemsetFile;
 
-        // Clear the contest text to make sure the entity is modified.
-        $this->setContestProblemsetContent(null);
-
         return $this;
     }
 
     public function setClearContestProblemset(bool $clearContestProblemset): Contest
     {
         $this->clearContestProblemset = $clearContestProblemset;
-        $this->setContestProblemsetContent(null);
 
         return $this;
     }

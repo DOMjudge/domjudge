@@ -6,7 +6,7 @@ export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
             docs install-docs inplace-install inplace-uninstall maintainer-conf \
-            maintainer-install dependencies dependencies-dev
+            maintainer-install dependencies dependencies-dev dependencies-dist
 
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
@@ -54,7 +54,7 @@ docs: paths.mk config
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
-dist: configure dependencies
+dist: configure dependencies-dist
 
 domserver-configure:
 ifneq "$(DOMSERVER_BUILD_ENABLED)" "yes"
@@ -100,6 +100,7 @@ distclean:                  SUBDIRS=etc doc lib sql judge misc-tools webapp
 maintainer-clean:           SUBDIRS=etc doc lib sql judge misc-tools webapp
 dependencies:               SUBDIRS=                                 webapp
 dependencies-dev:           SUBDIRS=                                 webapp
+dependencies-dist:          SUBDIRS=                                 webapp
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(domserver_dirs))
@@ -282,8 +283,8 @@ inplace-install-l:
 	@echo "        And manually make sure the webserver has traversal access to: $(CURDIR)"
 	@echo "    - Configure webserver"
 	@echo "        Nginx + PHP-FPM:"
-	@echo "           ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/"
-	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm /etc/php/$(PHPVERSION)/fpm/pool.d/domjudge.conf"
+	@echo "           ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/domjudge.conf"
+	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm.conf /etc/php/$(PHPVERSION)/fpm/pool.d/domjudge-fpm.conf"
 	@echo "           systemctl restart nginx"
 	@echo "           systemctl restart php-fpm"
 	@echo "        Apache 2:"
@@ -337,7 +338,7 @@ endif
 	fi
 	@sandbox_err=0; \
 	for service in apache2 nginx php$(PHPVERSION)-fpm php-fpm; do \
-		$(CURDIR)/misc-tools/check-systemd-sandbox $$service $(CURDIR)/webapp/var || sandbox_err=1; \
+		$(CURDIR)/misc-tools/check-systemd-sandbox $$service $(CURDIR)/webapp/var $(domserver_tmpdir) || sandbox_err=1; \
 	done; \
 	if [ $$sandbox_err -ne 0 ]; then \
 		echo "ERROR: Fix the above systemd sandboxing issue(s) before continuing."; \
@@ -413,4 +414,4 @@ clean-autoconf:
 .PHONY: $(addsuffix -create-dirs,domserver judgehost docs) check-root \
         $(addprefix inplace-,conf conf-common install uninstall) \
         $(addprefix maintainer-,conf install) clean-autoconf config distdocs \
-        dependencies dependencies-dev coverity-conf coverity-build
+        $(addprefix dependencies-,dev dist) dependencies coverity-conf coverity-build

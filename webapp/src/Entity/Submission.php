@@ -102,7 +102,7 @@ class Submission extends BaseApiEntity implements
         options: ['comment' => 'Optional entry point. Can be used e.g. for java main class.']
     )]
     #[OA\Property(nullable: true)]
-    #[Serializer\Expose(if: "context.getAttribute('domjudge_service').checkrole('jury')")]
+    #[Serializer\Expose(if: "context.getAttribute('authorized_user_service').checkRole('jury')")]
     private ?string $entry_point = null;
 
     #[ORM\Column(
@@ -110,7 +110,7 @@ class Submission extends BaseApiEntity implements
         options: ['comment' => 'The error message for submissions which got an error during shadow importing.']
     )]
     #[OA\Property(nullable: true)]
-    #[Serializer\Expose(if: "context.getAttribute('domjudge_service').checkrole('jury')")]
+    #[Serializer\Expose(if: "context.getAttribute('authorized_user_service').checkRole('jury')")]
     #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private ?string $importError = null;
 

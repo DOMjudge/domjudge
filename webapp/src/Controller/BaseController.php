@@ -39,6 +39,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -86,6 +87,10 @@ abstract class BaseController extends AbstractController
             try {
                 $router->match($path);
                 return true;
+            } catch (MethodNotAllowedException) {
+                // The path exists but cannot be reached with GET, so redirecting the browser
+                // back to it would only produce a 405. Treat it like an unusable referer.
+                return false;
             } catch (ResourceNotFoundException) {
                 return false;
             } finally {

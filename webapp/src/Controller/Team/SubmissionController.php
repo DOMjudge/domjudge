@@ -12,6 +12,7 @@ use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\Testcase;
 use App\Form\Type\SubmitProblemType;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -43,6 +44,7 @@ class SubmissionController extends BaseController
     final public const ALWAYS_SHOW_COMPILE_OUTPUT = 2;
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         EntityManagerInterface $em,
         protected readonly SubmissionService $submissionService,
         protected readonly EventLogService $eventLogService,
@@ -57,7 +59,7 @@ class SubmissionController extends BaseController
     #[Route(path: '/submit/{problem}', name: 'team_submit')]
     public function createAction(Request $request, ?Problem $problem = null): Response
     {
-        $user    = $this->dj->getUser();
+        $user    = $this->authService->getUser();
         $team    = $user->getTeam();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         $data = ['languages' => []];
@@ -126,7 +128,7 @@ class SubmissionController extends BaseController
             $this->addFlash('danger', 'No active contest');
             return $this->redirectToRoute('team_index');
         }
-        if (!$this->dj->checkrole('jury') && !$contest->getFreezeData()->started()) {
+        if (!$this->authService->checkRole('jury') && !$contest->getFreezeData()->started()) {
             $this->addFlash('danger', 'Contest has not yet started');
             return $this->redirectToRoute('team_index');
         }
@@ -155,7 +157,7 @@ class SubmissionController extends BaseController
         try {
             $message = '';
             $submission = $this->submissionService->submitSolution(
-                $team, $this->dj->getUser(), $problem->getProbid(), $contest, $language, $files, SubmissionSource::TEAM_PAGE, null,
+                $team, $this->authService->getUser(), $problem->getProbid(), $contest, $language, $files, SubmissionSource::TEAM_PAGE, null,
                 null, $entryPoint, null, null, $message
             );
 
@@ -221,7 +223,7 @@ class SubmissionController extends BaseController
         $showSampleOutput     = $this->config->get('show_sample_output');
         $allowDownload        = (bool)$this->config->get('allow_team_submission_download');
         $showTooLateResult    = $this->config->get('show_too_late_result');
-        $user                 = $this->dj->getUser();
+        $user                 = $this->authService->getUser();
         $team                 = $user->getTeam();
         $contest              = $this->dj->getCurrentContest($team->getTeamid());
         if (!$contest) {
@@ -327,7 +329,7 @@ class SubmissionController extends BaseController
             throw new NotFoundHttpException('Submission download not allowed');
         }
 
-        $user = $this->dj->getUser();
+        $user = $this->authService->getUser();
         $team = $user->getTeam();
         /** @var Submission|null $submission */
         $submission = $this->em->createQueryBuilder()

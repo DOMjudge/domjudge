@@ -285,7 +285,9 @@
                     {{ button(path('jury_problem_edit', {'probId': problem.externalid}), 'Edit', 'primary', 'edit') }}
                     {{ button(path('jury_problem_delete', {'probId': problem.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
                 {% endif %}
-                {{ button(path('jury_problem_request_remaining', {'probId': problem.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
+                {% if current_contest %}
+                    {{ button(path('jury_problem_request_remaining', {'probId': problem.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
+                {% endif %}
             {% endif %}
             {{ button(path('jury_export_problem', {'problemId': problem.externalid}), 'Export', 'secondary', 'download') }}
             {% include 'jury/partials/rejudge_form.html.twig' with {table: 'problem', id: problem.externalid, buttonClass: 'btn-secondary'} %}

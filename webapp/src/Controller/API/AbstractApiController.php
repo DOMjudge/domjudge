@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\Entity\Contest;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -23,6 +24,7 @@ abstract class AbstractApiController extends AbstractFOSRestController
     final public const GROUP_RESTRICTED_NONSTRICT = 'RestrictedNonstrict';
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
@@ -56,7 +58,7 @@ abstract class AbstractApiController extends AbstractFOSRestController
             ->andWhere('c.enabled = 1')
             ->orderBy('c.activatetime');
 
-        if ($onlyActive || !$this->dj->checkrole('api_reader')) {
+        if ($onlyActive || !$this->authService->checkRole('api_reader')) {
             $qb
                 ->andWhere('c.activatetime <= :now')
                 ->andWhere('c.deactivatetime IS NULL OR c.deactivatetime > :now')
@@ -64,13 +66,13 @@ abstract class AbstractApiController extends AbstractFOSRestController
         }
 
         // Filter on contests this user has access to
-        if (!$this->dj->checkrole('api_reader') && !$this->dj->checkrole('judgehost')) {
-            if ($this->dj->checkrole('team') && $this->dj->getUser()->getTeam()) {
+        if (!$this->authService->checkRole('api_reader') && !$this->authService->checkRole('judgehost')) {
+            if ($this->authService->checkRole('team') && $this->authService->getUser()->getTeam()) {
                 $qb->leftJoin('c.teams', 'ct')
                     ->leftJoin('c.team_categories', 'tc')
                     ->leftJoin('tc.teams', 'tct')
                     ->andWhere('ct.teamid = :teamid OR tct.teamid = :teamid OR c.openToAllTeams = 1')
-                    ->setParameter('teamid', $this->dj->getUser()->getTeam());
+                    ->setParameter('teamid', $this->authService->getUser()->getTeam());
             } else {
                 $qb->andWhere('c.public = 1');
             }

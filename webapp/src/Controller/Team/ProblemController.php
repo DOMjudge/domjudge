@@ -5,6 +5,7 @@ namespace App\Controller\Team;
 use App\Controller\BaseController;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -29,6 +30,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class ProblemController extends BaseController
 {
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly StatisticsService $stats,
@@ -45,7 +47,7 @@ class ProblemController extends BaseController
     #[Route(path: '/problems', name: 'team_problems')]
     public function problemsAction(): Response
     {
-        $teamId = $this->dj->getUser()->getTeam()->getTeamid();
+        $teamId = $this->authService->getUser()->getTeam()->getTeamid();
         return $this->render('team/problems.html.twig',
             $this->dj->getTwigDataForProblemsAction($this->stats, $teamId));
     }
@@ -98,7 +100,7 @@ class ProblemController extends BaseController
      */
     protected function getBinaryFile(string $probId, callable $response): StreamedResponse
     {
-        $user    = $this->dj->getUser();
+        $user    = $this->authService->getUser();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));

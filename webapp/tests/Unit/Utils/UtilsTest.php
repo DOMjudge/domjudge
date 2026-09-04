@@ -728,10 +728,9 @@ class UtilsTest extends TestCase
         $logo = __DIR__ . $imageLocation;
         $image = file_get_contents($logo);
         $error = null;
-        $tmp = sys_get_temp_dir();
         $maxsize = 30;
 
-        $thumb = Utils::getImageThumb($image, $maxsize, $tmp, $error);
+        $thumb = Utils::getImageThumb($image, $maxsize, $error);
         self::assertNull($error);
 
         $data = getimagesizefromstring($thumb);
@@ -753,10 +752,9 @@ class UtilsTest extends TestCase
     {
         $image = 'Not really an image';
         $error = null;
-        $tmp = sys_get_temp_dir();
         $maxsize = 30;
 
-        $thumb = Utils::getImageThumb($image, $maxsize, $tmp, $error);
+        $thumb = Utils::getImageThumb($image, $maxsize, $error);
         self::assertFalse($thumb);
         self::assertEquals('Could not determine image information.', $error);
     }

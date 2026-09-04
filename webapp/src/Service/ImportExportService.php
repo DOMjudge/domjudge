@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\DataTransferObject\ResultRow;
-use App\Entity\Configuration;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\ExternalContestSourceType;

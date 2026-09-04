@@ -4,7 +4,8 @@ namespace App\Form\Type;
 
 use App\Entity\Clarification;
 use App\Entity\ContestProblem;
-use App\Service\ConfigurationService;
+use App\Service\AuthorizedUserService;
+use App\Service\ClarificationService;
 use App\Service\DOMJudgeService;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -16,8 +17,9 @@ use Symfony\Component\Validator\Constraints\Length;
 class TeamClarificationType extends AbstractType
 {
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         protected readonly DOMJudgeService $dj,
-        protected readonly ConfigurationService $config
+        protected readonly ClarificationService $clarificationService
     ) {}
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -29,8 +31,8 @@ class TeamClarificationType extends AbstractType
 
         $subjects = [];
         /** @var string[] $categories */
-        $categories = $this->config->get('clar_categories');
-        $user = $this->dj->getUser();
+        $categories = $this->clarificationService->getClarificationCategories();
+        $user = $this->authService->getUser();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         if ($contest) {
             foreach ($categories as $categoryId => $categoryName) {
@@ -51,7 +53,7 @@ class TeamClarificationType extends AbstractType
         $builder->add('subject', ChoiceType::class, [
             'choices' => $subjects,
         ]);
-        $maxLength = $this->config->get('clar_max_body_length');
+        $maxLength = $this->clarificationService->getClarificationMaximumBodyLength();
         $constraints = [];
         if ($maxLength > 0) {
             $constraints[] = new Length(max: $maxLength, maxMessage: 'Clarification body is too long: {{ value }} characters, maximum is {{ limit }}.');

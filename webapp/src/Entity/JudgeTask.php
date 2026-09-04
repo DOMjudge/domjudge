@@ -287,13 +287,13 @@ class JudgeTask
         return $this->compare_script_id;
     }
 
-    public function setPass(int $pass): JudgeTask
+    public function setPass(?int $pass): JudgeTask
     {
         $this->pass = $pass;
         return $this;
     }
 
-    public function getPass(): int
+    public function getPass(): ?int
     {
         return $this->pass;
     }

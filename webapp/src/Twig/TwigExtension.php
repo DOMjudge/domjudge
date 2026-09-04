@@ -269,10 +269,10 @@ class TwigExtension
                 $icon = 'check';
                 break;
             default:
-                return $status;
+                return htmlspecialchars($status);
         }
         return sprintf('<i class="fas fa-%s-circle" aria-hidden="true"></i><span class="sr-only">%s</span>', $icon,
-                       $status);
+                       htmlspecialchars($status));
     }
 
     #[AsTwigFilter('countryFlag', isSafe: ['html'])]
@@ -404,10 +404,15 @@ class TwigExtension
     // TODO: this function shares a lot with the above one, unify them?
     /**
      * @param Testcase[] $testcases
+     * @param array<int, JudgingRun>|null $judgingRunsByTestcaseId
      */
     #[AsTwigFilter('displayTestcaseResults', isSafe: ['html'])]
-    public function displayTestcaseResults(array $testcases, bool $submissionDone, bool $isExternal = false): string
-    {
+    public function displayTestcaseResults(
+        array $testcases,
+        bool $submissionDone,
+        bool $isExternal = false,
+        ?array $judgingRunsByTestcaseId = null,
+    ): string {
         $results = '';
         $lastTypeSample = true;
         foreach ($testcases as $testcase) {
@@ -420,7 +425,13 @@ class TwigExtension
             $text      = '?';
             $isCorrect = false;
             /** @var JudgingRun|ExternalRun|null $run */
-            $run = $isExternal ? $testcase->getFirstExternalRun() : $testcase->getFirstJudgingRun();
+            if ($isExternal) {
+                $run = $testcase->getFirstExternalRun();
+            } elseif ($judgingRunsByTestcaseId !== null) {
+                $run = $judgingRunsByTestcaseId[$testcase->getTestcaseid()] ?? null;
+            } else {
+                $run = $testcase->getFirstJudgingRun();
+            }
             if ($isExternal) {
                 $runResult = $run?->getResult();
             } else {
@@ -458,7 +469,7 @@ class TwigExtension
             }
             $icon    = sprintf('<span class="badge text-bg-%s badge-testcase">%s</span>', $class, $text);
             $results .= sprintf('<a title="%s" href="#run-%d" %s>%s</a>',
-                join(', ', $titleElements), $testcase->getRank(),
+                htmlspecialchars(join(', ', $titleElements)), $testcase->getRank(),
                                 $isCorrect ? 'onclick="display_correctruns(true);"' : '', $icon);
         }
 
@@ -529,7 +540,8 @@ class TwigExtension
                 }
         }
 
-        return sprintf('<span class="sol %s">%s</span>', $valid ? $style : 'disabled', $result);
+        return sprintf('<span class="sol %s">%s</span>', $valid ? $style : 'disabled',
+                       htmlspecialchars($result));
     }
 
     #[AsTwigFilter('printValidJuryResult', isSafe: ['html'])]
@@ -671,14 +683,9 @@ class TwigExtension
     #[AsTwigFilter('printHosts', isSafe: ['html'])]
     public function printHosts(array $hostnames): string
     {
-        $hostnames = array_values($hostnames);
         if (empty($hostnames)) {
             return "";
         }
-        if (count($hostnames) == 1) {
-            return $this->printHost($hostnames[0]);
-        }
-        $hostnames = array_unique($hostnames);
 
         $local_parts = [];
         foreach ($hostnames as $hostname) {
@@ -689,25 +696,35 @@ class TwigExtension
             }
             $local_parts[] = $hostname;
         }
+        // Hostnames in different domains can share their first label, so only deduplicate
+        // after shortening: duplicates here would be printed twice below.
+        $local_parts = array_values(array_unique($local_parts));
+
+        if (count($local_parts) == 1) {
+            return $this->printHost($local_parts[0]);
+        }
 
         // Extract the longest common prefix.
         $common_prefix = $this->getCommonPrefix($local_parts);
         $prefix_len = strlen($common_prefix);
 
-        // Extract the longest common suffix.
+        // Extract the longest common suffix, clipped so it cannot overlap the common prefix:
+        // for e.g. ["abab", "ab"] both would otherwise be the entire shortest string, which
+        // would print that string twice and lose the parts in between.
         $reversed = array_map(strrev(...), $local_parts);
         $common_suffix = strrev($this->getCommonPrefix($reversed));
-        $suffix_len = strlen($common_suffix);
+        $shortest_len = min(array_map(strlen(...), $local_parts));
+        $suffix_len = min(strlen($common_suffix), $shortest_len - $prefix_len);
+        $common_suffix = $suffix_len > 0 ? substr($common_suffix, -$suffix_len) : "";
 
-        // Extract the list of remaining parts. This list may contain empty values. If $common_prefix overlaps
-        // $common_suffix, then $common_prefix = $common_suffix = the entire string.
+        // Extract the list of remaining parts. This list may contain empty values.
         $middle_parts = array_map(fn($host) => substr($host, $prefix_len, strlen($host) - $prefix_len - $suffix_len), $local_parts);
         // Usually the middle parts contain numbers, so use natural sort for them.
         usort($middle_parts, strnatcmp(...));
 
         if (empty($common_prefix) && empty($common_suffix)) {
             // No common prefix nor suffix: list all the names without "{}".
-            return implode(", ", array_map($this->printHost(...), $hostnames));
+            return implode(", ", array_map($this->printHost(...), $local_parts));
         } else {
             $hosts = $common_prefix . "{" . implode(",", $middle_parts) . "}" . $common_suffix;
             return $this->printHost($hosts, true);
@@ -758,19 +775,24 @@ class TwigExtension
             $is_validator = $log[$idx] == '>' || $log[$idx] == ']';
             if ($log[$idx] == ']' || $log[$idx] == '[') {
                 $content = '<td style="font-style:italic; color: dimgrey;">EOF from program</td>';
+                // An EOF marker consists of the header and the direction character only.
+                $idx++;
             } else {
                 $content = substr($log, $idx + 3, $len);
-                if (empty($content)) {
+                if ($content === '') {
+                    // Nothing left: the log was cut off right after this header.
                     break;
                 }
                 $content = htmlspecialchars($content);
                 $content = '<td class="output_text">'
                     . str_replace("\n", "\u{21B5}<br/>", $content)
                     . '</td>';
+                // Skip the direction character, the ": " separator, the message and its newline.
+                $idx += $len + 4;
             }
-            $idx       += $len + 4;
             $team      = $is_validator ? '<td></td>' : $content;
             $validator = $is_validator ? $content : '<td></td>';
+            $time      = htmlspecialchars($time);
             $body      .= "<tr>" . ($forTeam ? "" : "<td>$time</td>")
                           . $validator
                           . $team
@@ -792,16 +814,24 @@ class TwigExtension
         $lines_ref  = preg_split('/\n/', trim($runOutput['output_reference']));
 
         $diffs    = [];
-        $firstErr = count($lines_team) + 1;
+        $firstErr = PHP_INT_MAX;
         $lastErr  = -1;
-        $n        = min(count($lines_team), count($lines_ref));
+        // Walk over the lines of the longest output: a line missing from the other output is a
+        // difference too, and treating it as an empty line shows it as fully added or removed.
+        $n        = max(count($lines_team), count($lines_ref));
         for ($i = 0; $i < $n; $i++) {
-            $lcs = Utils::computeLcsDiff($lines_team[$i], $lines_ref[$i]);
+            $lcs = Utils::computeLcsDiff($lines_team[$i] ?? '', $lines_ref[$i] ?? '');
             if ($lcs[0] === true) {
                 $firstErr = min($firstErr, $i);
                 $lastErr  = max($lastErr, $i);
             }
             $diffs[] = $lcs[1];
+        }
+        if ($lastErr === -1) {
+            // Both outputs are identical line by line, so there is no difference to center the
+            // displayed window on. Show everything instead of an empty table.
+            $firstErr = 0;
+            $lastErr  = count($diffs) - 1;
         }
         $contextLines = 5;
         $firstErr     -= $contextLines;
@@ -917,7 +947,7 @@ JS;
 $(function() {
     const editorId = '%s';
     const diffId = '%s';
-    const submissionId = '%s';
+    const submissionId = %s;
     const models = %s;
     require(['vs/editor/editor.main'], () => {
         initDiffEditorTab(editorId, diffId, submissionId, models);
@@ -930,7 +960,7 @@ HTML;
             $editor,
             $editorId,
             $diffId,
-            $submissionId,
+            $this->serializer->serialize($submissionId, 'json'),
             $this->serializer->serialize($files, 'json'),
         );
     }
@@ -1024,7 +1054,11 @@ HTML;
         if ($description == null) {
             return '';
         }
-        $descriptionLines = explode("\n", $description);
+        // Escape every line on its own: the newlines are deliberately turned into <br>,
+        // but nothing else in the description may end up as markup. The data-attributes
+        // below are assigned to innerHTML by toggleExpand(), so they carry the same
+        // already-escaped content.
+        $descriptionLines = array_map(htmlspecialchars(...), explode("\n", $description));
         if (count($descriptionLines) <= 3) {
             return implode('<br>', $descriptionLines);
         } else {
@@ -1062,26 +1096,10 @@ EOF;
         if (is_null($col)) {
             return $text;
         }
-        $ret = preg_match_all("/[0-9A-Fa-f]{2}/", $col, $m);
-        if (!($ret && count($m[0]))) {
-            return $text;
-        }
 
-        $m = current($m);
-        switch (count($m)) {
-            case 4:
-                // We also have opacity; load that and use
-                // RGB of case 3
-                $opacity = hexdec(array_pop($m));
-                // no-break
-            case 3:
-                $vals   = array_map(hexdec(...), $m);
-                $vals[] = $opacity;
+        [$red, $green, $blue] = Utils::parseHexColor($col);
 
-                return "rgba(" . implode(",", $vals) . ")";
-        }
-
-        return $text;
+        return sprintf('rgba(%d,%d,%d,%s)', $red, $green, $blue, $opacity);
     }
 
     #[AsTwigFilter('tsvField')]
@@ -1121,7 +1139,7 @@ EOF;
             $rgb,
             $border,
             $foreground,
-            $problem?->getShortname() ?? '?'
+            htmlspecialchars($problem?->getShortname() ?? '?')
         );
     }
 
@@ -1163,10 +1181,10 @@ EOF;
             $rgb,
             $border,
             $submissionsUrl,
-            $score->team->getExternalid(),
-            $problem->getExternalId(),
+            htmlspecialchars((string)$score->team->getExternalid()),
+            htmlspecialchars((string)$problem->getExternalId()),
             $foreground,
-            $problem->getShortname()
+            htmlspecialchars($problem->getShortname())
         );
         if (!$matrixItem->isCorrect) {
             if ($matrixItem->numSubmissionsPending > 0) {
@@ -1200,10 +1218,10 @@ EOF;
         }
 
         if (isset($metadata['cpu-time'])) {
-            $result .= $metadata['cpu-time'] . 's CPU, ';
+            $result .= htmlspecialchars($metadata['cpu-time']) . 's CPU, ';
         }
         if (isset($metadata['wall-time'])) {
-            $result .= $metadata['wall-time'] . 's wall, ';
+            $result .= htmlspecialchars($metadata['wall-time']) . 's wall, ';
         }
         if (isset($metadata['memory-bytes'])) {
             $result .= '<i class="fas fa-memory" title="RAM"></i> '
@@ -1211,10 +1229,10 @@ EOF;
         }
         if (isset($metadata['exitcode'])) {
             $result .= '<i class="far fa-question-circle" title="exit-status"></i> '
-                . 'exit-code: ' . $metadata['exitcode'];
+                . 'exit-code: ' . htmlspecialchars($metadata['exitcode']);
         }
         if (isset($metadata['signal'])) {
-            $result .= ' signal: ' . $metadata['signal'];
+            $result .= ' signal: ' . htmlspecialchars($metadata['signal']);
         }
         $result .= '</span>';
         return $result;
@@ -1225,20 +1243,21 @@ EOF;
     {
         switch ($warning->getType()) {
             case ExternalSourceWarning::TYPE_UNSUPORTED_ACTION:
-                $action = $warning->getContent()['action'];
+                $action = htmlspecialchars((string)$warning->getContent()['action']);
                 return "Action $action not supported for this entity type";
             case ExternalSourceWarning::TYPE_DATA_MISMATCH:
                 $rows = [];
                 $null = '&lt;null&gt;';
                 foreach ($warning->getContent()['diff'] as $field => $diff) {
-                    $tdField    = "<td><code>$field</code></td>";
+                    $fieldEscaped = htmlspecialchars((string)$field);
+                    $tdField    = "<td><code>$fieldEscaped</code></td>";
                     $tdUs       = sprintf(
                         '<td><code>%s</code></td>',
-                        $diff['us'] ?? $null
+                        isset($diff['us']) ? htmlspecialchars((string)$diff['us']) : $null
                     );
                     $tdExternal = sprintf(
                         '<td><code>%s</code></td>',
-                        $diff['external'] ?? $null
+                        isset($diff['external']) ? htmlspecialchars((string)$diff['external']) : $null
                     );
                     $rows[]     = "<tr>{$tdField}{$tdUs}{$tdExternal}</tr>";
                 }
@@ -1258,8 +1277,8 @@ EOF;
             case ExternalSourceWarning::TYPE_DEPENDENCY_MISSING:
                 $rows = [];
                 foreach ($warning->getContent()['dependencies'] as $dependency) {
-                    $type   = $dependency['type'];
-                    $id     = $dependency['id'];
+                    $type   = htmlspecialchars((string)$dependency['type']);
+                    $id     = htmlspecialchars((string)$dependency['id']);
                     $rows[] = "<tr><td>$type</td><td>$id</td></tr>";
                 }
                 $header  = <<<'EOF'
@@ -1277,7 +1296,7 @@ EOF;
             case ExternalSourceWarning::TYPE_ENTITY_SHOULD_NOT_EXIST:
                 return '';
             case ExternalSourceWarning::TYPE_SUBMISSION_ERROR:
-                return $warning->getContent()['message'];
+                return htmlspecialchars((string)$warning->getContent()['message']);
         }
 
         return '';

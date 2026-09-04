@@ -88,7 +88,7 @@ mysql_log "SHOW GLOBAL STATUS LIKE 'Connection_errors_%'"
 mysql_log "SHOW VARIABLES LIKE '%_timeout'"
 section_end
 
-if [ "${db}" = "install" ]; then
+if [ "${db}" = "install" ] || [ "${db}" = "bare-install" ]; then
     section_start "Install DOMjudge database"
     /opt/domjudge/domserver/bin/dj_setup_database bare-install
     section_end

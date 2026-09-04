@@ -244,11 +244,11 @@ observers	Observers
 
     public static function provideResultsTsvExport(): Generator
     {
-        yield [0, true, true, "results	1\nexteam		Honorable	0	0	0	\n"];
-        yield [0, true, false, "results	1\nexteam		Honorable	0	0	0	\n"];
-        yield [0, false, true, "results	1\nexteam		Honorable	0	0	0	\n"];
-        yield [0, false, true, "results	1\nexteam		Honorable	0	0	0	\n"];
-        yield [1, true, true, "results	1\n"];
+        yield [0, true, true,  "results	1\nexteam		Honorable	0	0	0	\nnav-alpha		Honorable	0	0	0	\nnav-beta		Honorable	0	0	0	\nnav-gamma		Honorable	0	0	0	\n"];
+        yield [0, true, false, "results	1\nexteam		Honorable	0	0	0	\nnav-alpha		Honorable	0	0	0	\nnav-beta		Honorable	0	0	0	\nnav-gamma		Honorable	0	0	0	\n"];
+        yield [0, false, true, "results	1\nexteam		Honorable	0	0	0	\nnav-alpha		Honorable	0	0	0	\nnav-beta		Honorable	0	0	0	\nnav-gamma		Honorable	0	0	0	\n"];
+        yield [0, false, true, "results	1\nexteam		Honorable	0	0	0	\nnav-alpha		Honorable	0	0	0	\nnav-beta		Honorable	0	0	0	\nnav-gamma		Honorable	0	0	0	\n"];
+        yield [1, true, true,  "results	1\n"];
         yield [1, true, false, "results	1\n"];
         yield [1, false, true, "results	1\n"];
         yield [1, false, true, "results	1\n"];

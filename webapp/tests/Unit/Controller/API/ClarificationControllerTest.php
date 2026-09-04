@@ -4,6 +4,8 @@ namespace App\Tests\Unit\Controller\API;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\ClarificationFixture;
+use App\DataFixtures\Test\ClarificationForProblemOutsideContestFixture;
+use App\DataFixtures\Test\NavigationTeamUsersFixture;
 use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\Entity\Clarification;
 use App\Entity\Problem;
@@ -16,7 +18,7 @@ class ClarificationControllerTest extends BaseTestCase
 
     protected ?string $apiUser = 'admin';
 
-    protected static array $fixtures = [ClarificationFixture::class];
+    protected static array $fixtures = [ClarificationFixture::class, NavigationTeamUsersFixture::class];
 
     protected ?string $entityClass = Clarification::class;
 
@@ -47,6 +49,15 @@ class ClarificationControllerTest extends BaseTestCase
             "time"         => "2018-02-11T21:47:43.689+00:00",
             "text"         => "There was a mistake in judging this problem. Please try again",
             "answered"     => true,
+        ],
+        ClarificationFixture::class . ':4' => [
+            "problem_id"   => "hello",
+            "from_team_id" => "nav-alpha",
+            "to_team_id"   => null,
+            "reply_to_id"  => null,
+            "time"         => "2018-02-11T21:48:59.901+00:00",
+            "text"         => "Is it encouraged to read the problem statement carefully?",
+            "answered"     => false,
         ],
     ];
 
@@ -103,6 +114,19 @@ class ClarificationControllerTest extends BaseTestCase
             static::assertEquals("exteam", $clarificationFromApi[$mistakJudgingId]['to_team_id']);
             static::assertEquals("There was a mistake in judging this problem. Please try again", $clarificationFromApi[$mistakJudgingId]['text']);
             static::assertArrayNotHasKey('answered', $clarificationFromApi[$mistakJudgingId]);
+
+            // Different team with different clarifications
+            if ($problemId) {
+                $expectedNumber = 1;
+            } else {
+                $expectedNumber = 2;
+            }
+            $clarificationFromApi = $this->verifyApiJsonResponse('GET', $clarificationApi.$postfix, 200, 'nav-alpha-user');
+            static::assertCount($expectedNumber, $clarificationFromApi);
+
+            static::assertEquals("nav-alpha", $clarificationFromApi[$expectedNumber-1]['from_team_id']);
+            static::assertEquals("Is it encouraged to read the problem statement carefully?", $clarificationFromApi[$expectedNumber-1]['text']);
+            static::assertArrayNotHasKey('answered', $clarificationFromApi[$expectedNumber-1]);
         }
         $clarificationFromApi = $this->verifyApiJsonResponse('GET', $clarificationApi."?problem=9999", 200, 'demo');
         static::assertCount(0, $clarificationFromApi);
@@ -122,8 +146,18 @@ class ClarificationControllerTest extends BaseTestCase
      * Test that if invalid data is supplied, the correct message is returned.
      */
     #[DataProvider('provideAddInvalidData')]
-    public function testAddInvalidData(string $user, array $dataToSend, string $expectedMessage): void
+    public function testAddInvalidData(string $user, array $dataToSend, string $expectedMessage, ?string $id = null): void
     {
+        if (!is_null($id)) {
+            $referencedId = strval($this->resolveReference(ClarificationFixture::class . ':' .$id));
+            $expectedMessage = str_replace('%s', $referencedId, $expectedMessage);
+            foreach ($dataToSend as $key => $value) {
+                if (is_string($value)) {
+                    $dataToSend[$key] = str_replace('%s', $referencedId, $value);
+                }
+            }
+        }
+
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $method = isset($dataToSend['id']) ? 'PUT' : 'POST';
@@ -153,6 +187,7 @@ class ClarificationControllerTest extends BaseTestCase
         yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => 'noteam'], "Team with ID 'noteam' not found in contest or not enabled."];
         yield ['admin', ['text' => 'This is a clarification', 'to_team_id' => 'noteam'], "Team with ID 'noteam' not found in contest or not enabled."];
         yield ['admin', ['text' => 'This is a clarification', 'time' => 'this is not a time'], "Can not parse time 'this is not a time'."];
+        yield ['nav-alpha-user', ['text' => 'This is a response to a clarification of another team', 'reply_to_id' => '%s'], "Clarification '%s' not found.", '0'];
     }
 
     /**
@@ -347,5 +382,21 @@ class ClarificationControllerTest extends BaseTestCase
         //     null,
         //     null,
         // ];
+    }
+
+    /**
+     * A clarification may only reference a problem of its own contest, so one
+     * pointing elsewhere must not reach the feed with a dangling problem_id.
+     */
+    public function testListDoesNotExposeClarificationForProblemOutsideContest(): void
+    {
+        $this->loadFixture(ClarificationForProblemOutsideContestFixture::class);
+
+        $contestId = $this->getDemoContestId();
+        $apiEndpoint = $this->apiEndpoint;
+        $clarificationsFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint", 200);
+
+        $bodies = array_column($clarificationsFromApi, 'text');
+        static::assertNotContains(ClarificationForProblemOutsideContestFixture::BODY, $bodies);
     }
 }

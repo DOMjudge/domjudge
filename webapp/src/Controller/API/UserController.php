@@ -7,6 +7,7 @@ use App\DataTransferObject\UpdateUser;
 use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\User;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -38,14 +39,15 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class UserController extends AbstractRestController
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
+        AuthorizedUserService $authService,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         protected readonly ImportExportService $importExportService,
         protected readonly ValidatorInterface $validator,
     ) {
-        parent::__construct($entityManager, $dj, $config, $eventLogService);
+        parent::__construct($authService, $em, $dj, $config, $eventLogService);
     }
 
     /**

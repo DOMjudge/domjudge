@@ -1,0 +1,40 @@
+{% set current_route = app.request.attributes.get('_route') %}
+{% extends current_route starts with 'team_' ? 'team/base.html.twig' : 'public/base.html.twig' %}
+{% import 'macros.html.twig' as macros %}
+
+{% block title %}View clarification - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.mathjax_head() }}
+{% endblock %}
+
+{% block content %}
+    <h1 class="text-center mt-4">Clarification
+    {% if clarification.sender and clarification.sender.teamid == team.teamid %}Request{% endif%}</h1>
+
+    {% include 'partials/clarification_content.html.twig' %}
+
+    <div class="container clarificationform mt-3">
+    {% if current_route starts with 'team_' %}
+        <button class="btn btn-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#collapsereplyform"
+                aria-expanded="false" aria-controls="collapsereplyform" id="clarification-reply-button">
+            <i class="fa fa-reply"></i> reply to this clarification
+        </button>
+    {% endif %}
+    </div>
+
+{% endblock %}
+
+{% block extrafooter %}
+    {% if current_route starts with 'team_' %}
+        <script>
+            setupPreviewClarification($('#team_clarification_message'), $('#messagepreview'), true);
+            {% if not form.vars.valid %}
+            $(function () {
+                replaceClarificationReplyButton();
+            });
+            {% endif %}
+        </script>
+    {% endif %}
+{% endblock %}

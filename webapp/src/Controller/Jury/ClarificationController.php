@@ -9,12 +9,11 @@ use App\Entity\Problem;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Form\Type\JuryClarificationType;
-use App\Service\ConfigurationService;
+use App\Service\ClarificationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,9 +31,9 @@ class ClarificationController extends BaseController
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
-        protected readonly ConfigurationService $config,
         EventLogService $eventLogService,
         KernelInterface $kernel,
+        protected readonly ClarificationService $clarificationService,
     ) {
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
@@ -63,37 +62,13 @@ class ClarificationController extends BaseController
         string $currentQueue = 'all',
     ): Response {
         $contest = $this->dj->getContestByExternalId($contestId);
-        $categories = $this->config->get('clar_categories');
+        $categories = $this->clarificationService->getClarificationCategories();
 
         if ($currentFilter === 'all') {
             $currentFilter = null;
         }
 
-        $queryBuilder = $this->em->createQueryBuilder()
-            ->from(Clarification::class, 'clar')
-            ->leftJoin('clar.problem', 'p')
-            ->innerJoin('clar.contest', 'c')
-            ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = clar.contest')
-            ->select('clar', 'p', 'cp')
-            ->andWhere('c.externalid = :contestId')
-            ->setParameter('contestId', $contestId)
-            ->orderBy('clar.submittime', 'DESC')
-            ->addOrderBy('clar.clarid', 'DESC');
-
-        if ($currentQueue === "unassigned") {
-            $queryBuilder->andWhere($queryBuilder->expr()->orX(
-                $queryBuilder->expr()->isNull('clar.queue'),
-                $queryBuilder->expr()->eq('clar.queue', ':queue')
-            ))
-                ->setParameter('queue', $currentQueue);
-        } elseif ($currentQueue !== "all") {
-            $queryBuilder->andWhere('clar.queue = :queue')
-                ->setParameter('queue', $currentQueue);
-        }
-
-        $clarifications = $queryBuilder
-            ->getQuery()
-            ->getResult();
+        $clarifications = $this->clarificationService->getClarifications($contestId, $currentQueue);
 
         /** @var Clarification[] $newClarifications */
         $newClarifications = [];
@@ -114,7 +89,7 @@ class ClarificationController extends BaseController
             }
         }
 
-        $queues = $this->config->get('clar_queues');
+        $queues = $this->clarificationService->getClarificationQueues();
 
         return $this->render('jury/clarifications.html.twig', [
             'contestId' => $contestId,
@@ -191,7 +166,7 @@ class ClarificationController extends BaseController
         $lastClarification = end($clarificationList);
         $formData['message'] = "> " . str_replace("\n", "\n> ", Utils::wrapUnquoted($lastClarification->getBody())) . "\n\n";
 
-        $form = $this->createForm(JuryClarificationType::class, $formData, ['limit_to_team' => $clarification->getSender(), 'clarid' => $id]);
+        $form = $this->createForm(JuryClarificationType::class, $formData, ['limit_to_team' => $clarification->getSender(), 'clarid' => $id, 'contestId' => $contestId]);
 
         $form->handleRequest($request);
 
@@ -212,8 +187,8 @@ class ClarificationController extends BaseController
             }
         }
         $parameters['subjects'] = $groupedCategories;
-        $queues = $this->config->get('clar_queues');
-        $clarificationAnswers = $this->config->get('clar_answers');
+        $queues = $this->clarificationService->getClarificationQueues();
+        $clarificationAnswers = $this->clarificationService->getClarificationDefaultAnswers();
 
         foreach ($clarificationList as $clar) {
             $data = ['clarid' => $clar->getClarid(), 'externalid' => $clar->getExternalid()];
@@ -269,11 +244,8 @@ class ClarificationController extends BaseController
 
         $parameters['queues'] = $queues;
         $parameters['answers'] = $clarificationAnswers;
-        $parameters['jurymember'] = $this->em->createQueryBuilder()
+        $parameters['jurymember'] = $this->clarificationService->getQueryBuilder(externalContestId: $contestId, externalClarificationId: $clarification->getExternalid(), includeProblemsOutsideContest: true)
             ->select('clar.jury_member')
-            ->from(Clarification::class, 'clar')
-            ->where('clar.clarid = :clarid')
-            ->setParameter('clarid', $clarification->getClarid())
             ->getQuery()
             ->getSingleResult()['jury_member'];
 
@@ -301,7 +273,7 @@ class ClarificationController extends BaseController
             $formData['recipient'] = $teamto;
         }
 
-        $form = $this->createForm(JuryClarificationType::class, $formData);
+        $form = $this->createForm(JuryClarificationType::class, $formData, ['contestId' => $contestId]);
 
         $form->handleRequest($request);
 
@@ -481,7 +453,7 @@ class ClarificationController extends BaseController
         if ($inReplTo) {
             $queue = $inReplTo->getQueue();
         } else {
-            $queue = $this->config->get('clar_default_problem_queue');
+            $queue = $this->clarificationService->getClarificationDefaultProblemQueue();
             if ($queue === "") {
                 $queue = null;
             }

@@ -1,0 +1,11 @@
+{% extends "partials/modal.html.twig" %}
+
+{% block title %}View clarifications for problem {{ problem | problemBadgeForContest }} {{ problem.name }}{% endblock %}
+
+{% block content %}
+    {% if clarifications is empty %}
+        <p class="nodata">No clarifications.</p>
+    {% else %}
+        {% include 'partials/clarification_list.html.twig' with {clarifications: clarifications, subject: false} %}
+    {% endif %}
+{% endblock %}

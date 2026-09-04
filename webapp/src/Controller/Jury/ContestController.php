@@ -4,7 +4,6 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
-use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judgehost;
@@ -21,6 +20,8 @@ use App\Form\Type\ContestType;
 use App\Form\Type\FinalizeContestType;
 use App\Form\Type\RemovedIntervalType;
 use App\Service\AssetUpdateService;
+use App\Service\AuthorizedUserService;
+use App\Service\ClarificationService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -53,8 +54,10 @@ class ContestController extends BaseController
     use JudgeRemainingTrait;
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        protected readonly ClarificationService $clarificationService,
         protected readonly ConfigurationService $config,
         KernelInterface $kernel,
         protected readonly EventLogService $eventLogService,
@@ -774,8 +777,8 @@ class ContestController extends BaseController
                                   Utils::printtime($contest->getEndtime(), 'Y-m-d H:i:s (T)'));
         }
 
-        /** @var int[] $submissionIds */
-        $submissionIds = array_map(fn(array $data) => $data['submitid'], $this->em->createQueryBuilder()
+        /** @var string[] $submissionIds */
+        $submissionIds = array_map(fn(array $data) => $data['externalid'], $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
             ->select('s.externalid')
@@ -792,13 +795,10 @@ class ContestController extends BaseController
             $blockers[] = 'Unjudged submissions found: ' . implode(', ', $submissionIds);
         }
 
-        /** @var int[] $clarificationIds */
-        $clarificationIds = array_map(fn(array $data) => $data['clarid'], $this->em->createQueryBuilder()
-            ->from(Clarification::class, 'c')
-            ->select('c.externalid')
-            ->andWhere('c.contest = :contest')
-            ->andWhere('c.answered = false')
-            ->setParameter('contest', $contest)
+        /** @var string[] $clarificationIds */
+        $clarificationIds = array_map(fn(array $data) => $data['externalid'], $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), includeProblemsOutsideContest: true)
+            ->select('clar.externalid')
+            ->andWhere('clar.answered = false')
             ->getQuery()
             ->getResult()
         );
@@ -807,7 +807,7 @@ class ContestController extends BaseController
         }
 
         if (empty($contest->getFinalizecomment())) {
-            $contest->setFinalizecomment(sprintf('Finalized by: %s', $this->dj->getUser()->getName()));
+            $contest->setFinalizecomment(sprintf('Finalized by: %s', $this->authService->getUser()->getName()));
         }
         $form = $this->createForm(FinalizeContestType::class, $contest);
 

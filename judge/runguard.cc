@@ -70,6 +70,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 #include <linux/prctl.h>
@@ -490,7 +491,12 @@ void output_cgroup_stats(double *cputime)
 	void *handle;
 	ret = cgroup_read_stats_begin("cpu", cgroupname, &handle, &stat);
 	while (ret == 0) {
-		logmsg(LOG_DEBUG, "cpu.stat: {} = {}", stat.name, stat.value);
+		/* libcgroup hands us the value from cpu.stat verbatim,
+		   including its trailing newline. */
+		std::string_view value{stat.value};
+		value = value.substr(0, value.find_last_not_of("\r\n") + 1);
+
+		logmsg(LOG_DEBUG, "cpu.stat: {} = {}", stat.name, value);
 		if (strcmp(stat.name, "usage_usec") == 0) {
 			long long usec = strtoll(stat.value, nullptr, 10);
 			*cputime = usec / 1e6;
@@ -689,6 +695,25 @@ int groupid(char *name)
 	return (int) grp->gr_gid;
 }
 
+char *username()
+{
+	int saved_errno = errno;
+	errno = 0; /* per the linux GETPWNAM(3) man-page */
+
+	struct passwd *pwd;
+	uid_t uid = getuid();
+	pwd = getpwuid(uid);
+
+	if ( pwd==nullptr || errno) {
+		logmsg(LOG_WARNING, "failed to get username");
+		static char uid_str[32];
+		snprintf(uid_str, sizeof(uid_str), "%u", uid);
+		errno = saved_errno;
+		return uid_str;
+	}
+
+	return pwd->pw_name;
+}
 
 long read_optarg_int(const char *desc, long minval, long maxval)
 {
@@ -1273,9 +1298,16 @@ int main(int argc, char **argv)
 			logmsg(LOG_DEBUG, "metafile closed in child");
 		}
 
+		/* Restore the signal mask before we hand over: we inherit the
+		   one of runguard, which blocks SIGCHLD for its own bookkeeping,
+		   and execve() leaves it in place. */
+		if ( sigprocmask(SIG_SETMASK, &emptymask, nullptr)!=0 ) {
+			die(errno,"unblocking signals for command");
+		}
+
 		/* And execute child command. */
 		execvp(cmdname,cmdargs);
-		die(errno,"cannot start `{}' as user `{}'", cmdname, getuid());
+		die(errno,"cannot start `{}' as user `{}'", cmdname, username());
 
 	default: /* become watchdog */
 		logmsg(LOG_DEBUG, "child pid = {}", child_pid);
@@ -1413,10 +1445,20 @@ int main(int argc, char **argv)
 			pump_pipes(&readfds, data_read, data_passed);
 		} while ( data_passed[1] + data_passed[2] > total_data );
 
-		/* Close the output files */
-		for(int i=1; i<=2; i++) {
-			ret = close(child_redirfd[i]);
-			if( ret!=0 ) die(errno,"closing output fd {}", i);
+		/* Always close stdout, also when it is our own without `-o':
+		   its EOF signals the end of the command's output to a
+		   downstream reader such as runpipe, which an interactive
+		   problem's validator relies on. */
+		ret = close(child_redirfd[STDOUT_FILENO]);
+		if ( ret!=0 ) die(errno,"closing output fd {}", STDOUT_FILENO);
+
+		/* Only close stderr when `-e' redirected it to a file. Without
+		   it, child_redirfd[2] aliases our own stderr and closing it
+		   would discard all logmsg()/warning()/die() output for the rest
+		   of our lifetime. */
+		if ( redir_stderr ) {
+			ret = close(child_redirfd[STDERR_FILENO]);
+			if( ret!=0 ) die(errno,"closing output fd {}", STDERR_FILENO);
 		}
 
 		if ( times(&endticks)==(clock_t) -1 ) {

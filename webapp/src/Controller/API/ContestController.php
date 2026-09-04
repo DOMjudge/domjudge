@@ -8,11 +8,14 @@ use App\DataTransferObject\PatchContest;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Event;
+use App\Entity\TeamCategory;
 use App\Service\AssetUpdateService;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
+use App\Service\ScoreboardService;
 use App\Utils\EventFeedFormat;
 use App\Utils\Utils;
 use BadMethodCallException;
@@ -32,6 +35,7 @@ use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -47,10 +51,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
 use TypeError;
 
-use App\Entity\TeamCategory;
-use App\Service\ScoreboardService;
-use Symfony\Component\HttpFoundation\RequestStack;
-
 /**
  * @extends AbstractRestController<Contest, Contest>
  */
@@ -64,7 +64,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class ContestController extends AbstractRestController
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
+        AuthorizedUserService $authService,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
@@ -73,7 +74,7 @@ class ContestController extends AbstractRestController
         protected readonly AssetUpdateService $assetUpdater,
         protected readonly ScoreboardService $scoreboardService
     ) {
-        parent::__construct($entityManager, $dj, $config, $eventLogService);
+        parent::__construct($authService, $em, $dj, $config, $eventLogService);
     }
 
     /**
@@ -449,8 +450,8 @@ class ContestController extends AbstractRestController
             throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $cid));
         }
 
-        $hasAccess = $this->dj->checkrole('jury') ||
-            $this->dj->checkrole('api_reader') ||
+        $hasAccess = $this->authService->checkRole('jury') ||
+            $this->authService->checkRole('api_reader') ||
             $contest->getFreezeData()->started();
 
         if (!$hasAccess) {

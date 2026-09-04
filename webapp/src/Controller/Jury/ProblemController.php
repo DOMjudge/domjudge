@@ -17,6 +17,7 @@ use App\Entity\TestcaseContent;
 use App\Form\Type\ProblemAttachmentType;
 use App\Form\Type\ProblemType;
 use App\Form\Type\ProblemUploadType;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -53,6 +54,7 @@ class ProblemController extends BaseController
     use JudgeRemainingTrait;
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         EntityManagerInterface $em,
         DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
@@ -249,7 +251,7 @@ class ProblemController extends BaseController
     #[Route(path: '/problemset', name: 'jury_problemset')]
     public function problemsetAction(StatisticsService $stats): Response
     {
-        $teamId = $this->dj->getUser()->getTeam()?->getTeamid();
+        $teamId = $this->authService->getUser()->getTeam()?->getTeamid();
         return $this->render('jury/problemset.html.twig',
             $this->dj->getTwigDataForProblemsAction($stats, teamId: $teamId, forJury: true));
     }
@@ -306,6 +308,12 @@ class ProblemController extends BaseController
 
         // Build up YAML.
         $yaml = ['name' => $problem->getName()];
+        // The problem package format expects the types space separated, while
+        // we keep them comma separated for display purposes.
+        $yaml['type'] = str_replace(', ', ' ', $problem->getTypesAsString());
+        // Note that we keep writing the deprecated `validation` key for
+        // backwards compatibility. It cannot express every combination of
+        // types, which is exactly why the format replaced it with `type`.
         if (!empty($problem->getCompareExecutable())) {
             $yaml['validation'] = 'custom';
         } elseif ($problem->isInteractiveProblem() && !empty($problem->getRunExecutable())) {
@@ -320,6 +328,9 @@ class ProblemController extends BaseController
         }
         if (!empty($problem->getOutputlimit())) {
             $yaml['limits']['output'] = (int)round($problem->getOutputlimit() / 1024);
+        }
+        if ($problem->isMultipassProblem()) {
+            $yaml['limits']['validation_passes'] = $problem->getMultipassLimit();
         }
 
         $yamlString = '# Problem exported by DOMjudge on ' . date('c') . "\n" . Yaml::dump($yaml);
@@ -632,6 +643,10 @@ class ProblemController extends BaseController
                 }
 
                 $newDescription = $request->request->all('description')[$rank];
+                $newDescription = str_replace("\r\n", "\n", $newDescription);
+                if ($newDescription === '') {
+                    $newDescription = null;
+                }
                 if ($newDescription !== $testcase->getDescription(true)) {
                     $testcase->setDescription($newDescription);
                     $messages[] = sprintf('Updated description of testcase %d ', $rank);
@@ -662,8 +677,7 @@ class ProblemController extends BaseController
                                     $this->addFlash('danger', sprintf('image: %s', $error));
                                     return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                                 }
-                                $thumb = Utils::getImageThumb($content, $thumbnailSize,
-                                                            $this->dj->getDomjudgeTmpDir(), $error);
+                                $thumb = Utils::getImageThumb($content, $thumbnailSize, $error);
                                 if ($thumb === false) {
                                     $this->addFlash('danger', sprintf('image: %s', $error));
                                     return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
@@ -746,12 +760,16 @@ class ProblemController extends BaseController
             if ($inputOrOutputSpecified && $allOk) {
                 $newTestcase        = new Testcase();
                 $newTestcaseContent = new TestcaseContent();
+                $newTestcaseDescription = $request->request->get('add_desc');
                 $newTestcase
                     ->setContent($newTestcaseContent)
                     ->setRank($maxrank)
                     ->setProblem($problem)
-                    ->setDescription($request->request->get('add_desc'))
                     ->setSample($request->request->has('add_sample'));
+                if (is_string($newTestcaseDescription) && $newTestcaseDescription !== '') {
+                    $newTestcaseDescription = str_replace("\r\n", "\n", $newTestcaseDescription);
+                    $newTestcase->setDescription($newTestcaseDescription);
+                }
                 foreach (['input', 'output'] as $type) {
                     $file          = $request->files->get('add_' . $type);
                     $content       = file_get_contents($file->getRealPath());
@@ -778,8 +796,7 @@ class ProblemController extends BaseController
                         $this->addFlash('danger', sprintf('image: %s', $error));
                         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                     }
-                    $thumb = Utils::getImageThumb($content, $thumbnailSize,
-                                                  $this->dj->getDomjudgeTmpDir(), $error);
+                    $thumb = Utils::getImageThumb($content, $thumbnailSize, $error);
                     if ($thumb === false) {
                         $this->addFlash('danger', sprintf('image: %s', $error));
                         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);

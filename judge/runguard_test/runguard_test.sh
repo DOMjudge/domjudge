@@ -86,8 +86,11 @@ test_cputime_limit() {
 	# Now also limiting wall time to 2s.
 	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS -C 3.1 -t 2 ./threads 2 3
 
-	# Some failing cases.
-	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -C 2.9 ./threads 2 3
+	# Some failing cases. The command is killed by the RLIMIT_CPU we set to
+	# the CPU-time limit rounded up, so stay a whole second below the ~3s it
+	# spends: at `-C 2.9' that limit is the 3s it takes, and whether it is
+	# killed comes down to which of the two gets there first.
+	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -C 1.9 ./threads 2 3
 	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -C 3.1 -t 1.4 ./threads 2 3
 }
 
@@ -109,8 +112,11 @@ test_streamsize() {
 test_streamsize_stderr() {
 	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -t 1 -s 42 ./fill-stderr.sh
 	expect_stderr "DOMjudge"
-	# Allow 100 bytes extra, for the runguard time limit message.
-	limit=$((42*1024 + 100))
+	# Allow some bytes extra: runguard shares this stderr with the command
+	# and reports the time limit, the signal that killed it and the soft
+	# time limit on it. Those messages are timestamped and carry our pid,
+	# so do not depend on their exact length.
+	limit=$((42*1024 + 512))
 	actual=$(wc -c < "$LOG2")
 	[ $limit -gt $actual ] || fail "stdout not limited to ${limit}B, but wrote ${actual}B"
 }
@@ -200,6 +206,13 @@ test_memsize() {
 	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -m $((1024*1024)) ./mem $((1024*1024*1024))
 	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS -m $((1024*1024 + 10000)) ./mem $((1024*1024*1024))
 	expect_stdout "mem = 1073741824"
+}
+
+test_signal_mask() {
+	# runguard blocks SIGCHLD for its own bookkeeping, and a signal mask
+	# survives the execve(), so the command must not inherit ours.
+	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS grep SigBlk /proc/self/status
+	expect_stdout "SigBlk:.*0000000000000000"
 }
 
 test_envvars() {

@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Executable;
+use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
 use App\Entity\ProblemAttachmentContent;
@@ -39,6 +40,7 @@ use ZipArchive;
 readonly class ImportProblemService
 {
     public function __construct(
+        protected AuthorizedUserService  $authService,
         protected EntityManagerInterface $em,
         protected LoggerInterface        $logger,
         protected DOMJudgeService        $dj,
@@ -230,8 +232,7 @@ readonly class ImportProblemService
                 ->setRunExecutable()
                 ->setMemlimit(null)
                 ->setOutputlimit(null)
-                ->setProblemStatementContent(null)
-                ->setProblemstatementType(null);
+                ->resetLanguages();
 
             $contestProblem
                 ?->setPoints(1)
@@ -247,7 +248,14 @@ readonly class ImportProblemService
         // Parse YAML before validation so that all problem properties (including
         // types) are set before the entity validation callbacks fire.
         $validationMode = 'default';
-        if (!static::parseYaml($problemYaml, $messages, $validationMode, $propertyAccessor, $problem)) {
+        if (!static::parseYaml(
+            $problemYaml,
+            $messages,
+            $validationMode,
+            $propertyAccessor,
+            $problem,
+            fn(array $languageIds, array &$failedLanguageIds): array => $this->helperLanguages($languageIds, $failedLanguageIds)
+        )) {
             return null;
         }
 
@@ -302,20 +310,27 @@ readonly class ImportProblemService
         }
 
         // Add problem statement, also look in obsolete location.
+        $statementFound = false;
         foreach (['problem_statement/', ''] as $dir) {
             foreach (['pdf', 'html', 'txt'] as $type) {
                 $filename = sprintf('%sproblem.%s', $dir, $type);
                 $text     = $zip->getFromName($filename);
                 if ($text !== false) {
-                    $content = (new ProblemStatementContent())
-                        ->setContent($text);
+                    $content = $problem->getProblemStatementContent() ?? new ProblemStatementContent();
+                    $content->setContent($text);
                     $problem
                         ->setProblemStatementContent($content)
                         ->setProblemstatementType($type);
+                    $statementFound = true;
                     $messages['info'][] = "Added/updated problem statement from: $filename";
                     break 2;
                 }
             }
+        }
+        if (!$statementFound) {
+            $problem
+                ->setProblemStatementContent(null)
+                ->setProblemstatementType(null);
         }
 
         $this->em->persist($problem);
@@ -395,6 +410,15 @@ readonly class ImportProblemService
                 }
             }
         }
+        if ($testCaseGroups !== []) {
+            foreach (['data/sample', 'data/secret'] as $default_dir) {
+                if (!key_exists($default_dir, $testCaseGroups)) {
+                    $testcaseGroup = new TestcaseGroup();
+                    $testcaseGroup->setName($default_dir);
+                    $testCaseGroups[$default_dir] = $testcaseGroup;
+                }
+            }
+        }
         foreach ($testCaseGroups as $dir => $testCaseGroup) {
             $parentDir = dirname($dir);
             if (isset($testCaseGroups[$parentDir])) {
@@ -450,7 +474,6 @@ readonly class ImportProblemService
                             $thumbnailSize = $this->config->get('thumbnail_size');
                             $imageThumb    = Utils::getImageThumb(
                                 $imageFile, $thumbnailSize,
-                                $this->dj->getDomjudgeTmpDir(),
                                 $errormsg
                             );
                             if ($imageThumb === false) {
@@ -702,7 +725,7 @@ readonly class ImportProblemService
         // Submit reference solutions.
         if ($contest === null) {
             $messages['warning'][] = 'No jury solutions added: problem is not linked to a contest (yet).';
-        } elseif (!$this->dj->getUser()->getTeam()) {
+        } elseif (!$this->authService->getUser()->getTeam()) {
             $messages['warning'][] = 'No jury solutions added: must associate team with your user first.';
         } elseif ($contestProblem->getAllowSubmit()) {
             $subs_with_unknown_lang = [];
@@ -840,8 +863,8 @@ readonly class ImportProblemService
                             $expectedResults = [$expectedResult];
                         }
                     }
-                    $jury_team_id = $this->dj->getUser()->getTeam()->getTeamid();
-                    $jury_user = $this->dj->getUser();
+                    $jury_team_id = $this->authService->getUser()->getTeam()->getTeamid();
+                    $jury_user = $this->authService->getUser();
                     if (isset($submission_details[$path]['team'])) {
                         /** @var Team|null $json_team */
                         $json_team = $this->em->getRepository(Team::class)
@@ -1191,8 +1214,12 @@ readonly class ImportProblemService
                     join(', ', $unknown_flags), $name);
             }
         }
-        if (isset($yamlData['output_validator_flags'])) {
-            $testcaseGroup->setOutputValidatorFlags($yamlData['output_validator_flags']);
+        foreach(['flags', 'args'] as $postFix) {
+            $output_validator_flags_key = 'output_validator_' . $postFix;
+            if (isset($yamlData[$output_validator_flags_key])) {
+                $testcaseGroup->setOutputValidatorFlags($yamlData[$output_validator_flags_key]);
+                break;
+            }
         }
         if (isset($yamlData['on_reject'])) {
             $testcaseGroup->setOnRejectContinue($yamlData['on_reject'] === 'continue');
@@ -1201,12 +1228,44 @@ readonly class ImportProblemService
     }
 
     /**
+     * @param array<string|bool|int|null> $languageIds
+     * @param string[] &$failedLanguageIds
+     * @return Language[]
+     */
+    public function helperLanguages(array $languageIds, array &$failedLanguageIds): array
+    {
+        $languages = [];
+        foreach ($languageIds as $langId) {
+            if (is_bool($langId)) {
+                $langId = $langId ? 'true' : 'false';
+            } elseif (is_null($langId)) {
+                $langId = 'null';
+            }
+            $langId = strval($langId);
+            $language = $this->em->getRepository(Language::class)->findByExternalId($langId);
+            if ($language) {
+                $languages[] = $language;
+            } else {
+                $failedLanguageIds[] = $langId;
+            }
+        }
+        return $languages;
+    }
+
+    /**
      * Returns true iff the yaml could be parsed correctly.
      *
      * @param array{danger?: string[], info?: string[]} $messages
+     * @param callable(string[], string[]&): Language[]|null $languageResolver
      */
-    public static function parseYaml(bool|string $problemYaml, array &$messages, string &$validationMode, PropertyAccessor $propertyAccessor, Problem $problem): bool
-    {
+    public static function parseYaml(
+        bool|string $problemYaml,
+        array &$messages,
+        string &$validationMode,
+        PropertyAccessor $propertyAccessor,
+        Problem $problem,
+        ?callable $languageResolver = null
+    ): bool {
         if ($problemYaml === false) {
             // While there was no problem.yaml, there was also no error in parsing.
             return true;
@@ -1246,8 +1305,12 @@ readonly class ImportProblemService
             $yamlProblemProperties['typesAsString'] = ['pass-fail'];
         }
 
-        if (isset($yamlData['validator_flags'])) {
-            $yamlProblemProperties['special_compare_args'] = $yamlData['validator_flags'];
+        foreach (['flags', 'args'] as $postFix) {
+            $validator_flags_key = 'validator_' . $postFix;
+            if (isset($yamlData[$validator_flags_key])) {
+                $yamlProblemProperties['special_compare_args'] = $yamlData[$validator_flags_key];
+                break;
+            }
         }
 
         if (isset($yamlData['validation'])
@@ -1275,7 +1338,48 @@ readonly class ImportProblemService
                 $yamlProblemProperties['outputlimit'] = 1024 * $yamlData['limits']['output'];
             }
             if (isset($yamlData['limits']['validation_passes'])) {
-                $yamlProblemProperties['multipassLimit'] = $yamlData['limits']['validation_passes'];
+                $validationPasses = $yamlData['limits']['validation_passes'];
+                // The spec requires this to be an int >= 2.
+                if (!is_int($validationPasses) || $validationPasses < 2) {
+                    $messages['danger'][] = sprintf(
+                        "problem.yaml: limits.validation_passes must be an integer >= 2, got '%s'.",
+                        is_scalar($validationPasses) ? (string)$validationPasses : gettype($validationPasses)
+                    );
+                    return false;
+                }
+                $yamlProblemProperties['multipassLimit'] = $validationPasses;
+            }
+        }
+
+        // We can't check for isset as `languages: null` should be handled.
+        if (key_exists('languages', $yamlData)) {
+            $problem->resetLanguages();
+            if ($languageResolver === null) {
+                $messages['danger'][] = 'Cannot resolve problem languages without a language resolver.';
+                return false;
+            } elseif ($yamlData['languages'] !== 'all') {
+                if (is_bool($yamlData['languages']) || is_null($yamlData['languages'])) {
+                    $yamlData['languages'] = [$yamlData['languages']];
+                }
+                if (is_array($yamlData['languages'])) {
+                    $languageIds = $yamlData['languages'];
+                } else {
+                    $languageIds = preg_split('/[\s,;]+/', strval($yamlData['languages']), flags: PREG_SPLIT_NO_EMPTY);
+                }
+                if (count($languageIds) === 0) {
+                    $messages['danger'][] = "'languages' field provided without content.";
+                    return false;
+                }
+                $failedLanguageIds = [];
+                $languages = $languageResolver($languageIds, $failedLanguageIds);
+                if ($failedLanguageIds) {
+                    sort($failedLanguageIds);
+                    $messages['danger'][] = sprintf("Unknown language(s): '%s'.", implode("', '", $failedLanguageIds));
+                    return false;
+                }
+                foreach ($languages as $language) {
+                    $problem->addLanguage($language);
+                }
             }
         }
 

@@ -2,11 +2,14 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use App\DataFixtures\Test\UnjudgedSubmissionFixture;
 use App\Entity\Contest;
+use App\Entity\ContestProblemsetContent;
 use App\Entity\JudgeTask;
 use App\Entity\QueueTask;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ContestControllerTest extends JuryControllerTestCase
 {
@@ -321,6 +324,242 @@ class ContestControllerTest extends JuryControllerTestCase
         return [$entity, $expected];
     }
 
+    /**
+     * @return array{0: UploadedFile, 1: string}
+     */
+    private static function temporaryProblemsetFile(string $content, string $originalName = 'problemset.txt'): array
+    {
+        $tempFile = tempnam(sys_get_temp_dir(), 'contest-problemset-');
+        self::assertIsString($tempFile);
+        self::assertNotFalse(file_put_contents($tempFile, $content));
+
+        return [new UploadedFile($tempFile, $originalName, 'text/plain', null, true), $tempFile];
+    }
+
+    /**
+     * Submit the normal add-contest form, but inject a file upload for the
+     * transient contestProblemsetFile field. The generic add helper does not
+     * support file uploads.
+     *
+     * @param array<string, mixed> $element
+     */
+    private function submitAddContestFormWithProblemset(array $element, UploadedFile $problemset): void
+    {
+        self::assertSelectorExists('a:contains(' . $this->addButton . ')');
+
+        $formFields = [];
+        foreach ($element as $id => $field) {
+            if (is_bool($field) || $id === static::$addPlus) {
+                continue;
+            }
+
+            $formId = str_replace('.', '][', $id);
+            $formFields[static::$addForm . $formId . ']'] = $field;
+        }
+
+        $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
+
+        $button = $this->client->getCrawler()->selectButton('Save');
+        $form = $button->form($formFields, 'POST');
+        $formName = str_replace('[', '', static::$addForm);
+
+        foreach ($element as $id => $field) {
+            if (!is_bool($field)) {
+                continue;
+            }
+
+            if ($field) {
+                $form[$formName][$id]->tick();
+            } else {
+                $form[$formName][$id]->untick();
+            }
+        }
+
+        $rawValues = $form->getPhpValues();
+        if (static::$addPlus !== null && array_key_exists(static::$addPlus, $element)) {
+            $rawValues[$formName][static::$addPlus] = $element[static::$addPlus];
+        }
+
+        $rawFiles = $form->getPhpFiles();
+        $rawFiles[$formName] ??= [];
+        $rawFiles[$formName]['contestProblemsetFile'] = $problemset;
+
+        $this->client->request($form->getMethod(), $form->getUri(), $rawValues, $rawFiles);
+    }
+
+    public function testAddContestWithProblemsetDocument(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        $shortname = 'psdoc';
+        $problemsetContent = "problemset created with contest\n";
+        [$problemset, $tempFile] = self::temporaryProblemsetFile($problemsetContent);
+
+        try {
+            $element = static::$addEntities[0];
+            $element['shortname'] = $shortname;
+            $element['name'] = 'Contest with problemset';
+
+            $this->verifyPageResponse('GET', static::$baseUrl, 200);
+            $this->submitAddContestFormWithProblemset($element, $problemset);
+
+            self::assertNotSame(
+                500,
+                $this->client->getResponse()->getStatusCode(),
+                $this->client->getResponse()->getContent() ?: ''
+            );
+            self::assertTrue(
+                $this->client->getResponse()->isRedirect(),
+                $this->client->getResponse()->getContent() ?: ''
+            );
+            $this->client->followRedirect();
+            self::assertTrue(
+                $this->client->getResponse()->isSuccessful(),
+                $this->client->getResponse()->getContent() ?: ''
+            );
+        } finally {
+            @unlink($tempFile);
+        }
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $em->clear();
+
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => $shortname]);
+        self::assertInstanceOf(Contest::class, $contest);
+        self::assertSame('txt', $contest->getContestProblemsetType());
+
+        /** @var ContestProblemsetContent[] $contents */
+        $contents = $em->getRepository(ContestProblemsetContent::class)
+            ->findBy(['contest' => $contest]);
+
+        self::assertCount(1, $contents);
+        self::assertSame($problemsetContent, $contents[0]->getContent());
+        self::assertSame($contest->getCid(), $contents[0]->getContest()->getCid());
+    }
+
+    public function testEditContestProblemsetReplacement(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        self::assertInstanceOf(Contest::class, $contest);
+        $oldContent = (new ContestProblemsetContent())
+            ->setContest($contest)
+            ->setContent("old problemset document\n");
+        $contest
+            ->setContestProblemsetContent($oldContent)
+            ->setContestProblemsetType('txt');
+        $em->persist($oldContent);
+        $em->flush();
+        $em->clear();
+
+        $replacementContent = "replacement problemset document\n";
+        [$replacement, $tempFile] = self::temporaryProblemsetFile($replacementContent);
+        try {
+            $this->verifyPageResponse('GET', '/jury/contests/demo/edit', 200);
+            $form = $this->getCurrentCrawler()->selectButton('Save')->form();
+            $formName = str_replace('[', '', static::$addForm);
+            $rawValues = $form->getPhpValues();
+            $rawFiles = $form->getPhpFiles();
+            $rawFiles[$formName] ??= [];
+            $rawFiles[$formName]['contestProblemsetFile'] = $replacement;
+
+            $this->client->request($form->getMethod(), $form->getUri(), $rawValues, $rawFiles);
+            self::assertTrue(
+                $this->client->getResponse()->isRedirect(),
+                $this->client->getResponse()->getContent() ?: ''
+            );
+        } finally {
+            @unlink($tempFile);
+        }
+
+        $em->clear();
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        self::assertInstanceOf(Contest::class, $contest);
+        self::assertSame('txt', $contest->getContestProblemsetType());
+
+        /** @var ContestProblemsetContent[] $contents */
+        $contents = $em->getRepository(ContestProblemsetContent::class)
+            ->findBy(['contest' => $contest]);
+        self::assertCount(1, $contents);
+        self::assertSame($replacementContent, $contents[0]->getContent());
+    }
+
+    public function testEditContestProblemsetDeleteCheckbox(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $problemsetContent = "problemset to keep, then delete\n";
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        self::assertInstanceOf(Contest::class, $contest);
+
+        $content = (new ContestProblemsetContent())
+            ->setContest($contest)
+            ->setContent($problemsetContent);
+        $contest
+            ->setContestProblemsetContent($content)
+            ->setContestProblemsetType('txt');
+        $em->persist($content);
+        $em->flush();
+        $em->clear();
+
+        $contestId = 'demo';
+        $this->verifyPageResponse('GET', "/jury/contests/$contestId/edit", 200);
+
+        self::assertSelectorExists('#contest_clearContestProblemset:not([disabled])');
+        self::assertSelectorExists('label[for="contest_clearContestProblemset"]');
+
+        $crawler = $this->getCurrentCrawler();
+        $form = $crawler->selectButton('Save')->form();
+        $this->client->submit($form);
+
+        self::assertTrue(
+            $this->client->getResponse()->isRedirect(),
+            $this->client->getResponse()->getContent() ?: ''
+        );
+
+        $em->clear();
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        self::assertInstanceOf(Contest::class, $contest);
+        self::assertSame($problemsetContent, $contest->getContestProblemset());
+        self::assertSame('txt', $contest->getContestProblemsetType());
+
+        $this->verifyPageResponse('GET', "/jury/contests/$contestId/edit", 200);
+        $crawler = $this->getCurrentCrawler();
+        $form = $crawler->selectButton('Save')->form();
+        $formName = str_replace('[', '', static::$addForm);
+        $form[$formName]['clearContestProblemset']->tick();
+        $this->client->submit($form);
+
+        self::assertTrue(
+            $this->client->getResponse()->isRedirect(),
+            $this->client->getResponse()->getContent() ?: ''
+        );
+
+        $em->clear();
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        self::assertInstanceOf(Contest::class, $contest);
+        self::assertNull($contest->getContestProblemsetContent());
+        self::assertNull($contest->getContestProblemsetType());
+
+        $contents = $em->getRepository(ContestProblemsetContent::class)
+            ->findBy(['contest' => $contest]);
+        self::assertCount(0, $contents);
+    }
+
     public function testUnlockJudgeTasks(): void
     {
         // First, check that adding a submission creates a queue task and 4 judge tasks.
@@ -502,5 +741,28 @@ class ContestControllerTest extends JuryControllerTestCase
         $this->verifyPageResponse('GET', $deleteUrl, 200);
         $crawler = $this->getCurrentCrawler();
         self::assertStringStartsWith('Delete contest ', $crawler->filter('h1')->text());
+    }
+
+    public function testFinalizeBlockerShowsUnjudgedSubmissionExternalId(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+        $this->loadFixture(UnjudgedSubmissionFixture::class);
+
+        $this->verifyPageResponse('GET', '/jury/contests/demo/finalize', 200);
+        $blockers = $this->getCurrentCrawler()
+            ->filter('.alert-danger li')
+            ->each(fn(Crawler $node) => $node->text());
+
+        $unjudgedBlockers = array_values(array_filter(
+            $blockers,
+            fn(string $blocker) => str_starts_with($blocker, 'Unjudged submissions found:')
+        ));
+        self::assertCount(1, $unjudgedBlockers, implode("\n", $blockers));
+        self::assertSame(
+            'Unjudged submissions found: ' . UnjudgedSubmissionFixture::EXTERNAL_ID,
+            $unjudgedBlockers[0]
+        );
     }
 }

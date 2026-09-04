@@ -2,10 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\Problem;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
+use App\Service\ClarificationService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -34,6 +37,7 @@ class PublicController extends BaseController
     use ScoreboardSubmissionsTrait;
     public function __construct(
         DOMJudgeService $dj,
+        protected readonly ClarificationService $clarificationService,
         protected readonly ConfigurationService $config,
         protected readonly ScoreboardService $scoreboardService,
         protected readonly StatisticsService $stats,
@@ -295,12 +299,99 @@ class PublicController extends BaseController
     #[Route(path: '/submissions-data/team/{teamId}/problem/{problemId}.json', name: 'public_submissions_data_cell')]
     public function submissionsDataAction(Request $request, ?string $teamId, ?string $problemId): JsonResponse
     {
-        $contest = $this->dj->getCurrentContest(onlyPublic: true);
+        /** @var Contest|null $contest */
+        $contest = $request->attributes->get('_domjudge_static_scoreboard_contest')
+            ?? $this->dj->getCurrentContest(onlyPublic: true);
 
         if (!$contest) {
             throw $this->createNotFoundException('No active contest found');
         }
 
-        return $this->getSubmissionsDataResponse($contest, $teamId, $problemId);
+        $forceUnfrozen = (bool)$request->attributes->get(
+            '_domjudge_static_scoreboard_force_unfrozen',
+            false
+        );
+
+        return $this->getSubmissionsDataResponse($contest, $teamId, $problemId, $forceUnfrozen);
+    }
+
+    #[Route(path: '/clarifications/by-problem/{probId}', name: 'public_clarification_by_prob')]
+    public function viewByProblemAction(Request $request, string $probId): Response
+    {
+        $contest = $this->dj->getCurrentContest();
+        if (!$contest) {
+            throw new NotFoundHttpException('No active contest');
+        }
+
+        $problem = $this->em->getRepository(Problem::class)->findByExternalId($probId);
+        if ($problem === null) {
+            throw new NotFoundHttpException(sprintf('Problem %s not found', $probId));
+        }
+        $contestProblem = $problem->getContestProblems();
+        $foundProblemInContest = false;
+        foreach ($contestProblem as $cp) {
+            if ($cp->getContest()->getCid() === $contest->getCid()) {
+                $foundProblemInContest = true;
+                break;
+            }
+        }
+        if (!$foundProblemInContest) {
+            throw new NotFoundHttpException(sprintf('Problem %s not in current contest', $probId));
+        }
+
+        /** @var Clarification[] $clarifications */
+        $clarifications = [];
+        if ($contest->getStartTimeObject()?->getTimestamp() <= time()) {
+            $clarifications = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), problem: strval($problem->getProbid()))
+                ->select('clar', 'p')
+                ->andWhere('clar.sender IS NULL')
+                ->andWhere('clar.recipient IS NULL')
+                ->addOrderBy('clar.submittime', 'DESC')
+                ->addOrderBy('clar.clarid', 'DESC')
+                ->getQuery()
+                ->getResult();
+        }
+
+        $data = [
+            'clarifications' => $clarifications,
+            'problem' => $problem,
+        ];
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('clarifications_by_problem_modal.html.twig', $data);
+        } else {
+            return $this->render('clarifications_by_problem.html.twig', $data);
+        }
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    #[Route(path: '/clarifications/{clarId}', name: 'public_clarification')]
+    public function viewAction(Request $request, string $clarId): Response
+    {
+        $categories = $this->config->get('clar_categories');
+        $contest    = $this->dj->getCurrentContest();
+        /** @var Clarification|null $clarification */
+        $clarification = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), externalClarificationId: $clarId)
+            ->select('clar, p, c')
+            ->andWhere('clar.sender IS NULL')
+            ->andWhere('clar.recipient IS NULL')
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($clarification === null) {
+            throw new NotFoundHttpException(sprintf('Clarification %s not found', $clarId));
+        }
+
+        $data = [
+            'clarification' => $clarification,
+            'categories' => $categories,
+        ];
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('clarification_modal.html.twig', $data);
+        } else {
+            return $this->render('clarification.html.twig', $data);
+        }
     }
 }

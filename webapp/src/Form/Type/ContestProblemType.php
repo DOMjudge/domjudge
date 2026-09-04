@@ -53,7 +53,7 @@ class ContestProblemType extends AbstractType
             'label' => 'Colour',
             'attr' => [
                 'data-color-picker' => '',
-                'size' => 6,
+                'size' => 8,
             ],
         ]);
         $builder->add('lazyEvalResults', ChoiceType::class, [

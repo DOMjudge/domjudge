@@ -8,7 +8,7 @@
     </h2>
     {% if clarifications is not empty %}
         <h1 class="teamoverview">Clarifications</h1>
-        {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarifications} %}
+        {% include 'partials/clarification_list.html.twig' with {clarifications: clarifications} %}
     {% endif %}
 {% else %}
 
@@ -35,14 +35,14 @@
             {% if clarifications is empty %}
                 <p class="nodata">No clarifications.</p>
             {% else %}
-                {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarifications} %}
+                {% include 'partials/clarification_list.html.twig' with {clarifications: clarifications} %}
             {% endif %}
 
             <h1 class="teamoverview">Clarification Requests</h1>
             {% if clarificationRequests is empty %}
                 <p class="nodata">No clarification request.</p>
             {% else %}
-                {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarificationRequests} %}
+                {% include 'partials/clarification_list.html.twig' with {clarifications: clarificationRequests} %}
             {% endif %}
 
             <div class="m-1">

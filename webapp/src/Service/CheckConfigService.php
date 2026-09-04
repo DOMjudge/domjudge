@@ -64,6 +64,7 @@ readonly class CheckConfigService
             'adminpass' => $this->checkAdminPass(),
             'comparerun' => $this->checkDefaultCompareRunExist(),
             'filesizememlimit' => $this->checkScriptFilesizevsMemoryLimit(),
+            'diskspacescriptfilesize' => $this->checkDiskspaceErrorVsScriptFilesizeLimit(),
             'debugdisabled' => $this->checkDebugDisabled(),
             'tmpdirwritable' => $this->checkTmpdirWritable(),
             'hashtime' => $this->checkHashTime(),
@@ -369,6 +370,29 @@ readonly class CheckConfigService
             'recommend to include a margin to be on the safe side. The current ' .
             '`script_filesize_limit` = `' . $this->config->get('script_filesize_limit') . '` ' .
             'while `memory_limit` = `' . $this->config->get('memory_limit') . '`.'
+        );
+    }
+
+    public function checkDiskspaceErrorVsScriptFilesizeLimit(): ConfigCheckItem
+    {
+        $this->stopwatch->start(__FUNCTION__);
+        $diskspace_error = $this->config->get('diskspace_error');
+        $script_filesize_limit = $this->config->get('script_filesize_limit');
+        // Both values are in kB.
+        if ($diskspace_error < $script_filesize_limit) {
+            $result = 'W';
+        } else {
+            $result = 'O';
+        }
+        $this->stopwatch->stop(__FUNCTION__);
+        return new ConfigCheckItem(
+            caption: 'Disk space error threshold vs. script filesize limit',
+            result: $result,
+            desc: 'If the disk space error threshold is lower than the script filesize limit, ' .
+            'the judgehost may run out of disk space during compilation without triggering ' .
+            'the disk space check. We recommend `diskspace_error` >= `script_filesize_limit`. ' .
+            'The current `diskspace_error` = `' . $diskspace_error . '` kB ' .
+            'while `script_filesize_limit` = `' . $script_filesize_limit . '` kB.'
         );
     }
 

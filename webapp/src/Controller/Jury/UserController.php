@@ -10,6 +10,7 @@ use App\Entity\Team;
 use App\Entity\User;
 use App\Form\Type\GeneratePasswordsType;
 use App\Form\Type\UserType;
+use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -35,6 +36,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class UserController extends BaseController
 {
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         EntityManagerInterface $em,
         DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
@@ -84,7 +86,7 @@ class UserController extends BaseController
             $userdata    = [];
             $useractions = [];
 
-            $this->addEntityCheckbox($userdata, $u, $u->getExternalid(), 'user-checkbox', fn(User $user) => $user->getUserid() !== $this->dj->getUser()->getUserid());
+            $this->addEntityCheckbox($userdata, $u, $u->getExternalid(), 'user-checkbox', fn(User $user) => $user->getUserid() !== $this->authService->getUser()->getUserid());
 
             // Get whatever fields we can from the user object itself.
             foreach ($table_fields as $k => $v) {
@@ -240,7 +242,7 @@ class UserController extends BaseController
             $this->saveEntity($user, $user->getUserid(), false);
 
             // If we save the currently logged in used, update the login token.
-            if ($user->getUserid() === $this->dj->getUser()->getUserid()) {
+            if ($user->getUserid() === $this->authService->getUser()->getUserid()) {
                 $token = new UsernamePasswordToken(
                     $user,
                     'main',
@@ -404,7 +406,7 @@ class UserController extends BaseController
             'externalid',
             'jury_users',
             'No users could be deleted (you cannot delete your own account).',
-            fn(User $user) => $user->getUserid() !== $this->dj->getUser()->getUserid()
+            fn(User $user) => $user->getUserid() !== $this->authService->getUser()->getUserid()
         );
     }
 }

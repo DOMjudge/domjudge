@@ -3,8 +3,12 @@
 namespace App\Tests\Unit\Controller\Team;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use App\Entity\Clarification;
 use App\Entity\Contest;
+use App\Entity\Problem;
+use App\Entity\Team;
 use App\Tests\Unit\BaseTestCase;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -193,5 +197,41 @@ class MiscControllerTest extends BaseTestCase
         $this->verifyPageResponse('GET', '/team', 200);
 
         self::assertSelectorNotExists('a:contains("Docs")');
+    }
+
+    /**
+     * Jury and admin users are not restricted by the clarification query
+     * builder, but their own team page should still only show the
+     * clarifications their team is allowed to see.
+     */
+    public function testTeamOverviewHidesClarificationsForOtherTeams(): void
+    {
+        // `team` is needed to reach /team at all, `admin` to be exempt from the
+        // restriction the clarification query builder applies to teams: that
+        // exemption is exactly what this page has to compensate for.
+        $this->roles = ['admin', 'team'];
+        $this->logOut();
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        $otherTeam = $em->getRepository(Team::class)->findOneBy(['name' => 'DOMjudge']);
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => 'hello']);
+
+        $clarification = (new Clarification())
+            ->setExternalid('for-the-other-team')
+            ->setContest($contest)
+            ->setSubmittime(Utils::now())
+            ->setRecipient($otherTeam)
+            ->setJuryMember('admin')
+            ->setProblem($problem)
+            ->setBody('This message is only meant for the other team')
+            ->setAnswered(true);
+        $em->persist($clarification);
+        $em->flush();
+
+        $this->verifyPageResponse('GET', '/team', 200);
+        self::assertSelectorTextNotContains('body', 'This message is only meant for the other team');
     }
 }

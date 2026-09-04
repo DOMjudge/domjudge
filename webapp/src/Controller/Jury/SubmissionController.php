@@ -24,6 +24,7 @@ use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\TestcaseGroup;
 use App\Form\Type\SubmissionsFilterType;
+use App\Service\AuthorizedUserService;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -64,6 +65,7 @@ class SubmissionController extends BaseController
     use JudgeRemainingTrait;
 
     public function __construct(
+        protected readonly AuthorizedUserService $authService,
         EntityManagerInterface $em,
         protected readonly EventLogService $eventLogService,
         DOMJudgeService $dj,
@@ -301,6 +303,12 @@ class SubmissionController extends BaseController
                 ->setParameter('rejudgingId', $rejudgingId)
                 ->setParameter('submitId', $submitId)
                 ->setParameter('contest', $contest)
+                // A submission can have more than one judging within the same
+                // rejudging, for example when a judging was aborted or
+                // requeued after an internal error. Make this more robust by
+                // picking the most recent one.
+                ->orderBy('j.judgingid', 'DESC')
+                ->setMaxResults(1)
                 ->getQuery()
                 ->getOneOrNullResult();
             if ($judging) {
@@ -554,6 +562,8 @@ class SubmissionController extends BaseController
         $lastJudging = null;
         /** @var Testcase[] $lastRuns */
         $lastRuns = [];
+        /** @var array<int, JudgingRun> $lastRunsByTestcaseId */
+        $lastRunsByTestcaseId = [];
         if ($lastSubmission !== null) {
             $lastJudging = $this->em->createQueryBuilder()
                 ->from(Judging::class, 'j')
@@ -569,14 +579,22 @@ class SubmissionController extends BaseController
             if ($lastJudging !== null) {
                 $lastRuns = $this->em->createQueryBuilder()
                     ->from(Testcase::class, 't')
-                    ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
-                    ->select('t', 'jr')
+                    ->select('t')
                     ->andWhere('t.problem = :problem')
-                    ->setParameter('judging', $lastJudging)
                     ->setParameter('problem', $submission->getProblem())
                     ->orderBy('t.ranknumber')
                     ->getQuery()
                     ->getResult();
+
+                // Testcase entities may already have judging_runs hydrated for the current judging,
+                // so fetch previous runs separately and index them explicitly.
+                /** @var JudgingRun[] $previousRuns */
+                $previousRuns = $this->em->getRepository(JudgingRun::class)->findBy([
+                    'judging' => $lastJudging,
+                ]);
+                foreach ($previousRuns as $previousRun) {
+                    $lastRunsByTestcaseId[$previousRun->getTestcase()->getTestcaseid()] = $previousRun;
+                }
             }
         }
 
@@ -643,6 +661,7 @@ class SubmissionController extends BaseController
             'externalRuns' => $externalRuns,
             'runsOutput' => $runsOutput,
             'lastRuns' => $lastRuns,
+            'lastRunsByTestcaseId' => $lastRunsByTestcaseId,
             'unjudgableReasons' => $unjudgableReasons,
             'verificationRequired' => (bool)$this->config->get('verification_required'),
             'claimWarning' => $claimWarning,
@@ -887,7 +906,7 @@ class SubmissionController extends BaseController
     }
 
     private function allowEdit(): bool {
-        return $this->dj->getUser()->getTeam() && $this->dj->checkrole('team');
+        return $this->authService->getUser()->getTeam() && $this->authService->checkRole('team');
     }
 
     /**
@@ -1138,7 +1157,7 @@ class SubmissionController extends BaseController
                 $filesToSubmit[] = new UploadedFile($tmpfname, $file->getFilename(), null, null, true);
             }
 
-            $team = $this->dj->getUser()->getTeam();
+            $team = $this->authService->getUser()->getTeam();
             /** @var Language $language */
             $language   = $submittedData['language'];
             $entryPoint = $submittedData['entry_point'];
@@ -1147,7 +1166,7 @@ class SubmissionController extends BaseController
             }
             $submittedSubmission = $this->submissionService->submitSolution(
                 $team,
-                $this->dj->getUser(),
+                $this->authService->getUser(),
                 $submittedData['problem'],
                 $submission->getContest(),
                 $language,
@@ -1265,7 +1284,7 @@ class SubmissionController extends BaseController
             $comment  = $request->request->get('comment');
             $judging
                 ->setVerified($verified)
-                ->setJuryMember($verified ? $this->dj->getUser()->getUserIdentifier() : null)
+                ->setJuryMember($verified ? $this->authService->getUser()->getUserIdentifier() : null)
                 ->setVerifyComment($comment);
 
             $this->em->flush();
@@ -1330,7 +1349,7 @@ class SubmissionController extends BaseController
             $comment  = $request->request->get('comment');
             $judgement
                 ->setVerified($verified)
-                ->setJuryMember($verified ? $this->dj->getUser()->getUserIdentifier() : null)
+                ->setJuryMember($verified ? $this->authService->getUser()->getUserIdentifier() : null)
                 ->setVerifyComment($comment);
 
             $this->em->flush();
@@ -1353,7 +1372,7 @@ class SubmissionController extends BaseController
         Request $request,
         ?string &$claimWarning
     ): ?RedirectResponse {
-        $user   = $this->dj->getUser();
+        $user   = $this->authService->getUser();
         $action = ($request->get('claim') || $request->get('claimdiff')) ? 'claim' : 'unclaim';
 
         $type = ($judging instanceof ExternalJudgement) ?'shadow difference' : 'submission';
