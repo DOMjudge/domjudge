@@ -39,7 +39,7 @@ if [ "$(uname -m)" = "x86_64" ]; then
 fi
 
 # Location of the pre-built chroot tree and where to bind mount from:
-CHROOTORIGINAL="@judgehost_chrootdir@"
+CHROOTDIR="@judgehost_chrootdir@"
 
 dj_umount() {
 	set +e
@@ -54,22 +54,39 @@ dj_umount() {
 	set -e
 }
 
+CHROOTDIR_OPT=""
+while getopts "c:" opt; do
+  case $opt in
+    c)
+      CHROOTDIR="${CHROOTDIR//domjudge/$OPTARG}"
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      ;;
+    *)
+      echo "Invalid option specified." >&2
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+
 case "$1" in
 	check)
-		if [ ! -d "$CHROOTORIGINAL" ]; then
-			>&2 echo "chroot dir '$CHROOTORIGINAL' does not exist, run dj_make_chroot"
+		if [ ! -d "$CHROOTDIR" ]; then
+			>&2 echo "chroot dir '$CHROOTDIR' does not exist, run dj_make_chroot"
 			exit 2
 		fi
 		for i in $SUBDIRMOUNTS ; do
-			if [ ! -e "$CHROOTORIGINAL/$i" ]; then
-				>&2 echo "chroot subdir '$CHROOTORIGINAL/$i' not found, rerun dj_make_chroot"
+			if [ ! -e "$CHROOTDIR/$i" ]; then
+				>&2 echo "chroot subdir '$CHROOTDIR/$i' not found, rerun dj_make_chroot"
 				exit 2
 			fi
 		done
 		# This directory is removed at the very end of the debootstrap run, if it's
 		# still present, building the chroot did not complete.
-		if [ -d "$CHROOTORIGINAL/debootstrap" ]; then
-			>&2 echo "chroot dir '$CHROOTORIGINAL' incomplete, rerun dj_make_chroot"
+		if [ -d "$CHROOTDIR/debootstrap" ]; then
+			>&2 echo "chroot dir '$CHROOTDIR' incomplete, rerun dj_make_chroot"
 			exit 2
 		fi
 		# Check that sudo works
@@ -94,11 +111,11 @@ case "$1" in
 
 			# Some dirs may be links to others, e.g. /lib64 -> /lib.
 			# Preserve those; bind mount the others.
-			if [ -L "$CHROOTORIGINAL/$i" ]; then
-				ln -s "$(readlink "$CHROOTORIGINAL/$i")" "$i"
-			elif [ -d "$CHROOTORIGINAL/$i" ]; then
+			if [ -L "$CHROOTDIR/$i" ]; then
+				ln -s "$(readlink "$CHROOTDIR/$i")" "$i"
+			elif [ -d "$CHROOTDIR/$i" ]; then
 				mkdir -p $i
-				sudo -n mount --bind "$CHROOTORIGINAL/$i" "$i" < /dev/null
+				sudo -n mount --bind "$CHROOTDIR/$i" "$i" < /dev/null
 				# Mount read-only for extra security. Note that this
 				# must be executed separately from the bind mount.
 				sudo -n mount -o remount,ro,bind "$PWD/$i" < /dev/null
@@ -119,9 +136,9 @@ case "$1" in
 		rmdir dev || true
 
 		for i in $SUBDIRMOUNTS ; do
-			if [ -L "$CHROOTORIGINAL/$i" ]; then
+			if [ -L "$CHROOTDIR/$i" ]; then
 				rm -f "$i"
-			elif [ -d "$CHROOTORIGINAL/$i" ]; then
+			elif [ -d "$CHROOTDIR/$i" ]; then
 				dj_umount "$PWD/$i"
 			fi
 		done
@@ -133,6 +150,8 @@ case "$1" in
 
 	*)
 		echo "Unknown argument '$1' given."
+		echo "Valid arguments: check, start & stop."
+		echo "Valid options: -c <custom_chroot>."
 		exit 1
 esac
 

@@ -1558,18 +1558,20 @@ class DOMJudgeService
         }
         $runExecutable = $this->getImmutableRunExecutable($problem);
 
-        return Utils::jsonEncode(
-            [
-                'time_limit' => $problem->getProblem()->getTimelimit() * $submission->getLanguage()->getTimeFactor(),
-                'memory_limit' => $memoryLimit,
-                'output_limit' => $outputLimit,
-                'process_limit' => $this->config->get('process_limit'),
-                'entry_point' => $submission->getEntryPoint(),
-                'pass_limit' => $problem->getProblem()->getMultipassLimit(),
-                'hash' => $runExecutable->getHash(),
-                'overshoot' => $overshoot,
-            ]
-        );
+        $settings = [
+            'time_limit' => $problem->getProblem()->getTimelimit() * $submission->getLanguage()->getTimeFactor(),
+            'memory_limit' => $memoryLimit,
+            'output_limit' => $outputLimit,
+            'process_limit' => $this->config->get('process_limit'),
+            'entry_point' => $submission->getEntryPoint(),
+            'pass_limit' => $problem->getProblem()->getMultipassLimit(),
+            'hash' => $runExecutable->getHash(),
+            'overshoot' => $overshoot,
+        ];
+        if ($submission->getLanguage()->getChrootDirectory()) {
+            $settings['chroot'] = $submission->getLanguage()->getChrootDirectory();
+        }
+        return Utils::jsonEncode($settings);
     }
 
     public function getCompareConfig(ContestProblem $contestProblem, ?string $outputValidatorFlags = null): string
@@ -1577,32 +1579,34 @@ class DOMJudgeService
         $compareExecutable = $this->getImmutableCompareExecutable($contestProblem);
         $problem = $contestProblem->getProblem();
         $outputValidatorFlags ??= $problem->getSpecialCompareArgs();
-        return Utils::jsonEncode(
-            [
-                'script_timelimit' => $this->config->get('script_timelimit'),
-                'script_memory_limit' => $this->config->get('script_memory_limit'),
-                'script_filesize_limit' => $this->config->get('script_filesize_limit'),
-                'compare_args' => $outputValidatorFlags,
-                'combined_run_compare' => $problem->isInteractiveProblem(),
-                'hash' => $compareExecutable->getHash(),
-                'is_scoring_problem' => $problem->isScoringProblem(),
-            ]
-        );
+        // Passing the chroot here would require knowing the language (so also the submission), for now we'll assume
+        // that run and compare are done with the same chroot.
+        return Utils::jsonEncode([
+            'script_timelimit' => $this->config->get('script_timelimit'),
+            'script_memory_limit' => $this->config->get('script_memory_limit'),
+            'script_filesize_limit' => $this->config->get('script_filesize_limit'),
+            'compare_args' => $outputValidatorFlags,
+            'combined_run_compare' => $problem->isInteractiveProblem(),
+            'hash' => $compareExecutable->getHash(),
+            'is_scoring_problem' => $problem->isScoringProblem(),
+        ]);
     }
 
     public function getCompileConfig(Submission $submission): string
     {
         $compileExecutable = $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable();
-        return Utils::jsonEncode(
-            [
-                'script_timelimit' => $this->config->get('script_timelimit'),
-                'script_memory_limit' => $this->config->get('script_memory_limit'),
-                'script_filesize_limit' => $this->config->get('script_filesize_limit'),
-                'language_extensions' => $submission->getLanguage()->getExtensions(),
-                'filter_compiler_files' => $submission->getLanguage()->getFilterCompilerFiles(),
-                'hash' => $compileExecutable->getHash(),
-            ]
-        );
+        $settings = [
+            'script_timelimit' => $this->config->get('script_timelimit'),
+            'script_memory_limit' => $this->config->get('script_memory_limit'),
+            'script_filesize_limit' => $this->config->get('script_filesize_limit'),
+            'language_extensions' => $submission->getLanguage()->getExtensions(),
+            'filter_compiler_files' => $submission->getLanguage()->getFilterCompilerFiles(),
+            'hash' => $compileExecutable->getHash(),
+        ];
+        if ($submission->getLanguage()->getChrootDirectory()) {
+            $settings['chroot'] = $submission->getLanguage()->getChrootDirectory();
+        }
+        return Utils::jsonEncode($settings);
     }
 
     public function getScoreboardZip(
