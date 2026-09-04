@@ -28,6 +28,21 @@ expect_meta() {
 	expect_file "$META" "$1"
 }
 
+# Check that a numeric metadata value lies in [min, max). Timings are
+# never exact: runguard only notices the command's exit when it wakes
+# up, and after a hard time limit it sends SIGTERM, waits, sends SIGKILL
+# and waits again before it records the end time. Matching an exact
+# value would make the test depend on how busy the machine is.
+expect_meta_between() {
+	key="$1"
+	min="$2"
+	max="$3"
+	expect_meta "^$key: " || return
+	value=$(sed -n "s/^$key: //p" "$META")
+	awk -v v="$value" -v lo="$min" -v hi="$max" 'BEGIN { exit !(v >= lo && v < hi) }' \
+		|| fail "expected '$key' in [$min, $max), got $value"
+}
+
 expect_stdout() {
 	expect_file "$LOG1" "$1"
 }
@@ -250,7 +265,7 @@ test_nprocs() {
 
 test_meta() {
 	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS -t 2 -M "$META" sleep 1
-	expect_meta 'wall-time: 1.0'
+	expect_meta_between wall-time 1.0 1.3
 	expect_meta 'cpu-time: 0.0'
 	expect_meta 'sys-time: 0.0'
 	expect_meta 'time-used: wall-time'
@@ -264,14 +279,16 @@ test_meta() {
 
 	# shellcheck disable=SC2024
 	echo "DOMjudge" | sudo $RUNGUARD $RUNGUARD_OPTIONS -t 2 -M "$META" rev > "$LOG1" 2> "$LOG2"
-	expect_meta 'wall-time: 0.0'
+	expect_meta_between wall-time 0.0 0.2
 	expect_meta 'stdout-bytes: 9'
 	expect_stdout "egdujMOD"
 
 	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -C 3.1 -t 1.4 -M "$META" ./threads 2 3
 	expect_meta 'exitcode: 143'
 	expect_meta 'signal: 14'
-	expect_meta 'wall-time: 1.5'
+	# Killed at the 1.4s limit, plus the 0.1s runguard waits after SIGTERM
+	# and again after SIGKILL, minus whichever of those the exit cuts short.
+	expect_meta_between wall-time 1.5 1.8
 	expect_meta 'time-result: hard-timelimit'
 
 	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS -C 1:5 -M "$META" ./threads 2 3
