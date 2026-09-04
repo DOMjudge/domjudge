@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Controller\API;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use App\Controller\API\GeneralInfoController;
+use App\DataFixtures\Test\PendingSubmissionFixture;
 use App\DataFixtures\Test\SampleSubmissionsFixture;
 use App\Service\DOMJudgeService;
 use Generator;
@@ -35,8 +36,8 @@ class GeneralInfoControllerTest extends BaseTestCase
 
             static::assertIsArray($response);
             static::assertCount(5, $response);
-            static::assertEquals(GeneralInfoController::CCS_SPEC_API_VERSION, $response['version']);
-            static::assertEquals(GeneralInfoController::CCS_SPEC_API_URL, $response['version_url']);
+            static::assertEquals('2026-01', $response['version']);
+            static::assertEquals('https://ccs-specs.icpc.io/2026-01/contest_api', $response['version_url']);
             static::assertEquals('DOMjudge', $response['name']);
             static::assertMatchesRegularExpression('/^\d+\.\d+\.\d+/', $response['domjudge']['version']);
             static::assertEquals('test', $response['domjudge']['environment']);
@@ -78,12 +79,13 @@ class GeneralInfoControllerTest extends BaseTestCase
      */
     public function testStatusAdminSubmissionsPresent(): void
     {
-        $this->loadFixture(SampleSubmissionsFixture::class);
+        $this->loadFixtures([SampleSubmissionsFixture::class, PendingSubmissionFixture::class]);
         $response = $this->verifyApiJsonResponse('GET', "/status", 200, 'admin');
 
+        // SampleSubmissionsFixture creates two judged submissions; PendingSubmissionFixture adds one without a judging.
         $expected = [[
-            'num_submissions' => 2,
-            'num_queued' => 2,
+            'num_submissions' => 3,
+            'num_queued' => 1,
             'num_judging' => 0,
             'cid' => $this->getDemoContestId(),
         ]];

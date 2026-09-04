@@ -4,6 +4,7 @@ namespace App\Controller\API;
 
 use App\DataTransferObject\Access;
 use App\DataTransferObject\AccessEndpoint;
+use App\Utils\CcsApiVersion;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -81,6 +82,9 @@ class AccessController extends AbstractApiController
             $submissionsProperties[] = 'files';
         }
 
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+
         $capabilities = [];
 
         // Add capabilities
@@ -90,7 +94,7 @@ class AccessController extends AbstractApiController
         }
         if ($this->authService->checkRole('team') && $this->authService->getUser()->getTeam()) {
             $capabilities[] = 'team_submit';
-            $capabilities[] = 'team_clar';
+            $capabilities[] = $ccsApiVersion->clarCapability();
         }
         if ($this->authService->checkRole('api_writer')) {
             $capabilities[] = 'proxy_submit';
@@ -161,6 +165,9 @@ class AccessController extends AbstractApiController
                         'rgb',
                         'color',
                         'time_limit',
+                        'memory_limit',
+                        'output_limit',
+                        'code_limit',
                         'test_data_count',
                         'statement',
                         'attachments',
@@ -252,6 +259,7 @@ class AccessController extends AbstractApiController
                         'end_time',
                         'end_contest_time',
                         'max_run_time',
+                        'current',
                         // DOMjudge specific properties:
                         'valid',
                     ],

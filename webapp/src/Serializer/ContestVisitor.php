@@ -4,14 +4,17 @@ namespace App\Serializer;
 
 use App\DataTransferObject\FileWithName;
 use App\DataTransferObject\ImageFile;
+use App\DataTransferObject\ImageTag;
 use App\Entity\Contest;
 use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
+use JMS\Serializer\JsonSerializationVisitor;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -35,7 +38,30 @@ readonly class ContestVisitor implements EventSubscriberInterface
                 'format' => 'json',
                 'method' => 'onPreSerialize',
             ],
+            [
+                'event' => Events::POST_SERIALIZE,
+                'class' => Contest::class,
+                'format' => 'json',
+                'method' => 'onPostSerialize',
+            ],
         ];
+    }
+
+    public function onPostSerialize(ObjectEvent $event): void
+    {
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+        if (!$ccsApiVersion->useRelTimes()) {
+            return;
+        }
+
+        /** @var JsonSerializationVisitor $visitor */
+        $visitor = $event->getVisitor();
+        /** @var Contest $contest */
+        $contest = $event->getObject();
+
+        $property = new StaticPropertyMetadata(Contest::class, 'penalty_time', null);
+        $visitor->visitProperty($property, Utils::relTime($contest->getPenaltyTime() * 60, floored: true));
     }
 
     public function onPreSerialize(ObjectEvent $event): void
@@ -60,6 +86,7 @@ readonly class ContestVisitor implements EventSubscriberInterface
                 filename: 'banner.' . $extension,
                 width: $imageSize[0],
                 height: $imageSize[1],
+                tag: [ImageTag::LIGHT],
             ));
         } else {
             $contest->setBannerForApi();

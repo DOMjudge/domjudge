@@ -7,12 +7,17 @@ use App\Entity\AbstractJudgement;
 use App\Entity\Contest;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
+use App\Entity\Team;
+use App\Entity\TeamCategory;
 use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Utils\FreezeData;
+use App\Utils\SimplifiedVerdict;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -41,6 +46,13 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     protected readonly array $verdicts;
 
     private bool $useExternalJudgements = false;
+
+    /**
+     * The team to compare each judgement's submitting team against when redacting
+     * judgement_type_id for non-privileged callers. Null means the caller may see all
+     * detailed verdicts (privileged role or no team context).
+     */
+    private ?Team $ownTeamForRedaction = null;
 
     public function __construct(
         AuthorizedUserService $authService,
@@ -108,6 +120,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         $contestId = null;
+        $contest = null;
         if ($request->attributes->has('cid')) {
             $contestId = $this->getContestId($request);
             $contest = $this->em->getRepository(Contest::class)->find($contestId);
@@ -153,10 +166,28 @@ class JudgementController extends AbstractRestController implements QueryObjectT
             $queryBuilder->andWhere('j.result IS NOT NULL');
         }
 
+        $this->ownTeamForRedaction = null;
         if (!$roleAllowsVisibility) {
-            $queryBuilder
-                ->andWhere('s.team = :team')
-                ->setParameter('team', $this->authService->getUser()->getTeam());
+            $currentTeam = $this->authService->getUser()->getTeam();
+            // During the contest freeze (or when no contest is in scope), restrict listings to the
+            // caller's own team. Otherwise the caller may see other teams' judgements, but
+            // transformObject() redacts judgement_type_id so only the simplified verdict is exposed.
+            $contestIsFrozen = $contest !== null && (new FreezeData($contest))->showFrozen();
+            if ($contestId === null || $contestIsFrozen) {
+                $queryBuilder
+                    ->andWhere('s.team = :team')
+                    ->setParameter('team', $currentTeam);
+            } else {
+                // Never expose judgements for hidden (non-public) teams. Mirrors the
+                // visibility filter used in SubmissionController::getQueryBuilder().
+                $queryBuilder
+                    ->join('s.team', 't')
+                    ->join('t.categories', 'cat', Join::WITH, 'BIT_AND(cat.types, :scoring) = :scoring')
+                    ->setParameter('scoring', TeamCategory::TYPE_SCORING)
+                    ->andWhere('cat.visible = 1 OR s.team = :team')
+                    ->setParameter('team', $currentTeam);
+                $this->ownTeamForRedaction = $currentTeam;
+            }
         }
 
         if ($request->query->has('submission_id')) {
@@ -193,6 +224,17 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     {
         /** @var AbstractJudgement $judging */
         $judgementTypeId = $judging->getResult() ? $this->verdicts[$judging->getResult()] : null;
-        return new JudgingWrapper($judging, $judgementTypeId);
+        $simplifiedJudgementTypeId = $judgementTypeId === null
+            ? null
+            : SimplifiedVerdict::for($judgementTypeId)->value;
+
+        // Hide the detailed verdict for other teams' judgements when the caller is a non-privileged
+        // team viewing during a non-frozen contest. The simplified verdict is still exposed.
+        if ($this->ownTeamForRedaction !== null
+            && $judging->getSubmission()->getTeam()->getTeamid() !== $this->ownTeamForRedaction->getTeamid()) {
+            $judgementTypeId = null;
+        }
+
+        return new JudgingWrapper($judging, $judgementTypeId, $simplifiedJudgementTypeId);
     }
 }

@@ -17,7 +17,7 @@ class SampleSubmissionsFixture extends AbstractTestDataFixture
     {
         $submissionData = [
             // team name,         problem shortname, language, submittime,            entry point, result
-            ['DOMjudge',          'A',               'cpp',    '2021-01-01 12:34:56', null,        'success'],
+            ['DOMjudge',          'A',               'cpp',    '2021-01-01 12:34:56', null,        'correct'],
             ['Example teamname',  'C',               'java',   '2021-03-04 12:00:00', 'Main',      'wrong-answer'],
         ];
 
@@ -36,6 +36,7 @@ class SampleSubmissionsFixture extends AbstractTestDataFixture
                 ->setEntryPoint($submissionItem[4]);
             $judging = (new Judging())
                 ->setContest($contest)
+                ->setSubmission($submission)
                 ->setStarttime(Utils::toEpochFloat($submissionItem[3]))
                 ->setEndtime(Utils::toEpochFloat($submissionItem[3]) + 5)
                 ->setResult($submissionItem[5]);

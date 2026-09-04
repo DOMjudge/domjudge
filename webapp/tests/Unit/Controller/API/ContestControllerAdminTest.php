@@ -209,6 +209,7 @@ EOF;
                 'href'     => "contests/$id/banner",
                 'mime'     => 'image/svg+xml',
                 'filename' => 'banner.svg',
+                'tag'      => ['light'],
                 'width'    => 510,
                 'height'   => 1122,
             ],

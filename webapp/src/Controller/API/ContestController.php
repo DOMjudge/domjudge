@@ -16,7 +16,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
 use App\Service\ScoreboardService;
-use App\Utils\EventFeedFormat;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use BadMethodCallException;
 use Doctrine\Inflector\InflectorFactory;
@@ -732,7 +732,8 @@ class ContestController extends AbstractRestController
             $since_id = -1;
         }
 
-        $format = $this->config->get('event_feed_format');
+        /** @var CcsApiVersion $format */
+        $format = $this->config->get('ccs_api_version');
 
         $response = new StreamedResponse();
         $response->headers->set('X-Accel-Buffering', 'no');
@@ -779,12 +780,16 @@ class ContestController extends AbstractRestController
                 unset($toCheck['teamaffiliations']);
                 unset($toCheck['contestproblems']);
 
+                /** @var CcsApiVersion $ccsApiVersion */
+                $ccsApiVersion = $this->config->get('ccs_api_version');
+
                 foreach ($toCheck as $plural => $class) {
                     $serializerMetadata = $metadataFactory->getMetadataForClass($class);
                     /** @var PropertyMetadata $propertyMetadata */
                     foreach ($serializerMetadata->propertyMetadata as $propertyMetadata) {
                         if (is_array($propertyMetadata->groups) &&
-                            !in_array('Default', $propertyMetadata->groups)) {
+                            !in_array('Default', $propertyMetadata->groups) &&
+                            !in_array($ccsApiVersion->value, $propertyMetadata->groups)) {
                             $skippedProperties[$plural][] = $propertyMetadata->serializedName;
                         }
                     }
@@ -899,21 +904,25 @@ class ContestController extends AbstractRestController
                             unset($data[$property]);
                         }
                     }
+
+                    $data = $this->eventLogService->applyCcsVersionChanges($event->getEndpointtype(), $data);
+
                     switch ($format) {
-                        case EventFeedFormat::Format_2020_03:
+                        case CcsApiVersion::Format_2020_03:
                             $result = [
                                 'id' => (string)$event->getEventid(),
-                                'type' => (string)$event->getEndpointtype(),
-                                'op' => (string)$event->getAction(),
+                                'type' => $event->getEndpointtype(),
+                                'op' => $event->getAction(),
                                 'data' => $data,
                             ];
                             break;
-                        case EventFeedFormat::Format_2022_07:
+                        case CcsApiVersion::Format_2023_06:
+                        case CcsApiVersion::Format_2026_01:
                             if ($event->getAction() === EventLogService::ACTION_DELETE) {
                                 $data = null;
                             }
-                            $id   = (string)$event->getEndpointid() ?: null;
-                            $type = (string)$event->getEndpointtype();
+                            $id   = $event->getEndpointid() ?: null;
+                            $type = $event->getEndpointtype();
                             if ($type === 'contests') {
                                 // Special case: the type for a contest is singular and the ID must not be set
                                 $id   = null;

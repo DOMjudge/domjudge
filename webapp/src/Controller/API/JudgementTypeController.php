@@ -3,6 +3,8 @@
 namespace App\Controller\API;
 
 use App\DataTransferObject\JudgementType;
+use App\Utils\CcsApiVersion;
+use App\Utils\SimplifiedVerdict;
 use Doctrine\ORM\NonUniqueResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -86,6 +88,9 @@ class JudgementTypeController extends AbstractApiController
     protected function getJudgementTypes(?array $filteredOn = null): array
     {
         $verdicts = $this->config->getVerdicts(['final', 'external']);
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+        $useSimplified = $ccsApiVersion === CcsApiVersion::Format_2026_01;
 
         $result = [];
         foreach ($verdicts as $name => $label) {
@@ -106,8 +111,21 @@ class JudgementTypeController extends AbstractApiController
                 name: str_replace('-', ' ', $name),
                 penalty: (bool)$penalty,
                 solved: $solved,
+                simplifiedJudgementTypeId: $useSimplified ? SimplifiedVerdict::for($label)->value : null,
             );
         }
+
+        // The RE simplified verdict is not a real DOMjudge verdict; expose it for 2026-01 so clients
+        // can resolve the simplified_judgement_type_id of rejected judgements.
+        if ($useSimplified && ($filteredOn === null || in_array(SimplifiedVerdict::RE->value, $filteredOn))) {
+            $result[] = new JudgementType(
+                id: SimplifiedVerdict::RE->value,
+                name: 'Rejected',
+                penalty: true,
+                solved: false,
+            );
+        }
+
         return $result;
     }
 }
