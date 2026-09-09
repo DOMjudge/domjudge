@@ -975,6 +975,7 @@ class DOMJudgeService
             ->leftJoin('p.problemStatementContent', 'content')
             ->select('c', 'cp', 'p', 'a', 'content')
             ->andWhere('c.cid = :cid')
+            ->andWhere('cp.allowSubmit = 1')
             ->setParameter('cid', $contest->getCid())
             ->getQuery()
             ->getSingleResult();
