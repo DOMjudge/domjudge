@@ -35,7 +35,7 @@ DEBIAN_ARCHLIST="amd64,arm64,armel,armhf,i386,mips,mips64el,mipsel,ppc64el,s390x
 UBUNTU_ARCHLIST="amd64,arm64,armhf,i386,powerpc,ppc64el,s390x"
 
 if ! command -v lsb_release; then
-    echo "Please install `lsb_release`."
+    echo "Please install lsb_release."
     exit 1
 fi
 
