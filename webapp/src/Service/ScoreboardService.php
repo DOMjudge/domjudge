@@ -815,9 +815,11 @@ class ScoreboardService
             ->leftJoin('cat.teams', 't')
             ->leftJoin('t.affiliation', 'affil')
             ->andWhere('cat.visible = 1')
+            ->andWhere('BIT_AND(cat.types, :scoring) = :scoring')
             ->orderBy('cat.name')
             ->addOrderBy('affil.name')
-            ->addOrderBy('t.name');
+            ->addOrderBy('t.name')
+            ->setParameter('scoring', TeamCategory::TYPE_SCORING);
 
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
