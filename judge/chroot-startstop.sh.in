@@ -54,7 +54,6 @@ dj_umount() {
 	set -e
 }
 
-CHROOTDIR_OPT=""
 while getopts "c:" opt; do
   case $opt in
     c)

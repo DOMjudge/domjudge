@@ -35,6 +35,7 @@ class LanguageType extends AbstractExternalIdEntityType
             'required' => false,
         ]);
         $builder->add('chrootDirectory', TextType::class, [
+            'label' => 'Alternative judge directory',
             'required' => false,
         ]);
         $builder->add('allowSubmit', CheckboxType::class, [

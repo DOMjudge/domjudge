@@ -1602,7 +1602,6 @@ class JudgeDaemon
         if ($chroot_compile !== $this->chroot_current) {
             logmsg(LOG_INFO, "  🔏 Submission should be done in different chroot '" . $chroot_compile . "', leaving chroot '" . $this->chroot_current . "'");
             logmsg(LOG_INFO, "  🔓 Executing chroot script: '" . self::CHROOT_SCRIPT . " stop'");
-            sleep(1);
             if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'stop'], $retval)) {
                 logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                 $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
@@ -1613,7 +1612,6 @@ class JudgeDaemon
                 // rm: and worst case, the chroot script will fail the next time when
                 // rm: starting.
             }
-            sleep(1);
             if (!in_array($chroot_compile, $this->chroots_checked)) {
                 logmsg(LOG_INFO, " 🔏 Executing chroot script: '" . self::CHROOT_SCRIPT . " -c " . $chroot_compile . " check'");
                 if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, '-c', $chroot_compile, 'check'])) {
@@ -1622,14 +1620,12 @@ class JudgeDaemon
                     $this->chroots_checked[] = $chroot_compile;
                 }
             }
-            sleep(1);
             logmsg(LOG_INFO, "  🔒 Executing chroot script: '" . self::CHROOT_SCRIPT . " -c " . $chroot_compile . " start'");
             if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, '-c', $chroot_compile, 'start'], $retval)) {
                 logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                 $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
                 return false;
             }
-            sleep(1);
             $this->chroot_current = $chroot_compile;
         }
 
@@ -2024,7 +2020,6 @@ class JudgeDaemon
             if ($chroot_run !== $this->chroot_current) {
                 logmsg(LOG_INFO, "  🔏 Submission should be done in different chroot '" . $chroot_run . "', leaving chroot '" . $this->chroot_current . "'");
                 logmsg(LOG_INFO, "  🔓 Executing chroot script: '" . self::CHROOT_SCRIPT . " stop'");
-                sleep(1);
                 if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'stop'], $retval)) {
                     logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                     $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
@@ -2035,7 +2030,6 @@ class JudgeDaemon
                     // rm: and worst case, the chroot script will fail the next time when
                     // rm: starting.
                 }
-                sleep(1);
                 if (!in_array($chroot_run, $this->chroots_checked)) {
                     logmsg(LOG_INFO, " 🔏 Executing chroot script: '" . self::CHROOT_SCRIPT . " -c " . $chroot_run . " check'");
                     if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, '-c', $chroot_run, 'check'])) {
@@ -2044,14 +2038,12 @@ class JudgeDaemon
                         $this->chroots_checked[] = $chroot_run;
                     }
                 }
-                sleep(1);
                 logmsg(LOG_INFO, "  🔒 Executing chroot script: '" . self::CHROOT_SCRIPT . " -c " . $chroot_run . " start'");
                 if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, '-c', $chroot_run, 'start'], $retval)) {
                     logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                     $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
                     return false;
                 }
-                sleep(1);
             }
             $realWorkdir = realpath($passdir);
             $prefix = '/' . basename(dirname($realWorkdir)) . '/' . basename($realWorkdir);
@@ -2268,7 +2260,6 @@ class JudgeDaemon
                 if ($chroot_compare !== $this->chroot_current) {
                     logmsg(LOG_INFO, "  🔏 Submission comparisan should be done in different chroot '" . $chroot_compare . "', leaving chroot '" . $this->chroot_current . "'");
                     logmsg(LOG_INFO, "  🔓 Executing chroot script: '" . self::CHROOT_SCRIPT . " stop'");
-                    sleep(1);
                     if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'stop'], $retval)) {
                         logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                         $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
@@ -2279,7 +2270,6 @@ class JudgeDaemon
                         // rm: and worst case, the chroot script will fail the next time when
                         // rm: starting.
                     }
-                    sleep(1);
                     if (!in_array($chroot_compare, $this->chroots_checked)) {
                         logmsg(LOG_INFO, " 🔏 Executing chroot script: '" . self::CHROOT_SCRIPT . " -c " . $chroot_compare . " check'");
                         if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, '-c', $chroot_compare, 'check'])) {
@@ -2288,14 +2278,12 @@ class JudgeDaemon
                             $this->chroots_checked[] = $chroot_compare;
                         }
                     }
-                    sleep(1);
                     logmsg(LOG_INFO, "  🔒 Executing chroot script: '" . self::CHROOT_SCRIPT . " -c " . $chroot_compare . " start'");
                     if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, '-c', $chroot_compare, 'start'], $retval)) {
                         logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                         $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
                         return false;
                     }
-                    sleep(1);
                 }
                 $compare_args = array_merge(
                     $gainroot,
