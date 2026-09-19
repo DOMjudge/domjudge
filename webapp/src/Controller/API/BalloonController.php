@@ -94,4 +94,19 @@ class BalloonController extends AbstractApiController
     {
         $balloonService->setDone($balloonId);
     }
+
+    /**
+     * Mark a specific balloon as undone.
+     */
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')"))]
+    #[Rest\Post(path: '/{balloonId<\d+>}/undone')]
+    #[OA\Response(
+        response: 204,
+        description: 'The balloon was now marked as undone or already marked as such.'
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/balloonId')]
+    public function markUndoneAction(int $balloonId, BalloonService $balloonService): void
+    {
+        $balloonService->setUndone($balloonId);
+    }
 }
