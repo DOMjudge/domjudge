@@ -13,6 +13,7 @@ class SelfRegisteredUserFixture extends AbstractTestDataFixture
     {
         $user = new User();
         $user
+            ->setExternalid('selfregister')
             ->setUsername('selfregister')
             ->setName('selfregistered user for example team')
             ->setPlainPassword('demo')
