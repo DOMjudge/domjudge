@@ -15,7 +15,7 @@ class UpdateUser extends AddUser
         ?string $password,
         ?bool $enabled,
         ?string $teamId,
-        array $roles
+        ?array $roles
     ) {
         parent::__construct($username, $name, $ip, $password, $enabled, $teamId, $roles);
     }
