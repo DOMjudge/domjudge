@@ -231,8 +231,31 @@ readonly class BalloonService
      */
     public function setDone(int|array $balloonId): void
     {
-        $em = $this->em;
-        $balloons = $em->createQueryBuilder()
+        foreach ($this->getBalloons($balloonId) as $balloon) {
+            $balloon->setDone(true);
+        }
+        $this->em->flush();
+    }
+
+    /**
+     * @param int|list<int> $balloonId
+     */
+    public function setUndone(int|array $balloonId): void
+    {
+        foreach ($this->getBalloons($balloonId) as $balloon) {
+            $balloon->setDone(false);
+        }
+        $this->em->flush();
+    }
+
+    /**
+     * @param int|list<int> $balloonId
+     *
+     * @return list<Balloon>
+     */
+    private function getBalloons(int|array $balloonId): array
+    {
+        $balloons = $this->em->createQueryBuilder()
             ->from(Balloon::class, 'b')
             ->select('b')
             ->andWhere('b.balloonid IN (:balloonIds)')
@@ -242,9 +265,7 @@ readonly class BalloonService
         if (count($balloons) !== count((array)$balloonId)) {
             throw new NotFoundHttpException('balloon(s) not found');
         }
-        foreach ($balloons as $balloon) {
-            $balloon->setDone(true);
-        }
-        $em->flush();
+
+        return $balloons;
     }
 }

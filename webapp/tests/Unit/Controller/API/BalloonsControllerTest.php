@@ -36,7 +36,7 @@ class BalloonsControllerTest extends BaseTestCase
         }
     }
 
-    public function testMarkAsDone(): void
+    public function testMarkAsDoneUndone(): void
     {
         $expectedBalloon = ['team'=>'exteam: Example teamname', 'problem'=>'U'];
         $contestId = $this->getUnitContestId();
@@ -58,6 +58,16 @@ class BalloonsControllerTest extends BaseTestCase
         $response = $this->verifyApiJsonResponse('GET', $url, 200, 'balloonuser');
         self::assertCount(1, $response);
         $this->verifyApiJsonResponse('POST', $postUrl, 204, 'balloonuser');
+
+        $postUrl = "/contests/$contestId/balloons/$balloonId/undone";
+        $this->verifyApiJsonResponse('POST', $postUrl, 204, 'balloonuser');
+        $url = "/contests/$contestId/balloons?todo=1";
+        /** @var array $response */
+        $response = $this->verifyApiJsonResponse('GET', $url, 200, 'balloonuser');
+        self::assertCount(1, $response);
+        foreach ($expectedBalloon as $key => $value) {
+            static::assertEquals($response[0][$key], $value);
+        }
     }
 
     public function testMarkInvalidBalloonAsDone(): void
