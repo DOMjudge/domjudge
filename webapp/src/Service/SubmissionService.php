@@ -754,7 +754,7 @@ class SubmissionService
             if ($countQueryExtra === null) {
                 continue;
             }
-            $countQueryBuilder = (clone $queryBuilder)->select('COUNT(s.submitid) AS cnt');
+            $countQueryBuilder = (clone $queryBuilder)->select('COUNT(DISTINCT s.submitid) AS cnt');
             if (!empty($countQueryExtra)) {
                 $countQueryBuilder->andWhere($countQueryExtra);
             }
@@ -765,7 +765,7 @@ class SubmissionService
 
         // Handle shadowUnverified count separately due to score comparison complexity
         if ($showShadowUnverified) {
-            $shadowCountBuilder = (clone $queryBuilder)->select('COUNT(s.submitid) AS cnt');
+            $shadowCountBuilder = (clone $queryBuilder)->select('COUNT(DISTINCT s.submitid) AS cnt');
             $shadowCountBuilder->andWhere('ej.verified = 0 AND ej.result IS NOT NULL');
 
             // Always count score differences for scoring problems as unverified
@@ -789,7 +789,7 @@ class SubmissionService
             ->getQuery()
             ->getSingleScalarResult();
         $counts['inContest'] = (clone $queryBuilder)
-            ->select('COUNT(s.submitid)')
+            ->select('COUNT(DISTINCT s.submitid)')
             ->join('s.contest', 'c')
             ->andWhere('s.submittime BETWEEN c.starttime AND c.endtime')
             ->andWhere('tc.visible = true')
