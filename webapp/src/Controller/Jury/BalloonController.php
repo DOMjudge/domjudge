@@ -195,7 +195,7 @@ class BalloonController extends AbstractController
         return $this->redirectToRoute("jury_balloons", ['contestId' => $contestId]);
     }
 
-    #[Route(path: '/contests/{contestId}/balloons/{balloonId}/done', name: 'jury_balloons_setundone')]
+    #[Route(path: '/contests/{contestId}/balloons/{balloonId}/undone', name: 'jury_balloons_setundone')]
     public function setUndoneAction(string $contestId, int $balloonId, BalloonService $balloonService): RedirectResponse
     {
         $this->dj->getContestByExternalId($contestId); // Validate contest exists
