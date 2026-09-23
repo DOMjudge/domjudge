@@ -60,7 +60,7 @@ class ClarificationController extends BaseController
         $contestProblem = $problem->getContestProblems();
         $foundProblemInContest = false;
         foreach ($contestProblem as $cp) {
-            if ($cp->getContest()->getCid() === $contest->getCid()) {
+            if ($cp->getContest()->getCid() === $contest->getCid() && $cp->getAllowSubmit()) {
                 $foundProblemInContest = true;
                 break;
             }
