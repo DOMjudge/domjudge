@@ -189,6 +189,47 @@ class ProblemControllerTest extends BaseTestCase
     }
 
     /**
+     * Test that problems teams cannot submit to are not accessible by team and public routes.
+     */
+    public function testProblemNotAllowedForSubmission(): void
+    {
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+        /** @var Problem $problem */
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => 'hello']);
+        $problem->getTestcases()->get(0)->setSample(true);
+        $em->flush();
+        $probId = $problem->getProbid();
+
+        $this->logIn();
+
+        $endpoints = [
+            "/team/problems/{$probId}/statement",
+            "/team/{$probId}/samples.zip",
+            "/team/clarifications/by-problem/{$probId}",
+            "/public/problems/{$probId}/statement",
+            "/public/{$probId}/samples.zip",
+        ];
+        foreach ($endpoints as $endpoint) {
+            $this->client->request('GET', $endpoint);
+            $statusCode = $this->client->getResponse()->getStatusCode();
+            static::assertSame(200, $statusCode, "Expected status code 200, got {$statusCode} for {$endpoint}");
+        }
+
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+        $em->getRepository(Problem::class)->findOneBy(['externalid' => 'hello'])
+            ->getContestProblems()->first()->setAllowSubmit(false);
+        $em->flush();
+
+        foreach ($endpoints as $endpoint) {
+            $this->client->request('GET', $endpoint);
+            $statusCode = $this->client->getResponse()->getStatusCode();
+            static::assertSame(404, $statusCode, "Expected status code 404, got {$statusCode} for {$endpoint}");
+        }
+    }
+
+    /**
      * Test that the problems page does not show page, statement, sample data before contest start.
      */
     public function testAccessProblemBeforeContestStarts(): void
