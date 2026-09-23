@@ -106,7 +106,7 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
         $contestProblem = $this->em->getRepository(ContestProblem::class)->findByProblemAndContest($contest, $probId);
-        if (!$contestProblem) {
+        if (!$contestProblem || !$contestProblem->getAllowSubmit()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
 
