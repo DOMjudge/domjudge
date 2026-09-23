@@ -121,6 +121,8 @@ symfony_console()
 		ARG=""
 	fi
 	DATABASE_URL=
+	host=$(urlencode "${domjudge_DBHOST}")
+	db=$(urlencode "${domjudge_DBNAME}")
 
 	# If we do not have an explicit user and password set, determine them from passed arguments,
 	# ~/.my.cnf or the current user
@@ -148,8 +150,6 @@ symfony_console()
 
 		if [ -n "$DBA_USER" ]; then
 			user=$(urlencode "${DBA_USER}")
-			host=$(urlencode "${domjudge_DBHOST}")
-			db=$(urlencode "${domjudge_DBNAME}")
 			if [ -n "$DBA_PASSWD" ]; then
 				DATABASE_URL="mysql://$user:$(urlencode "${DBA_PASSWD}")@$host:${domjudge_DBPORT}/$db"
 			else
@@ -157,7 +157,8 @@ symfony_console()
 			fi
 		fi
 	else
-		DATABASE_URL="mysql://$DBUSER:$(urlencode "${PASSWD}")@$host:${domjudge_DBPORT}/$db"
+		user=$(urlencode "${DBUSER}")
+		DATABASE_URL="mysql://$user:$(urlencode "${PASSWD}")@$host:${domjudge_DBPORT}/$db"
 	fi
 
 	if [ -n "$DATABASE_URL" ]; then
@@ -282,21 +283,27 @@ install_scoring_problems()
 	( cd "$SCORINGEXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
 }
 
+load_example_data()
+{
+	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD \
+		symfony_console domjudge:load-example-data
+}
+
 install_pass_fail_examples()
 {
-	symfony_console domjudge:load-example-data
+	load_example_data
 	install_pass_fail_problems
 }
 
 install_scoring_examples()
 {
-	symfony_console domjudge:load-example-data
+	load_example_data
 	install_scoring_problems
 }
 
 install_examples()
 {
-	symfony_console domjudge:load-example-data
+	load_example_data
 	install_pass_fail_problems
 	install_scoring_problems
 }
