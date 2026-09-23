@@ -853,6 +853,12 @@ class DOMJudgeService
 
         $this->addSamplesToZip($zip, $contestProblem);
 
+        if ($zip->numFiles === 0) {
+            // Closing an archive without entries removes the file instead of writing it.
+            $zip->close();
+            throw new NotFoundHttpException(sprintf('Problem p%d has no downloadable samples', $contestProblem->getProbid()));
+        }
+
         $zip->close();
         $zipFileContents = file_get_contents($tempFilename);
         unlink($tempFilename);
@@ -864,15 +870,11 @@ class DOMJudgeService
         /** @var Testcase[] $testcases */
         $testcases = $this->em->createQueryBuilder()
             ->from(Testcase::class, 'tc')
-            ->join('tc.problem', 'p')
-            ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
             ->join('tc.content', 'tcc')
             ->select('tc', 'tcc')
             ->andWhere('tc.problem = :problem')
             ->andWhere('tc.sample = 1')
-            ->andWhere('cp.allowSubmit = 1')
             ->setParameter('problem', $problem->getProblem())
-            ->setParameter('contest', $problem->getContest())
             ->orderBy('tc.testcaseid')
             ->getQuery()
             ->getResult();
