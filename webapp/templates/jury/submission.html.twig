@@ -25,6 +25,14 @@
             max-height: {{ thumbnailSize }}px;
         }
 
+        {% for runIdx in runsOutput | keys %}
+            {% for colname in ['output_run_colwidth', 'output_error_colwidth'] %}
+                .output_text_truncate_columns_{{ colname }}_{{ runIdx }} {
+                    column-width: {{ runsOutput[runIdx][colname] }}ch;
+                }
+            {% endfor %}
+        {% endfor %}
+
         .scoring-details-container .full-precision { display: none; }
         .scoring-details-container.show-full .rounded-precision { display: none; }
         .scoring-details-container.show-full .full-precision { display: inline; }
@@ -956,7 +964,7 @@
                                 {% if runsOutput[runIdx].output_run is empty %}
                                     <p class="nodata">There was no program output.</p>
                                 {% else %}
-                                    <pre class="output_text">{{ runsOutput[runIdx].output_run | convertUnprintableChars }}</pre>
+                                    <pre class="output_text output_text_truncate_columns output_text_truncate_columns_output_run_colwidth_{{ runIdx }}">{{ runsOutput[runIdx].output_run | convertUnprintableChars }}</pre>
                                 {% endif %}
                             {% endif %}
 
@@ -964,7 +972,7 @@
                             {% if runsOutput[runIdx].output_error is empty %}
                                 <p class="nodata">There was no stderr output.</p>
                             {% else %}
-                                <pre class="output_text">{{ runsOutput[runIdx].output_error | convertUnprintableChars }}</pre>
+                                <pre class="output_text output_text_truncate_columns output_text_truncate_columns_output_error_colwidth_{{ runIdx }}">{{ runsOutput[runIdx].output_error | convertUnprintableChars }}</pre>
                             {% endif %}
 
                             <h5>Judging system output (info/debug/errors)</h5>
