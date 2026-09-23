@@ -227,7 +227,11 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
 
         confirmIndividually = dj_utils.confirm("Confirm individually for every problem", False)
         for problem in problems:
+            problem = str(problem)
             print(f'\nPreparing problem \'{problem}\'.')
+            if not re.match(r'^[a-zA-Z0-9_.-]+$', problem) or problem in ('.', '..'):
+                print(f'Invalid problem identifier \'{problem}\'.')
+                exit(3)
             if not os.path.isdir(problem) or not os.path.isfile(f'{problem}/problem.yaml'):
                 print('Problem directory not found or doesn\'t contain a problem.yaml.')
                 exit(3)
