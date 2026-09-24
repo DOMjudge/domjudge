@@ -110,3 +110,17 @@ jobs:
         with:
           name: Event File
           path: ${{ github.event_path }}
+
+  unit-tests-gate:
+    name: unit-tests-gate
+    needs: [changes, unit-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check matrix status
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          echo "One or more matrix jobs failed or were cancelled."
+          exit 1
+      - name: Success
+        run: echo "All required jobs passed or were intentionally skipped."
