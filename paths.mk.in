@@ -58,6 +58,15 @@ BASEURL         = @BASEURL@
 # API URL the judgehost credentials point at, derived from BASEURL.
 RESTAPIURL      = @RESTAPIURL@
 
+# Short identifier of this instance. Used for the webserver and PHP-FPM
+# configuration file names and the default database name and user, so that
+# multiple instances can coexist on one host.
+INSTANCE        = @INSTANCE@
+
+# Path DOMjudge is served under, derived from BASEURL. Empty when it lives
+# in the root of the webserver.
+URLPREFIX       = @URLPREFIX@
+
 # Autoconf prefixes and paths
 FHS_ENABLED    = @FHS_ENABLED@
 
@@ -123,6 +132,17 @@ judgehost_dirs = $(judgehost_bindir) $(judgehost_etcdir) $(judgehost_libdir) \
 
 docs_dirs      = $(addprefix $(domjudge_docdir)/,manual examples logos)
 
+# Template lines marked with @ONLY_IF_PREFIX@ are only kept when DOMjudge is
+# served under a path prefix, and lines marked with @ONLY_IF_ROOT@ only when
+# it lives in the root of the webserver. The marker itself is always
+# removed. This is needed where the two cases differ in kind rather than in
+# value, e.g. Apache's Alias versus DocumentRoot.
+ifeq ($(URLPREFIX),)
+substprefixlines = -e '/^@ONLY_IF_PREFIX[@]/d' -e 's,^@ONLY_IF_ROOT[@],,'
+else
+substprefixlines = -e 's,^@ONLY_IF_PREFIX[@],,' -e '/^@ONLY_IF_ROOT[@]/d'
+endif
+
 # Macro to substitute configure variables.
 # Defined in makefile to allow for expansion of ${prefix} etc. during
 # build and install, conforming to the GNU coding standards, see:
@@ -160,7 +180,14 @@ define substconfigvars
 	-e 's,@RUNUSER[@],@RUNUSER@,g' \
 	-e 's,@RUNGROUP[@],@RUNGROUP@,g' \
 	-e 's,@BASEURL[@],@BASEURL@,g' \
+	-e 's,@INSTANCE[@],@INSTANCE@,g' \
+	-e 's,@HTTPSVAR[@],@HTTPSVAR@,g' \
+	-e 's,@URLPREFIXSLASH[@],@URLPREFIXSLASH@,g' \
+	-e 's,@URLPREFIX[@],@URLPREFIX@,g' \
+	-e 's,@URLSERVERNAME[@],@URLSERVERNAME@,g' \
+	-e 's,@URLLISTEN[@],@URLLISTEN@,g' \
 	-e 's,@PHPVERSION[@],@PHPVERSION@,g' \
+	$(substprefixlines) \
 	> $@
 @chmod $(shell stat -c '%a' $<) $@
 endef

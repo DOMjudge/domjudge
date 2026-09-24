@@ -161,10 +161,11 @@ endif
 	@echo "Optionally:"
 	@echo "    - Install the create-cgroup service to setup the secure judging restrictions:"
 	@echo "        cp judge/create-cgroups.service /etc/systemd/system/"
-	@echo "    - Install the judgehost service:"
-	@echo "        cp judge/domjudge-judgedaemon@.service /etc/systemd/system/"
+	@echo "    - Install the judgehost service. The unit is named after this"
+	@echo "      instance, since it refers to this installation's paths:"
+	@echo "        cp judge/domjudge-judgedaemon@.service /etc/systemd/system/$(INSTANCE)-judgedaemon@.service"
 	@echo "    - You can enable the judgehost on CPU core 1 with:"
-	@echo "        systemctl enable domjudge-judgedaemon@1"
+	@echo "        systemctl enable $(INSTANCE)-judgedaemon@1"
 	@echo ""
 
 check-root:
@@ -191,10 +192,36 @@ paths.mk:
 	@echo "have not run './configure' yet, aborting..."
 	@exit 1
 
+# Derive an instance name from the directory this source tree lives in, so
+# that several checkouts or worktrees can be installed in place next to
+# each other without overwriting each other's webserver configuration or
+# sharing a database. A checkout named 'domjudge' keeps the historic
+# defaults. Sanitizing is repeated by configure; it is done here as well
+# because the base URL below is built from the result.
+INPLACE_INSTANCE := $(shell echo '$(notdir $(CURDIR))' | tr 'A-Z' 'a-z' | \
+	sed -e 's/[^a-z0-9-][^a-z0-9-]*/-/g' -e 's/--*/-/g' \
+	    -e 's/^-//' -e 's/-$$//' | cut -c1-24 | sed -e 's/-$$//')
+ifeq ($(INPLACE_INSTANCE),domjudge)
+INPLACE_BASEURL := http://localhost/domjudge/
+else
+INPLACE_BASEURL := http://$(INPLACE_INSTANCE).localhost/
+endif
+
 # Configure for running in source tree, not meant for normal use:
 maintainer-conf: inplace-conf-common dependencies-dev
 inplace-conf: inplace-conf-common dependencies
 inplace-conf-common: dist
+# Without a derived name there is nothing to build the base URL from
+# either: it would come out as 'http://.localhost/', which configure has no
+# reason to reject. Both flags therefore have to be given by hand.
+	@if [ -z '$(INPLACE_INSTANCE)' ] && \
+	    ! { echo '$(CONFIGURE_FLAGS)' | grep -q -- '--with-instance-name=' && \
+	        echo '$(CONFIGURE_FLAGS)' | grep -q -- '--with-baseurl='; }; then \
+		echo "ERROR: cannot derive an instance name from directory '$(notdir $(CURDIR))'."; \
+		echo "       Pass both the name and a matching base URL explicitly:"; \
+		echo "         make maintainer-conf CONFIGURE_FLAGS=\"--with-instance-name=NAME --with-baseurl=http://NAME.localhost/\""; \
+		exit 1; \
+	fi
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
 	            --with-domserver_root=$(CURDIR) \
 	            --with-judgehost_root=$(CURDIR) \
@@ -207,7 +234,8 @@ inplace-conf-common: dist
 	            --with-judgehost_tmpdir=$(CURDIR)/output/tmp \
 	            --with-judgehost_judgedir=$(CURDIR)/output/judgings \
 	            --with-domserver_databasedumpdir=$(CURDIR)/output/db-dumps \
-	            --with-baseurl='http://localhost/domjudge/' \
+	            --with-instance-name='$(INPLACE_INSTANCE)' \
+	            --with-baseurl='$(INPLACE_BASEURL)' \
 	            $(CONFIGURE_FLAGS)
 
 # Install the system in place: don't really copy stuff, but create
@@ -236,6 +264,9 @@ inplace-install-l:
 	(cd webapp && composer auto-scripts)
 	@echo ""
 	@echo "========== Maintainer Install Completed =========="
+	@echo ""
+	@echo "Instance name: $(INSTANCE)"
+	@echo "Base URL.....: $(BASEURL)"
 	@echo ""
 	@echo "Next:"
 	@echo "    - Configure nginx"
@@ -283,13 +314,13 @@ inplace-install-l:
 	@echo "        And manually make sure the webserver has traversal access to: $(CURDIR)"
 	@echo "    - Configure webserver"
 	@echo "        Nginx + PHP-FPM:"
-	@echo "           ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/domjudge.conf"
-	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm.conf /etc/php/$(PHPVERSION)/fpm/pool.d/domjudge-fpm.conf"
+	@echo "           ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/$(INSTANCE).conf"
+	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm.conf /etc/php/$(PHPVERSION)/fpm/pool.d/$(INSTANCE)-fpm.conf"
 	@echo "           systemctl restart nginx"
 	@echo "           systemctl restart php-fpm"
 	@echo "        Apache 2:"
-	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/domjudge.conf"
-	@echo "           a2enconf domjudge"
+	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/$(INSTANCE).conf"
+	@echo "           a2enconf $(INSTANCE)"
 	@echo "           a2enmod rewrite headers"
 	@echo "           systemctl restart apache2"
 	@echo ""
@@ -345,36 +376,78 @@ endif
 		exit 1; \
 	fi
 
+# The installed file names are derived from the instance name so that
+# several in-place installs can coexist on one host. Refuse to take over a
+# file that belongs to a different source tree: two trees whose directory
+# names reduce to the same instance name would otherwise silently steal
+# each other's webserver configuration.
+define check_instance_clash
+@target='$(1)'; \
+if [ -L "$$target" ]; then \
+	current=`readlink -f "$$target" 2>/dev/null`; \
+	case "$$current" in $(CURDIR)/*) ;; *) \
+		echo "ERROR: '$$target' already belongs to another DOMjudge tree:"; \
+		echo "           $${current:-<unresolvable>}"; \
+		echo "       This tree is configured as instance '$(INSTANCE)'."; \
+		echo "       Reconfigure it with a different --with-instance-name=NAME."; \
+		exit 1 ;; \
+	esac; \
+elif [ -e "$$target" ]; then \
+	echo "ERROR: '$$target' exists and is not a symlink, so it was not"; \
+	echo "       created by an in-place install; refusing to overwrite it."; \
+	echo "       This tree is configured as instance '$(INSTANCE)'."; \
+	echo "       Reconfigure it with a different --with-instance-name=NAME."; \
+	exit 1; \
+fi
+endef
+
 inplace-postinstall-apache: inplace-postinstall-permissions
 	@if [ ! -d "/etc/apache2/conf-enabled" ]; then echo "Couldn't find directory /etc/apache2/conf-enabled. Is apache installed?"; false; fi
-	ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/domjudge.conf
-	a2enconf domjudge
+	$(call check_instance_clash,/etc/apache2/conf-available/$(INSTANCE).conf)
+	$(call check_instance_clash,/etc/apache2/conf-enabled/$(INSTANCE).conf)
+	ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/$(INSTANCE).conf
+	a2enconf $(INSTANCE)
 	a2enmod rewrite headers
 	systemctl restart apache2
 
 inplace-postinstall-nginx: inplace-postinstall-permissions
 	@if [ ! -d "/etc/nginx/" ]; then echo "Couldn't find directory /etc/nginx/. Is nginx installed?"; false; fi
-	@cmd="ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/conf.d/domjudge.conf"; \
-	if [ -d "/etc/nginx/sites-enabled/" ]; then \
-		cmd="ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/domjudge.conf"; \
-	fi; echo $$cmd; $$cmd
-	systemctl restart nginx
 	@if [ ! -d "$(debpool)" ] && [ ! -d "$(fedpool)" ]; then \
 		echo "Couldn't find directory $(debpool) or $(fedpool). Is php-fpm installed?"; false; \
 	fi
+	$(call check_instance_clash,/etc/nginx/sites-enabled/$(INSTANCE).conf)
+	$(call check_instance_clash,/etc/nginx/conf.d/$(INSTANCE).conf)
+	$(call check_instance_clash,$(debpool)/$(INSTANCE)-fpm.conf)
+	$(call check_instance_clash,$(fedpool)/$(INSTANCE)-fpm.conf)
+	@cmd="ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/conf.d/$(INSTANCE).conf"; \
+	if [ -d "/etc/nginx/sites-enabled/" ]; then \
+		cmd="ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/$(INSTANCE).conf"; \
+	fi; echo $$cmd; $$cmd
+	systemctl restart nginx
 	@service="php-fpm"; phppool="$(fedpool)"; \
 	if [ -d "$(debpool)" ]; then \
 		phppool="$(debpool)"; \
 		service="php$(PHPVERSION)-fpm"; \
 	fi; \
 	service="systemctl restart $$service"; \
-	ln="ln -sf $(CURDIR)/etc/domjudge-fpm.conf $$phppool/domjudge-fpm.conf"; \
+	ln="ln -sf $(CURDIR)/etc/domjudge-fpm.conf $$phppool/$(INSTANCE)-fpm.conf"; \
 	echo $$ln; echo $$service; $$ln; $$service
 
+# This file is copied rather than symlinked, so check_instance_clash cannot
+# tell it apart from another tree's; compare the contents instead, which
+# differ because they name this tree's judgehost paths.
 inplace-postinstall-judgedaemon:
-	cp $(CURDIR)/etc/sudoers-domjudge /etc/sudoers.d/domjudge
-	chown root:root /etc/sudoers.d/domjudge
-	chmod 0600 /etc/sudoers.d/domjudge
+	@target=/etc/sudoers.d/$(INSTANCE); \
+	if [ -e "$$target" ] && ! cmp -s $(CURDIR)/etc/sudoers-domjudge "$$target"; then \
+		echo "ERROR: '$$target' exists with different contents, so it"; \
+		echo "       probably belongs to another DOMjudge tree."; \
+		echo "       This tree is configured as instance '$(INSTANCE)'."; \
+		echo "       Reconfigure it with a different --with-instance-name=NAME."; \
+		exit 1; \
+	fi
+	cp $(CURDIR)/etc/sudoers-domjudge /etc/sudoers.d/$(INSTANCE)
+	chown root:root /etc/sudoers.d/$(INSTANCE)
+	chmod 0600 /etc/sudoers.d/$(INSTANCE)
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 inplace-uninstall-l:

@@ -2,11 +2,11 @@
 
 ; PHP-FPM configuration for DOMjudge
 
-[domjudge]
+[@INSTANCE@]
 user = @WEBSERVER_GROUP@
 group = @WEBSERVER_GROUP@
 
-listen = /var/run/php-fpm-domjudge.sock
+listen = /var/run/php-fpm-@INSTANCE@.sock
 listen.owner = @WEBSERVER_GROUP@
 listen.group = @WEBSERVER_GROUP@
 listen.mode = 0660
@@ -17,11 +17,11 @@ pm.max_requests = 5000
 pm.status_path = /fpm_status
 
 request_slowlog_timeout = 10s
-slowlog = /var/log/php-fpm-domjudge.log.slow
+slowlog = /var/log/php-fpm-@INSTANCE@.log.slow
 
 php_flag[display_errors] = off
 php_admin_flag[log_errors] = on
-php_admin_value[error_log] = /var/log/fpm-php.domjudge.log
+php_admin_value[error_log] = /var/log/fpm-php.@INSTANCE@.log
 
 ; Set these three to be at least the size of your largest testcase and
 ; largest expected program output.
