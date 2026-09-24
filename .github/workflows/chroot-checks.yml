@@ -42,3 +42,17 @@ jobs:
           name: ${{ matrix.arch }}-logs
           path: |
             /tmp/artifacts
+
+  check-chroot-arch-gate:
+    name: check-chroot-arch-gate
+    needs: [changes, check-chroot-arch]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check matrix status
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          echo "One or more matrix jobs failed or were cancelled."
+          exit 1
+      - name: Success
+        run: echo "All required jobs passed or were intentionally skipped."

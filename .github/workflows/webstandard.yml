@@ -135,3 +135,17 @@ jobs:
             /tmp/artifacts
             /var/log/nginx
             /opt/domjudge/domserver/webapp/var/log/*.log
+
+  standards-gate:
+    name: standards-gate
+    needs: [changes, standards]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check matrix status
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          echo "One or more matrix jobs failed or were cancelled."
+          exit 1
+      - name: Success
+        run: echo "All required jobs passed or were intentionally skipped."

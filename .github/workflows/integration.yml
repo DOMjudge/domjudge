@@ -220,3 +220,17 @@ jobs:
           ( cd ccs-specs && git reset --hard $CCS_SPECS_PINNED_SHA1 )
           export CHECK_API="${HOME}/ccs-specs/check-api.sh -j ${HOME}/yajsv"
           $CHECK_API -n -C -e -a 'strict=1' "http://admin:${ADMIN_PASSWORD}@localhost/domjudge/api"
+
+  integration-gate:
+    name: integration-gate
+    needs: [changes, integration]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check matrix status
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          echo "One or more matrix jobs failed or were cancelled."
+          exit 1
+      - name: Success
+        run: echo "All required jobs passed or were intentionally skipped."
