@@ -72,6 +72,7 @@
 	},
 	"require-dev": {
 		"ext-dom": "*",
+		"brianium/paratest": "^7.4",
 		"dama/doctrine-test-bundle": "^8.0",
 		"phpstan/phpstan": "^2.0",
 		"phpstan/phpstan-doctrine": "^2.0",
