@@ -124,13 +124,21 @@ class RejudgingService
             // So use the direct connection transaction API here.
             $this->em->getConnection()->beginTransaction();
 
-            $this->em->getConnection()->executeStatement(
+            // Claim the submission. The check above ran before this transaction, so another
+            // rejudging may have taken it since; going on regardless would create judge tasks
+            // for a submission somebody else owns.
+            $claimed = $this->em->getConnection()->executeStatement(
                 'UPDATE submission SET rejudgingid = :rejudgingid WHERE submitid = :submitid AND rejudgingid IS NULL',
                 [
                     'rejudgingid' => $rejudging->getRejudgingid(),
                     'submitid' => $judging->getSubmissionId(),
                 ]
             );
+            if (!$claimed) {
+                $this->em->getConnection()->rollBack();
+                $skipped[] = $judging;
+                continue;
+            }
 
             if ($singleJudging) {
                 $teamid = $judging->getSubmission()->getTeamId();

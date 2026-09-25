@@ -247,7 +247,7 @@ class JudgehostController extends AbstractFOSRestController
     #[IsGranted('ROLE_JUDGEHOST')]
     #[Rest\Put(path: '/update-judging/{hostname}/{judgetaskid<\d+>}')]
     #[OA\Response(
-        response: 200,
+        response: 204,
         description: 'When the judging has been updated'
     )]
     #[OA\RequestBody(
@@ -319,13 +319,24 @@ class JudgehostController extends AbstractFOSRestController
         if ($request->request->has('output_compile')) {
             // Note: we use ->get here instead of ->has since entry_point can be the empty string and then we do not
             // want to update the submission or send out an update event
-            if ($request->request->get('entry_point')) {
-                $this->em->wrapInTransaction(function () use ($query, $request, &$judging): void {
+            $entryPoint = (string)$request->request->get('entry_point');
+            // The entry point is detected from the compile output, which is under control of the
+            // submitter. Apply the same check as when submitting and ignore it otherwise, so it
+            // will be detected again when the submission is rejudged.
+            if ($entryPoint && !preg_match(SubmissionService::FILENAME_REGEX, $entryPoint)) {
+                $this->logger->warning(
+                    'Ignoring entry point with illegal characters reported by judgehost {hostname}: {entry_point}',
+                    ['hostname' => $hostname, 'entry_point' => $entryPoint]
+                );
+                $entryPoint = '';
+            }
+            if ($entryPoint) {
+                $this->em->wrapInTransaction(function () use ($query, $entryPoint, &$judging): void {
                     $submission = $judging->getSubmission();
-                    if ($submission->getEntryPoint() === $request->request->get('entry_point')) {
+                    if ($submission->getEntryPoint() === $entryPoint) {
                         return;
                     }
-                    $submission->setEntryPoint($request->request->get('entry_point'));
+                    $submission->setEntryPoint($entryPoint);
                     $this->em->flush();
                     $submissionId = $submission->getSubmitid();
                     $contestId    = $submission->getContest()->getCid();
@@ -469,7 +480,7 @@ class JudgehostController extends AbstractFOSRestController
      */
     #[IsGranted('ROLE_JUDGEHOST')]
     #[Rest\Post(path: '/add-debug-info/{hostname}/{judgeTaskId<\d+>}')]
-    #[OA\Response(response: 200, description: 'When the debug info has been added')]
+    #[OA\Response(response: 204, description: 'When the debug info has been added')]
     public function addDebugInfo(
         Request $request,
         #[OA\PathParameter(description: 'The hostname of the judgehost that wants to add the debug info')]
@@ -625,7 +636,9 @@ class JudgehostController extends AbstractFOSRestController
             'output_run',
             'output_diff',
             'output_error',
-            'output_system'
+            'output_system',
+            'start_time',
+            'end_time'
         ];
 
         foreach ($required as $argument) {

@@ -23,6 +23,6 @@ class AddUser
         #[OA\Property(nullable: true)]
         public readonly ?string $teamId,
         #[Serializer\Type('array<string>')]
-        public readonly array $roles,
+        public readonly ?array $roles,
     ) {}
 }

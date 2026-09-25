@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use App\DataFixtures\Test\UnjudgedSubmissionFixture;
 use App\Entity\Contest;
 use App\Entity\ContestProblemsetContent;
 use App\Entity\JudgeTask;
@@ -740,5 +741,28 @@ class ContestControllerTest extends JuryControllerTestCase
         $this->verifyPageResponse('GET', $deleteUrl, 200);
         $crawler = $this->getCurrentCrawler();
         self::assertStringStartsWith('Delete contest ', $crawler->filter('h1')->text());
+    }
+
+    public function testFinalizeBlockerShowsUnjudgedSubmissionExternalId(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+        $this->loadFixture(UnjudgedSubmissionFixture::class);
+
+        $this->verifyPageResponse('GET', '/jury/contests/demo/finalize', 200);
+        $blockers = $this->getCurrentCrawler()
+            ->filter('.alert-danger li')
+            ->each(fn(Crawler $node) => $node->text());
+
+        $unjudgedBlockers = array_values(array_filter(
+            $blockers,
+            fn(string $blocker) => str_starts_with($blocker, 'Unjudged submissions found:')
+        ));
+        self::assertCount(1, $unjudgedBlockers, implode("\n", $blockers));
+        self::assertSame(
+            'Unjudged submissions found: ' . UnjudgedSubmissionFixture::EXTERNAL_ID,
+            $unjudgedBlockers[0]
+        );
     }
 }

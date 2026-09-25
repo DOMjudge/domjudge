@@ -194,7 +194,10 @@ paths.mk:
 # Configure for running in source tree, not meant for normal use:
 maintainer-conf: inplace-conf-common dependencies-dev
 inplace-conf: inplace-conf-common dependencies
-inplace-conf-common: dist
+# In-place installs are not distributions: maintainer-conf and inplace-conf
+# install their respective dependencies (dev vs non-dev) above, and 'make domserver'
+# builds the default data archives. Only the configure script is needed here.
+inplace-conf-common: configure
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
 	            --with-domserver_root=$(CURDIR) \
 	            --with-judgehost_root=$(CURDIR) \
@@ -283,8 +286,8 @@ inplace-install-l:
 	@echo "        And manually make sure the webserver has traversal access to: $(CURDIR)"
 	@echo "    - Configure webserver"
 	@echo "        Nginx + PHP-FPM:"
-	@echo "           ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/"
-	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm /etc/php/$(PHPVERSION)/fpm/pool.d/domjudge.conf"
+	@echo "           ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/domjudge.conf"
+	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm.conf /etc/php/$(PHPVERSION)/fpm/pool.d/domjudge-fpm.conf"
 	@echo "           systemctl restart nginx"
 	@echo "           systemctl restart php-fpm"
 	@echo "        Apache 2:"

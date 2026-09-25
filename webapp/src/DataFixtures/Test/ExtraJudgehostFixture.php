@@ -7,11 +7,13 @@ use Doctrine\Persistence\ObjectManager;
 
 class ExtraJudgehostFixture extends AbstractTestDataFixture
 {
+    final public const HOSTNAME = 'example-judgehost2';
+
     public function load(ObjectManager $manager): void
     {
         $judgehost = new Judgehost();
         $judgehost
-            ->setHostname('example-judgehost2')
+            ->setHostname(self::HOSTNAME)
             ->setEnabled(false);
 
         $manager->persist($judgehost);

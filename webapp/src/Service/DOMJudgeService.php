@@ -62,6 +62,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Throwable;
 use Twig\Attribute\AsTwigFilter;
 use Twig\Attribute\AsTwigFunction;
 use Twig\Environment;
@@ -387,7 +388,7 @@ class DOMJudgeService
 
         if ($this->authService->checkRole('jury')) {
             if ($contest) {
-                $clarifications = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid())
+                $clarifications = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), includeProblemsOutsideContest: true)
                     ->select('clar.externalid', 'clar.body')
                     ->andWhere('clar.sender IS NOT NULL')
                     ->andWhere('clar.answered = false')
@@ -974,6 +975,7 @@ class DOMJudgeService
             ->leftJoin('p.problemStatementContent', 'content')
             ->select('c', 'cp', 'p', 'a', 'content')
             ->andWhere('c.cid = :cid')
+            ->andWhere('cp.allowSubmit = 1')
             ->setParameter('cid', $contest->getCid())
             ->getQuery()
             ->getSingleResult();
@@ -1425,31 +1427,34 @@ class DOMJudgeService
     }
 
     /**
-     * Get asset files in the given directory with the given extension
+     * Get asset files in the given directory ending in one of the given extensions
      *
+     * @param string[] $extensions
      * @return string[]
      */
-    public function getAssetFiles(string $path): array
+    public function getAssetFiles(string $path, array $extensions): array
     {
-        if (isset($this->assetFilesCache[$path])) {
-            return $this->assetFilesCache[$path];
+        $cacheKey = $path . '|' . implode(',', $extensions);
+        if (isset($this->assetFilesCache[$cacheKey])) {
+            return $this->assetFilesCache[$cacheKey];
         }
 
         $customDir = sprintf('%s/public/%s', $this->params->get('kernel.project_dir'), $path);
         if (!is_dir($customDir)) {
-            return $this->assetFilesCache[$path] = [];
+            return $this->assetFilesCache[$cacheKey] = [];
         }
 
         $results = [];
         foreach (scandir($customDir) as $file) {
-            foreach (array_merge(['css','js'], static::MIMETYPE_TO_EXTENSION) as $extension) {
-                if (str_contains($file, '.' . $extension)) {
+            foreach ($extensions as $extension) {
+                if (str_ends_with($file, '.' . $extension)) {
                     $results[] = $file;
+                    break;
                 }
             }
         }
 
-        return $this->assetFilesCache[$path] = $results;
+        return $this->assetFilesCache[$cacheKey] = $results;
     }
 
     /**
@@ -1475,7 +1480,7 @@ class DOMJudgeService
         }
 
         if (isset($dir)) {
-            $assets = $this->getAssetFiles($dir);
+            $assets = $this->getAssetFiles($dir, array_values(static::MIMETYPE_TO_EXTENSION));
             foreach (static::MIMETYPE_TO_EXTENSION as $extension) {
                 if ($forceExtension === $extension || (!$forceExtension && in_array($name . '.' . $extension, $assets))) {
                     return sprintf('%s%s/%s.%s', $prefix, $dir, $name, $extension);
@@ -1795,15 +1800,42 @@ class DOMJudgeService
             $judgetaskInsertParamsWithoutColon[$key] = $param;
         }
 
-        $this->em->getConnection()->executeQuery($judgetaskInsertQuery, $judgetaskInsertParamsWithoutColon);
+        // Create the judge tasks exactly once: two concurrent unblockJudgeTasks() calls both
+        // see a judging without them, and a second set fails on judging_run's unique key. Lock
+        // the judging and re-check. The raw transaction API, because wrapInTransaction()
+        // flushes, which createRejudging() avoids for speed.
+        $connection = $this->em->getConnection();
+        $connection->beginTransaction();
+        try {
+            $connection->executeQuery(
+                'SELECT judgingid FROM judging WHERE judgingid = :judgingid FOR UPDATE',
+                ['judgingid' => $judging->getJudgingid()]
+            );
 
-        // Step 3: Insert the corresponding judging runs.
-        $this->em->getConnection()->executeQuery(
-            'INSERT INTO judging_run (judgingid, judgetaskid, testcaseid)
-                    SELECT :judgingid, judgetaskid, testcase_id FROM judgetask
-                    WHERE jobid = :judgingid ORDER BY judgetaskid',
-            ['judgingid' => $judging->getJudgingid()]
-        );
+            $alreadyCreated = (int)$connection->fetchOne(
+                'SELECT COUNT(*) FROM judgetask WHERE jobid = :judgingid',
+                ['judgingid' => $judging->getJudgingid()]
+            );
+            if ($alreadyCreated > 0) {
+                $connection->commit();
+                return;
+            }
+
+            $connection->executeQuery($judgetaskInsertQuery, $judgetaskInsertParamsWithoutColon);
+
+            // Step 3: Insert the corresponding judging runs.
+            $connection->executeQuery(
+                'INSERT INTO judging_run (judgingid, judgetaskid, testcaseid)
+                        SELECT :judgingid, judgetaskid, testcase_id FROM judgetask
+                        WHERE jobid = :judgingid ORDER BY judgetaskid',
+                ['judgingid' => $judging->getJudgingid()]
+            );
+
+            $connection->commit();
+        } catch (Throwable $e) {
+            $connection->rollBack();
+            throw $e;
+        }
     }
 
     public function shadowMode(): bool

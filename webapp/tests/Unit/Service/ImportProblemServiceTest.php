@@ -1028,4 +1028,90 @@ YAML;
             yield [$yaml, ['ada', 'bash']];
         }
     }
+    /**
+     * Importing the same problem twice at once collides on the temporary test case ranks.
+     *
+     * To renumber without tripping the (probid, ranknumber) unique key, existing test cases
+     * first get temporary ranks starting at the current count plus one. That count is read
+     * without a lock, so two imports of the same problem pick the same range and the second
+     * one collides. It must say so rather than let the constraint violation escape - and it
+     * must leave a usable entity manager behind, since a failed flush closes it.
+     */
+    public function testConcurrentImportOfTheSameProblemIsReported(): void
+    {
+        /** @var ImportProblemService $service */
+        $service = static::getContainer()->get(ImportProblemService::class);
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $yaml = "name: rank collision\n";
+        $files = [
+            'problem.yaml' => $yaml,
+            'data/sample/1.in' => "1\n",
+            'data/sample/1.ans' => "1\n",
+            'data/secret/2.in' => "2\n",
+            'data/secret/2.ans' => "2\n",
+        ];
+
+        $problem = $this->import($service, $files, null);
+        self::assertInstanceOf(Problem::class, $problem);
+        $probId = $problem->getProbid();
+
+        $count = (int)$em->getConnection()->fetchOne(
+            'SELECT COUNT(*) FROM testcase WHERE probid = ?', [$probId]
+        );
+        self::assertGreaterThan(0, $count);
+
+        // Stand in for the competing import: occupy the first temporary rank the next import
+        // will hand out. Inserting it raises the count by one, so the next import starts at
+        // exactly this rank - the same state the real race produces.
+        $em->getConnection()->executeStatement(
+            'INSERT INTO testcase (probid, ranknumber, md5sum_input, md5sum_output, sample)
+             VALUES (:probid, :rank, :md5in, :md5out, 0)',
+            [
+                'probid' => $probId,
+                'rank' => $count + 2,
+                'md5in' => md5('occupied-in'),
+                'md5out' => md5('occupied-out'),
+            ]
+        );
+
+        $em->clear();
+        $problem = $em->getRepository(Problem::class)->find($probId);
+
+        $messages = ['info' => [], 'warning' => [], 'danger' => []];
+        $result = $this->import($service, $files, $problem, $messages);
+
+        self::assertNull($result, 'the import must not claim success');
+        self::assertNotEmpty($messages['danger']);
+        self::assertStringContainsString('at the same time', $messages['danger'][0]);
+
+        // The entity manager must still be usable: a failed flush closes it, and callers keep
+        // working with it after this returns.
+        $freshEm = static::getContainer()->get(EntityManagerInterface::class);
+        self::assertTrue($freshEm->isOpen(), 'the entity manager must have been reset');
+        self::assertNotNull($freshEm->getRepository(Problem::class)->find($probId));
+    }
+
+    /**
+     * @param array<string, string> $files
+     * @param array<string, string[]> $messages
+     */
+    private function import(
+        ImportProblemService $service,
+        array $files,
+        ?Problem $problem,
+        array &$messages = []
+    ): ?Problem {
+        $messages = ['info' => [], 'warning' => [], 'danger' => []];
+        $zipFile = $this->createZipWithContents($files);
+        $zip = new ZipArchive();
+        self::assertTrue($zip->open($zipFile));
+        try {
+            return $service->importZippedProblem($zip, 'rankcollision.zip', $problem, null, $messages);
+        } finally {
+            $zip->close();
+            @unlink($zipFile);
+        }
+    }
 }

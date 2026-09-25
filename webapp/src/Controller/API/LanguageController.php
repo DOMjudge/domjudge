@@ -76,7 +76,7 @@ class LanguageController extends AbstractRestController
     #[IsGranted('ROLE_ADMIN')]
     #[Rest\Post(path: 'languages/{id}/executable')]
     #[OA\Response(
-        response: 200,
+        response: 204,
         description: 'Update the executable for a given language.',
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]

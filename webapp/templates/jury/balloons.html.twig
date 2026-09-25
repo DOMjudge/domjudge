@@ -81,8 +81,10 @@
                 const anyChecked = $('.balloons-table input[type="checkbox"]:checked').length > 0;
                 if (anyChecked) {
                     $('.mark-multiple-done-button').attr('disabled', false);
+                    $('.mark-multiple-undone-button').attr('disabled', false);
                 } else {
                     $('.mark-multiple-done-button').attr('disabled', true);
+                    $('.mark-multiple-undone-button').attr('disabled', true);
                 }
             }
 

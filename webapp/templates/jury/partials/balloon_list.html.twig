@@ -4,8 +4,9 @@
 {% if balloons is empty %}
     <div class="alert alert-warning">No balloons</div>
 {% else %}
-    <form action="{{ path('jury_balloons_setdone_multiple', {contestId: contestId}) }}" method="post">
-        <input type="submit" class="btn btn-primary mark-multiple-done-button" value="Mark selected as done" />
+    <form action="{{ path('jury_balloons_setmultiple', {contestId: contestId}) }}" method="post">
+        <input type="submit" name="action" class="btn btn-primary mark-multiple-done-button" value="Mark selected as done" />
+        <input type="submit" name="action" class="btn btn-danger mark-multiple-undone-button" value="Mark selected as undone" />
 
         <table class="data-table table table-hover table-striped table-sm balloons-table" style="width:auto">
             <thead class="thead-light">
@@ -51,17 +52,20 @@
                     {%- endfor -%}
                     </td>
                     <td>
-                        {%- if not balloon.data.done -%}
-                        {%- set link = path('jury_balloons_setdone', {contestId: contestId, balloonId: balloon.data.balloonid}) %}
-                        <a href="{{ link }}" title="mark balloon as done">
-                        <i class="fas fa-running"></i>
-                        </a>
+                        {%- if balloon.data.done -%}
+                            {%- set link = path('jury_balloons_setundone', {contestId: contestId, balloonId: balloon.data.balloonid}) %}
+                            <a href="{{ link }}" title="mark balloon as undone">
+                                <i class="fas fa-undo"></i>
+                            </a>
+                        {%- else -%}
+                            {%- set link = path('jury_balloons_setdone', {contestId: contestId, balloonId: balloon.data.balloonid}) %}
+                            <a href="{{ link }}" title="mark balloon as done">
+                                <i class="fas fa-running"></i>
+                            </a>
                         {%- endif -%}
                     </td>
                     <td>
-                        {% if not balloon.data.done %}
-                            <input type="checkbox" name="balloonIds[]" data-balloon-id="{{ balloon.data.balloonid }}" value="{{ balloon.data.balloonid }}" />
-                        {% endif %}
+                        <input type="checkbox" name="balloonIds[]" data-balloon-id="{{ balloon.data.balloonid }}" value="{{ balloon.data.balloonid }}" />
                     </td>
                 </tr>
             {%- endfor %}

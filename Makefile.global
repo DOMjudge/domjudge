@@ -66,8 +66,13 @@ LIBOBJECTS = $(addsuffix $(OBJEXT),$(LIBSBASE))
 CFLAGS   += -I$(TOPDIR)/lib -I$(TOPDIR)/etc
 CXXFLAGS += -I$(TOPDIR)/lib -I$(TOPDIR)/etc
 
-$(LIBOBJECTS):
+# Always delegate to lib/Makefile, which knows the real dependencies of
+# these objects; this Makefile does not, so without FORCE an existing
+# object file would never be rebuilt from here.
+$(LIBOBJECTS): FORCE
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
+
+FORCE:
 
 # Default recursive targets; these should always at least call the
 # TARGET-l variant:

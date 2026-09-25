@@ -11,7 +11,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    uses: ./.github/workflows/changes.yml
+    permissions:
+      contents: read
+      pull-requests: read
+
   compare:
+    needs: changes
+    # Skip only when change detection ran and said so: a skipped job counts
+    # as a passed required check, so if detection failed we must run.
+    if: ${{ !cancelled() && needs.changes.outputs.compare != 'false' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     container:

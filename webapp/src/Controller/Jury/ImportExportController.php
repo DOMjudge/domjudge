@@ -538,7 +538,7 @@ class ImportExportController extends BaseController
         }
 
         /** @var Clarification[] $clarifications */
-        $clarifications = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid())
+        $clarifications = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), includeProblemsOutsideContest: true)
             ->select('clar')
             ->addOrderBy('clar.category')
             ->addOrderBy('p.probid')

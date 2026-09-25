@@ -195,12 +195,25 @@ class BalloonController extends AbstractController
         return $this->redirectToRoute("jury_balloons", ['contestId' => $contestId]);
     }
 
-    #[Route(path: '/contests/{contestId}/balloons/done', name: 'jury_balloons_setdone_multiple', methods: ['POST'])]
-    public function setMultipleDoneAction(Request $request, string $contestId, BalloonService $balloonService): RedirectResponse
+    #[Route(path: '/contests/{contestId}/balloons/{balloonId}/undone', name: 'jury_balloons_setundone')]
+    public function setUndoneAction(string $contestId, int $balloonId, BalloonService $balloonService): RedirectResponse
+    {
+        $this->dj->getContestByExternalId($contestId); // Validate contest exists
+        $balloonService->setUndone($balloonId);
+
+        return $this->redirectToRoute("jury_balloons", ['contestId' => $contestId]);
+    }
+
+    #[Route(path: '/contests/{contestId}/balloons/multiple', name: 'jury_balloons_setmultiple', methods: ['POST'])]
+    public function setMultipleAction(Request $request, string $contestId, BalloonService $balloonService): RedirectResponse
     {
         $this->dj->getContestByExternalId($contestId); // Validate contest exists
         $balloonIds = $request->request->all('balloonIds');
-        $balloonService->setDone($balloonIds);
+        if ($request->request->get('action') === 'Mark selected as done') {
+            $balloonService->setDone($balloonIds);
+        } else {
+            $balloonService->setUndone($balloonIds);
+        }
 
         return $this->redirectToRoute("jury_balloons", ['contestId' => $contestId]);
     }

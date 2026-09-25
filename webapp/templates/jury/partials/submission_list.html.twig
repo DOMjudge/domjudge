@@ -97,6 +97,12 @@
         </tr>
         </thead>
         <tbody>
+        {%- if showTestcases is defined and showTestcases %}
+            {%- do prefetchTestcaseResults(submissions) %}
+        {%- endif %}
+        {%- if showExternalResult and showExternalTestcases %}
+            {%- do prefetchTestcaseResults(submissions, showExternal=true) %}
+        {%- endif %}
         {%- for submission in submissions %}
             {%- if rejudging is defined %}
                 {%- set link = path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, rejudgingid: rejudging.rejudgingid}) %}
@@ -296,7 +302,7 @@
                         </td>
                     {% endif %}
                     <td class="testcase-results">
-                        {{- submission | testcaseResults(true) -}}
+                        {{- submission | testcaseResults(showExternal=true) -}}
                     </td>
                 </tr>
                 <tr>

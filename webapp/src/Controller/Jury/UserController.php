@@ -201,7 +201,7 @@ class UserController extends BaseController
             'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
             'showExternalResult' => $this->dj->shadowMode(),
             'refresh' => [
-                'after' => 3,
+                'after' => 15,
                 'url' => $this->generateUrl('jury_user', ['userId' => $userId]),
                 'ajax' => true,
             ],

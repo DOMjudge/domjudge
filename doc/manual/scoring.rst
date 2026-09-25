@@ -17,9 +17,9 @@ Key points:
 
 - Teams are sorted by their sortorder first; this is frequently used to group teams into actual participants and other
   groups (e.g. company teams, non-eligible teams, staff, etc.).
-- Then teams are sorted ascending by the sum of their problem points. Each correctly solved problem scores a
+- Then teams are sorted descending by the sum of their problem points. Each correctly solved problem scores a
   pre-defined number of points (integer, by default 1).
-- Then teams are sorted descending by either their penalty time (or runtime, can be configured at contest level). The
+- Then teams are sorted ascending by either their penalty time (or runtime, can be configured at contest level). The
   penalty time per problem is rounded down to the nearest minute by default, but can be configured to use second
   granularity instead.
 - If two teams have the same score, they are sorted by the time of their last accepted submission.

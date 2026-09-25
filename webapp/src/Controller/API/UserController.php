@@ -355,6 +355,10 @@ class UserController extends AbstractRestController
             throw new BadRequestHttpException('`id` field is required');
         }
 
+        if (!$addUser instanceof UpdateUser && !$addUser->roles) {
+            throw new BadRequestHttpException('`roles` field is required');
+        }
+
         $user = new User();
         if ($addUser instanceof UpdateUser) {
             $existingUser = $this->em->getRepository(User::class)->findOneBy(['externalid' => $addUser->id]);
@@ -370,12 +374,24 @@ class UserController extends AbstractRestController
         $user
             ->setUsername($addUser->username)
             ->setName($addUser->name)
-            ->setIpAddress($addUser->ip)
-            ->setPlainPassword($addUser->password)
-            ->setEnabled($addUser->enabled ?? true);
+            ->setIpAddress($addUser->ip);
 
         if ($addUser instanceof UpdateUser) {
             $user->setExternalid($addUser->id);
+
+            // Specifically allow one to update the user and enabled without changing the password.
+            // Note that for other nullable fields (ip and teamId) setting them to null is a valid action
+            if ($addUser->enabled !== null) {
+                $user->setEnabled($addUser->enabled);
+            }
+
+            if ($addUser->password !== null) {
+                $user->setPlainPassword($addUser->password);
+            }
+        } else {
+            $user
+                ->setEnabled($addUser->enabled ?? true)
+                ->setPlainPassword($addUser->password);
         }
 
         if ($addUser->teamId) {
@@ -394,33 +410,35 @@ class UserController extends AbstractRestController
             $user->setTeam($team);
         }
 
-        // Clear existing roles on update to avoid duplicate join table entries.
-        if ($addUser instanceof UpdateUser) {
-            foreach ($user->getUserRoles() as $existingRole) {
-                $user->removeUserRole($existingRole);
+        if (!empty($addUser->roles)) {
+            // Clear existing roles on update to avoid duplicate join table entries.
+            if ($addUser instanceof UpdateUser) {
+                foreach ($user->getUserRoles() as $existingRole) {
+                    $user->removeUserRole($existingRole);
+                }
             }
-        }
 
-        $roles = $addUser->roles;
-        // For the file import we change a CDS user to the roles needed for ICPC CDS.
-        if ($user->getUsername() === 'cds') {
-            $roles = ['cds'];
-        }
-        if (in_array('cds', $roles)) {
-            $roles = ['api_source_reader', 'api_writer', 'api_reader', ...array_diff($roles, ['cds'])];
-        }
-        foreach ($roles as $djRole) {
-            if ($djRole === '') {
-                continue;
+            $roles = $addUser->roles;
+            // For the file import we change a CDS user to the roles needed for ICPC CDS.
+            if ($user->getUsername() === 'cds') {
+                $roles = ['cds'];
             }
-            if ($djRole === 'judge') {
-                $djRole = 'jury';
+            if (in_array('cds', $roles)) {
+                $roles = ['api_source_reader', 'api_writer', 'api_reader', ...array_diff($roles, ['cds'])];
             }
-            $role = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => $djRole]);
-            if ($role === null) {
-                throw new BadRequestHttpException(sprintf("Role %s not found", $djRole));
+            foreach ($roles as $djRole) {
+                if ($djRole === '') {
+                    continue;
+                }
+                if ($djRole === 'judge') {
+                    $djRole = 'jury';
+                }
+                $role = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => $djRole]);
+                if ($role === null) {
+                    throw new BadRequestHttpException(sprintf("Role %s not found", $djRole));
+                }
+                $user->addUserRole($role);
             }
-            $user->addUserRole($role);
         }
 
         $errors = $this->validator->validate($user);

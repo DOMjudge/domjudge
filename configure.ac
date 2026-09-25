@@ -265,6 +265,16 @@ else
 fi
 AC_MSG_RESULT($BASEURL)
 
+# The generated judgehost credentials point at the API of this
+# installation. Fall back to the historic default when no base URL was
+# configured, so that the generated file stays unchanged in that case.
+if test "x$BASEURL_UNCONFIGURED" = x1; then
+	restapiurl='http://localhost/domjudge/api'
+else
+	restapiurl=`echo "$BASEURL" | sed -e 's,//*$,,'`/api
+fi
+AC_SUBST(RESTAPIURL,$restapiurl)
+
 # Checks for programs.
 if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 AC_PROG_CXX

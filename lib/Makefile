@@ -8,8 +8,10 @@ OBJECTS = $(addsuffix $(OBJEXT),lib.error lib.misc)
 
 build: $(OBJECTS)
 
-lib.error$(OBJEXT): lib.error.cc lib.error.hpp
-lib.misc$(OBJEXT): lib.misc.cc lib.misc.h
+# paths.mk holds the compiler and flags chosen by configure, so a
+# reconfigure with a different compiler must rebuild these.
+lib.error$(OBJEXT): lib.error.cc lib.error.hpp $(TOPDIR)/paths.mk
+lib.misc$(OBJEXT): lib.misc.cc lib.misc.h $(TOPDIR)/paths.mk
 
 clean-l:
 	rm -f $(OBJECTS)

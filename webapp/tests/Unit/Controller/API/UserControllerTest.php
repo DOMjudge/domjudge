@@ -2,6 +2,10 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\SelfRegisteredUserFixture;
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
+
 class UserControllerTest extends AccountBaseTestCase
 {
     protected ?string $apiEndpoint = 'users';
@@ -74,6 +78,35 @@ class UserControllerTest extends AccountBaseTestCase
         static::assertEquals('testuser', $response['username']);
         static::assertEquals('Test User', $response['name']);
         static::assertEquals(['team'], $response['roles']);
+    }
+
+    public function testUpdateNotAllFields(): void
+    {
+        static::loadFixture(SelfRegisteredUserFixture::class);
+
+        /** @var EntityManagerInterface $manager */
+        $manager = static::getContainer()->get(EntityManagerInterface::class);
+        /** @var User $user */
+        $user = $manager->getRepository(User::class)->findOneBy(['username' => 'selfregister']);
+
+        // Set the user to not enabled. It should stay that way. Also keep track of its password
+        $password = $user->getPassword();
+
+        $user->setEnabled(false);
+        $manager->flush();
+
+        $data = [
+            'id' => 'selfregister',
+            'username' => 'selfregister',
+            'name' => 'Test User',
+        ];
+
+        $this->verifyApiJsonResponse('PUT', $this->helperGetEndpointURL($this->apiEndpoint) . '/selfregister', 201, 'admin', $data);
+
+        $user = $manager->getRepository(User::class)->findOneBy(['username' => 'selfregister']);
+        static::assertEquals($password, $user->getPassword());
+        static::assertFalse($user->getEnabled());
+        static::assertEquals(['team'], $user->getRoleList());
     }
 
     public function testUpdateNoId(): void

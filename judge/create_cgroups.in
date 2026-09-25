@@ -18,6 +18,13 @@ cgroup_error_and_usage () {
     exit 1
 }
 
+# Writing to the cgroup filesystem requires root, so fail early with a
+# clear message instead of a confusing "Permission denied" further down.
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Error: this script must be run as root, e.g. via 'sudo $0'." >&2
+    exit 1
+fi
+
 # Check whether cgroup v2 is enabled.
 fs_type=$(awk '$2 == "/sys/fs/cgroup" {print $3}' /proc/mounts)
 if [ "$fs_type" = "cgroup2" ]; then
