@@ -173,6 +173,7 @@ class RejudgingType extends AbstractType
             $teamsQueryBuilder = $this->em->createQueryBuilder()
                 ->from(Team::class, 't')
                 ->select('t')
+                ->distinct()
                 ->andWhere('t.enabled = 1')
                 ->addOrderBy('t.name');
 

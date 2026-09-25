@@ -683,6 +683,7 @@ class ScoreboardService
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't')
             ->select('t')
+            ->distinct()
             ->orderBy('t.teamid');
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
