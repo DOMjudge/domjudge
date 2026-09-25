@@ -76,6 +76,7 @@ class StatisticsService
             ->setParameter('contest', $contest)
             ->setParameter('starttime', $contest->getStarttime(false))
             ->setParameter('endtime', $contest->getEndtime())
+            ->distinct()
             ->getQuery()->getResult();
     }
 
@@ -241,11 +242,9 @@ class StatisticsService
             ->join('s.problem', 'p')
             ->join('j.runs', 'jr')
             ->join('s.team', 'team')
-            ->join('team.categories', 'tc')
             // ->andWhere('j.valid = true')
             ->andWhere('s.contest = :contest')
             ->andWhere('s.team = :team')
-            // ->andWhere('tc.visible = true')
             ->setParameter('team', $team)
             ->setParameter('contest', $contest)
             ->getQuery()->getResult();
@@ -334,6 +333,7 @@ class StatisticsService
             ->andWhere('s.problem = :problem'), $view)
             ->setParameter('problem', $problem)
             ->setParameter('contest', $contest)
+            ->distinct()
             ->getQuery()->getResult();
 
         // Create a summary of the results (how many correct, timelimit, wrong-answer, etc).
@@ -433,7 +433,7 @@ class StatisticsService
         // Fetch all judging counts in a single query, grouped by problem
         // and whether the result is correct.
         $queryBuilder = $this->em->createQueryBuilder()
-            ->select('p.probid, j.result, s.submittime')
+            ->select('DISTINCT j.judgingid, p.probid, j.result, s.submittime')
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
             ->join('s.problem', 'p')
@@ -663,7 +663,7 @@ class StatisticsService
     {
         // Figure out how many submissions each team has.
         $results = $this->applyFilter($this->em->createQueryBuilder()
-            ->select('t.teamid as teamid, count(t.teamid) as num_submissions')
+            ->select('t.teamid as teamid, COUNT(DISTINCT s.submitid) as num_submissions')
             ->from(Submission::class, 's')
             ->join('s.team', 't')
             ->join('t.categories', 'tc')
