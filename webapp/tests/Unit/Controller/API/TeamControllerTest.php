@@ -5,6 +5,7 @@ namespace App\Tests\Unit\Controller\API;
 use App\DataFixtures\Test\AddLocationToTeamFixture;
 use App\DataFixtures\Test\CreateTeamWithTwoTeamAffiliationsFixture;
 use App\Entity\Team;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -48,6 +49,8 @@ class TeamControllerTest extends BaseTestCase
 
     protected ?string $objectClassForExternalId = Team::class;
 
+    // Writes the photo of a fixed team ID to the shared public/ dir.
+    #[Group('no-parallel')]
     public function testLogoManagement(): void
     {
         // Note: we are doing this as admin as we require privileges

@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\API;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use App\DataFixtures\Test\DemoAboutToStartContestFixture;
 use App\DataFixtures\Test\DemoPostUnfreezeContestFixture;
 use App\DataFixtures\Test\DemoPreEndContestFixture;
@@ -186,6 +187,8 @@ EOF;
         return $contents[0];
     }
 
+    // Writes the banner of a fixed contest ID to the shared public/ dir.
+    #[Group('no-parallel')]
     public function testBannerManagement(): void
     {
         // First, make sure we have no banner

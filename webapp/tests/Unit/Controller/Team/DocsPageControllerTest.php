@@ -3,7 +3,10 @@
 namespace App\Tests\Unit\Controller\Team;
 
 use App\Tests\Unit\BaseTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
+// Creates etc/docs.yaml and rebuilds the shared test container.
+#[Group('no-parallel')]
 class DocsPageControllerTest extends BaseTestCase
 {
     protected array $roles = ['team'];
