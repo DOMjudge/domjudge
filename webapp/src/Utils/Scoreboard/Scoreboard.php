@@ -330,8 +330,12 @@ class Scoreboard
      *
      * @param int[] $limitToTeamIds
      */
-    public function isBestInCategory(Team $team, TeamCategory $category, ?array $limitToTeamIds = null): bool
+    public function isBestInCategory(Team $team, ?TeamCategory $category = null, ?array $limitToTeamIds = null): bool
     {
+        if ($category === null) {
+            return false;
+        }
+
         if ($this->bestInCategoryData === null) {
             $this->bestInCategoryData = [];
             foreach ($this->scores as $score) {
@@ -341,9 +345,11 @@ class Scoreboard
                     continue;
                 }
 
-                $categoryId = $score->team->getScoringCategory()->getCategoryid();
-                if (!isset($this->bestInCategoryData[$categoryId])) {
-                    $this->bestInCategoryData[$categoryId] = $score->team->getTeamid();
+                if ($scoringCategory = $score->team->getScoringCategory()) {
+                    $categoryId = $scoringCategory->getCategoryid();
+                    if (!isset($this->bestInCategoryData[$categoryId])) {
+                        $this->bestInCategoryData[$categoryId] = $score->team->getTeamid();
+                    }
                 }
 
                 foreach ($score->team->getTopBadgeCategories() as $badgeCategory) {
@@ -357,10 +363,11 @@ class Scoreboard
 
         $categoryId = $category->getCategoryid();
         // Only check the scores when the team has points.
-        if ($this->scores[$team->getTeamid()]->numPoints > 0) {
+        if (isset($this->scores[$team->getTeamid()]) && $this->scores[$team->getTeamid()]->numPoints > 0) {
             // If the rank of this team is equal to the best team for this
             // category, this team is best in that category.
-            return $this->scores[$this->bestInCategoryData[$categoryId]]->rank ===
+            return isset($this->bestInCategoryData[$categoryId]) &&
+                $this->scores[$this->bestInCategoryData[$categoryId]]->rank ===
                 $this->scores[$team->getTeamid()]->rank;
         }
 
