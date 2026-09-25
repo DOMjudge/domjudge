@@ -82,7 +82,7 @@ jobs:
         with:
           comment_mode: changes in failures
           check_name: unit-tests-${{ matrix.PHPVERSION }}-${{ matrix.TEST }}.xml
-          files: unit-tests-${{ matrix.PHPVERSION }}-${{ matrix.TEST }}.xml
+          files: unit-tests-${{ matrix.PHPVERSION }}-${{ matrix.TEST }}*.xml
       - name: Get SQL logs
         run: docker logs "${{ job.services.sqlserver.id }}"
       - name: Collect docker logs on failure
