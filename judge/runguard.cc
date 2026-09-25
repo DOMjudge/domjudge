@@ -154,6 +154,9 @@ pid_t child_pid = -1;
 static volatile sig_atomic_t received_SIGCHLD = 0;
 static volatile sig_atomic_t received_signal = -1;
 static volatile sig_atomic_t errno_in_signalhandler = 0;
+/* Set when terminate() reaped the command itself, together with its status. */
+static volatile sig_atomic_t child_reaped = 0;
+static volatile sig_atomic_t child_status = 0;
 
 /* A signal handler must leave errno as it found it: the code it interrupts
    may not have inspected the errno of its failed call yet. */
@@ -618,6 +621,35 @@ void cgroup_delete()
 	logmsg(LOG_DEBUG, "deleted cgroup `{}'",cgroupname);
 }
 
+/* Wait until the command's process group is gone, but for about `limit'
+   at most. Returns whether it is gone. The command's zombie keeps the group
+   alive, so reap it; that we did is what `child_reaped' tells the main
+   loop. Called from terminate(), so async-signal-safe functions only.
+
+   Prefer nanosleep over sleep because of higher resolution and it does
+   not interfere with signals. */
+static bool wait_for_group(const struct timespec &limit)
+{
+	const struct timespec poll_delay = { 0, 1000000L }; /* 1ms */
+	long polls = limit.tv_sec*1000 + limit.tv_nsec/1000000L;
+
+	while ( true ) {
+		if ( !child_reaped ) {
+			/* This fails only with ECHILD, when the main loop has
+			   reaped the command already. */
+			int status;
+			if ( waitpid(child_pid, &status, WNOHANG)==child_pid ) {
+				child_status = status;
+				child_reaped = 1;
+			}
+		}
+		if ( kill(-child_pid,0)!=0 && errno==ESRCH ) return true;
+
+		if ( polls--<=0 ) return false;
+		nanosleep(&poll_delay,nullptr);
+	}
+}
+
 void terminate(int sig)
 {
 	errno_guard guard;
@@ -659,9 +691,10 @@ void terminate(int sig)
 		return;
 	}
 
-	/* Prefer nanosleep over sleep because of higher resolution and
-	   it does not interfere with signals. */
-	nanosleep(&killdelay,nullptr);
+	/* Give the command `killdelay' to act on the SIGTERM, but no longer
+	   than it needs. Wait for its whole process group: a child of it that
+	   ignores the SIGTERM would otherwise survive. */
+	if ( wait_for_group(killdelay) ) return;
 
 	verbose_from_signalhandler("sending SIGKILL");
 	if ( kill(-child_pid,SIGKILL)!=0 && errno!=ESRCH ) {
@@ -670,8 +703,9 @@ void terminate(int sig)
 		return;
 	}
 
-	/* Wait another while to make sure the process is killed by now. */
-	nanosleep(&killdelay,nullptr);
+	/* The killed processes may still be exiting, and the main loop does
+	   not wait for them before it checks for left-over processes. */
+	wait_for_group(killdelay);
 }
 
 static void child_handler(int sig)
@@ -1423,9 +1457,22 @@ int main(int argc, char **argv)
 				die(errno_in_signalhandler, "error in signal handler, exiting");
 			}
 
+			/* terminate() may have reaped the command, either before
+			   we got here or after this check, before the wait below. */
+			if ( child_reaped ) {
+				status = child_status;
+				break;
+			}
+
 			if ( received_SIGCHLD || received_signal == SIGALRM ) {
 				pid_t pid;
-				if ( (pid = wait(&status))<0 ) die(errno,"waiting on child");
+				if ( (pid = wait(&status))<0 ) {
+					if ( errno==ECHILD && child_reaped ) {
+						status = child_status;
+						break;
+					}
+					die(errno,"waiting on child");
+				}
 				if ( pid==child_pid ) break;
 			}
 
