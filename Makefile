@@ -252,6 +252,20 @@ inplace-conf-common: configure
 	            --with-baseurl='$(INPLACE_BASEURL)' \
 	            $(CONFIGURE_FLAGS)
 
+# Generate only the files that static analysis (phpstan) needs after
+# inplace-conf-common, without building anything. This needs no judgehost
+# build dependencies, so configure may skip the libcgroup check by passing
+# CONFIGURE_FLAGS='ac_cv_lib_cgroup_cgroup_init=yes'.
+ci-conf-phpstan: paths.mk
+	$(MAKE) -C etc domserver-static.php judgehost-static.php
+	$(MAKE) -C judge judgedaemon
+	$(MAKE) -C webapp/config autoload.php static.yaml
+	-rmdir $(judgehost_libjudgedir)
+	-rm -f $(judgehost_libjudgedir)
+	ln -sf $(CURDIR)/judge $(judgehost_libjudgedir)
+
+ci-phpstan: ci-conf-phpstan
+
 # Install the system in place: don't really copy stuff, but create
 # symlinks where necessary to let it work from the source tree.
 # This stuff is a hack!
@@ -487,4 +501,5 @@ clean-autoconf:
 .PHONY: $(addsuffix -create-dirs,domserver judgehost docs) check-root \
         $(addprefix inplace-,conf conf-common install uninstall) \
         $(addprefix maintainer-,conf install) clean-autoconf config distdocs \
-        $(addprefix dependencies-,dev dist) dependencies coverity-conf coverity-build
+        $(addprefix dependencies-,dev dist) dependencies coverity-conf coverity-build \
+        ci-conf-phpstan ci-phpstan
