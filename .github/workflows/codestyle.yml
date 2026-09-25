@@ -38,16 +38,24 @@ jobs:
 
   phpcs_compatibility:
     runs-on: ubuntu-latest
-    container:
-      image: domjudge/gitlabci:24.04
     strategy:
       matrix:
         PHPVERSION: ["8.2", "8.5"]
     steps:
       - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.PHPVERSION }}
+          coverage: none
+      - name: Install PHPCompatibility
+        run: |
+          composer global config -n allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+          composer global require -n phpcompatibility/php-compatibility:dev-develop squizlabs/php_codesniffer
+          composer global config bin-dir --absolute >> "$GITHUB_PATH"
       - name: Detect compatibility with supported PHP version
         run: >
-          /vendor/bin/phpcs -s -p --colors
+          phpcs -s -p --colors
           --standard=PHPCompatibility
           --extensions=php
           --runtime-set testVersion ${{ matrix.PHPVERSION }}
