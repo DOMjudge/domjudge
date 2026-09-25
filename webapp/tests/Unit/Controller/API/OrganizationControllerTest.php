@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\API;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use App\DataFixtures\Test\SampleAffiliationsFixture;
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
@@ -120,6 +121,8 @@ class OrganizationControllerTest extends BaseTestCase
         });
     }
 
+    // Writes the logo of a fixed organization ID to the shared public/ dir.
+    #[Group('no-parallel')]
     public function testLogoManagement(): void
     {
         // Note: we are doing this as admin as we require privileges
