@@ -147,7 +147,7 @@ if [ "$TEST" = "w3cval" ]; then
 
     section_start "Install testsuite"
     cd /
-    unzip -q vnu.linux.zip
+    unzip -qo vnu.linux.zip
     # Remove a warning by creating an empty config.
     touch vnu.properties
     section_end
