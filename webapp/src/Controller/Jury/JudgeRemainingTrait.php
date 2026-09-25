@@ -84,9 +84,8 @@ trait JudgeRemainingTrait
         $query = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
             ->select('j')
+            ->distinct()
             ->join('j.submission', 's')
-            ->join('s.team', 't')
-            ->join('t.categories', 'tc')
             ->andWhere('j.valid = true')
             ->andWhere('j.result != :compiler_error')
             ->setParameter('compiler_error', 'compiler-error');
@@ -98,6 +97,8 @@ trait JudgeRemainingTrait
         }
         if ($categoryId !== null) {
             $query
+                ->join('s.team', 't')
+                ->join('t.categories', 'tc')
                 ->andWhere('tc.externalid = :categoryId')
                 ->setParameter('categoryId', $categoryId);
         }

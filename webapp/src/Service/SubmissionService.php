@@ -444,6 +444,7 @@ class SubmissionService
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->select('s', 'j', 'cp', 'l')
+            ->distinct()
             ->join('s.team', 't')
             ->join('t.categories', 'tc')
             ->join('s.contest_problem', 'cp')

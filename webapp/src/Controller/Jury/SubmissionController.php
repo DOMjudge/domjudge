@@ -1307,6 +1307,7 @@ class SubmissionController extends BaseController
             $teamsQueryBuilder = $this->em->createQueryBuilder()
                                      ->from(Team::class, 't')
                                      ->select('t')
+                                     ->distinct()
                                      ->orderBy('t.teamid');
             if (!$judging->getContest()->isOpenToAllTeams()) {
                 $teamsQueryBuilder
