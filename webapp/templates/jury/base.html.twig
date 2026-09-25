@@ -69,7 +69,7 @@
 
             $('[data-conditional-field]').each(function () {
                 const $field = $(this);
-                const $wrapper = $field.closest('div.mb-3');
+                const $wrapper = $field.closest('tr, div.mb-3');
                 const conditionalFieldName = $field.data('conditional-field');
                 const conditionalFieldRequiredValue = $field.data('conditional-field-value').toString();
                 const $form = $field.closest('form');
