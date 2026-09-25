@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Controller\API\AbstractRestController as ARC;
 use App\DataTransferObject\FileWithName;
 use App\Repository\SubmissionRepository;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -363,6 +364,15 @@ class Submission extends BaseApiEntity implements
     public function getApiTeamId(): string
     {
         return $this->getTeam()->getExternalid();
+    }
+
+    #[OA\Property(nullable: true)]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT, CcsApiVersion::Format_2026_01->value])]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('account_id')]
+    public function getApiAccountId(): ?string
+    {
+        return $this->getUser()?->getExternalid();
     }
 
     public function setUser(?User $user = null): Submission

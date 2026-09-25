@@ -3,6 +3,7 @@ namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
 use App\Repository\ClarificationRepository;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -340,6 +341,7 @@ class Clarification extends BaseApiEntity implements
     }
 
     #[OA\Property(nullable: true)]
+    #[Serializer\Groups([CcsApiVersion::Format_2020_03->value, CcsApiVersion::Format_2023_06->value])]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('to_team_id')]
     public function getRecipientId(): ?string

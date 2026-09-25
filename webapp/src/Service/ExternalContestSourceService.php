@@ -38,6 +38,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
+use App\Entity\User;
 use App\Utils\Utils;
 use DateTime;
 use DateTimeZone;
@@ -894,7 +895,11 @@ class ExternalContestSourceService
         }
 
         $toCheck['name'] = $data->name;
-        $toCheck['penalty_time'] = $data->penaltyTime ?? 0;
+        $penaltyTime = $data->penaltyTime ?? 0;
+        if (is_string($penaltyTime) && Utils::isRelTime($penaltyTime)) {
+            $penaltyTime = (int)floor(Utils::relTimeToSeconds($penaltyTime) / 60);
+        }
+        $toCheck['penalty_time'] = $penaltyTime;
 
         $this->compareOrCreateValues($event, $data->id, $contest, $toCheck);
 
@@ -1371,7 +1376,9 @@ class ExternalContestSourceService
             }
         }
 
-        $toTeamId = $data->toTeamId;
+        // CCS 2026-01+ feeds expose to_team_ids (array); older versions use a single to_team_id.
+        // We only model one recipient internally, so use the first entry if present.
+        $toTeamId = $data->toTeamIds[0] ?? $data->toTeamId;
         $toTeam   = null;
         if ($toTeamId !== null) {
             $toTeam = $this->em
@@ -1543,10 +1550,31 @@ class ExternalContestSourceService
             return;
         }
 
+        // CCS 2026-01 made team_id optional and allows account_id as an alternative. DOMjudge's
+        // Submission entity requires a team, so when only account_id is given we resolve it via
+        // the user's linked team and also record the user on the resulting submission.
         $teamId = $data->teamId;
-        $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
-        if (!$team) {
+        $team = $teamId !== null
+            ? $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId])
+            : null;
+        if (!$team && $teamId !== null) {
             $this->addPendingEvent('team', $teamId, $event, $data);
+            return;
+        }
+        $user = null;
+        if ($data->accountId !== null) {
+            $user = $this->em->getRepository(User::class)->findOneBy(['externalid' => $data->accountId]);
+            if (!$user) {
+                $this->addPendingEvent('account', $data->accountId, $event, $data);
+                return;
+            }
+            $team = $team ?? $user->getTeam();
+        }
+        if (!$team) {
+            // Spec allows submissions without a team, but our data model requires one.
+            $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_DEPENDENCY_MISSING, [
+                'dependencies' => [['type' => 'team', 'id' => '(none provided)']],
+            ]);
             return;
         }
 
@@ -1743,7 +1771,7 @@ class ExternalContestSourceService
             $contest = $this->em->getRepository(Contest::class)->find($this->getSourceContestId());
             $submission = $this->submissionService->submitSolution(
                 team: $team,
-                user: null,
+                user: $user,
                 problem: $contestProblem,
                 contest: $contest,
                 language: $language,

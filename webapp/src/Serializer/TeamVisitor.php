@@ -3,6 +3,7 @@
 namespace App\Serializer;
 
 use App\DataTransferObject\ImageFile;
+use App\DataTransferObject\ImageTag;
 use App\Entity\Team;
 use App\Service\DOMJudgeService;
 use App\Utils\Utils;
@@ -93,7 +94,8 @@ readonly class TeamVisitor implements EventSubscriberInterface
             mime: mime_content_type($teamPhoto),
             filename: 'photo.' . $extension,
             width: $imageSize[0],
-            height: $imageSize[1]
+            height: $imageSize[1],
+            tag: [ImageTag::LIGHT],
         ));
     }
 }

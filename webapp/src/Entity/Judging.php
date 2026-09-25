@@ -2,6 +2,7 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -286,6 +287,13 @@ class Judging extends AbstractJudgement
     public function getValid(): bool
     {
         return $this->valid;
+    }
+
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT, CcsApiVersion::Format_2026_01->value])]
+    #[Serializer\VirtualProperty]
+    public function getCurrent(): bool
+    {
+        return $this->getValid();
     }
 
     /**
