@@ -154,6 +154,9 @@ pid_t child_pid = -1;
 static volatile sig_atomic_t received_SIGCHLD = 0;
 static volatile sig_atomic_t received_signal = -1;
 static volatile sig_atomic_t errno_in_signalhandler = 0;
+/* Set when terminate() reaped the command itself (not any of its children), together with its status. */
+static volatile sig_atomic_t command_reaped = 0;
+static volatile sig_atomic_t command_status = 0;
 
 /* A signal handler must leave errno as it found it: the code it interrupts
    may not have inspected the errno of its failed call yet. */
@@ -636,6 +639,42 @@ void cgroup_delete()
 	logmsg(LOG_DEBUG, "deleted cgroup `{}'",cgroupname);
 }
 
+/* Wait until the command's process group is gone, polling for at most `limit'
+   time. Returns whether the group is gone.
+   If the command process has exited, its zombie keeps its process group alive
+   in the kernel until reaped. We therefore reap the command via waitpid() if it
+   exited; `command_reaped' signals to the main loop that the
+   command was already reaped and provides its exit status.
+   Called from terminate(), so async-signal-safe functions only.
+
+   Prefer nanosleep over sleep because of higher resolution and it does
+   not interfere with signals. */
+static bool wait_for_group(const struct timespec &limit)
+{
+	/* Poll every 1ms for up to `limit' time (converted to `polls' iterations). */
+	const struct timespec poll_delay = { 0, 1000000L }; /* 1ms */
+	long polls = limit.tv_sec*1000 + limit.tv_nsec/1000000L;
+
+	while ( true ) {
+		if ( !command_reaped ) {
+			/* This fails only with ECHILD, when the main loop has
+			   reaped the command already. */
+			int status;
+			if ( waitpid(child_pid, &status, WNOHANG)==child_pid ) {
+				command_status = status;
+				command_reaped = 1;
+			}
+		}
+		/* Signal 0 checks whether any process in the process group (-child_pid)
+		   is still alive without sending an actual signal. If kill() returns
+		   non-zero with ESRCH, the entire process group is gone. */
+		if ( kill(-child_pid,0)!=0 && errno==ESRCH ) return true;
+
+		if ( polls--<=0 ) return false;
+		nanosleep(&poll_delay,nullptr);
+	}
+}
+
 void terminate(int sig)
 {
 	errno_guard guard;
@@ -677,9 +716,10 @@ void terminate(int sig)
 		return;
 	}
 
-	/* Prefer nanosleep over sleep because of higher resolution and
-	   it does not interfere with signals. */
-	nanosleep(&killdelay,nullptr);
+	/* Give the command `killdelay' to act on the SIGTERM, but no longer
+	   than it needs. Wait for its whole process group: a child of it that
+	   ignores the SIGTERM would otherwise survive as a zombie. */
+	if ( wait_for_group(killdelay) ) return;
 
 	verbose_from_signalhandler("sending SIGKILL");
 	if ( kill(-child_pid,SIGKILL)!=0 && errno!=ESRCH ) {
@@ -688,8 +728,10 @@ void terminate(int sig)
 		return;
 	}
 
-	/* Wait another while to make sure the process is killed by now. */
-	nanosleep(&killdelay,nullptr);
+	/* The killed processes may still be exiting. Give them up to `killdelay'
+	   to finish exiting, so external callers (such as judgedaemon inspecting
+	   cgroups) do not falsely detect them as left-over processes. */
+	wait_for_group(killdelay);
 }
 
 static void child_handler(int sig)
@@ -1441,9 +1483,25 @@ int main(int argc, char **argv)
 				die(errno_in_signalhandler, "error in signal handler, exiting");
 			}
 
+			/* terminate() in a signal handler may have reaped the command,
+			   either before we reached this check or while racing into the wait()
+			   below. If already reaped, consume its status and break. */
+			if ( command_reaped ) {
+				status = command_status;
+				break;
+			}
+
 			if ( received_SIGCHLD || received_signal == SIGALRM ) {
 				pid_t pid;
-				if ( (pid = wait(&status))<0 ) die(errno,"waiting on child");
+				if ( (pid = wait(&status))<0 ) {
+					/* terminate() signal handler reaped the command between the check
+					   above and wait(), or during wait(), resulting in ECHILD. */
+					if ( errno==ECHILD && command_reaped ) {
+						status = command_status;
+						break;
+					}
+					die(errno,"waiting on child");
+				}
 				if ( pid==child_pid ) break;
 			}
 
