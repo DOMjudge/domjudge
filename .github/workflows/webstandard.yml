@@ -38,68 +38,10 @@ jobs:
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
     strategy:
       matrix:
-        role: [public, team, balloon, jury, admin]
-        test: [w3cval, WCAG2A, WCAG2AA]
         db: [bare-install, install]
-        exclude:
-          - role: jury
-            test: WCAG2AA
-          - role: jury
-            test: WCAG2A
-          - role: admin
-            test: WCAG2AA
-          - role: admin
-            test: WCAG2A
-          - role: public
-            test: WCAG2A
-          - role: balloon
-            test: WCAG2A
-          - role: team
-            test: WCAG2A
     steps:
       - uses: actions/checkout@v4
-      - name: Compute condition
-        id: filter
-        run: |
-          filter_out() {
-            if [ "${{ matrix.role }}" = "public" ]; then
-              if [ "${{ matrix.test }}" = "WCAG2A" ]; then
-                echo "should_run=false" >> $GITHUB_OUTPUT
-              else
-                echo "should_run=true" >> $GITHUB_OUTPUT
-              fi
-            elif [ "${{ matrix.role }}" = "balloon" ]; then
-              echo "should_run=false" >> $GITHUB_OUTPUT
-            elif [ "${{ matrix.role }}" = "jury" ]; then
-              echo "should_run=false" >> $GITHUB_OUTPUT
-            elif [ "${{ matrix.role }}" = "admin" ]; then
-              if [ "${{ matrix.test }}" = "w3cval" ]; then
-                echo "should_run=true" >> $GITHUB_OUTPUT
-              else
-                echo "should_run=true" >> $GITHUB_OUTPUT
-              fi
-            else
-              # Should never happen
-              echo "should_run=true" >> $GITHUB_OUTPUT
-            fi
-          }
-
-          if [[ "${GITHUB_EVENT_NAME}" == "merge_group" ]]; then
-            echo "should_run=true" >> $GITHUB_OUTPUT
-          elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            filter_out
-          elif [[ "${GITHUB_EVENT_NAME}" == "push" ]] &&
-               [[ "${GITHUB_REPOSITORY}" == "DOMjudge/domjudge" ]] &&
-               [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-            echo "should_run=false" >> $GITHUB_OUTPUT
-          else
-            filter_out
-          fi
-      - name: Mark as skipped
-        if: steps.filter.outputs.should_run == 'false'
-        run: echo "Skip job"
       - name: Cache node modules
-        if: steps.filter.outputs.should_run == 'true'
         uses: actions/cache@v4
         with:
           path: webapp/node_modules
@@ -107,7 +49,6 @@ jobs:
           restore-keys: |
             npm-
       - name: Cache composer dependencies
-        if: steps.filter.outputs.should_run == 'true'
         uses: actions/cache@v4
         with:
           path: webapp/vendor
@@ -115,11 +56,9 @@ jobs:
           restore-keys: |
             composer-
       - name: Install DOMjudge
-        if: steps.filter.outputs.should_run == 'true'
-        run: .github/jobs/baseinstall.sh ${{ matrix.role }} ${{ matrix.db }}
-      - name: Run webstandard tests (W3C, WCAG)
-        if: steps.filter.outputs.should_run == 'true'
-        run: .github/jobs/webstandard.sh ${{ matrix.test }} ${{ matrix.role }}
+        run: .github/jobs/baseinstall.sh admin ${{ matrix.db }}
+      - name: Run webstandard tests (W3C, WCAG) for all roles
+        run: .github/jobs/webstandard_all.sh
       - name: Upload database dump for debugging
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -127,11 +66,12 @@ jobs:
           name: DB-dump${{ matrix.artifact_suffix }}
           path: /tmp/artifacts/db.sql
       - name: Upload all logs/artifacts
-        if: ${{ steps.filter.outputs.should_run == 'true' && !cancelled() }}
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.role }}-${{ matrix.test }}-${{ matrix.db }}-logs
+          name: webstandard-${{ matrix.db }}-logs
           path: |
+            /tmp/webstandard-logs
             /tmp/artifacts
             /var/log/nginx
             /opt/domjudge/domserver/webapp/var/log/*.log
