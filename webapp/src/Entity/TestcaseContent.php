@@ -38,6 +38,13 @@ class TestcaseContent
     #[ORM\Column(
         type: 'blobtext',
         nullable: true,
+        options: ['comment' => 'Interaction log illustrating this sample testcase']
+    )]
+    private ?string $interaction = null;
+
+    #[ORM\Column(
+        type: 'blobtext',
+        nullable: true,
         options: ['comment' => 'A graphical representation of the testcase']
     )]
     private ?string $image = null;
@@ -91,6 +98,17 @@ class TestcaseContent
     public function getOutput(): string
     {
         return $this->output;
+    }
+
+    public function setInteraction(?string $interaction): TestcaseContent
+    {
+        $this->interaction = $interaction;
+        return $this;
+    }
+
+    public function getInteraction(): ?string
+    {
+        return $this->interaction;
     }
 
     public function setImage(?string $image): TestcaseContent

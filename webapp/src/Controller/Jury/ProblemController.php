@@ -577,7 +577,8 @@ class ProblemController extends BaseController
             ->from(Testcase::class, 'tc', 'tc.ranknumber')
             ->join('tc.content', 'content')
             ->select('tc', 'LENGTH(content.input) AS input_size', 'LENGTH(content.output) AS output_size',
-                     'LENGTH(content.image) AS image_size', 'tc.image_type')
+                     'LENGTH(content.image) AS image_size',
+                     'LENGTH(content.interaction) AS interaction_size', 'tc.image_type')
             ->andWhere('tc.problem = :problem')
             ->setParameter('problem', $problem)
             ->orderBy('tc.ranknumber')
@@ -619,6 +620,7 @@ class ProblemController extends BaseController
                 inputSize: (int)$data['input_size'],
                 outputSize: (int)$data['output_size'],
                 imageSize: (int)$data['image_size'],
+                interactionSize: (int)$data['interaction_size'],
             );
 
             $lastLineage = $lineage;
@@ -958,7 +960,7 @@ class ProblemController extends BaseController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route(path: '/{probId}/testcases/{rank<\d+>}/fetch/{type<input|output|image>}', name: 'jury_problem_testcase_fetch')]
+    #[Route(path: '/{probId}/testcases/{rank<\d+>}/fetch/{type<input|output|image|interaction>}', name: 'jury_problem_testcase_fetch')]
     public function fetchTestcaseAction(string $probId, int $rank, string $type): Response
     {
         /** @var Testcase|null $testcase */
@@ -998,6 +1000,9 @@ class ProblemController extends BaseController
                 break;
             case 'image':
                 $content = $testcase->getContent()->getImage();
+                break;
+            case 'interaction':
+                $content = $testcase->getContent()->getInteraction();
                 break;
         }
 
@@ -1251,6 +1256,11 @@ class ProblemController extends BaseController
                     $description .= "\n";
                 }
                 $zip->addFromString($filenamePrefix . '.desc', $description);
+            }
+
+            if (!empty($testcase->getContent()->getInteraction())) {
+                $zip->addFromString($filenamePrefix . '.interaction',
+                                    $testcase->getContent()->getInteraction());
             }
 
             if (!empty($testcase->getImageType())) {

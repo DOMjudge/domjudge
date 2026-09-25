@@ -35,7 +35,7 @@
                 {% if allowEdit %}
                     <th>upload new</th>
                 {% endif %}
-                <th>description / image</th>
+                <th>description / image / interaction</th>
             </tr>
             </thead>
             <tbody>
@@ -154,6 +154,12 @@
                                 {% else %}
                                 <span class="nodata">No image</span>
                                 {% endif %}
+                            {% endif %}
+                            {% if row.interactionSize > 0 %}
+                                <br>
+                                <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.externalid, 'rank': testcase.rank, 'type': 'interaction'}) }}">
+                                    <span class="filename">{{ testcase.downloadName | split('/') | last }}.{{ extensionMapping.interaction }}</span>
+                                </a>
                             {% endif %}
                         </td>
                     </tr>
