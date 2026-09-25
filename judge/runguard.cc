@@ -154,6 +154,14 @@ pid_t child_pid = -1;
 static volatile sig_atomic_t received_SIGCHLD = 0;
 static volatile sig_atomic_t received_signal = -1;
 static volatile sig_atomic_t error_in_signalhandler = 0;
+static volatile sig_atomic_t errno_in_signalhandler = 0;
+
+/* A signal handler must leave errno as it found it: the code it interrupts
+   may not have inspected the errno of its failed call yet. */
+struct errno_guard {
+	int saved = errno;
+	~errno_guard() { errno = saved; }
+};
 
 int child_pipefd[3][2];
 int child_redirfd[3];
@@ -613,6 +621,7 @@ void cgroup_delete()
 
 void terminate(int sig)
 {
+	errno_guard guard;
 	struct sigaction sigact;
 
 	/* Reset signal handlers to default */
@@ -646,6 +655,7 @@ void terminate(int sig)
 	   Don't report an already exited process as error. */
 	verbose_from_signalhandler("sending SIGTERM");
 	if ( kill(-child_pid,SIGTERM)!=0 && errno!=ESRCH ) {
+		errno_in_signalhandler = errno;
 		warning_from_signalhandler("error sending SIGTERM to command");
 		error_in_signalhandler = 1;
 		return;
@@ -657,6 +667,7 @@ void terminate(int sig)
 
 	verbose_from_signalhandler("sending SIGKILL");
 	if ( kill(-child_pid,SIGKILL)!=0 && errno!=ESRCH ) {
+		errno_in_signalhandler = errno;
 		warning_from_signalhandler("error sending SIGKILL to command");
 		error_in_signalhandler = 1;
 		return;
@@ -1412,7 +1423,7 @@ int main(int argc, char **argv)
 			int r = pselect(nfds+1, &readfds, nullptr, nullptr, nullptr, &emptymask);
 			if ( r==-1 && errno!=EINTR ) die(errno,"waiting for child data");
 			if (error_in_signalhandler) {
-				die(errno, "error in signal handler, exiting");
+				die(errno_in_signalhandler, "error in signal handler, exiting");
 			}
 
 			if ( received_SIGCHLD || received_signal == SIGALRM ) {
