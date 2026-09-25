@@ -98,10 +98,14 @@ jobs:
         run: make ${{ matrix.submit_check }}
       - name: Configure judgehost
         run: sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/ && sudo chmod 400 /etc/sudoers.d/sudoers-domjudge && cat /opt/domjudge/judgehost/etc/sudoers-domjudge
-      - name: Create user
-        run: sudo userdel -f -r domjudge-run-0 ; sudo useradd -d /nonexistent -g nogroup -s /bin/false -u 2222 domjudge-run-0
+      - name: Create users
+        run: |
+          sudo userdel -f -r domjudge-run-0 ; sudo useradd -d /nonexistent -g nogroup -s /bin/false -u 2222 domjudge-run-0
+          sudo userdel -f -r domjudge-run-1 || true ; sudo useradd -d /nonexistent -g nogroup -s /bin/false -u 2223 domjudge-run-1
       - name: Start judging
-        run: sudo -u domjudge sh -c 'cd /opt/domjudge/judgehost/ && nohup bin/judgedaemon -n 0 &'
+        # One judgedaemon per core on CPUs 0 and 1, leaving the other two
+        # cores of the runner for the webserver and database.
+        run: sudo -u domjudge sh -c 'cd /opt/domjudge/judgehost/ && for i in 0 1; do nohup bin/judgedaemon -n $i & done'
       - name: Import Kattis example problems
         run: |
           cd /tmp
@@ -132,10 +136,32 @@ jobs:
           done
       - name: Monitor judgehost log and stop once all submissions are judged
         run: |
-          tail -f /opt/domjudge/judgehost/log/judge*-0.log | while read line; do
-            echo "$line"
-            grep "No submissions in queue" /opt/domjudge/judgehost/log/judge*-0.log && break
+          LOGDIR=/opt/domjudge/judgehost/log
+          tail -F "$LOGDIR"/judge*-0.log "$LOGDIR"/judge*-1.log &
+          TAIL_PID=$!
+          # A daemon logs "No submissions in queue" each time it runs out of
+          # work and "Received ..." each time it gets new work, so it is idle
+          # iff the last of these lines in its log is the former.
+          daemon_idle() {
+            grep -hE "No submissions in queue|Received [0-9]+ '[a-z_]+' judge tasks|API indicated to retry" \
+              "$LOGDIR"/judge*-"$1".log | tail -n 1 | grep -q "No submissions in queue"
+          }
+          all_idle() { daemon_idle 0 && daemon_idle 1; }
+          # Both daemons may have gone idle before the last submissions were
+          # imported, so also require that no judge task is left unassigned.
+          # Recheck idleness after that, so that a daemon that got assigned
+          # the last task just before the query has logged it by then.
+          pending() {
+            mysql -N -B -e "SELECT COUNT(*) FROM judgetask WHERE type = 'judging_run' AND valid = 1 AND judgehostid IS NULL" domjudge
+          }
+          while :; do
+            if all_idle && [ "$(pending)" -eq 0 ]; then
+              sleep 2
+              all_idle && break
+            fi
+            sleep 2
           done
+          kill "$TAIL_PID"
       - name: dump the db
         if: ${{ !cancelled() }}
         run: mysqldump --quick --max_allowed_packet=1024M domjudge > /tmp/db.sql
@@ -160,6 +186,7 @@ jobs:
           path: |
             /var/log/nginx
             /opt/domjudge/domserver/webapp/var/log/*.log
+            /opt/domjudge/judgehost/log/*.log
             /tmp/docker-logs
             /tmp/artifacts
       - name: Verifying submissions
