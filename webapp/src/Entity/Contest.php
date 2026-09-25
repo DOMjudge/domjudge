@@ -481,7 +481,7 @@ class Contest extends BaseApiEntity implements
     /**
      * @var Collection<int, RemovedInterval>
      */
-    #[ORM\OneToMany(targetEntity: RemovedInterval::class, mappedBy: 'contest')]
+    #[ORM\OneToMany(targetEntity: RemovedInterval::class, mappedBy: 'contest', fetch: 'EAGER')]
     #[Assert\Valid]
     #[Serializer\Exclude]
     private Collection $removedIntervals;
