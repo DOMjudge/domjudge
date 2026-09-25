@@ -23,10 +23,14 @@ jobs:
     # as a passed required check, so if detection failed we must run.
     if: ${{ !cancelled() && needs.changes.outputs.phpstan != 'false' }}
     runs-on: ubuntu-latest
-    container:
-      image: domjudge/gitlabci:24.04
     steps:
       - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          # The version the CI container used to provide.
+          php-version: '8.3'
+          coverage: none
       - name: Cache composer dependencies
         uses: actions/cache@v4
         with:
@@ -38,10 +42,10 @@ jobs:
         run: .github/jobs/composer_setup.sh
       - name: Show the phpstan version
         run: webapp/vendor/phpstan/phpstan/phpstan --version
-      - name: Do basic installation
+      - name: Generate the configuration files
         run: |
-          make inplace-conf CONFIGURE_FLAGS='--with-domjudge-user=root'
-          make inplace-install
+          make inplace-conf-common CONFIGURE_FLAGS='--with-domjudge-user=root ac_cv_lib_cgroup_cgroup_init=yes'
+          make inplace-conf-phpstan
       - name: Run PHPStan in the classic way
         shell: bash
         run: |
