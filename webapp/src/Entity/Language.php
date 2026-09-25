@@ -163,6 +163,11 @@ class Language extends BaseApiEntity implements
     #[Serializer\Exclude]
     private Collection $problems;
 
+    #[ORM\Column(length: 32, nullable: true, options: ['comment' => 'Custom chroot for executable'])]
+    #[Serializer\Exclude]
+    #[Assert\Regex(^[a-zA-Z0-9_-]+$)]
+    private ?string $chrootDirectory;
+
     /**
      * @param Collection<int, Version> $versions
      */
@@ -470,5 +475,16 @@ class Language extends BaseApiEntity implements
     public function getProblems(): Collection
     {
         return $this->problems;
+    }
+
+    public function setChrootDirectory(?string $chrootDirectory): self
+    {
+        $this->chrootDirectory = $chrootDirectory;
+        return $this;
+    }
+
+    public function getChrootDirectory(): ?string
+    {
+        return $this->chrootDirectory;
     }
 }

@@ -34,6 +34,10 @@ class LanguageType extends AbstractExternalIdEntityType
         $builder->add('entryPointDescription', TextType::class, [
             'required' => false,
         ]);
+        $builder->add('chrootDirectory', TextType::class, [
+            'label' => 'Alternative judge directory',
+            'required' => false,
+        ]);
         $builder->add('allowSubmit', CheckboxType::class, [
             'required' => false,
             'attr' => self::TOGGLE_ATTRS,
