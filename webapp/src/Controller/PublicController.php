@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Attribute\ReleaseSessionLock;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -52,6 +53,7 @@ class PublicController extends BaseController
 
     #[Route(path: '', name: 'public_index')]
     #[Route(path: '/scoreboard')]
+    #[ReleaseSessionLock]
     public function scoreboardAction(
         Request $request,
         #[MapQueryParameter(name: 'contest')]

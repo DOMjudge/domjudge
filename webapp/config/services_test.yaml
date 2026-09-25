@@ -1,0 +1,8 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # Support code for tests that observe how requests use the session.
+    App\Tests\Session\:
+        resource: '../tests/Session/'

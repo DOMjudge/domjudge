@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\Attribute\ReleaseSessionLock;
 use App\Controller\API\AbstractRestController;
 use App\Entity\Configuration;
 use App\Service\CheckConfigService;
@@ -177,6 +178,7 @@ class ConfigController extends AbstractController
     }
 
     #[Route(path: '/check', name: 'jury_config_check')]
+    #[ReleaseSessionLock]
     public function checkAction(
         #[Autowire('%kernel.project_dir%')]
         string $projectDir,
