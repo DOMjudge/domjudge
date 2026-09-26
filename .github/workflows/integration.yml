@@ -63,9 +63,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: webapp/node_modules
-          key: npm-${{ hashFiles('webapp/package-lock.json') }}
+          key: yarn-${{ hashFiles('webapp/yarn.lock') }}
           restore-keys: |
-            npm-
+            yarn-
       - name: Cache composer dependencies
         uses: actions/cache@v4
         with:
