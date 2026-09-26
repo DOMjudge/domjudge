@@ -23,6 +23,7 @@ jobs:
     # as a passed required check, so if detection failed we must run.
     if: ${{ !cancelled() && needs.changes.outputs.webapp != 'false' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       ADMIN_PASSWORD: admin_password
       MYSQL_ROOT_PASSWORD: mysql_root_password
