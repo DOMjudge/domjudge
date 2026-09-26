@@ -38,6 +38,7 @@ jobs:
           - os: fedora
             version: latest
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     env:
       DEBIAN_FRONTEND: noninteractive
       TZ: Etc/UTC

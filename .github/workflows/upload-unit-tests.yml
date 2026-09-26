@@ -10,6 +10,7 @@ jobs:
   test-results:
     name: Process test results
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.event.workflow_run.conclusion != 'skipped'
     permissions:
       # required by download step to access artifacts API
