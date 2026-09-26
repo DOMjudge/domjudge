@@ -182,6 +182,32 @@ class ProblemControllerTest extends JuryControllerTestCase
         self::assertCount(0, $em->getRepository(ProblemStatementContent::class)->findBy(['problem' => $problem]));
     }
 
+    public function testSamplesZip(): void
+    {
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+        /** @var Problem $problem */
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => 'hello']);
+        $sample = $problem->getTestcases()->get(0);
+        // The jury can also download samples of problems teams cannot submit to.
+        $problem->getContestProblems()->first()->setAllowSubmit(false);
+        $em->flush();
+
+        $this->client->request('GET', '/jury/problems/hello/samples.zip');
+        self::assertSame(200, $this->client->getResponse()->getStatusCode());
+        $content = $this->unzipString($this->client->getInternalResponse()->getContent());
+        self::assertSame(['1.in' => $sample->getContent()->getInput(), '1.ans' => $sample->getContent()->getOutput()], $content);
+
+        // Without any samples there is nothing to download.
+        $sample->setSample(false);
+        $em->flush();
+
+        $this->client->request('GET', '/jury/problems/hello/samples.zip');
+        self::assertSame(404, $this->client->getResponse()->getStatusCode());
+    }
+
     public function testLockedContest(): void
     {
         $this->roles = ['admin'];

@@ -276,7 +276,7 @@ class PublicController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem %s not found or not available', $probId));
         }
         $contestProblem = $this->em->getRepository(ContestProblem::class)->findByProblemAndContest($contest, $probId);
-        if (!$contestProblem) {
+        if (!$contestProblem || !$contestProblem->getAllowSubmit()) {
             throw new NotFoundHttpException(sprintf('Problem %s not found or not available', $probId));
         }
 
@@ -330,7 +330,7 @@ class PublicController extends BaseController
         $contestProblem = $problem->getContestProblems();
         $foundProblemInContest = false;
         foreach ($contestProblem as $cp) {
-            if ($cp->getContest()->getCid() === $contest->getCid()) {
+            if ($cp->getContest()->getCid() === $contest->getCid() && $cp->getAllowSubmit()) {
                 $foundProblemInContest = true;
                 break;
             }
