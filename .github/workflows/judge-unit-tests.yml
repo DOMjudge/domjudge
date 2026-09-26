@@ -23,6 +23,7 @@ jobs:
     # as a passed required check, so if detection failed we must run.
     if: ${{ !cancelled() && needs.changes.outputs.judge-unit != 'false' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     container:
       image: domjudge/gitlabci:24.04
     strategy:

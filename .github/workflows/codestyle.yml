@@ -13,6 +13,7 @@ concurrency:
 jobs:
   syntax-job:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     container:
       image: domjudge/gitlabci:24.04
     steps:
@@ -22,6 +23,7 @@ jobs:
 
   detect-dump:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: "Search for leftover dump( statements"
@@ -29,6 +31,7 @@ jobs:
 
   php-linter:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     container:
       image: pipelinecomponents/php-linter:latest
     steps:
@@ -38,6 +41,7 @@ jobs:
 
   phpcs_compatibility:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     container:
       image: domjudge/gitlabci:24.04
     strategy:
@@ -55,6 +59,7 @@ jobs:
 
   pycodestyle:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Download pycodestyle python file
@@ -70,6 +75,7 @@ jobs:
 
   pyright:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
     - uses: jakebailey/pyright-action@v2
       with:
