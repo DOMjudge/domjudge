@@ -818,9 +818,22 @@ class JudgeDaemon
                 }
                 logmsg(
                     LOG_INFO,
-                    "🗑 Cleaned up $cnt old judging directories; reduced disk space by " .
+                    "🗑 Cleaned up $cnt old judging directories; increased free space by " .
                     sprintf("%01.2fMB.", ($after - $before) / (1024 * 1024))
                 );
+                if ($after < 1024 * $allowed_free_space) {
+                    $cacheBefore = $after;
+                    logmsg(LOG_INFO, "  - deleting testcase cache '$workdirpath/testcase'");
+                    if (!$this->clearTestcaseCache($workdirpath)) {
+                        logmsg(LOG_WARNING, "Deleting testcase cache '$workdirpath/testcase' was unsuccessful.");
+                    }
+                    $after = disk_free_space(JUDGEDIR);
+                    logmsg(
+                        LOG_INFO,
+                        "🗑 Cleared testcase cache; increased free space by " .
+                        sprintf("%01.2fMB.", ($after - $cacheBefore) / (1024 * 1024))
+                    );
+                }
             }
             if ($after < 1024 * $allowed_free_space) {
                 $free_abs = sprintf("%01.2fGB", $after / (1024 * 1024 * 1024));
@@ -830,6 +843,21 @@ class JudgeDaemon
                 $this->disable('judgehost', 'hostname', $this->myhost, "low on disk space on $this->myhost");
             }
         }
+    }
+
+    private function clearTestcaseCache(string $workdirpath): bool
+    {
+        $cachePath = $workdirpath . '/testcase';
+        if ((file_exists($cachePath) || is_link($cachePath)) &&
+            !$this->runCommandSafe(['rm', '-rf', '--', $cachePath])) {
+            return false;
+        }
+
+        if (!mkdir($cachePath, 0700, true)) {
+            return false;
+        }
+
+        return chmod($cachePath, 0700);
     }
 
     /**
@@ -1124,6 +1152,22 @@ class JudgeDaemon
                 }
             }
         }
+    }
+
+    /**
+     * Recreate the result directory for a testcase attempt.
+     *
+     * A task can be returned and fetched again by the same judgedaemon. Never
+     * reuse output, feedback, or hardlinks from an earlier attempt.
+     */
+    private function resetTestcaseDirectory(string $testcasedir): bool
+    {
+        if ((file_exists($testcasedir) || is_link($testcasedir)) &&
+            !$this->runCommandSafe(['rm', '-rf', '--', $testcasedir])) {
+            return false;
+        }
+
+        return mkdir($testcasedir, 0755, true);
     }
 
     /**
@@ -2435,6 +2479,10 @@ class JudgeDaemon
         $input = $tcfile['input'];
         $output = $tcfile['output'];
         $passLimit = $run_config['pass_limit'];
+        if (!$this->resetTestcaseDirectory($testcasedir)) {
+            error("Could not reset testcase result directory '$testcasedir'.");
+        }
+
         // All of those are to help PHPStan, it seems to not see that they are defined in the loop
         // and the loop always runs as tpassLimit >= $passCnt.
         $score = "";
