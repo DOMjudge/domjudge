@@ -42,6 +42,15 @@ jobs:
         run: |
           make inplace-conf CONFIGURE_FLAGS='--with-domjudge-user=root'
           make inplace-install
+      - name: Cache PHPStan results
+        uses: actions/cache@v4
+        with:
+          # PHPStan's default tmpDir. It only reanalyses the files that
+          # changed since the cached run, and their dependents.
+          path: /tmp/phpstan
+          key: phpstan-${{ github.run_id }}
+          restore-keys: |
+            phpstan-
       - name: Run PHPStan in the classic way
         shell: bash
         run: |
