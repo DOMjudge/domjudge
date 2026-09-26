@@ -141,7 +141,16 @@ if [ "${db}" = "install" ]; then
     if [ "${INSTALL_SCORING:-}" = "1" ]; then
         INSTALL_CMD="install-scoring-examples"
     fi
-    /opt/domjudge/domserver/bin/dj_setup_database "$INSTALL_CMD" | tee -a "$ARTIFACTS/mysql.txt"
+
+    # Standalone example installation must use the application credentials
+    # from dbpasswords.secret, not DBA credentials from ~/.my.cnf.
+    mv ~/.my.cnf ~/.my.cnf.ci-backup
+    if ! /opt/domjudge/domserver/bin/dj_setup_database "$INSTALL_CMD" | tee -a "$ARTIFACTS/mysql.txt"; then
+        mv ~/.my.cnf.ci-backup ~/.my.cnf
+        exit 1
+    fi
+    mv ~/.my.cnf.ci-backup ~/.my.cnf
+
     section_end
 fi
 
