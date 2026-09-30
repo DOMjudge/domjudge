@@ -13,6 +13,11 @@
     {% set buttonClass = 'btn-outline-primary btn-sm' %}
 {% endif %}
 
+{% if table == 'executable' %}
+    {# Only the judgings that did not use the current version of the executable are rejudged. #}
+    {% set buttonText = 'Rejudge outdated judgings for executable ' ~ id %}
+{% endif %}
+
 {% if table == 'submission' and submission is defined and judgings is defined %}
     {% set buttonText = 'Rejudge this submission' %}
     {% set questionText = 'Rejudge submission s' ~ id ~ '?' %}
