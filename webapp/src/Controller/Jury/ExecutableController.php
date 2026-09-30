@@ -7,6 +7,7 @@ use App\Entity\ContestProblem;
 use App\Entity\Executable;
 use App\Entity\ExecutableFile;
 use App\Entity\ImmutableExecutable;
+use App\Entity\Judging;
 use App\Form\Type\ExecutableUploadType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -268,6 +269,7 @@ class ExecutableController extends BaseController
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
+        $previousHash = $executable->getImmutableExecutable()->getHash();
 
         $editorData = $this->dataForEditor($executable);
         $data       = [];
@@ -330,6 +332,7 @@ class ExecutableController extends BaseController
             $executable->setImmutableExecutable($immutableExecutable);
             $this->em->flush();
             $this->dj->auditlog('executable', $executable->getExecid(), 'updated');
+            $this->suggestRejudging($executable, $previousHash);
 
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
         }
@@ -357,6 +360,7 @@ class ExecutableController extends BaseController
                 $this->dj->createImmutableExecutable($zip)
             );
             $this->saveEntity($executable, $executable->getExecid(), false);
+            $this->suggestRejudging($executable, $previousHash);
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
         }
 
@@ -432,6 +436,7 @@ class ExecutableController extends BaseController
 
             return $this->render('jury/delete.html.twig', $data);
         } else {
+            $previousHash = $executable->getImmutableExecutable()->getHash();
             // Create a copy of all files except $file
             $files = [];
             /** @var ExecutableFile $file */
@@ -453,6 +458,7 @@ class ExecutableController extends BaseController
             $this->em->persist($immutableExecutable);
             $executable->setImmutableExecutable($immutableExecutable);
             $this->em->flush();
+            $this->suggestRejudging($executable, $previousHash);
             $redirectUrl = $this->generateUrl('jury_executable', ['execId' => $execId]);
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse(['url' => $redirectUrl]);
@@ -490,6 +496,39 @@ class ExecutableController extends BaseController
         }
 
         return $this->deleteEntities($request, [$executable], $this->generateUrl('jury_executables'));
+    }
+
+    /**
+     * If the executable changed, point out the submissions that were judged with an outdated version of it.
+     */
+    private function suggestRejudging(Executable $executable, ?string $previousHash): void
+    {
+        if ($executable->getImmutableExecutable()->getHash() === $previousHash) {
+            return;
+        }
+        $contests = $this->dj->getCurrentContests();
+        if (empty($contests)) {
+            return;
+        }
+
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->from(Judging::class, 'j')
+            ->join('j.submission', 's')
+            ->select('COUNT(DISTINCT s.submitid)')
+            ->andWhere('j.contest IN (:contests)')
+            ->andWhere('j.valid = 1')
+            ->setParameter('contests', $contests);
+        $numSubmissions = (int)$this->dj->restrictToJudgingsWithOutdatedExecutable($queryBuilder, $executable)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        if ($numSubmissions > 0) {
+            $this->addFlash('warning', sprintf(
+                'In the active contests, %d %s judged with an outdated version of this executable, consider rejudging.',
+                $numSubmissions,
+                $numSubmissions === 1 ? 'submission was' : 'submissions were'
+            ));
+        }
     }
 
     /**
