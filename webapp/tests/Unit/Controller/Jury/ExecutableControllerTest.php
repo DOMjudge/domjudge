@@ -21,4 +21,38 @@ class ExecutableControllerTest extends JuryControllerTestCase
     protected static string  $addForm                  = 'executable_upload[';
     protected static array   $addEntitiesShown         = ['type'];
     protected static array   $addEntities              = [];
+
+    /**
+     * After changing an executable, the jury is pointed to the submissions that were judged
+     * with an outdated version of it, which they can rejudge from the page of the executable.
+     */
+    public function testChangingExecutableSuggestsRejudging(): void
+    {
+        $this->addSubmission('DOMjudge', 'hello');
+
+        $this->verifyPageResponse('GET', static::$baseUrl . '/c', 200);
+        self::assertSelectorTextContains('#rejudge-modal .modal-title', 'Rejudge outdated judgings for executable c');
+
+        // Saving the files without changing them does not outdate any judging.
+        $this->client->submitForm('Save files');
+        $this->checkStatusAndFollowRedirect();
+        self::assertSelectorNotExists('.alert:contains("outdated version")');
+
+        $form = $this->getCurrentCrawler()->selectButton('Save files')->form();
+        $form['form[source0]'] = $form['form[source0]']->getValue() . "# changed\n";
+        $this->client->submit($form);
+        $this->checkStatusAndFollowRedirect();
+        self::assertSelectorExists(
+            '.alert-warning:contains("judged with an outdated version of this executable, consider rejudging.")'
+        );
+    }
+
+    /**
+     * Debug scripts are not used for judging, so there is nothing to rejudge.
+     */
+    public function testNoRejudgingForDebugExecutable(): void
+    {
+        $this->verifyPageResponse('GET', static::$baseUrl . '/full_debug', 200);
+        self::assertSelectorNotExists('#rejudge-modal');
+    }
 }
