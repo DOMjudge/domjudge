@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\Attribute\ReleaseSessionLock;
 use App\Controller\BaseController;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\Judgehost;
@@ -45,6 +46,7 @@ class JudgehostController extends BaseController
     }
 
     #[Route(path: '', name: 'jury_judgehosts')]
+    #[ReleaseSessionLock]
     public function indexAction(Request $request): Response
     {
         /** @var Judgehost[] $judgehosts */

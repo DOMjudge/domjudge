@@ -2,6 +2,7 @@
 
 namespace App\Controller\Team;
 
+use App\Attribute\ReleaseSessionLock;
 use App\Controller\BaseController;
 use App\Controller\ScoreboardSubmissionsTrait;
 use App\Entity\Team;
@@ -47,6 +48,7 @@ class ScoreboardController extends BaseController
     }
 
     #[Route(path: '/scoreboard', name: 'team_scoreboard')]
+    #[ReleaseSessionLock]
     public function scoreboardAction(Request $request): Response
     {
         if (!$this->config->get('enable_ranking')) {

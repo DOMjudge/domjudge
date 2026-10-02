@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\Attribute\ReleaseSessionLock;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
@@ -67,6 +68,7 @@ class BalloonController extends AbstractController
     }
 
     #[Route(path: '/contests/{contestId}/balloons', name: 'jury_balloons')]
+    #[ReleaseSessionLock]
     public function indexAction(string $contestId, BalloonService $balloonService): Response
     {
         $contest = $this->dj->getContestByExternalId($contestId);

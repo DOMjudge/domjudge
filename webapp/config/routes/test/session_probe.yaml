@@ -1,0 +1,3 @@
+session_probe:
+    resource: '../../../tests/Session/SessionProbeController.php'
+    type: attribute

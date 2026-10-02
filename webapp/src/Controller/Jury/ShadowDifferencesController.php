@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\Attribute\ReleaseSessionLock;
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\ExternalJudgement;
@@ -17,7 +18,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -32,7 +32,6 @@ class ShadowDifferencesController extends BaseController
         DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly SubmissionService $submissions,
-        protected readonly RequestStack $requestStack,
         EntityManagerInterface $em,
         protected readonly EventLogService $eventLogService,
         KernelInterface $kernel,
@@ -45,6 +44,7 @@ class ShadowDifferencesController extends BaseController
      * @throws NonUniqueResultException
      */
     #[Route(path: '', name: 'jury_shadow_differences')]
+    #[ReleaseSessionLock]
     public function indexAction(
         Request $request,
         #[MapQueryParameter(name: 'view')]
@@ -68,9 +68,6 @@ class ShadowDifferencesController extends BaseController
             $this->addFlash('warning', 'Shadow mode is not enabled for this contest, please configure it first.');
             return $this->redirect($this->generateUrl('jury_contest_edit', ['contestId' => $contest->getCid()]) . '#externalSourceEnabled');
         }
-
-        // Close the session, as this might take a while and we don't need the session below.
-        $this->requestStack->getSession()->save();
 
         $verdicts = $this->config->getVerdicts(['final', 'error', 'external', 'in_progress']);
 

@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\Attribute\ReleaseSessionLock;
 use App\Controller\ScoreboardSubmissionsTrait;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -34,6 +35,7 @@ class ScoreboardController extends AbstractController
     }
 
     #[Route(path: '', name: 'jury_scoreboard')]
+    #[ReleaseSessionLock]
     public function scoreboardAction(Request $request): Response
     {
         $response   = new Response();
