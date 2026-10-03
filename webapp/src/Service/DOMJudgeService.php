@@ -1430,27 +1430,28 @@ class DOMJudgeService
         $type = $executable->getType();
         if ($type === 'compile') {
             $submissionField = 's.language';
-            $judgedWith = $executable->getLanguages()->toArray();
+            $usedBy = $this->em->createQueryBuilder()
+                ->from(Language::class, 'el')
+                ->select('el.langid')
+                ->andWhere('el.compile_executable = :executable');
         } elseif ($type === 'compare' || $type === 'run') {
             $submissionField = 's.problem';
-            $judgedWith = $type === 'compare'
-                ? $executable->getProblemsCompare()->toArray()
-                : $executable->getProblemsRun()->toArray();
+            $usesExecutable = sprintf('ep.%s_executable = :executable', $type);
             if ($executable->getExecid() === (string)$this->config->get('default_' . $type)) {
-                $judgedWith = array_merge($judgedWith, $this->em->getRepository(Problem::class)
-                    ->findBy([$type . '_executable' => null]));
+                // Problems without their own script use the default one.
+                $usesExecutable .= sprintf(' OR ep.%s_executable IS NULL', $type);
             }
+            $usedBy = $this->em->createQueryBuilder()
+                ->from(Problem::class, 'ep')
+                ->select('ep.probid')
+                ->andWhere($usesExecutable);
             if ($type === 'compare') {
                 // Interactive problems do not use a compare script, their run script compares the output.
-                $judgedWith = array_filter($judgedWith, fn(Problem $problem) => !$problem->isInteractiveProblem());
+                $usedBy->andWhere('BIT_AND(ep.types, :executableInteractiveType) = 0');
+                $queryBuilder->setParameter('executableInteractiveType', Problem::TYPE_INTERACTIVE);
             }
         } else {
             // Other executables, like debug scripts, are not used for judging.
-            return $queryBuilder->andWhere('1 = 0');
-        }
-
-        if (empty($judgedWith)) {
-            // No language or problem uses this executable.
             return $queryBuilder->andWhere('1 = 0');
         }
 
@@ -1465,9 +1466,9 @@ class DOMJudgeService
             ->andWhere('eie.hash != :executableHash');
 
         return $queryBuilder
-            ->andWhere(sprintf('%s IN (:executableJudgedWith)', $submissionField))
+            ->andWhere($queryBuilder->expr()->in($submissionField, $usedBy->getDQL()))
             ->andWhere($queryBuilder->expr()->exists($judgedWithOtherVersion->getDQL()))
-            ->setParameter('executableJudgedWith', $judgedWith)
+            ->setParameter('executable', $executable)
             ->setParameter('executableJudgeTaskType', JudgeTaskType::JUDGING_RUN)
             ->setParameter('executableHash', $executable->getImmutableExecutable()->getHash());
     }
