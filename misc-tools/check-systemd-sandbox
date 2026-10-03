@@ -2,16 +2,19 @@
 # Check if a systemd service has sandboxing that would prevent writing
 # to one or more directories. This detects ProtectHome, ProtectSystem, etc.
 #
-# Usage: check-systemd-sandbox <service> <writable-path> [<writable-path>...]
+# Usage: check-systemd-sandbox <service> <instance> <writable-path> [<writable-path>...]
 #
 # Any path that is made read-only by the sandbox and not already listed in
-# ReadWritePaths is reported together with a single command that adds all of
-# them at once.
+# ReadWritePaths is reported together with commands that add all of them at
+# once, in a drop-in file of this DOMjudge instance's own.
 
 set -eu
 
 SERVICE="$1.service"
-shift
+INSTANCE="$2"
+shift 2
+DROPIN_DIR="/etc/systemd/system/${SERVICE}.d"
+DROPIN="${DROPIN_DIR}/domjudge-${INSTANCE}.conf"
 
 if ! command -v systemctl >/dev/null 2>&1; then
     exit 0
@@ -65,10 +68,11 @@ for path in "$@"; do
 
     [ -n "$reason" ] || continue
 
-    # Every sandboxed path must be listed in the suggested fix. `systemctl edit`
-    # overwrites the same override file, so a fix that lists only the paths that
+    # Every sandboxed path must be listed in the suggested fix. It overwrites
+    # this instance's drop-in file, so a fix that lists only the paths that
     # happen to be missing right now would drop the ones granted by a previous
-    # run causing the check to flip-flop between paths.
+    # run causing the check to flip-flop between paths. Other instances have
+    # drop-in files of their own, and systemd adds up their ReadWritePaths.
     AFFECTED="${AFFECTED} ${path}"
 
     is_already_writable "$path" && continue
@@ -85,10 +89,12 @@ if [ "$ANY_MISSING" -eq 1 ]; then
     echo ""
     printf '%s' "$WARNINGS"
     echo ""
-    echo "Fix this by granting write access to all affected paths at once"
-    echo "(a single ReadWritePaths line, so a previous fix is not overwritten):"
+    echo "Fix this by granting write access in a drop-in file for this instance"
+    echo "('$INSTANCE'), which leaves those of other instances alone:"
     echo ""
-    printf '    printf '"'"'[Service]\nReadWritePaths=%s\n'"'"' | sudo SYSTEMD_EDITOR=tee systemctl edit %s\n' "$AFFECTED" "$SERVICE"
+    printf '    sudo mkdir -p %s\n' "$DROPIN_DIR"
+    printf '    printf '"'"'[Service]\\nReadWritePaths=%s\\n'"'"' | sudo tee %s\n' "$AFFECTED" "$DROPIN"
+    printf '    sudo systemctl daemon-reload\n'
     printf '    sudo systemctl restart %s\n' "$SERVICE"
     echo ""
     echo "We recommend to rerun this check after running the above command."
