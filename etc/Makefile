@@ -28,10 +28,11 @@ domserver: apache.conf nginx-conf nginx-conf-inner $(SECRETS)
 
 judgehost: restapi.secret
 
-# Pass the API URL so that the generated judgehost credentials point at
-# this installation rather than at a hardcoded localhost URL.
+# Pass the instance name and API URL so that the generated database and
+# judgehost credentials belong to this installation only.
 $(SECRETS):
-	DOMJUDGE_RESTAPIURL='$(RESTAPIURL)' ./gen_all_secrets $(subst 1,-q,$(QUIET))
+	DOMJUDGE_INSTANCE='$(INSTANCE)' DOMJUDGE_RESTAPIURL='$(RESTAPIURL)' \
+		./gen_all_secrets $(subst 1,-q,$(QUIET))
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
