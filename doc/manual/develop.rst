@@ -151,10 +151,9 @@ A few things to be aware of:
   database while leaving the webapp on the old one. Keep the two in sync,
   or remove the ``DATABASE_URL`` line.
 * ``misc-tools/check-systemd-sandbox`` may suggest a ``ReadWritePaths=``
-  override for your webserver or PHP-FPM service. That override is a
-  single file per service, so it must list the ``webapp/var`` and
-  ``output/tmp`` directories of *all* your checkouts on one line;
-  re-running ``systemctl edit`` overwrites the previous contents.
+  override for your webserver or PHP-FPM service. It goes into a drop-in
+  file named after the instance, ``domjudge-<instance>.conf``, so the
+  overrides of several checkouts do not overwrite each other.
 * The judgehost side is deliberately not parameterised: the
   ``domjudge-run-*`` users, the cgroups and the chroot directory are
   shared by the whole machine. To judge against a particular instance,
