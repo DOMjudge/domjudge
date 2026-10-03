@@ -13,6 +13,17 @@ include $(TOPDIR)/Makefile.global
 
 debpool := /etc/php/$(PHPVERSION)/fpm/pool.d
 fedpool := /etc/php-fpm.d
+# The default instance adds an Alias to Apache's global configuration. A
+# named instance brings a VirtualHost of its own, so it is installed as a
+# site: sites are loaded after conf-enabled/ and the distribution's default
+# site, so it does not become the default VirtualHost for other hostnames.
+ifeq ($(INSTANCE),domjudge)
+apachedir := /etc/apache2/conf
+a2enable := a2enconf
+else
+apachedir := /etc/apache2/sites
+a2enable := a2ensite
+endif
 
 default:
 	@echo "No default target"
@@ -322,8 +333,8 @@ inplace-install-l:
 	@echo "           systemctl restart nginx"
 	@echo "           systemctl restart php-fpm"
 	@echo "        Apache 2:"
-	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/$(INSTANCE).conf"
-	@echo "           a2enconf $(INSTANCE)"
+	@echo "           ln -sf $(CURDIR)/etc/apache.conf $(apachedir)-available/$(INSTANCE).conf"
+	@echo "           $(a2enable) $(INSTANCE)"
 	@echo "           a2enmod rewrite headers"
 	@echo "           systemctl restart apache2"
 	@echo ""
@@ -402,10 +413,10 @@ endef
 
 inplace-postinstall-apache: inplace-postinstall-permissions
 	@if [ ! -d "/etc/apache2/conf-enabled" ]; then echo "Couldn't find directory /etc/apache2/conf-enabled. Is apache installed?"; false; fi
-	$(call check_instance_clash,/etc/apache2/conf-available/$(INSTANCE).conf,$(CURDIR)/etc/apache.conf)
-	$(call check_instance_clash,/etc/apache2/conf-enabled/$(INSTANCE).conf,$(CURDIR)/etc/apache.conf)
-	ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/$(INSTANCE).conf
-	a2enconf $(INSTANCE)
+	$(call check_instance_clash,$(apachedir)-available/$(INSTANCE).conf,$(CURDIR)/etc/apache.conf)
+	$(call check_instance_clash,$(apachedir)-enabled/$(INSTANCE).conf,$(CURDIR)/etc/apache.conf)
+	ln -sf $(CURDIR)/etc/apache.conf $(apachedir)-available/$(INSTANCE).conf
+	$(a2enable) $(INSTANCE)
 	a2enmod rewrite headers
 	systemctl restart apache2
 
