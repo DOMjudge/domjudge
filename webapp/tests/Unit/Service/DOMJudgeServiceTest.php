@@ -144,6 +144,26 @@ class DOMJudgeServiceTest extends BaseTestCase
     }
 
     /**
+     * A problem with its own compare script is not judged with the default one.
+     */
+    public function testJudgingsOfProblemWithOwnCompareExecutable(): void
+    {
+        $this->logIn();
+
+        $submission = $this->addSubmission('jumble');
+        $ownCompare = $submission->getProblem()->getCompareExecutable();
+        self::assertNotNull($ownCompare);
+        $judgingId = $submission->getJudgings()->first()->getJudgingid();
+
+        $defaultCompare = $this->em()->getRepository(Executable::class)->find('compare');
+        $this->changeExecutable($defaultCompare, "\n# changed\n");
+        self::assertNotContains($judgingId, $this->getJudgingsWithOutdatedExecutable($defaultCompare));
+
+        $this->changeExecutable($ownCompare, "\n# changed\n");
+        self::assertContains($judgingId, $this->getJudgingsWithOutdatedExecutable($ownCompare));
+    }
+
+    /**
      * @return int[]
      */
     private function getJudgingsWithOutdatedExecutable(Executable $executable): array
