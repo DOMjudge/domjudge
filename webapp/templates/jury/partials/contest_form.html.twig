@@ -76,6 +76,14 @@
                 {% endif %}
                 {{ _self.form_table_row(form.contestProblemsetFile) }}
                 {% if form.offsetExists('clearContestProblemset') %}
+                    <tr>
+                        <th></th>
+                        <td>
+                            <a href="{{ path('jury_contest_problemset', {'cid': contest.externalid}) }}">
+                                <i class="fas fa-file-{{ contest.contestProblemsetType }} me-1"></i>View current problemset document
+                            </a>
+                        </td>
+                    </tr>
                     {{ _self.form_table_row(form.clearContestProblemset) }}
                 {% endif %}
 
