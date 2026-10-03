@@ -1,4 +1,9 @@
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+    {% if can_change_password %}
+        <a class="btn btn-info btn-sm me-2" href="{{ path('profile_index') }}">
+            <i class="fas fa-key"></i> Change password
+        </a>
+    {% endif %}
     <a class="btn btn-info btn-sm me-2" href="{{ path('logout') }}"
     {% if confirmLogout is defined %}
         onclick="return confirmLogout();"
