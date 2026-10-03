@@ -85,7 +85,9 @@ derives an *instance name* from the name of the directory the source tree
 lives in, and uses it for
 
 * the webserver and PHP-FPM configuration file names installed into
-  ``/etc``, and the name passed to ``a2enconf``;
+  ``/etc``, and the name passed to ``a2enconf``, or to ``a2ensite`` for a
+  named instance, whose Apache configuration is a ``VirtualHost`` of its
+  own;
 * the PHP-FPM pool name and its listening socket;
 * the nginx ``upstream`` name and the nginx variable holding the HTTPS
   flag, both of which are global to nginx: a duplicate makes nginx refuse
@@ -153,10 +155,6 @@ A few things to be aware of:
   single file per service, so it must list the ``webapp/var`` and
   ``output/tmp`` directories of *all* your checkouts on one line;
   re-running ``systemctl edit`` overwrites the previous contents.
-* With Apache, an instance served from the root of the server takes over
-  ``DocumentRoot`` for the whole server. To run several of them, either
-  give each a distinct path prefix through ``--with-baseurl``, or move the
-  generated configuration into a ``VirtualHost`` block.
 * The judgehost side is deliberately not parameterised: the
   ``domjudge-run-*`` users, the cgroups and the chroot directory are
   shared by the whole machine. To judge against a particular instance,

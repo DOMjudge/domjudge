@@ -56,18 +56,35 @@
 @ONLY_IF_PREFIX@### Alias config ###
 @ONLY_IF_ROOT@### Document root config ###
 #
-# The directive below is derived from the configured base URL.
+# The directives below are derived from the configured base URL.
+@ONLY_IF_NAMED@# This is a named instance, so it gets a VirtualHost for the
+@ONLY_IF_NAMED@# host in its base URL. That lets several instances coexist in
+@ONLY_IF_NAMED@# one Apache; install this file as a site, not as a conf, so
+@ONLY_IF_NAMED@# that it does not become the default VirtualHost.
+@ONLY_IF_LISTEN@#
+@ONLY_IF_LISTEN@# Apache does not listen on the port in the base URL by default.
+@ONLY_IF_LISTEN@# Several instances may share it, but a duplicate Listen makes
+@ONLY_IF_LISTEN@# Apache refuse to start, so only the first one declares it.
+@ONLY_IF_LISTEN@<IfDefine !DOMJUDGE_LISTEN_@URLLISTEN@>
+@ONLY_IF_LISTEN@Define DOMJUDGE_LISTEN_@URLLISTEN@
+@ONLY_IF_LISTEN@Listen @URLLISTEN@
+@ONLY_IF_LISTEN@</IfDefine>
+@ONLY_IF_NAMED@<VirtualHost *:@URLLISTEN@>
+@ONLY_IF_NAMED@ServerName @URLSERVERNAME@
 @ONLY_IF_PREFIX@# The base URL does not put DOMjudge in the root of this
 @ONLY_IF_PREFIX@# server, but only lets it occupy a subdir, like this:
-@ONLY_IF_PREFIX@# www.example.com/domjudge. Use one of the VirtualHost
-@ONLY_IF_PREFIX@# blocks above instead to give it a server of its own.
+@ONLY_IF_PREFIX@@ONLY_IF_DEFAULT@# www.example.com/domjudge. Use one of the VirtualHost
+@ONLY_IF_PREFIX@@ONLY_IF_DEFAULT@# blocks above instead to give it a server of its own.
+@ONLY_IF_PREFIX@@ONLY_IF_NAMED@# www.example.com/domjudge.
 @ONLY_IF_PREFIX@Alias @URLPREFIX@ @domserver_webappdir@/public
 @ONLY_IF_ROOT@# The base URL puts DOMjudge in the root of this server, so
 @ONLY_IF_ROOT@# it takes over the document root rather than occupying a
-@ONLY_IF_ROOT@# subdirectory. Note that this applies to the whole server;
-@ONLY_IF_ROOT@# move it into one of the VirtualHost blocks shown above if
-@ONLY_IF_ROOT@# that is not what you want.
+@ONLY_IF_ROOT@@ONLY_IF_DEFAULT@# subdirectory. Note that this applies to the whole server;
+@ONLY_IF_ROOT@@ONLY_IF_DEFAULT@# move it into one of the VirtualHost blocks shown above if
+@ONLY_IF_ROOT@@ONLY_IF_DEFAULT@# that is not what you want.
+@ONLY_IF_ROOT@@ONLY_IF_NAMED@# subdirectory.
 @ONLY_IF_ROOT@DocumentRoot @domserver_webappdir@/public
+@ONLY_IF_NAMED@</VirtualHost>
 
 ### General options ###
 #

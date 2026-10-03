@@ -67,6 +67,10 @@ INSTANCE        = @INSTANCE@
 # in the root of the webserver.
 URLPREFIX       = @URLPREFIX@
 
+# Port a named instance's webserver configuration listens on, derived from
+# BASEURL; always 80 for the default instance.
+URLLISTEN       = @URLLISTEN@
+
 # Autoconf prefixes and paths
 FHS_ENABLED    = @FHS_ENABLED@
 
@@ -143,6 +147,20 @@ else
 substprefixlines = -e 's,^@ONLY_IF_PREFIX[@],,' -e '/^@ONLY_IF_ROOT[@]/d'
 endif
 
+# Likewise, lines marked with @ONLY_IF_NAMED@ are only kept for a named
+# instance, which gets a server of its own, and lines marked with
+# @ONLY_IF_DEFAULT@ only for the default instance. Lines marked with
+# @ONLY_IF_LISTEN@ are kept for a named instance on a port other than 80,
+# which the webserver does not listen on by default. A line may carry a
+# path marker followed by an instance marker.
+ifeq ($(INSTANCE),domjudge)
+substinstancelines = -e 's,^@ONLY_IF_DEFAULT[@],,' -e '/^@ONLY_IF_NAMED[@]/d' -e '/^@ONLY_IF_LISTEN[@]/d'
+else ifeq ($(URLLISTEN),80)
+substinstancelines = -e '/^@ONLY_IF_DEFAULT[@]/d' -e 's,^@ONLY_IF_NAMED[@],,' -e '/^@ONLY_IF_LISTEN[@]/d'
+else
+substinstancelines = -e '/^@ONLY_IF_DEFAULT[@]/d' -e 's,^@ONLY_IF_NAMED[@],,' -e 's,^@ONLY_IF_LISTEN[@],,'
+endif
+
 # Macro to substitute configure variables.
 # Defined in makefile to allow for expansion of ${prefix} etc. during
 # build and install, conforming to the GNU coding standards, see:
@@ -188,6 +206,7 @@ define substconfigvars
 	-e 's,@URLLISTEN[@],@URLLISTEN@,g' \
 	-e 's,@PHPVERSION[@],@PHPVERSION@,g' \
 	$(substprefixlines) \
+	$(substinstancelines) \
 	> $@
 @chmod $(shell stat -c '%a' $<) $@
 endef

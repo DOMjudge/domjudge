@@ -290,6 +290,15 @@ source .github/jobs/configure-checks/functions.sh
   assert_success
   run grep -q "^listen = /var/run/php-fpm-wt-foo.sock" etc/domjudge-fpm.conf
   assert_success
+  # Apache gets a VirtualHost of its own, on port 80 without a Listen.
+  run grep -q "^<VirtualHost \*:80>" etc/apache.conf
+  assert_success
+  run grep -q "^ServerName wt-foo.localhost" etc/apache.conf
+  assert_success
+  run grep -q "^Listen" etc/apache.conf
+  assert_failure
+  run grep -q "applies to the whole server" etc/apache.conf
+  assert_failure
 
   # An explicit port in the base URL is used, but an 'https' scheme must
   # not silently become 'listen 443': the generated server block speaks
@@ -305,6 +314,22 @@ source .github/jobs/configure-checks/functions.sh
   # The commented-out TLS block still mentions 443; no active one may.
   run grep -q "^	listen 443" etc/nginx-conf
   assert_failure
+
+  # Apache only listens on port 80 by default, so other ports need a
+  # Listen, guarded so that instances can share the port.
+  run run_configure "--with-instance-name=wt-foo --with-baseurl=http://wt-foo.localhost:8080/"
+  run make -C etc config
+  assert_success
+  run grep -q "^<VirtualHost \*:8080>" etc/apache.conf
+  assert_success
+  run grep -q "^<IfDefine !DOMJUDGE_LISTEN_8080>" etc/apache.conf
+  assert_success
+  run grep -q "^Listen 8080" etc/apache.conf
+  assert_success
+  for file in apache.conf nginx-conf nginx-conf-inner domjudge-fpm.conf; do
+    run grep -q "ONLY_IF" "etc/$file"
+    assert_failure
+  done
 }
 
 @test "Default instance keeps the historic webserver identifiers" {
@@ -323,6 +348,10 @@ source .github/jobs/configure-checks/functions.sh
   assert_success
   run grep -q "^listen = /var/run/php-fpm-domjudge.sock" etc/domjudge-fpm.conf
   assert_success
+  run grep -q "^<VirtualHost" etc/apache.conf
+  assert_failure
+  run grep -q "^ServerName" etc/apache.conf
+  assert_failure
 }
 
 @test "Change users" {
