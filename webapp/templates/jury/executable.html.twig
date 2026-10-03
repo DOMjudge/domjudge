@@ -14,10 +14,11 @@
 
     <div class="mb-4">
         {%- if is_granted('ROLE_ADMIN') -%}
-            <p>
-                {{ button(path('jury_executable_download', {'execId': executable.execid}), 'Download ZIP', 'secondary', 'file-download') }}
-                {{ button(path('jury_executable_delete', {'execId': executable.execid}), 'Delete', 'danger', 'trash-alt', true) }}
-            </p>
+            {{ button(path('jury_executable_download', {'execId': executable.execid}), 'Download ZIP', 'secondary', 'file-download') }}
+            {{ button(path('jury_executable_delete', {'execId': executable.execid}), 'Delete', 'danger', 'trash-alt', true) }}
+        {% endif %}
+        {% if executable.type != 'debug' %}
+            {% include 'jury/partials/rejudge_form.html.twig' with {table: 'executable', id: executable.execid, buttonClass: 'btn-secondary'} %}
         {% endif %}
     </div>
 

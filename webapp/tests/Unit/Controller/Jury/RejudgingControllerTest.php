@@ -5,8 +5,17 @@ namespace App\Tests\Unit\Controller\Jury;
 use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\RejudgingStatesFixture;
 use App\Entity\Contest;
+use App\Entity\Executable;
+use App\Entity\ExecutableFile;
+use App\Entity\ImmutableExecutable;
+use App\Entity\Problem;
+use App\Entity\SubmissionSource;
+use App\Entity\Team;
+use App\Service\SubmissionService;
 use App\Tests\Unit\BaseTestCase;
+use Doctrine\ORM\EntityManagerInterface;
 use Generator;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class RejudgingControllerTest extends BaseTestCase
 {
@@ -134,5 +143,82 @@ class RejudgingControllerTest extends BaseTestCase
             }
         }
         yield [$contestName, $show, $hidden, $todo];
+    }
+
+    /**
+     * Rejudging an executable rejudges the submissions judged with an outdated version of it.
+     */
+    public function testRejudgeOutdatedJudgingsOfExecutable(): void
+    {
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $message = null;
+        $submission = static::getContainer()->get(SubmissionService::class)->submitSolution(
+            $em->getRepository(Team::class)->findOneBy(['name' => 'DOMjudge']),
+            null,
+            $em->getRepository(Problem::class)->findOneBy(['externalid' => 'hello']),
+            $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']),
+            'c',
+            [new UploadedFile(__FILE__, 'foo.c', null, null, true)],
+            SubmissionSource::UNKNOWN, null, null, null, null, null, $message
+        );
+        $submitId = $submission->getSubmitid();
+        // Pending judgings are not rejudged, so pretend this one is done.
+        $submission->getJudgings()->first()->setResult('wrong-answer');
+        $em->flush();
+
+        // The submission was judged with the current version of the compile script of C.
+        self::assertStringNotContainsString('/jury/rejudgings/', $this->createRejudging('executable', 'c'));
+        self::assertNull($this->getRejudgingOfSubmission($submitId));
+
+        $compileExecutable = $em->getRepository(Executable::class)->find('c');
+        $files = [];
+        foreach ($compileExecutable->getImmutableExecutable()->getFiles() as $file) {
+            $newFile = (new ExecutableFile())
+                ->setRank($file->getRank())
+                ->setIsExecutable($file->isExecutable())
+                ->setFilename($file->getFilename())
+                ->setFileContent($file->getFileContent() . "# changed\n");
+            $em->persist($newFile);
+            $files[] = $newFile;
+        }
+        $immutableExecutable = new ImmutableExecutable($files);
+        $em->persist($immutableExecutable);
+        $compileExecutable->setImmutableExecutable($immutableExecutable);
+        $em->flush();
+
+        $output = $this->createRejudging('executable', 'c');
+        self::assertMatchesRegularExpression('#"redirect":"/jury/rejudgings/\d+"#', $output);
+        preg_match('#"redirect":"/jury/rejudgings/(\d+)"#', $output, $matches);
+
+        $rejudgingId = $this->getRejudgingOfSubmission($submitId);
+        self::assertEquals($matches[1], $rejudgingId);
+        self::assertEquals('executable: c', static::getContainer()->get(EntityManagerInterface::class)
+            ->getConnection()
+            ->fetchOne('SELECT reason FROM rejudging WHERE rejudgingid = ?', [$rejudgingId]));
+    }
+
+    public function testRejudgeUnknownExecutable(): void
+    {
+        $this->client->request('POST', '/jury/rejudgings/create', ['table' => 'executable', 'id' => 'nonexistent']);
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    /**
+     * Create a rejudging like the rejudge button does and return the progress it reported.
+     */
+    private function createRejudging(string $table, string $id): string
+    {
+        $this->client->xmlHttpRequest('POST', '/jury/rejudgings/create', ['table' => $table, 'id' => $id]);
+        // The progress is streamed, so only the response as received by the browser contains it.
+        return $this->client->getInternalResponse()->getContent();
+    }
+
+    private function getRejudgingOfSubmission(int $submitId): ?int
+    {
+        // Rejudgings claim their submissions with a direct query, so do not trust loaded entities.
+        $rejudgingId = static::getContainer()->get(EntityManagerInterface::class)
+            ->getConnection()
+            ->fetchOne('SELECT rejudgingid FROM submission WHERE submitid = ?', [$submitId]);
+        return $rejudgingId === null ? null : (int)$rejudgingId;
     }
 }
