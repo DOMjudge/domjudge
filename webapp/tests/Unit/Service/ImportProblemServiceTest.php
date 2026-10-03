@@ -5,6 +5,7 @@ namespace App\Tests\Unit\Service;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\ProblemStatementContent;
+use App\Entity\Testcase;
 use App\Service\ImportProblemService;
 use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
@@ -603,6 +604,54 @@ YAML;
         $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
     }
 
+    public function testInteractionSampleImported(): void
+    {
+        $yaml = <<<YAML
+name: test
+type: pass-fail interactive
+YAML;
+        $interaction = ">1 2\n<3\n---\n>4 5\n<9\n";
+        $zipFile = $this->createZipWithContents([
+            'problem.yaml' => $yaml,
+            'output_validators/val/run.sh' => "#!/bin/sh\nexit 42\n",
+            'data/sample/1.in' => "1 2\n",
+            'data/sample/1.ans' => "3\n",
+            'data/sample/1.interaction' => $interaction,
+            'data/secret/1.in' => "4 5\n",
+            'data/secret/1.ans' => "9\n",
+            'data/secret/1.interaction' => "ignored\n",
+        ]);
+
+        $zip = new ZipArchive();
+        $zip->open($zipFile);
+
+        /** @var ImportProblemService $service */
+        $service = static::getContainer()->get(ImportProblemService::class);
+        /** @var array{info: string[], warning: string[], danger: string[]} $messages */
+        $messages = ['info' => [], 'warning' => [], 'danger' => []];
+
+        $problem = $service->importZippedProblem($zip, 'test-problem.zip', null, null, $messages);
+
+        $zip->close();
+        unlink($zipFile);
+
+        $this->assertNotNull($problem, implode('; ', $messages['danger']));
+        $this->assertEmpty($messages['danger']);
+
+        // The imported testcases are not loaded into the problem's collection,
+        // so fetch them from the database.
+        $testcases = static::getContainer()->get(EntityManagerInterface::class)
+            ->getRepository(Testcase::class)
+            ->findBy(['problem' => $problem], ['ranknumber' => 'ASC']);
+        $interactions = [];
+        foreach ($testcases as $testcase) {
+            $interactions[$testcase->getSample() ? 'sample' : 'secret'] = $testcase->getContent()->getInteraction();
+        }
+        $this->assertEquals($interaction, $interactions['sample'] ?? null);
+        $this->assertNull($interactions['secret'] ?? null);
+        $this->assertStringContainsString('only samples can have an interaction log',
+            implode("\n", $messages['warning']));
+    }
 
     /**
      * Create a temporary zip file with the given contents.
