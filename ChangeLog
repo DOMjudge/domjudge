@@ -23,7 +23,9 @@ Version 10.0.0DEV
    upstream, and the default database name and user. For in-place
    (maintainer mode) installs it is derived from the directory name, so
    that several checkouts or worktrees can each have their own
-   installation without any extra configuration.
+   installation without any extra configuration. Linked git worktrees
+   reuse the database, admin and judgehost credentials of the main
+   checkout.
  - `etc/genrestapicredentials` now uses the configured base URL instead of
    always writing `http://localhost/domjudge/api`.
  - The path prefix in the generated webserver configuration is now derived

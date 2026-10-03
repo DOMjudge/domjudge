@@ -93,6 +93,18 @@ lives in, and uses it for
 * the ``/etc/sudoers.d`` file name;
 * the default database name *and* database user.
 
+In a linked ``git worktree``, credentials are copied from the main
+checkout's ``etc/*.secret`` files where those exist, so that one set of
+credentials works for all worktrees:
+
+* the database user and password, e.g. for a database GUI; only the
+  database name differs. Removing an instance with
+  ``dj_setup_database uninstall`` keeps the user as long as other
+  databases still use it;
+* the initial ``admin`` password of the web interface;
+* the ``judgehost`` password, so one judgedaemon ``etc/restapi.secret``
+  can list the API URLs of several worktrees.
+
 The directory name is lowercased, characters outside ``[a-z0-9-]`` are
 replaced by dashes, and the result is truncated to 24 characters. A
 checkout directory named ``domjudge`` keeps all the historic defaults, so

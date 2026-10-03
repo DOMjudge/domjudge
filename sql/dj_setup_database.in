@@ -249,6 +249,17 @@ create_db_users()
 
 	echo "FLUSH PRIVILEGES;"
 	) | mysql
+
+	# The user may already have existed, e.g. shared with the main checkout
+	# of a git worktree (see etc/gendbpasswords). Then the password above
+	# was not applied, so check that it matches.
+	if ! DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD mysql -e 'SELECT 1;' >/dev/null 2>&1; then
+		echo "Error: cannot connect as database user '$domjudge_DBUSER' with the password from"
+		echo "'$PASSWDFILE'. The user probably already existed with a different"
+		echo "password. Copy the right password into that file, or run '$0 update-password'"
+		echo "to change it, which affects every installation using this user."
+		return 1
+	fi
 	verbose "DOMjudge database and user(s) created."
 }
 
@@ -256,10 +267,24 @@ remove_db_users()
 {
 	(
 	echo "DROP DATABASE IF EXISTS \`$DBNAME\`;"
-	echo "DROP USER IF EXISTS '$domjudge_DBUSER'@'%';"
 	echo "FLUSH PRIVILEGES;"
 	) | mysql -f
-	verbose "DOMjudge database and user(s) removed."
+	# Dropping a database leaves its grants behind. The user does not exist
+	# on a fresh install, so ignore errors.
+	echo "REVOKE ALL PRIVILEGES ON \`$DBNAME\`.* FROM '$domjudge_DBUSER'@'%';" \
+		| mysql -f >/dev/null 2>&1 || true
+	# The user may be shared with the databases of other installations (see
+	# etc/gendbpasswords), so only drop it when it has no grants left.
+	remaining=$(echo "SELECT COUNT(*) FROM mysql.db WHERE User = '$domjudge_DBUSER' AND Host = '%';" | mysql) || remaining=
+	if [ "$remaining" = 0 ]; then
+		(
+		echo "DROP USER IF EXISTS '$domjudge_DBUSER'@'%';"
+		echo "FLUSH PRIVILEGES;"
+		) | mysql -f
+		verbose "DOMjudge database and user(s) removed."
+	else
+		verbose "DOMjudge database removed; user '$domjudge_DBUSER' kept, it still has access to other databases."
+	fi
 }
 
 update_password()
