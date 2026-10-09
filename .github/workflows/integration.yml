@@ -26,6 +26,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        db: ['mariadb', 'mysql']
+
         include:
           - mode: default
             contest: demo
@@ -51,7 +53,7 @@ jobs:
       options: --privileged --cgroupns=host --init
     services:
       sqlserver:
-        image: mariadb
+        image: ${{ matrix.db }}
         ports:
           - 3306:3306
         env:
