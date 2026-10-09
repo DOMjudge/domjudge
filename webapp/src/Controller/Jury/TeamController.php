@@ -347,6 +347,8 @@ class TeamController extends BaseController
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
 
+        $wasEnabled = $team->getEnabled();
+
         $form = $this->createForm(TeamType::class, $team);
 
         $form->handleRequest($request);
@@ -355,6 +357,18 @@ class TeamController extends BaseController
             $this->possiblyAddUser($team);
             $this->assetUpdater->updateAssets($team);
             $this->saveEntity($team, $team->getTeamid(), false);
+
+            if ($wasEnabled && !$team->getEnabled()) {
+                foreach ($this->contestsForEntity($team) as $contest) {
+                    $this->eventLogService->log(
+                        'teams',
+                        $team->getTeamid(),
+                        EventLogService::ACTION_DELETE,
+                        $contest->getCid()
+                    );
+                }
+            }
+
             return $this->redirectToRoute('jury_team', ['teamId' => $teamId]);
         }
 

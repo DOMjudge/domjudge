@@ -4,6 +4,8 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\NonSortOrderTeamCategoryFixture;
 use App\DataFixtures\Test\PreviousSubmissionTestcaseRunsFixture;
+use App\Entity\Contest;
+use App\Entity\Event;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Entity\User;
@@ -234,5 +236,69 @@ class TeamControllerTest extends JuryControllerTestCase
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         self::assertSelectorNotExists('body:contains("Example teamname")');
         self::assertNull($em->getRepository(Team::class)->findOneBy(['name' => 'Example teamname']));
+    }
+
+    public function testDisablingTeamLogsDeleteEventForContest(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $team = $em->getRepository(Team::class)->findOneBy([
+            'name' => 'Example teamname',
+        ]);
+        $contest = $em->getRepository(Contest::class)->findOneBy([
+            'shortname' => 'beforeStart',
+        ]);
+
+        self::assertNotNull($team);
+        self::assertNotNull($contest);
+        self::assertTrue($team->getEnabled());
+
+        if (!$contest->getTeams()->contains($team)) {
+            $contest->addTeam($team);
+        }
+        $em->flush();
+
+        $teamId = $team->getExternalid();
+        self::assertNotNull($teamId);
+
+        $this->verifyPageResponse('GET', "/jury/teams/$teamId/edit", 200);
+        $form = $this->client->getCrawler()->selectButton('Save')->form();
+        $form['team[enabled]']->untick();
+        $this->client->submit($form);
+
+        self::assertNotEquals(500, $this->client->getResponse()->getStatusCode());
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $team = $em->getRepository(Team::class)->findOneBy([
+            'name' => 'Example teamname',
+        ]);
+        $contest = $em->getRepository(Contest::class)->findOneBy([
+            'shortname' => 'beforeStart',
+        ]);
+
+        self::assertNotNull($team);
+        self::assertNotNull($contest);
+        self::assertFalse($team->getEnabled());
+
+        $deleteEvents = $em->getRepository(Event::class)->findBy([
+            'contest' => $contest,
+            'endpointtype' => 'teams',
+            'endpointid' => $teamId,
+            'action' => 'delete',
+        ]);
+        self::assertNotEmpty(
+            $deleteEvents,
+            'Disabling a team should log a delete event for its contest.'
+        );
+        self::assertSame(
+            ['id' => $teamId],
+            $deleteEvents[0]->getContent(),
+            'The delete event should contain the team external ID.'
+        );
     }
 }
