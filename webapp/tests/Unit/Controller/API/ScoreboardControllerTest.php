@@ -6,7 +6,11 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\DemoNonPublicContestFixture;
 use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\DataFixtures\Test\SampleEventsFixture;
+use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectFixture;
 use App\Entity\Contest;
+use App\Entity\Submission;
+use App\Service\ScoreboardService;
+use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 
 class ScoreboardControllerTest extends BaseTestCase
@@ -61,6 +65,29 @@ class ScoreboardControllerTest extends BaseTestCase
         $scoreboardRows = $scoreboard['rows'];
         self::assertNotEmpty($scoreboard);
         self::assertCount($expectedCount, $scoreboardRows);
+    }
+
+    public function testSolvedInFirstMinuteHasScoreTime(): void
+    {
+        $this->loadFixture(SampleSubmissionsThreeTriesCorrectFixture::class);
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $submissionId = $this->resolveReference(SampleSubmissionsThreeTriesCorrectFixture::class . ':2', Submission::class);
+        /** @var Submission $submission */
+        $submission = $em->getRepository(Submission::class)->find($submissionId);
+        $contest = $submission->getContest();
+        $submission->setSubmittime((float)$contest->getStarttime() + 10);
+        $em->flush();
+        static::getContainer()->get(ScoreboardService::class)->refreshCache($contest);
+
+        $contestId = $this->resolveEntityId(Contest::class, (string)$contest->getCid());
+        $scoreboard = $this->verifyApiJsonResponse('GET', "/contests/$contestId/scoreboard", 200, 'admin');
+        $row = array_values(array_filter($scoreboard['rows'], fn(array $row) => $row['team_id'] === 'exteam'))[0];
+        $solved = array_values(array_filter($row['problems'], fn(array $problem) => $problem['solved']));
+
+        self::assertSame(1, $row['score']['num_solved']);
+        self::assertSame('0:00:00', $row['score']['time']);
+        self::assertCount(1, $solved);
+        self::assertSame('0:00:00', $solved[0]['time']);
     }
 
     public static function provideFilters(): Generator
