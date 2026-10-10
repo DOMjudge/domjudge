@@ -11,6 +11,7 @@ use App\DataFixtures\Test\SelfRegisteredUserFixture;
 use App\Entity\Contest;
 use App\Entity\Submission;
 use App\Entity\User;
+use App\Service\ScoreboardService;
 use App\Tests\Unit\BaseTestCase;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -42,6 +43,22 @@ class PublicControllerTest extends BaseTestCase
 
         $this->verifyPageResponse('GET', '/public', 200);
         self::assertSelectorExists('p.nodata:contains("No active contest")');
+    }
+
+    public function testStaticScoreboardOnlyUsesRelativeLinks(): void
+    {
+        $this->loadFixture(SampleSubmissionsInBucketsFixture::class);
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        static::getContainer()->get(ScoreboardService::class)->refreshCache($contest);
+
+        $this->verifyPageResponse('GET', '/public?static=1', 200);
+        $content = $this->client->getResponse()->getContent();
+
+        self::assertDoesNotMatchRegularExpression('/(href|src)="\//', $content);
+        self::assertStringContainsString('href="css/bootstrap.min.css', $content);
+        self::assertStringContainsString('href="public/scoreboard-category-color.css"', $content);
+        self::assertStringContainsString('data-submissions-url="public/submissions-data.json"', $content);
     }
 
     public function testScoreboardWarningMessage(): void

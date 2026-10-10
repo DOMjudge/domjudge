@@ -12,7 +12,7 @@
         {% set bannerImage = globalBannerAssetPath() %}
     {% endif %}
     {% if bannerImage %}
-        <img class="banner mt-2" src="{{ asset(bannerImage) }}" alt="Banner">
+        <img class="banner mt-2" src="{{ asset(bannerImage) | relativePath(static) }}" alt="Banner">
     {% endif %}
 
     <div data-ajax-refresh-target data-ajax-refresh-after="initializeScoreboard" class="mt-3">

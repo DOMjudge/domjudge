@@ -97,6 +97,9 @@ class DOMJudgeService implements ResetInterface
     // regex way more complicated and would also complicate the logic in ImportExportService::importContestYaml.
     final public const EXTERNAL_IDENTIFIER_REGEX = '/^[a-zA-Z0-9_.-]+$/';
 
+    // Temporary base path used while rendering the static scoreboard ZIP, so all used assets can be detected.
+    final public const SCOREBOARD_ZIP_BASE_PATH = '/CHANGE_ME';
+
     final public const MIMETYPE_TO_EXTENSION = [
         'image/png'     => 'png',
         'image/jpeg'    => 'jpg',
@@ -1643,17 +1646,21 @@ class DOMJudgeService implements ResetInterface
         // all requested and assets
         $requestReflection = new ReflectionClass($request);
         $basePathProperty  = $requestReflection->getProperty('basePath');
-        $basePathProperty->setValue($request, '/CHANGE_ME');
+        $basePathProperty->setValue($request, self::SCOREBOARD_ZIP_BASE_PATH);
         $requestStack->push($request);
 
         $contestPage = $this->twig->render('public/scoreboard.html.twig', $data);
 
         // Now get all assets that are used
-        $assetRegex = '|/CHANGE_ME/([/a-z0-9_\-\.]*)(\??[/a-z0-9_\-\.=]*)|i';
+        $assetRegex = '|' . preg_quote(self::SCOREBOARD_ZIP_BASE_PATH, '|') . '/([/a-z0-9_\-\.]*)(\??[/a-z0-9_\-\.=]*)|i';
         preg_match_all($assetRegex, $contestPage, $assetMatches);
         $contestPage = preg_replace($assetRegex, '$1$2', $contestPage);
-        $contestPage = preg_replace('|data-submissions-url="[^"]*/public/submissions-data\.json"|',
+        // Route URLs are generated relative to the current request (which might be a nested jury route),
+        // so point them to the files in the ZIP root.
+        $contestPage = preg_replace('|data-submissions-url="[^"]*submissions-data\.json"|',
             'data-submissions-url="submissions-data.json"', $contestPage);
+        $contestPage = preg_replace('|href="[^"]*scoreboard-category-color\.css"|',
+            'href="scoreboard-category-color.css"', $contestPage);
 
         $zip = new ZipArchive();
         if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "contest-"))) {
@@ -1665,6 +1672,9 @@ class DOMJudgeService implements ResetInterface
             throw new ServiceUnavailableHttpException(null, 'Could not create temporary zip file.');
         }
         $zip->addFromString('index.html', $contestPage);
+
+        $categoryColors = $this->twig->render('public/scoreboard_category_color.css.twig', $this->getScoreboardCategoryColorCss());
+        $zip->addFromString('scoreboard-category-color.css', $categoryColors);
 
         $submissionsDataRequest  = Request::create('/public/submissions-data.json', Request::METHOD_GET);
         if ($contest !== null) {

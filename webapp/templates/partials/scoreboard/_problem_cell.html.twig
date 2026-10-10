@@ -31,7 +31,7 @@
     {% set link = path('jury_team', {teamId: score.team.externalid, restrict: restrict}) %}
 {% elseif static %}
     {% set link = '#' %}
-    {% set extra = 'data-submissions-url="' ~ path('public_submissions_data') ~ '"' %}
+    {% set extra = 'data-submissions-url="' ~ path('public_submissions_data', relative = true) ~ '"' %}
     {% set extra = extra ~ ' data-team-id="' ~ score.team.externalid ~ '"' %}
     {% set extra = extra ~ ' data-problem-id="' ~ problem.externalid ~ '"' %}
 {% elseif submissions_data_route is defined %}
