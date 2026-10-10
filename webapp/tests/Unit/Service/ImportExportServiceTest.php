@@ -296,6 +296,21 @@ class ImportExportServiceTest extends BaseTestCase
             [],
             123456,
         ];
+        // Testing penalty time as RELTIME, as used in the 2026-01 CCS API
+        yield [
+            [
+                'name'            => 'Penalty RelTime Test',
+                'short-name'      => 'penalty-reltime-test',
+                'duration'        => '5:00:00',
+                'start-time'      => '2020-01-01T12:34:56+02:00',
+                'penalty_time'    => '0:25:00',
+            ],
+            'penalty-reltime-test',
+            '2020-01-01 10:34:56 UTC',
+            null,
+            [],
+            25,
+        ];
         // Scoring contest with problems: verify problems get scoring type.
         yield [
             [
@@ -457,6 +472,27 @@ class ImportExportServiceTest extends BaseTestCase
             self::assertArrayHasKey('shadow', $data);
             self::assertEquals($expectedShadow, $data['shadow']);
         }
+    }
+
+    public function testExportImportPenaltyTimeAsRelTime(): void
+    {
+        $contestData = [
+            'name'         => 'Penalty export test contest',
+            'short-name'   => 'penalty-export-test',
+            'duration'     => '5:00:00',
+            'start-time'   => '2020-01-01T12:34:56+02:00',
+            'penalty_time' => 25,
+        ];
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        self::assertTrue($importExportService->importContestData($contestData, $message, $cid), 'Importing failed: ' . $message);
+
+        $data = $importExportService->getContestYamlData($this->getContest($cid), false);
+        self::assertSame('0:25:00', $data['penalty_time']);
+
+        $data['id'] = 'penalty-export-test-reimport';
+        self::assertTrue($importExportService->importContestData($data, $message, $cid), 'Importing failed: ' . $message);
+        self::assertSame(25, $this->getContest($cid)->getPenaltyTime());
     }
 
     public static function provideExportContestYamlDataWithShadow(): Generator

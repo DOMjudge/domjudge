@@ -229,6 +229,18 @@ class Utils
     }
 
     /**
+     * Convert a time in minutes or as RELTIME, depending on the CCS API version, to whole minutes.
+     */
+    public static function minutesOrRelTimeToMinutes(int|string $time): int
+    {
+        if (is_string($time) && self::isRelTime($time)) {
+            return (int)floor(self::relTimeToSeconds($time) / 60);
+        }
+
+        return (int)$time;
+    }
+
+    /**
      * Parse a string as time and return as epoch in float format (with
      * optional fractional part). The original time string should be in one of
      * the formats understood by DateTime (e.g. an ISO 8601 date and time with

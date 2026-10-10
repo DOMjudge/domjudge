@@ -97,7 +97,7 @@ name: demo
 start_time: '{$year}-01-01T08:00:00+00:00'
 end_time: '+5:00:00'
 duration: '5:00:00.000'
-penalty_time: 20
+penalty_time: '0:20:00'
 activate_time: '{$pastYear}-01-01T08:00:00+00:00'
 scoreboard_type: pass-fail
 medals:

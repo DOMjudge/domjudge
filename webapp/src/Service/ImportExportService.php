@@ -13,6 +13,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
+use App\Utils\CcsApiVersion;
 use App\Utils\Scoreboard\Filter;
 use App\Utils\Utils;
 use Collator;
@@ -56,7 +57,7 @@ readonly class ImportExportService
      *     start_time: string,
      *     end_time: string,
      *     duration: string,
-     *     penalty_time: int,
+     *     penalty_time: int|string,
      *     activate_time: string,
      *     warning_message?: string,
      *     process_balloons?: bool,
@@ -94,6 +95,9 @@ readonly class ImportExportService
     {
         // We expect contest.yaml and problemset.yaml combined into one file here.
 
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+
         $data = [
             'id' => $contest->getExternalid(),
             'formal_name' => $contest->getName(),
@@ -103,7 +107,9 @@ readonly class ImportExportService
                 ? $contest->getEndtimeString()
                 : Utils::absTime($contest->getEndtime(), true),
             'duration' => Utils::relTime($contest->getContestTime((float)$contest->getEndtime())),
-            'penalty_time' => $contest->getPenaltyTime(),
+            'penalty_time' => $ccsApiVersion->useRelTimes()
+                ? Utils::relTime($contest->getPenaltyTime() * 60, floored: true)
+                : $contest->getPenaltyTime(),
             'activate_time' => Utils::isRelTime($contest->getActivatetimeString())
                 ? $contest->getActivatetimeString()
                 : Utils::absTime($contest->getActivatetime(), true),
@@ -357,7 +363,7 @@ readonly class ImportExportService
         if ($contest->getScoreboardType() === ScoreboardType::PASS_FAIL) {
             $penaltyTime = $data['penalty_time'] ?? $data['penalty-time'] ?? $data['penalty'] ?? null;
             if ($penaltyTime !== null) {
-                $contest->setPenaltytime((int)$penaltyTime);
+                $contest->setPenaltytime(Utils::minutesOrRelTimeToMinutes($penaltyTime));
             }
         } else {
             $contest->setPenaltyTime(0);

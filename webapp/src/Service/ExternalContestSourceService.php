@@ -894,7 +894,7 @@ class ExternalContestSourceService
         }
 
         $toCheck['name'] = $data->name;
-        $toCheck['penalty_time'] = $data->penaltyTime ?? 0;
+        $toCheck['penalty_time'] = Utils::minutesOrRelTimeToMinutes($data->penaltyTime ?? 0);
 
         $this->compareOrCreateValues($event, $data->id, $contest, $toCheck);
 

@@ -2,7 +2,6 @@
 
 namespace App\Controller\Jury;
 
-use App\Controller\API\GeneralInfoController as GI;
 use App\Controller\BaseController;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -16,6 +15,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use Composer\InstalledVersions;
 use Doctrine\ORM\EntityManagerInterface;
@@ -41,6 +41,7 @@ class JuryMiscController extends BaseController
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLogService,
         protected readonly RequestStack $requestStack,
         KernelInterface $kernel,
@@ -50,7 +51,7 @@ class JuryMiscController extends BaseController
 
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') or is_granted('ROLE_CLARIFICATION_RW')"))]
     #[Route(path: '', name: 'jury_index')]
-    public function indexAction(ConfigurationService $config): Response
+    public function indexAction(): Response
     {
         if ($this->isGranted('ROLE_ADMIN')) {
             $innodbSnapshotIsolation = $this->em->getConnection()->executeQuery('SHOW VARIABLES LIKE "innodb_snapshot_isolation"')->fetchAssociative();
@@ -64,9 +65,12 @@ class JuryMiscController extends BaseController
             $this->addFlash('info', 'New release ' . $newestVersion . ' available at: https://www.domjudge.org/download.');
         }
 
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+
         return $this->render('jury/index.html.twig', [
-            'adminer_enabled' => $config->get('adminer_enabled'),
-            'CCS_SPEC_API_URL' => GI::CCS_SPEC_API_URL,
+            'adminer_enabled' => $this->config->get('adminer_enabled'),
+            'CCS_SPEC_API_URL' => $ccsApiVersion->getCcsSpecsApiUrl(),
         ]);
     }
 
@@ -405,9 +409,8 @@ class JuryMiscController extends BaseController
     public function adminer(
         #[Autowire('%domjudge.etcdir%')] string $etcDir,
         #[Autowire('%domjudge.vendordir%')] string $vendorDir,
-        ConfigurationService $config
     ): Response {
-        if (!$config->get('adminer_enabled')) {
+        if (!$this->config->get('adminer_enabled')) {
             throw new NotFoundHttpException();
         }
 
