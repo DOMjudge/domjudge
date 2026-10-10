@@ -201,49 +201,51 @@ class ExecutableController extends BaseController
             /** @var UploadedFile[] $archives */
             $archives = $data['archives'];
             $id       = null;
-            foreach ($archives as $archive) {
-                $zip         = $this->dj->openZipFile($archive->getRealPath());
-                $filename    = $archive->getClientOriginalName();
-                $id          = substr($filename, 0, strlen($filename) - strlen(".zip"));
-                if (! preg_match('#^[a-z0-9_-]+$#i', $id)) {
-                    throw new InvalidArgumentException(sprintf("File base name '%s' must contain only alphanumerics", $id));
-                }
-                $description = $id;
-                $type        = $data['type'];
-
-                $propertyData = $zip->getFromName($propertyFile);
-                if ($propertyData !== false) {
-                    $ini_array = parse_ini_string($propertyData);
-                } else {
-                    $ini_array = [];
-                }
-                if (!empty($ini_array)) {
-                    if (!isset($ini_array['execid'], $ini_array['description'], $ini_array['type'])) {
-                        throw new InvalidArgumentException('Executable INI file is missing required fields (execid, description, type).');
+            // Use a transaction, so that either all uploaded executables and their
+            // audit log entries are stored or none at all.
+            $this->em->wrapInTransaction(function () use ($archives, $propertyFile, $data, &$id): void {
+                foreach ($archives as $archive) {
+                    $zip         = $this->dj->openZipFile($archive->getRealPath());
+                    $filename    = $archive->getClientOriginalName();
+                    $id          = substr($filename, 0, strlen($filename) - strlen(".zip"));
+                    if (! preg_match('#^[a-z0-9_-]+$#i', $id)) {
+                        throw new InvalidArgumentException(sprintf("File base name '%s' must contain only alphanumerics", $id));
                     }
-                    if (!preg_match('#^[a-z0-9_-]+$#i', $ini_array['execid'])) {
-                        throw new InvalidArgumentException(sprintf("INI execid '%s' must contain only alphanumerics", $ini_array['execid']));
+                    $description = $id;
+                    $type        = $data['type'];
+
+                    $propertyData = $zip->getFromName($propertyFile);
+                    if ($propertyData !== false) {
+                        $ini_array = parse_ini_string($propertyData);
+                    } else {
+                        $ini_array = [];
                     }
-                    $id          = $ini_array['execid'];
-                    $description = $ini_array['description'];
-                    $type        = $ini_array['type'];
+                    if (!empty($ini_array)) {
+                        if (!isset($ini_array['execid'], $ini_array['description'], $ini_array['type'])) {
+                            throw new InvalidArgumentException('Executable INI file is missing required fields (execid, description, type).');
+                        }
+                        if (!preg_match('#^[a-z0-9_-]+$#i', $ini_array['execid'])) {
+                            throw new InvalidArgumentException(sprintf("INI execid '%s' must contain only alphanumerics", $ini_array['execid']));
+                        }
+                        $id          = $ini_array['execid'];
+                        $description = $ini_array['description'];
+                        $type        = $ini_array['type'];
+                    }
+
+                    $immutableExecutable = $this->dj->createImmutableExecutable($zip);
+                    $executable = new Executable();
+                    $executable
+                        ->setExecid($id)
+                        ->setDescription($description)
+                        ->setType($type)
+                        ->setImmutableExecutable($immutableExecutable);
+                    $this->em->persist($executable);
+
+                    $zip->close();
+
+                    $this->dj->auditlog('executable', $id, 'upload zip', $archive->getClientOriginalName());
                 }
-
-                $immutableExecutable = $this->dj->createImmutableExecutable($zip);
-                $executable = new Executable();
-                $executable
-                    ->setExecid($id)
-                    ->setDescription($description)
-                    ->setType($type)
-                    ->setImmutableExecutable($immutableExecutable);
-                $this->em->persist($executable);
-
-                $zip->close();
-
-                $this->dj->auditlog('executable', $id, 'upload zip', $archive->getClientOriginalName());
-            }
-
-            $this->em->flush();
+            });
 
             if (count($archives) === 1) {
                 return $this->redirectToRoute('jury_executable', ['execId' => $id]);

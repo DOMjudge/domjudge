@@ -36,6 +36,7 @@ use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
+use Throwable;
 use ValueError;
 use ZipArchive;
 
@@ -56,12 +57,49 @@ readonly class ImportProblemService
     /**
      * Import a zipped problem.
      *
+     * The import and its audit log entry are stored in one transaction, so a failed
+     * import does not leave a partially imported problem behind.
+     *
      * @param array<string, string[]> $messages
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     public function importZippedProblem(
+        ZipArchive $zip,
+        string $clientName,
+        ?Problem $problem,
+        ?Contest $contest,
+        array &$messages
+    ): ?Problem {
+        // Not wrapInTransaction(), since that does not let us roll back when the import
+        // returns null, and it closes the entity manager on failure.
+        $connection = $this->em->getConnection();
+        $connection->beginTransaction();
+        try {
+            $newProblem = $this->doImportZippedProblem($zip, $clientName, $problem, $contest, $messages);
+            if ($newProblem === null) {
+                $connection->rollBack();
+                return null;
+            }
+            $this->dj->auditlog('problem', $newProblem->getExternalid(), 'upload zip', $clientName);
+            $connection->commit();
+            return $newProblem;
+        } catch (Throwable $e) {
+            if ($connection->isTransactionActive()) {
+                $connection->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * @param array<string, string[]> $messages
+     * @throws DBALException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
+    private function doImportZippedProblem(
         ZipArchive $zip,
         string $clientName,
         ?Problem $problem,
@@ -1037,7 +1075,6 @@ readonly class ImportProblemService
             );
             $allMessages = array_merge($allMessages, $messages);
             if ($newProblem) {
-                $this->dj->auditlog('problem', $newProblem->getExternalid(), 'upload zip', $clientName);
                 $probId = $newProblem->getExternalid();
             } else {
                 $errors = array_merge($errors, $messages);

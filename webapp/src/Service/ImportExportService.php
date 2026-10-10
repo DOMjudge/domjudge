@@ -1023,12 +1023,14 @@ readonly class ImportExportService
             return -1;
         }
 
-        foreach ($allCategories as $category) {
-            $this->em->persist($category);
-            $this->em->flush();
-            $this->dj->auditlog('team_category', $category->getExternalid(), 'replaced',
-                'imported from tsv / json');
-        }
+        $this->em->wrapInTransaction(function () use ($allCategories): void {
+            foreach ($allCategories as $category) {
+                $this->em->persist($category);
+                $this->em->flush();
+                $this->dj->auditlog('team_category', $category->getExternalid(), 'replaced',
+                    'imported from tsv / json');
+            }
+        });
 
         if ($contest = $this->dj->getCurrentContest()) {
             if (!empty($createdCategories)) {
@@ -1133,12 +1135,14 @@ readonly class ImportExportService
             return -1;
         }
 
-        foreach ($allOrganizations as $organization) {
-            $this->em->persist($organization);
-            $this->em->flush();
-            $this->dj->auditlog('team_affiliation', $organization->getExternalid(), 'replaced',
-                'imported from tsv / json');
-        }
+        $this->em->wrapInTransaction(function () use ($allOrganizations): void {
+            foreach ($allOrganizations as $organization) {
+                $this->em->persist($organization);
+                $this->em->flush();
+                $this->dj->auditlog('team_affiliation', $organization->getExternalid(), 'replaced',
+                    'imported from tsv / json');
+            }
+        });
 
         if ($contest = $this->dj->getCurrentContest()) {
             if (!empty($createdOrganizations)) {
@@ -1495,32 +1499,34 @@ readonly class ImportExportService
             return -1;
         }
 
-        foreach ($createdAffiliations as $affiliation) {
-            $this->em->persist($affiliation);
-        }
+        $this->em->wrapInTransaction(function () use ($createdAffiliations, $createdCategories, $allTeams): void {
+            foreach ($createdAffiliations as $affiliation) {
+                $this->em->persist($affiliation);
+            }
 
-        foreach ($createdCategories as $category) {
-            $this->em->persist($category);
-        }
+            foreach ($createdCategories as $category) {
+                $this->em->persist($category);
+            }
 
-        $this->em->flush();
-
-        foreach ($createdAffiliations as $affiliation) {
-            $this->dj->auditlog('team_affiliation',
-                $affiliation->getExternalid(),
-                'added', 'imported from tsv / json');
-        }
-
-        foreach ($createdCategories as $category) {
-            $this->dj->auditlog('team_category', $category->getExternalid(),
-                                    'added', 'imported from tsv');
-        }
-
-        foreach ($allTeams as $team) {
-            $this->em->persist($team);
             $this->em->flush();
-            $this->dj->auditlog('team', $team->getExternalid(), 'replaced', 'imported from tsv');
-        }
+
+            foreach ($createdAffiliations as $affiliation) {
+                $this->dj->auditlog('team_affiliation',
+                    $affiliation->getExternalid(),
+                    'added', 'imported from tsv / json');
+            }
+
+            foreach ($createdCategories as $category) {
+                $this->dj->auditlog('team_category', $category->getExternalid(),
+                                        'added', 'imported from tsv');
+            }
+
+            foreach ($allTeams as $team) {
+                $this->em->persist($team);
+                $this->em->flush();
+                $this->dj->auditlog('team', $team->getExternalid(), 'replaced', 'imported from tsv');
+            }
+        });
 
         if ($contest = $this->dj->getCurrentContest()) {
             if (!empty($createdAffiliations)) {

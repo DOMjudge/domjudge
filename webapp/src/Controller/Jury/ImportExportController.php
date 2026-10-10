@@ -170,10 +170,8 @@ class ImportExportController extends BaseController
                     $zip, $clientName, null, $contest, $messages
                 );
                 $allMessages = array_merge($allMessages, $messages);
-                if ($newProblem) {
-                    $this->dj->auditlog('problem', $newProblem->getExternalid(), 'upload zip',
-                        $clientName);
-                } else {
+                // importZippedProblem() also adds the audit log entry.
+                if (!$newProblem) {
                     $this->postMessages($allMessages);
                     return $this->redirectToRoute('jury_problems');
                 }
