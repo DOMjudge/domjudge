@@ -358,12 +358,16 @@ class TeamController extends BaseController
             $this->assetUpdater->updateAssets($team);
             $this->saveEntity($team, $team->getTeamid(), false);
 
-            if ($wasEnabled && !$team->getEnabled()) {
+            if ($wasEnabled !== $team->getEnabled()) {
+                $action = $team->getEnabled()
+                    ? EventLogService::ACTION_CREATE
+                    : EventLogService::ACTION_DELETE;
+
                 foreach ($this->contestsForEntity($team) as $contest) {
                     $this->eventLogService->log(
                         'teams',
                         $team->getTeamid(),
-                        EventLogService::ACTION_DELETE,
+                        $action,
                         $contest->getCid()
                     );
                 }

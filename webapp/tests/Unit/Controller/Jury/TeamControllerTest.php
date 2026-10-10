@@ -238,7 +238,7 @@ class TeamControllerTest extends JuryControllerTestCase
         self::assertNull($em->getRepository(Team::class)->findOneBy(['name' => 'Example teamname']));
     }
 
-    public function testDisablingTeamLogsDeleteEventForContest(): void
+    public function testDisablingAndReEnablingTeamLogsDeleteAndCreateEventsForContest(): void
     {
         $this->roles = ['admin'];
         $this->logOut();
@@ -299,6 +299,49 @@ class TeamControllerTest extends JuryControllerTestCase
             ['id' => $teamId],
             $deleteEvents[0]->getContent(),
             'The delete event should contain the team external ID.'
+        );
+
+        // Re-enable the team and verify that the Resolver receives a create event.
+        $this->verifyPageResponse('GET', "/jury/teams/$teamId/edit", 200);
+        $form = $this->client->getCrawler()->selectButton('Save')->form();
+        $form['team[enabled]']->tick();
+        $this->client->submit($form);
+
+        self::assertNotEquals(500, $this->client->getResponse()->getStatusCode());
+
+        $em->clear();
+        $team = $em->getRepository(Team::class)->findOneBy([
+            'name' => 'Example teamname',
+        ]);
+        $contest = $em->getRepository(Contest::class)->findOneBy([
+            'shortname' => 'noDeactivationNFr',
+        ]);
+
+        self::assertNotNull($team);
+        self::assertNotNull($contest);
+        self::assertTrue($team->getEnabled());
+
+        $createEvents = $em->getRepository(Event::class)->findBy([
+            'contest' => $contest,
+            'endpointtype' => 'teams',
+            'endpointid' => $teamId,
+            'action' => 'create',
+        ]);
+
+        self::assertNotEmpty(
+            $createEvents,
+            'Re-enabling a team should log a create event for its contest.'
+        );
+        $createContent = $createEvents[0]->getContent();
+        self::assertSame(
+            $teamId,
+            $createContent['id'],
+            'The create event should contain the team external ID.'
+        );
+        self::assertSame(
+            'Example teamname',
+            $createContent['name'],
+            'The create event should contain the team name.'
         );
     }
 }
