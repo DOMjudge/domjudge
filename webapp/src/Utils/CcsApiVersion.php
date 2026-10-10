@@ -42,4 +42,12 @@ enum CcsApiVersion: string
             self::Format_2026_01 => self::Format_2026_01,
         };
     }
+
+    public function clarCapability(): string
+    {
+        return match ($this) {
+            self::Format_2020_03, self::Format_2023_06 => 'team_clar',
+            default => 'post_clar',
+        };
+    }
 }

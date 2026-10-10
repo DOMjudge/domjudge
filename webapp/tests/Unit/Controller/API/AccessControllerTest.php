@@ -16,13 +16,23 @@ class AccessControllerTest extends BaseTestCase
         $this->verifyApiJsonResponse('GET', $url, 403, 'demo');
     }
 
+    public function testTeamClarCapabilityBefore2026(): void
+    {
+        $this->withChangedConfiguration('ccs_api_version', '2023-06', function (): void {
+            $url    = $this->helperGetEndpointURL('access');
+            $access = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
+            self::assertContains('team_clar', $access['capabilities']);
+            self::assertNotContains('post_clar', $access['capabilities']);
+        });
+    }
+
     public function testAccessAsAdmin(): void
     {
         $url    = $this->helperGetEndpointURL('access');
         $access = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
         self::assertArrayHasKey('capabilities', $access);
         self::assertSame(
-            ['contest_start', 'contest_thaw', 'team_submit', 'team_clar', 'proxy_submit', 'proxy_clar', 'admin_submit', 'admin_clar'],
+            ['contest_start', 'contest_thaw', 'team_submit', 'post_clar', 'proxy_submit', 'proxy_clar', 'admin_submit', 'admin_clar'],
             $access['capabilities']
         );
 

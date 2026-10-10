@@ -82,6 +82,9 @@ class AccessController extends AbstractApiController
             $submissionsProperties[] = 'files';
         }
 
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+
         $capabilities = [];
 
         // Add capabilities
@@ -91,7 +94,7 @@ class AccessController extends AbstractApiController
         }
         if ($this->authService->checkRole('team') && $this->authService->getUser()->getTeam()) {
             $capabilities[] = 'team_submit';
-            $capabilities[] = 'team_clar';
+            $capabilities[] = $ccsApiVersion->clarCapability();
         }
         if ($this->authService->checkRole('api_writer')) {
             $capabilities[] = 'proxy_submit';
