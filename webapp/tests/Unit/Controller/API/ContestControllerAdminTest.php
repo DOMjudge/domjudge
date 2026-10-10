@@ -84,7 +84,7 @@ activate_time: '2021-03-27T09:00:00+00:00'
 start_time: '2021-03-27T09:00:00+00:00'
 end_time: '+2:00:00'
 duration: 2:00:00.000
-penalty_time: 20
+penalty_time: 0:20:00
 medals:
     enabled: true
     gold: 4
@@ -114,7 +114,7 @@ activate_time: '2024-01-01T00:00:00+00:00'
 start_time: '2024-01-01T00:00:00+00:00'
 end_time: '+5:00:00'
 duration: 5:00:00.000
-penalty_time: 0
+penalty_time: 0:00:00
 medals:
     enabled: true
     gold: 4

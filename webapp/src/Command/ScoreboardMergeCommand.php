@@ -255,13 +255,16 @@ readonly class ScoreboardMergeCommand
                         ->setProblem($problems[$id]->getProblem())
                         ->setTeam($team);
                     if (array_key_exists('time', $problem)) {
-                        // TODO: Make this work with input in seconds as well.
+                        // TODO: Make this work with integer input in seconds as well.
+                        $solveTime = is_string($problem['time']) && Utils::isRelTime($problem['time'])
+                            ? Utils::relTimeToSeconds($problem['time'])
+                            : $problem['time'] * 60;
                         $scoreCacheObj
-                            ->setSolveTimePublic($problem['time'] * 60)
-                            ->setSolveTimeRestricted($problem['time'] * 60);
+                            ->setSolveTimePublic($solveTime)
+                            ->setSolveTimeRestricted($solveTime);
                         if ($firstSolve[$name] === null ||
-                            $problem['time'] * 60 < $firstSolve[$name]) {
-                            $firstSolve[$name] = $problem['time'] * 60;
+                            $solveTime < $firstSolve[$name]) {
+                            $firstSolve[$name] = $solveTime;
                         }
                     }
                     $scoreCacheObj
