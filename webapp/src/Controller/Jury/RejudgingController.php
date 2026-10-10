@@ -6,6 +6,7 @@ use App\Attribute\ReleaseSessionLock;
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Contest;
+use App\Entity\Executable;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
 use App\Entity\Judging;
@@ -751,7 +752,14 @@ class RejudgingController extends BaseController
             'rejudging' => 'j2.rejudging',
         ];
 
-        if (!isset($tablemap[$table])) {
+        // For an executable, rejudge the submissions that were judged with another version of it.
+        $executable = null;
+        if ($table === 'executable') {
+            $executable = $this->em->getRepository(Executable::class)->find($id);
+            if ($executable === null) {
+                throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $id));
+            }
+        } elseif (!isset($tablemap[$table])) {
             throw new BadRequestHttpException(sprintf('unknown table %s in rejudging', $table));
         }
 
@@ -770,7 +778,7 @@ class RejudgingController extends BaseController
             flush();
         };
 
-        return $this->streamResponse($this->requestStack, function () use ($priority, $progressReporter, $repeat, $reason, $overshoot, $request, $autoApply, $includeAll, $id, $table, $tablemap): void {
+        return $this->streamResponse($this->requestStack, function () use ($priority, $progressReporter, $repeat, $reason, $overshoot, $request, $autoApply, $includeAll, $id, $table, $tablemap, $executable): void {
             // Only rejudge submissions in active contests.
             $contests = $this->dj->getCurrentContests();
 
@@ -789,9 +797,15 @@ class RejudgingController extends BaseController
                 ->distinct()
                 ->andWhere('j.contest IN (:contests)')
                 ->andWhere('j.valid = 1')
-                ->andWhere(sprintf('%s = :id', $tablemap[$table]))
-                ->setParameter('contests', $contests)
-                ->setParameter('id', $id);
+                ->setParameter('contests', $contests);
+
+            if ($executable !== null) {
+                $this->dj->restrictToJudgingsWithOutdatedExecutable($queryBuilder, $executable);
+            } else {
+                $queryBuilder
+                    ->andWhere(sprintf('%s = :id', $tablemap[$table]))
+                    ->setParameter('id', $id);
+            }
 
             if ($table === 'rejudging') {
                 $queryBuilder->join('s.judgings', 'j2');

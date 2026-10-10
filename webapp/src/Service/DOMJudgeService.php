@@ -1416,6 +1416,64 @@ class DOMJudgeService
     }
 
     /**
+     * Restrict the given query builder to the judgings of submissions that are judged
+     * with the given executable, but that did not use its current version, for example
+     * because the executable was changed afterwards.
+     *
+     * The query builder should select judgings aliased as 'j', joined with their
+     * submission aliased as 's'.
+     */
+    public function restrictToJudgingsWithOutdatedExecutable(
+        QueryBuilder $queryBuilder,
+        Executable $executable
+    ): QueryBuilder {
+        $type = $executable->getType();
+        if ($type === 'compile') {
+            $submissionField = 's.language';
+            $usedBy = $this->em->createQueryBuilder()
+                ->from(Language::class, 'el')
+                ->select('el.langid')
+                ->andWhere('el.compile_executable = :executable');
+        } elseif ($type === 'compare' || $type === 'run') {
+            $submissionField = 's.problem';
+            $usesExecutable = sprintf('ep.%s_executable = :executable', $type);
+            if ($executable->getExecid() === (string)$this->config->get('default_' . $type)) {
+                // Problems without their own script use the default one.
+                $usesExecutable .= sprintf(' OR ep.%s_executable IS NULL', $type);
+            }
+            $usedBy = $this->em->createQueryBuilder()
+                ->from(Problem::class, 'ep')
+                ->select('ep.probid')
+                ->andWhere($usesExecutable);
+            if ($type === 'compare') {
+                // Interactive problems do not use a compare script, their run script compares the output.
+                $usedBy->andWhere('BIT_AND(ep.types, :executableInteractiveType) = 0');
+                $queryBuilder->setParameter('executableInteractiveType', Problem::TYPE_INTERACTIVE);
+            }
+        } else {
+            // Other executables, like debug scripts, are not used for judging.
+            return $queryBuilder->andWhere('1 = 0');
+        }
+
+        // All judge tasks of a judging use the same executables, so it is enough to find one that used another version.
+        $judgedWithOtherVersion = $this->em->createQueryBuilder()
+            ->from(JudgeTask::class, 'ejt')
+            ->join(ImmutableExecutable::class, 'eie', Join::WITH,
+                sprintf('eie.immutable_execid = ejt.%s_script_id', $type))
+            ->select('ejt.judgetaskid')
+            ->andWhere('ejt.jobid = j.judgingid')
+            ->andWhere('ejt.type = :executableJudgeTaskType')
+            ->andWhere('eie.hash != :executableHash');
+
+        return $queryBuilder
+            ->andWhere($queryBuilder->expr()->in($submissionField, $usedBy->getDQL()))
+            ->andWhere($queryBuilder->expr()->exists($judgedWithOtherVersion->getDQL()))
+            ->setParameter('executable', $executable)
+            ->setParameter('executableJudgeTaskType', JudgeTaskType::JUDGING_RUN)
+            ->setParameter('executableHash', $executable->getImmutableExecutable()->getHash());
+    }
+
+    /**
      * Get the URL to a route relative to the API root
      *
      * @param array<string, string> $params
