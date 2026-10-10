@@ -11,11 +11,13 @@ readonly class SubmissionEvent implements EventData
         public string  $id,
         public string  $languageId,
         public string  $problemId,
-        public string  $teamId,
+        // Optional since 2026-01, which added account_id as an alternative.
+        public ?string $teamId,
         public string  $time,
         public ?string $entryPoint,
         // For the analyst instance we lose access to the files
         // during the freeze.
         public ?array  $files,
+        public ?string $accountId,
     ) {}
 }

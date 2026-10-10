@@ -38,6 +38,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
+use App\Entity\User;
 use App\Utils\Utils;
 use DateTime;
 use DateTimeZone;
@@ -1543,11 +1544,27 @@ class ExternalContestSourceService
             return;
         }
 
+        // Accounts are not imported, so an unknown account must not block the submission.
+        $user = $data->accountId === null
+            ? null
+            : $this->em->getRepository(User::class)->findOneBy(['externalid' => $data->accountId]);
+
         $teamId = $data->teamId;
-        $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
-        if (!$team) {
-            $this->addPendingEvent('team', $teamId, $event, $data);
-            return;
+        if ($teamId === null) {
+            // Our data model requires a team, so derive it from the account.
+            $team = $user?->getTeam();
+            if (!$team) {
+                $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_DEPENDENCY_MISSING, [
+                    'dependencies' => [['type' => 'team', 'id' => '(none provided)']],
+                ]);
+                return;
+            }
+        } else {
+            $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
+            if (!$team) {
+                $this->addPendingEvent('team', $teamId, $event, $data);
+                return;
+            }
         }
 
         $this->removeWarning($event->type, $data->id, ExternalSourceWarning::TYPE_DEPENDENCY_MISSING);
@@ -1743,7 +1760,7 @@ class ExternalContestSourceService
             $contest = $this->em->getRepository(Contest::class)->find($this->getSourceContestId());
             $submission = $this->submissionService->submitSolution(
                 team: $team,
-                user: null,
+                user: $user,
                 problem: $contestProblem,
                 contest: $contest,
                 language: $language,
