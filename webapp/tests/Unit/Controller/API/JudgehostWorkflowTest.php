@@ -405,6 +405,11 @@ class JudgehostWorkflowTest extends BaseTestCase
         self::assertTrue($version->getActive());
         self::assertSame('gcc 14.1.0', $version->getCompilerVersion());
         self::assertSame('gcc 14.1.0', $version->getRunnerVersion());
+
+        // Trust On First Use: the first reported versions become the language's canonical ones.
+        $language = $version->getLanguage();
+        self::assertSame('gcc 14.1.0', $language->getCompilerVersion());
+        self::assertSame('gcc 14.1.0', $language->getRunnerVersion());
     }
 
     public function testCheckVersionsSupersedesAPreviousVersion(): void

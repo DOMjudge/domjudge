@@ -18,9 +18,6 @@ return [
     // JudgehostWorkflowTest::testJudgingIsCompletedOnceEveryRunIsReported
     'App\Controller\API\JudgehostController::addSingleJudgingRun'
         => 'TODO: drop the outer transaction, lock inside maybeUpdateActiveJudging.',
-    // JudgehostWorkflowTest::testCheckVersionsRecordsTheReportedVersion
-    'App\Controller\API\JudgehostController::checkVersions'
-        => 'TODO: guard the language auto-promote write, drop the transaction.',
     // Jury\SubmissionControllerTest::testVerifyAndUnverifyJudging
     'App\Controller\Jury\SubmissionController::verifyAction'
         => 'TODO: verify with one bulk UPDATE, no transaction.',
