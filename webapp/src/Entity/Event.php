@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Utils\CcsApiVersion;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -48,6 +49,13 @@ class Event
         options: ['comment' => 'JSON encoded content of the change, as provided in the event feed']
     )]
     private $content;
+
+    #[ORM\Column(
+        length: 16,
+        enumType: CcsApiVersion::class,
+        options: ['comment' => 'CCS API version the content is in']
+    )]
+    private CcsApiVersion $version;
 
     #[ORM\ManyToOne(inversedBy: 'problems')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
@@ -120,6 +128,17 @@ class Event
     public function getContent()
     {
         return $this->content;
+    }
+
+    public function setVersion(CcsApiVersion $version): Event
+    {
+        $this->version = $version;
+        return $this;
+    }
+
+    public function getVersion(): CcsApiVersion
+    {
+        return $this->version;
     }
 
     public function setContest(?Contest $contest): Event

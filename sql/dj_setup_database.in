@@ -457,6 +457,7 @@ upgrade)
 	symfony_console doctrine:migrations:migrate -n
 	symfony_console domjudge:refresh-cache
 	symfony_console domjudge:load-default-data
+	symfony_console domjudge:upgrade-events
 	verbose "DOMjudge database upgrade completed."
 	;;
 

@@ -5,8 +5,10 @@ namespace App\Service;
 use App\Config\Loader\YamlConfigLoader;
 use App\DataTransferObject\ConfigurationSpecification;
 use App\Entity\Configuration;
+use App\Entity\Contest;
 use App\Entity\Executable;
 use App\Entity\Judging;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use BackedEnum;
 use Doctrine\ORM\EntityManagerInterface;
@@ -172,14 +174,18 @@ EOF;
      *
      * @throws NonUniqueResultException
      * @param array<string, mixed> $dataToSet
+     * @param string[]|null $upgradedContests
+     * @param-out string[] $upgradedContests External IDs of contests whose events got upgraded
      * @return array<string,string> Error per item
      */
     public function saveChanges(
         array $dataToSet,
         EventLogService $eventLog,
         DOMJudgeService $dj,
-        bool $treatMissingBooleansAsFalse = true
+        bool $treatMissingBooleansAsFalse = true,
+        ?array &$upgradedContests = null
     ): array {
+        $upgradedContests = [];
         $specs = $this->getConfigSpecification();
         foreach ($specs as &$spec) {
             $spec = $this->addOptions($spec);
@@ -196,6 +202,7 @@ EOF;
         $errors = [];
         $logUnverifiedJudgings = false;
         $unblockJudgeTasks = false;
+        $upgradeEventsTo = null;
         foreach ($specs as $specName => $spec) {
             $oldValue = $spec->defaultValue;
             if (isset($options[$specName])) {
@@ -237,6 +244,14 @@ EOF;
                 // We log unverified judgings after saving all configuration
                 // since it will invalidate Doctrine entities.
                 $logUnverifiedJudgings = true;
+            }
+
+            if ($specName === 'ccs_api_version') {
+                $oldVersion = CcsApiVersion::tryFrom((string)$oldValue);
+                $newVersion = CcsApiVersion::tryFrom((string)$val);
+                if ($newVersion?->getContentVersion() !== $oldVersion?->getContentVersion()) {
+                    $upgradeEventsTo = $newVersion?->getContentVersion();
+                }
             }
             switch ($spec->type) {
                 case 'bool':
@@ -311,7 +326,34 @@ EOF;
             $dj->unblockJudgeTasks();
         }
 
+        if ($upgradeEventsTo !== null && empty($errors)) {
+            $upgradedContests = $this->upgradeEvents($eventLog, $upgradeEventsTo);
+        }
+
         return $errors;
+    }
+
+    /**
+     * @return string[] External IDs of the upgraded contests
+     */
+    private function upgradeEvents(EventLogService $eventLog, CcsApiVersion $version): array
+    {
+        $contests = $this->em->createQueryBuilder()
+            ->from(Contest::class, 'c')
+            ->select('c.cid, c.externalid')
+            ->getQuery()
+            ->getArrayResult();
+
+        $upgradedContests = [];
+        foreach ($contests as ['cid' => $contestId, 'externalid' => $externalId]) {
+            // Upgrading clears the entity manager, so get a fresh reference every time.
+            if ($eventLog->upgradeEvents($this->em->getReference(Contest::class, $contestId), $version) !== null) {
+                $upgradedContests[] = $externalId;
+                $this->logger->info("upgraded events of contest %s to version %s", [$externalId, $version->value]);
+            }
+        }
+
+        return $upgradedContests;
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\DataFixtures\Test;
 
 use App\Entity\Contest;
 use App\Entity\Event;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use Doctrine\Persistence\ObjectManager;
 
@@ -20,7 +21,8 @@ class SampleEventsFixture extends AbstractTestDataFixture
                 ->setAction('create')
                 ->setEventtime(Utils::now())
                 // Note: we do not care about the actual contents, as long as we have some event
-                ->setContent([]);
+                ->setContent([])
+                ->setVersion(CcsApiVersion::Format_2026_01);
 
             $manager->persist($event);
         }

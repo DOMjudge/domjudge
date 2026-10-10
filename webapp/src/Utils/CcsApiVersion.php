@@ -29,4 +29,17 @@ enum CcsApiVersion: string
             default => true,
         };
     }
+
+    /**
+     * The oldest version whose events have the same content as this one.
+     * Events are stored per content version, so switching between versions
+     * that share one keeps the existing event feed.
+     */
+    public function getContentVersion(): self
+    {
+        return match ($this) {
+            self::Format_2020_03, self::Format_2023_06 => self::Format_2020_03,
+            self::Format_2026_01 => self::Format_2026_01,
+        };
+    }
 }

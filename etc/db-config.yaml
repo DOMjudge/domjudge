@@ -385,7 +385,7 @@
             default_value: 2026-01
             enum_class: App\Utils\CcsApiVersion
             public: false
-            description: Version of the CCS API to use for the API and event feed. See [current draft](https://ccs-specs.icpc.io/draft/contest_api#event-feed) and [versions available](https://ccs-specs.icpc.io/).
+            description: Version of the CCS API to use for the API and event feed. See [current draft](https://ccs-specs.icpc.io/draft/contest_api#event-feed) and [versions available](https://ccs-specs.icpc.io/). Changing it upgrades the existing events of all contests to the new version; event feed clients have to reconnect.
         -   name: external_contest_sources_allow_untrusted_certificates
             type: bool
             default_value: false

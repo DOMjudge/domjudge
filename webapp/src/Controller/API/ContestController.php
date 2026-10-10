@@ -712,12 +712,17 @@ class ContestController extends AbstractRestController
         // Make sure this script doesn't hit the PHP maximum execution timeout.
         set_time_limit(0);
 
+        /** @var CcsApiVersion $format */
+        $format = $this->config->get('ccs_api_version');
+        $contentVersion = $format->getContentVersion();
+
         if ($sinceToken !== null || $sinceId !== null) {
             // This parameter is a string in the spec, but we want an integer
             $since_id = (int)($sinceToken ?? $sinceId);
             $event    = $this->em->getRepository(Event::class)->findOneBy([
                 'eventid' => $since_id,
                 'contest' => $contest,
+                'version' => $contentVersion,
             ]);
             if ($event === null) {
                 throw new BadRequestHttpException(
@@ -732,13 +737,10 @@ class ContestController extends AbstractRestController
             $since_id = -1;
         }
 
-        /** @var CcsApiVersion $format */
-        $format = $this->config->get('ccs_api_version');
-
         $response = new StreamedResponse();
         $response->headers->set('X-Accel-Buffering', 'no');
         $response->headers->set('Content-Type', 'application/x-ndjson');
-        $response->setCallback(function () use ($format, $cid, $contest, $request, $since_id, $types, $strict, $stream, $metadataFactory, $kernel): void {
+        $response->setCallback(function () use ($format, $contentVersion, $cid, $contest, $request, $since_id, $types, $strict, $stream, $metadataFactory, $kernel): void {
             $lastUpdate = 0;
             $lastIdSent = max(0, $since_id);
             $lastIdExists = $since_id !== -1; // Don't try to look for event_id=0
@@ -882,6 +884,10 @@ class ContestController extends AbstractRestController
                     if ($event->getContest()->getCid() !== $contest->getCid()) {
                         continue;
                     }
+                    // Not filtered in the query, since the gap detection above needs all event IDs.
+                    if ($event->getVersion() !== $contentVersion) {
+                        continue;
+                    }
                     if ($typeFilter !== false &&
                         !in_array($event->getEndpointtype(), $typeFilter)) {
                         continue;
@@ -904,8 +910,6 @@ class ContestController extends AbstractRestController
                             unset($data[$property]);
                         }
                     }
-
-                    $data = $this->eventLogService->applyCcsVersionChanges($event->getEndpointtype(), $data);
 
                     switch ($format) {
                         case CcsApiVersion::Format_2020_03:

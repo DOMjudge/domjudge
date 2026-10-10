@@ -4,6 +4,10 @@ namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\DemoPreStartContestFixture;
 use App\Entity\Contest;
+use App\Entity\Event;
+use App\Utils\CcsApiVersion;
+use App\Utils\Utils;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ContestControllerTest extends BaseTestCase
 {
@@ -70,5 +74,37 @@ class ContestControllerTest extends BaseTestCase
         self::assertIsArray($contest);
         self::assertSame('Demo contest', $contest['formal_name']);
         self::assertSame('demo', $contest['shortname']);
+    }
+
+    public function testEventFeedOnlyContainsEventsOfConfiguredVersion(): void
+    {
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        $events = [];
+        foreach ([CcsApiVersion::Format_2020_03, CcsApiVersion::Format_2026_01] as $version) {
+            $event = (new Event())
+                ->setContest($contest)
+                ->setEventtime(Utils::now())
+                ->setEndpointtype('teams')
+                ->setEndpointid('team-' . $version->value)
+                ->setAction('create')
+                ->setContent(['id' => 'team-' . $version->value])
+                ->setVersion($version);
+            $em->persist($event);
+            $em->flush();
+            $events[$version->value] = $event->getEventid();
+        }
+
+        $url = '/contests/' . $this->getDemoContestId() . '/event-feed?stream=false&types=teams';
+        $feed = $this->verifyApiResponse('GET', $url, 200, 'admin', attachment: true);
+        $tokens = array_map(
+            fn(string $line) => json_decode($line, true)['token'],
+            array_filter(explode("\n", $feed))
+        );
+        self::assertContains((string)$events['2026-01'], $tokens);
+        self::assertNotContains((string)$events['2020-03'], $tokens);
+
+        $this->verifyApiResponse('GET', $url . '&since_token=' . $events['2026-01'], 200, 'admin', attachment: true);
+        $this->verifyApiResponse('GET', $url . '&since_token=' . $events['2020-03'], 400, 'admin');
     }
 }

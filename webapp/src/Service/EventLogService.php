@@ -15,6 +15,7 @@ use App\Entity\User;
 use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use BadMethodCallException;
+use Doctrine\DBAL\LockMode;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
@@ -386,7 +387,8 @@ class EventLogService
                     ->setEndpointtype($type)
                     ->setEndpointid((string)$ids[$idx])
                     ->setAction($action)
-                    ->setContent($jsonElement);
+                    ->setContent($jsonElement)
+                    ->setVersion($this->getContentVersion());
                 $this->em->persist($event);
                 $events[] = $event;
             }
@@ -455,8 +457,10 @@ class EventLogService
             ->select('e')
             ->andWhere('e.contest = :contest')
             ->andWhere('e.endpointtype = :state')
+            ->andWhere('e.version = :version')
             ->setParameter('contest', $contest)
             ->setParameter('state', 'state')
+            ->setParameter('version', $this->getContentVersion())
             ->orderBy('e.eventid')
             ->getQuery()
             ->getResult();
@@ -546,7 +550,8 @@ class EventLogService
                 ->setContest($contest)
                 ->setEndpointtype($endpointType)
                 ->setEndpointid($endpointId)
-                ->setContent($contents[$index]);
+                ->setContent($contents[$index])
+                ->setVersion($this->getContentVersion());
             $events[] = $event;
             if ($firstEndpointId === null) {
                 $firstEndpointId = $endpointId;
@@ -563,7 +568,7 @@ class EventLogService
             $existingEvent = $existingEvents[$event->getEndpointid()] ?? null;
             $existingData = $existingEvent === null ?
                 null :
-                Utils::jsonEncode($this->applyCcsVersionChanges($endpointType, $existingEvent->getContent()));
+                Utils::jsonEncode($existingEvent->getContent());
             $data = Utils::jsonEncode($event->getContent());
             if ($existingEvent === null || $existingData !== $data) {
                 // Special case for state: this is always an update event
@@ -744,9 +749,11 @@ class EventLogService
                     ->andWhere('e.contest = :contest')
                     ->andWhere('e.endpointtype = :endpoint')
                     ->andWhere('e.endpointid = :endpointid')
+                    ->andWhere('e.version = :version')
                     ->setParameter('contest', $contest)
                     ->setParameter('endpoint', $endpointType)
                     ->setParameter('endpointid', $endpointId)
+                    ->setParameter('version', $this->getContentVersion())
                     ->getQuery()
                     ->getSingleScalarResult();
 
@@ -774,16 +781,18 @@ class EventLogService
         $events = $this->em->createQueryBuilder()
             ->from(Event::class, 'e', 'e.endpointid')
             ->leftJoin(Event::class, 'e2', Join::WITH,
-                'e2.contest = e.contest AND e2.endpointtype = e.endpointtype AND e2.endpointid = e.endpointid AND e2.eventid > e.eventid'
+                'e2.contest = e.contest AND e2.endpointtype = e.endpointtype AND e2.endpointid = e.endpointid AND e2.version = e.version AND e2.eventid > e.eventid'
             )
             ->select('e')
             ->andWhere('e.contest = :contest')
             ->andWhere('e.endpointtype = :endpoint')
             ->andWhere('e.endpointid IN (:endpointids)')
+            ->andWhere('e.version = :version')
             ->andWhere('e2.eventid IS NULL')
             ->setParameter('contest', $events[0]->getContest())
             ->setParameter('endpoint', $events[0]->getEndpointtype())
             ->setParameter('endpointids', $endpointIds)
+            ->setParameter('version', $events[0]->getVersion())
             ->orderBy('e.eventid', 'DESC')
             ->getQuery()
             ->getResult();
@@ -854,26 +863,216 @@ class EventLogService
     }
 
     /**
-     * @param array<string,mixed>  $event
-     *
-     * @return array<string,mixed>
+     * The version events are written in and read from, based on the configured CCS API version.
      */
-    public function applyCcsVersionChanges(string $endpointType, array $event): array
+    public function getContentVersion(): CcsApiVersion
     {
         /** @var CcsApiVersion $ccsApiVersion */
         $ccsApiVersion = $this->config->get('ccs_api_version');
+        return $ccsApiVersion->getContentVersion();
+    }
 
-        // Delete events only contain the ID
-        if ($endpointType === 'contests' && isset($event['penalty_time'])) {
-            $penaltyTime = $event['penalty_time'];
-            $penaltyTimeIsRelative = is_string($penaltyTime) && Utils::isRelTime($penaltyTime);
-            if ($ccsApiVersion->useRelTimes() && !$penaltyTimeIsRelative) {
-                $event['penalty_time'] = Utils::relTime($penaltyTime * 60, floored: true);
-            } elseif (!$ccsApiVersion->useRelTimes() && $penaltyTimeIsRelative) {
-                $event['penalty_time'] = Utils::minutesOrRelTimeToMinutes($penaltyTime);
-            }
+    /**
+     * The older version to upgrade the events of the contest from, or null if already upgraded.
+     */
+    public function getUpgradeSource(Contest $contest, CcsApiVersion $to): ?CcsApiVersion
+    {
+        /** @var Event|null $event */
+        $event = $this->em->createQueryBuilder()
+            ->from(Event::class, 'e')
+            ->select('e')
+            ->andWhere('e.contest = :contest')
+            // Versions are named after their release month, so they sort as strings.
+            ->andWhere('e.version < :version')
+            ->setParameter('contest', $contest)
+            ->setParameter('version', $to)
+            ->orderBy('e.eventid', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($event === null) {
+            return null;
         }
 
-        return $event;
+        // Copies keep their time; events written after switching are newer.
+        $numUpgradedEvents = (int)$this->em->createQueryBuilder()
+            ->from(Event::class, 'e')
+            ->select('COUNT(e)')
+            ->andWhere('e.contest = :contest')
+            ->andWhere('e.version = :version')
+            ->andWhere('e.eventtime <= :eventtime')
+            ->setParameter('contest', $contest)
+            ->setParameter('version', $to)
+            ->setParameter('eventtime', $event->getEventtime())
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $numUpgradedEvents > 0 ? null : $event->getVersion();
+    }
+
+    public function hasEvents(Contest $contest, CcsApiVersion $version): bool
+    {
+        return (int)$this->em->createQueryBuilder()
+            ->from(Event::class, 'e')
+            ->select('COUNT(e)')
+            ->andWhere('e.contest = :contest')
+            ->andWhere('e.version = :version')
+            ->setParameter('contest', $contest)
+            ->setParameter('version', $version)
+            ->getQuery()
+            ->getSingleScalarResult() > 0;
+    }
+
+    /**
+     * Copy the older events to the given version and move existing events in it after them.
+     *
+     * @return array{from: CcsApiVersion, copied: int, kept: int}|null Null if there is nothing to upgrade
+     */
+    public function upgradeEvents(Contest $contest, CcsApiVersion $to): ?array
+    {
+        $from = $this->getUpgradeSource($contest, $to);
+        if ($from === null) {
+            return null;
+        }
+        $contestId = $contest->getCid();
+
+        return $this->em->wrapInTransaction(function () use ($contestId, $from, $to): array {
+            // Lock before any plain read, so deleting these events below works with innodb_snapshot_isolation.
+            $lastExistingEventId = (int)$this->em->createQueryBuilder()
+                ->from(Event::class, 'e')
+                ->select('MAX(e.eventid)')
+                ->andWhere('e.contest = :contest')
+                ->andWhere('e.version = :version')
+                ->setParameter('contest', $contestId)
+                ->setParameter('version', $to)
+                ->getQuery()
+                ->setLockMode(LockMode::PESSIMISTIC_WRITE)
+                ->getSingleScalarResult();
+
+            // Content hash per existing object.
+            $latestContent = [];
+
+            $copied = 0;
+            $this->walkEvents($contestId, $from, null, function (Event $event) use ($contestId, $from, $to, &$latestContent, &$copied): void {
+                $key = $event->getEndpointtype() . '|' . $event->getEndpointid();
+                $content = $this->upgradeEventContent($event->getEndpointtype(), $event->getContent(), $from, $to);
+                if ($event->getAction() === self::ACTION_DELETE) {
+                    unset($latestContent[$key]);
+                } else {
+                    $latestContent[$key] = md5(Utils::jsonEncode($content));
+                }
+                $this->addEventCopy($contestId, $event, $event->getAction(), $content, $to);
+                $copied++;
+            });
+
+            $kept = 0;
+            if ($lastExistingEventId > 0) {
+                $this->walkEvents($contestId, $to, $lastExistingEventId, function (Event $event) use ($contestId, $to, &$latestContent, &$kept): void {
+                    $key = $event->getEndpointtype() . '|' . $event->getEndpointid();
+                    $exists = isset($latestContent[$key]);
+                    if ($event->getAction() === self::ACTION_DELETE) {
+                        if (!$exists) {
+                            return;
+                        }
+                        $action = self::ACTION_DELETE;
+                        unset($latestContent[$key]);
+                    } else {
+                        $hash = md5(Utils::jsonEncode($event->getContent()));
+                        if ($exists && $latestContent[$key] === $hash) {
+                            return;
+                        }
+                        $action = $exists || $event->getEndpointtype() === 'state' ? self::ACTION_UPDATE : self::ACTION_CREATE;
+                        $latestContent[$key] = $hash;
+                    }
+                    $this->addEventCopy($contestId, $event, $action, $event->getContent(), $to);
+                    $kept++;
+                });
+
+                $this->em->createQueryBuilder()
+                    ->delete(Event::class, 'e')
+                    ->andWhere('e.contest = :contest')
+                    ->andWhere('e.version = :version')
+                    ->andWhere('e.eventid <= :lastExistingEventId')
+                    ->setParameter('contest', $contestId)
+                    ->setParameter('version', $to)
+                    ->setParameter('lastExistingEventId', $lastExistingEventId)
+                    ->getQuery()
+                    ->execute();
+            }
+
+            return ['from' => $from, 'copied' => $copied, 'kept' => $kept];
+        });
+    }
+
+    /**
+     * Note that this clears the entity manager after every batch.
+     *
+     * @param callable(Event): void $callback
+     */
+    protected function walkEvents(int $contestId, CcsApiVersion $version, ?int $maxEventId, callable $callback): void
+    {
+        $lastEventId = 0;
+        do {
+            $queryBuilder = $this->em->createQueryBuilder()
+                ->from(Event::class, 'e')
+                ->select('e')
+                ->andWhere('e.contest = :contest')
+                ->andWhere('e.version = :version')
+                ->andWhere('e.eventid > :lastEventId')
+                ->setParameter('contest', $contestId)
+                ->setParameter('version', $version)
+                ->setParameter('lastEventId', $lastEventId)
+                ->orderBy('e.eventid')
+                ->setMaxResults(500);
+            if ($maxEventId !== null) {
+                $queryBuilder
+                    ->andWhere('e.eventid <= :maxEventId')
+                    ->setParameter('maxEventId', $maxEventId);
+            }
+            /** @var Event[] $events */
+            $events = $queryBuilder->getQuery()->getResult();
+
+            foreach ($events as $event) {
+                $callback($event);
+                $lastEventId = $event->getEventid();
+            }
+
+            $this->em->flush();
+            $this->em->clear();
+        } while (!empty($events));
+    }
+
+    /**
+     * @param array<string, mixed> $content
+     */
+    protected function addEventCopy(int $contestId, Event $event, string $action, array $content, CcsApiVersion $version): void
+    {
+        $this->em->persist(
+            (new Event())
+                ->setEventtime($event->getEventtime())
+                ->setContest($this->em->getReference(Contest::class, $contestId))
+                ->setEndpointtype($event->getEndpointtype())
+                ->setEndpointid($event->getEndpointid())
+                ->setAction($action)
+                ->setContent($content)
+                ->setVersion($version)
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $content
+     *
+     * @return array<string, mixed>
+     */
+    public function upgradeEventContent(string $endpointType, array $content, CcsApiVersion $from, CcsApiVersion $to): array
+    {
+        // Delete events only contain the ID.
+        if ($endpointType === 'contests' && isset($content['penalty_time']) &&
+            !$from->useRelTimes() && $to->useRelTimes()) {
+            $content['penalty_time'] = Utils::relTime($content['penalty_time'] * 60, floored: true);
+        }
+
+        return $content;
     }
 }

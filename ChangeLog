@@ -42,6 +42,9 @@ Version 10.0.0DEV
      `ccs_api_version`, which also applies to the API. It defaults to the
      new `2026-01` version, which uses RELTIME for relative times;
      installations that explicitly set the old variable keep that version.
+     Changing it converts the existing events to the new version, as does
+     `dj_setup_database upgrade` when the default changes. To do this from
+     the command line, use `webapp/bin/console domjudge:upgrade-events`.
 
 Version 9.0.0 - 5 October 2025
 ------------------------------
