@@ -1701,7 +1701,7 @@ class ExternalContestSourceService
                 }
             }
 
-            if ($submissionDownloadSucceeded && isset($zipFile, $tmpdir)) {
+            if ($submissionDownloadSucceeded) {
                 // Open the ZIP file.
                 $zip = new ZipArchive();
                 $zip->open($zipFile);
