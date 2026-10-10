@@ -47,6 +47,11 @@ jobs:
     if: ${{ !cancelled() && needs.changes.outputs.judge-unit != 'false' }}
     uses: ./.github/workflows/judge-unit-tests.yml
 
+  misc-tools-unit-tests:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.misc-tools-unit != 'false' }}
+    uses: ./.github/workflows/misc-tools-unit-tests.yml
+
   phpstan:
     needs: changes
     if: ${{ !cancelled() && needs.changes.outputs.phpstan != 'false' }}
@@ -74,7 +79,8 @@ jobs:
   ci-gate:
     name: ci-gate
     needs: [changes, autoconf, chroot, compare, database-upgrade, integration,
-            judge-unit-tests, phpstan, runpipe, unit-tests, webstandard]
+            judge-unit-tests, misc-tools-unit-tests, phpstan, runpipe, unit-tests,
+            webstandard]
     if: always()
     runs-on: ubuntu-latest
     steps:
