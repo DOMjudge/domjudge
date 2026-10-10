@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\ContestProblemWrapper;
 use App\DataTransferObject\ContestState;
 use App\DataTransferObject\ContestStatus;
 use App\DataTransferObject\PatchContest;
@@ -769,12 +770,12 @@ class ContestController extends AbstractRestController
                     if (class_exists($class)) {
                         $inflector = InflectorFactory::create()->build();
                         $plural = strtolower($inflector->pluralize($shortClass));
-                        $toCheck[$plural] = $class;
+                        $toCheck[$plural] = [$class];
                     }
                 }
 
                 // Change some specific endpoints that do not map to our own objects.
-                $toCheck['problems'] = ContestProblem::class;
+                $toCheck['problems'] = [ContestProblem::class, ContestProblemWrapper::class];
                 $toCheck['judgements'] = $toCheck['judgings'];
                 $toCheck['groups'] = $toCheck['teamcategories'];
                 $toCheck['organizations'] = $toCheck['teamaffiliations'];
@@ -785,14 +786,16 @@ class ContestController extends AbstractRestController
                 /** @var CcsApiVersion $ccsApiVersion */
                 $ccsApiVersion = $this->config->get('ccs_api_version');
 
-                foreach ($toCheck as $plural => $class) {
-                    $serializerMetadata = $metadataFactory->getMetadataForClass($class);
-                    /** @var PropertyMetadata $propertyMetadata */
-                    foreach ($serializerMetadata->propertyMetadata as $propertyMetadata) {
-                        if (is_array($propertyMetadata->groups) &&
-                            !in_array('Default', $propertyMetadata->groups) &&
-                            !in_array($ccsApiVersion->value, $propertyMetadata->groups)) {
-                            $skippedProperties[$plural][] = $propertyMetadata->serializedName;
+                foreach ($toCheck as $plural => $classes) {
+                    foreach ($classes as $class) {
+                        $serializerMetadata = $metadataFactory->getMetadataForClass($class);
+                        /** @var PropertyMetadata $propertyMetadata */
+                        foreach ($serializerMetadata->propertyMetadata as $propertyMetadata) {
+                            if (is_array($propertyMetadata->groups) &&
+                                !in_array('Default', $propertyMetadata->groups) &&
+                                !in_array($ccsApiVersion->value, $propertyMetadata->groups)) {
+                                $skippedProperties[$plural][] = $propertyMetadata->serializedName;
+                            }
                         }
                     }
                 }

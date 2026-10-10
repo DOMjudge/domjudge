@@ -19,7 +19,8 @@ readonly class ContestProblemWrapper
         #[Serializer\Groups([ARC::GROUP_NONSTRICT, CcsApiVersion::Format_2026_01->value])]
         protected int $codeLimit,
         #[Serializer\SerializedName('test_data_count')]
-        protected int $testDataCount
+        #[Serializer\Exclude(if: 'object.testDataCount === null')]
+        public ?int $testDataCount = null,
     ) {}
 
     public function getContestProblem(): ContestProblem
