@@ -39,4 +39,8 @@ return [
     // No test: JudgehostWorkflowTest reaches it with the entities already loaded.
     'App\Controller\API\JudgehostController::giveBackJudging'
         => 'TODO: replace the ORM loop with guarded bulk UPDATEs.',
+
+    // JudgehostWorkflowTest::testCompletingAnAutoApplyRejudgingAppliesIt
+    'App\Service\RejudgingService::createRejudging'
+        => 'locks the judging this transaction inserted a few statements earlier, which no other transaction can change.',
 ];

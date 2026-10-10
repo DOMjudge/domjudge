@@ -10,10 +10,12 @@ use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Problem;
 use App\Entity\QueueTask;
+use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\Version;
+use App\Service\RejudgingService;
 use App\Service\SubmissionService;
 use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
@@ -304,6 +306,79 @@ class JudgehostWorkflowTest extends BaseTestCase
         $judging = $this->judgingForTask((int)$tasks[0]['judgetaskid']);
         self::assertSame(Judging::RESULT_CORRECT, $judging->getResult());
         self::assertNotNull($judging->getEndtime());
+    }
+
+    /**
+     * An auto-applying rejudging is applied by the judgehost that reports its last run: the
+     * new judging becomes the valid one, the submission is released from the rejudging and
+     * the rejudging is finished. This is the only path that reaches the auto-apply branch of
+     * maybeUpdateActiveJudging().
+     */
+    public function testCompletingAnAutoApplyRejudgingAppliesIt(): void
+    {
+        $originalTasks = $this->claimWorkForOneSubmission();
+        foreach ($originalTasks as $task) {
+            $this->reportRun((int)$task['judgetaskid'], 'correct');
+        }
+
+        // Read the ids without hydrating entities: clearing the entity manager here would
+        // detach the security token's user, which createRejudging() records as the rejudging's
+        // start user and would then reject as an unknown entity.
+        $em = $this->em();
+        $originalJudgingId = (int)$em->getConnection()->fetchOne(
+            'SELECT judgingid FROM judging_run WHERE judgetaskid = ?',
+            [(int)$originalTasks[0]['judgetaskid']]
+        );
+        $submissionId = (int)$em->getConnection()->fetchOne(
+            'SELECT submitid FROM judging WHERE judgingid = ?',
+            [$originalJudgingId]
+        );
+
+        $originalJudging = $em->getRepository(Judging::class)->find($originalJudgingId);
+        $em->refresh($originalJudging);
+
+        // The security token still holds the judgehost user from the API calls above, which
+        // belongs to the container of a since-rebooted kernel. createRejudging() stores it as
+        // the rejudging's start user, and this entity manager would reject it as unknown.
+        // A rejudging without a start user is valid, so just drop the token.
+        self::getContainer()->get('security.token_storage')->setToken(null);
+
+        $skipped = [];
+        $rejudging = self::getContainer()->get(RejudgingService::class)->createRejudging(
+            'testing auto apply',
+            JudgeTask::PRIORITY_DEFAULT,
+            [$originalJudging],
+            true,
+            null,
+            0,
+            null,
+            $skipped
+        );
+        self::assertNotNull($rejudging, 'the rejudging should have been created');
+        $rejudgingId = $rejudging->getRejudgingid();
+
+        // Judge the submission again; the last run applies the rejudging.
+        $rejudgeTasks = $this->fetchWork();
+        self::assertNotEmpty($rejudgeTasks, 'the rejudging must produce new work');
+        self::assertNotSame('try_again', $rejudgeTasks[0]['type'] ?? null);
+        foreach ($rejudgeTasks as $task) {
+            $this->reportRun((int)$task['judgetaskid'], 'correct');
+        }
+
+        $em = $this->freshEm();
+
+        $newJudging = $this->judgingForTask((int)$rejudgeTasks[0]['judgetaskid']);
+        self::assertSame($rejudgingId, $newJudging->getRejudging()?->getRejudgingid());
+        self::assertTrue($newJudging->getValid(), 'the rejudged judging must become the valid one');
+
+        $superseded = $em->getRepository(Judging::class)->find($originalJudgingId);
+        self::assertFalse($superseded->getValid(), 'the original judging must be superseded');
+
+        $submission = $em->getRepository(Submission::class)->find($submissionId);
+        self::assertNull($submission->getRejudging(), 'applying releases the submission');
+
+        $rejudging = $em->getRepository(Rejudging::class)->find($rejudgingId);
+        self::assertNotNull($rejudging->getEndtime(), 'the rejudging must be finished');
     }
 
     public function testInternalErrorDisablesTheJudgehostAndGivesBackWork(): void
