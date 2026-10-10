@@ -15,9 +15,6 @@ return [
     'App\Doctrine\ExternalIdAssigner::__invoke'
         => 'postPersist: only updates the row this transaction just inserted.',
 
-    // JudgehostWorkflowTest::testJudgingIsCompletedOnceEveryRunIsReported
-    'App\Controller\API\JudgehostController::addSingleJudgingRun'
-        => 'TODO: drop the outer transaction, lock inside maybeUpdateActiveJudging.',
     // JudgehostWorkflowTest::testCheckVersionsRecordsTheReportedVersion
     'App\Controller\API\JudgehostController::checkVersions'
         => 'TODO: guard the language auto-promote write, drop the transaction.',
