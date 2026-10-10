@@ -247,6 +247,20 @@ del {
 
 .center { margin: 0 auto; }
 
+
+#scoreboard-table {
+  width: auto;
+}
+#scoreboard-table .dt-column-header .dt-column-order {
+    display: none;
+}
+/* Display the sorting arrows on hover or when it is the active sort key */
+#scoreboard-table .dt-column-header:hover .dt-column-order,
+#scoreboard-table .dt-ordering-asc .dt-column-order,
+#scoreboard-table .dt-ordering-desc .dt-column-order {
+    display: initial;
+}
+
 .scoreboard {
     border-collapse: collapse;
     clear: both;

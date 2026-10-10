@@ -30,6 +30,66 @@
 {% endif %}
 
 {# ===== DESKTOP TABLE ===== #}
+<table id="scoreboard-table" class="table scoreboard">
+	<thead>
+		<tr class="scoreheader">
+			<th class="dt-center" colspan="2" data-dt-order="disable">Rank</th>
+			<th class="dt-center" colspan="3">Team</th>
+			<th class="dt-center" colspan="2" data-dt-order="disable">Score</th>
+            {% for problem in problems %}
+                {% set link = null %}
+                {% set target = '_self' %}
+                {% if not static %}
+                    {% if jury %}
+                        {% set link = path('jury_problem', {'probId': problem.externalid}) %}
+                    {% elseif problem.problem.problemstatementType is not empty %}
+                        {% if public %}
+                            {% set link = path('public_problem_statement', {probId: problem.externalid}) %}
+                            {% set target = '_blank' %}
+                        {% else %}
+                            {% set link = path('team_problem_statement', {probId: problem.externalid}) %}
+                            {% set target = '_blank' %}
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+                <th class="dt-center"
+                    title="problem {{ problem.problem.name }}"
+                    scope="col"
+                    data-problem-external-id="{{ problem.externalid }}"
+                    data-problem-name="{{ problem.problem.name | escape('html_attr') }}"
+                    data-problem-badge="{{ problem | problemBadge | escape('html_attr') }}"
+                >
+                    <a {% if link %}href="{{ link }}"{% endif %} target="{{ target }}">
+                        {{  problem | problemBadge }}
+                        {% if showPoints and not scoringScoreboard %}
+                            <br/>
+                            <span class='problempoints'>
+                                [{% if problem.points == 1 %}1 point{% else %}{{ problem.points }} points{% endif %}]
+                            </span>
+                        {% endif %}
+                    </a>
+                </th>
+            {% endfor %}
+		</tr>
+	</thead>
+</table>
+
+<script>
+(() => {
+    const teamsUrl = "{{ path('current_api_contest_teams', {'cid': contest.externalid} ) }}";
+    const scoreboardUrl = "{{ path('current_api_contest_scoreboard', {'cid': contest.externalid, 'restrict': ''} ) }}";
+    const nrProblems = {{ problems | length | raw }};
+    {% if jury %}
+    const cellUrlTemplate = "{{ path('jury_team', {teamId: '__TEAM_ID__', restrict: {problemId: '__PROBLEM_ID__'}}) }}";
+    {% elseif static %}
+    const cellUrlTemplate = "#";
+    {% else %}
+    const cellUrlTemplate = "{{ path(submissions_route|default('public_submissions'), {teamId: '__TEAM_ID__', problemId: '__PROBLEM_ID__'}) }}";
+    {% endif %}
+    renderScoreboardTable(nrProblems, teamsUrl, scoreboardUrl, cellUrlTemplate);
+})();
+</script>
+
 <table class="d-none d-md-table scoreboard desktop-scoreboard center {% if jury %}scoreboard_jury{% endif %}">
 
     {% set teamColspan = 3 %}

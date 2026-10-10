@@ -57,7 +57,7 @@ class TeamController extends AbstractRestController
      * Get all the teams for this contest.
      * @throws NonUniqueResultException
      */
-    #[Rest\Get(path: 'contests/{cid}/teams')]
+    #[Rest\Get(path: 'contests/{cid}/teams', name: 'api_contest_teams')]
     #[Rest\Get(path: 'teams')]
     #[OA\Response(
         response: 200,
