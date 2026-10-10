@@ -16,9 +16,11 @@ class ConfigKeyValueType extends AbstractType
         foreach (['key', 'val'] as $field) {
             $choices = $options[$field . '_options'];
             if ($choices !== null) {
-                $builder->add($field, ChoiceType::class, ConfigurationType::choiceOptions($choices) + [
+                $builder->add($field, ChoiceType::class, [
                     'label' => false,
-                ]);
+                    'required' => false,
+                    'placeholder' => 'Select…',
+                ] + ConfigurationType::choiceOptions($choices));
             } else {
                 $type = $field === 'val' && $options['val_type'] === 'int' ? IntegerType::class : TextType::class;
                 $builder->add($field, $type, [

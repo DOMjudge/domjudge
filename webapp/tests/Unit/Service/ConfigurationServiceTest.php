@@ -320,11 +320,8 @@ class ConfigurationServiceTest extends KernelTestCase
     #[DataProvider('provideAddOptionsResults')]
     public function testAddOptionsResults(string $item): void
     {
-        $verdictOptions = ['' => ''];
-        $verdicts = $this->config->getVerdicts(['final']);
-        foreach (array_keys($verdicts) as $verdict) {
-            $verdictOptions[$verdict] = $verdict;
-        }
+        $verdicts = array_keys($this->config->getVerdicts(['final']));
+        $verdictOptions = array_combine($verdicts, $verdicts);
 
         $spec = $this->config->getConfigSpecification()[$item];
         self::assertNull($spec->options);

@@ -393,11 +393,8 @@ EOF;
                 break;
             case 'results_prio':
             case 'results_remap':
-                $verdicts = $this->getVerdicts(['final']);
-                $item->keyOptions = ['' => ''];
-                foreach (array_keys($verdicts) as $verdict) {
-                    $item->keyOptions[$verdict] = $verdict;
-                }
+                $verdicts = array_keys($this->getVerdicts(['final']));
+                $item->keyOptions = array_combine($verdicts, $verdicts);
                 if ($item->name === 'results_remap') {
                     $item->valueOptions = $item->keyOptions;
                 }
