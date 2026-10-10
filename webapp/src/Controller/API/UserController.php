@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\DataTransferObject\AddUser;
+use App\DataTransferObject\ChangePasswordRequest;
 use App\DataTransferObject\UpdateUser;
 use App\Entity\Role;
 use App\Entity\Team;
@@ -12,6 +13,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
+use App\Service\PasswordChangeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
@@ -23,7 +25,9 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -46,6 +50,7 @@ class UserController extends AbstractRestController
         EventLogService $eventLogService,
         protected readonly ImportExportService $importExportService,
         protected readonly ValidatorInterface $validator,
+        protected readonly PasswordChangeService $passwordChangeService,
     ) {
         parent::__construct($authService, $em, $dj, $config, $eventLogService);
     }
@@ -347,6 +352,66 @@ class UserController extends AbstractRestController
             throw new BadRequestHttpException('ID in URL does not match ID in payload');
         }
         return $this->addOrUpdateUser($updateUser, $request);
+    }
+
+    /**
+     * Change password of a user.
+     */
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[Rest\Post(path: '/{id}/change-password')]
+    #[OA\RequestBody(
+        required: true,
+        content: [
+            new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(ref: new Model(type: ChangePasswordRequest::class))
+            ),
+            new OA\MediaType(
+                mediaType: 'application/x-www-form-urlencoded',
+                schema: new OA\Schema(ref: new Model(type: ChangePasswordRequest::class))
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 204,
+        description: 'Password changed successfully'
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Current password is incorrect or new password does not meet requirements'
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'User is not permitted to change password or attempting to change another user\'s password'
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'User not found'
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
+    public function changePasswordAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        ChangePasswordRequest $requestPayload,
+        string $id
+    ): Response {
+        /** @var User|null $targetUser */
+        $targetUser = $this->em->getRepository(User::class)->findOneBy(['externalid' => $id]);
+        if ($targetUser === null) {
+            throw new NotFoundHttpException(sprintf('User with ID %s not found', $id));
+        }
+
+        $currentUser = $this->authService->getUser();
+        if ($currentUser === null || $currentUser->getUserid() !== $targetUser->getUserid()) {
+            throw new AccessDeniedHttpException('You can only change your own password.');
+        }
+
+        $this->passwordChangeService->changePassword(
+            $targetUser,
+            $requestPayload->currentPassword,
+            $requestPayload->newPassword
+        );
+
+        return new Response(null, Response::HTTP_NO_CONTENT);
     }
 
     protected function addOrUpdateUser(AddUser $addUser, Request $request): Response

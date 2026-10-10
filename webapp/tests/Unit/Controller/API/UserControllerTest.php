@@ -135,4 +135,99 @@ class UserControllerTest extends AccountBaseTestCase
         $response = $this->verifyApiJsonResponse('PUT', $this->helperGetEndpointURL($this->apiEndpoint) . '/invalid%20id!', 400, 'admin', $data);
         self::assertStringContainsString('Only letters, numbers, dashes, underscores and dots are allowed.', $response['message']);
     }
+
+    public function testChangePasswordDisallowed(): void
+    {
+        $data = [
+            'current_password' => 'demo',
+            'new_password' => 'new-secret-password-123',
+        ];
+
+        // By default, demo user cannot change password unless category or role allows it
+        $this->verifyApiJsonResponse('POST', $this->helperGetEndpointURL($this->apiEndpoint) . '/demo/change-password', 403, 'demo', $data);
+    }
+
+    public function testChangePasswordOtherUserForbidden(): void
+    {
+        $data = [
+            'current_password' => 'demo',
+            'new_password' => 'new-secret-password-123',
+        ];
+
+        // demo cannot change admin's password
+        $this->verifyApiJsonResponse('POST', $this->helperGetEndpointURL($this->apiEndpoint) . '/admin/change-password', 403, 'demo', $data);
+    }
+
+    public function testChangePasswordMissingFields(): void
+    {
+        $this->verifyApiJsonResponse('POST', $this->helperGetEndpointURL($this->apiEndpoint) . '/demo/change-password', 400, 'demo', []);
+    }
+
+    public function testChangePasswordUnknownUser(): void
+    {
+        $data = [
+            'current_password' => 'demo',
+            'new_password' => 'new-secret-password-123',
+        ];
+
+        $this->verifyApiJsonResponse('POST', $this->helperGetEndpointURL($this->apiEndpoint) . '/nonexistent/change-password', 404, 'demo', $data);
+    }
+
+    public function testChangePasswordWrongCurrentPassword(): void
+    {
+        $this->allowPasswordChangeForDemoCategory();
+
+        $data = [
+            'current_password' => 'not-the-password',
+            'new_password' => 'new-secret-password-123',
+        ];
+
+        $response = $this->verifyApiJsonResponse('POST', $this->helperGetEndpointURL($this->apiEndpoint) . '/demo/change-password', 400, 'demo', $data);
+        self::assertStringContainsString('Current password is incorrect.', $response['message']);
+    }
+
+    public function testChangePasswordNewPasswordTooShort(): void
+    {
+        $this->allowPasswordChangeForDemoCategory();
+
+        $data = [
+            'current_password' => 'demo',
+            'new_password' => 'x',
+        ];
+
+        $response = $this->verifyApiJsonResponse('POST', $this->helperGetEndpointURL($this->apiEndpoint) . '/demo/change-password', 400, 'demo', $data);
+        self::assertStringContainsString('at least', $response['message']);
+    }
+
+    public function testChangePasswordSuccess(): void
+    {
+        $this->allowPasswordChangeForDemoCategory();
+
+        /** @var EntityManagerInterface $manager */
+        $manager = static::getContainer()->get(EntityManagerInterface::class);
+        $oldHash = $manager->getRepository(User::class)->findOneBy(['username' => 'demo'])->getPassword();
+
+        $data = [
+            'current_password' => 'demo',
+            'new_password' => 'new-secret-password-123',
+        ];
+
+        $this->verifyApiJsonResponse('POST', $this->helperGetEndpointURL($this->apiEndpoint) . '/demo/change-password', 204, 'demo', $data);
+
+        $manager->clear();
+        $newHash = $manager->getRepository(User::class)->findOneBy(['username' => 'demo'])->getPassword();
+        self::assertNotEquals($oldHash, $newHash);
+    }
+
+    private function allowPasswordChangeForDemoCategory(): void
+    {
+        /** @var EntityManagerInterface $manager */
+        $manager = static::getContainer()->get(EntityManagerInterface::class);
+        /** @var User $user */
+        $user = $manager->getRepository(User::class)->findOneBy(['username' => 'demo']);
+        foreach ($user->getTeam()->getCategories() as $category) {
+            $category->setAllowPasswordChange(true);
+        }
+        $manager->flush();
+    }
 }

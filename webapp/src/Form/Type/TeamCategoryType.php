@@ -86,6 +86,17 @@ class TeamCategoryType extends AbstractExternalIdEntityType
                 'data-off' => 'No',
             ],
         ]);
+        $builder->add('allow_password_change', CheckboxType::class, [
+            'label' => 'Allow password change',
+            'required' => false,
+            'attr' => [
+                'data-toggle' => 'toggle',
+                'data-size' => 'mini',
+                'data-on' => 'Yes',
+                'data-off' => 'No',
+            ],
+            'help' => 'Allow users in this category to change their own password.',
+        ]);
         $builder->add('save', SubmitType::class);
     }
 
