@@ -531,6 +531,10 @@ class DOMJudgeService
 
     /**
      * Log an action to the auditlog table.
+     *
+     * Note that flushing writes all pending changes of the entity manager, not only the
+     * audit log entry. Pass $flush = false to only persist the entry, so that the caller
+     * can flush it together with the action it describes.
      */
     public function auditlog(
         string $datatype,
@@ -538,7 +542,8 @@ class DOMJudgeService
         string $action,
         mixed $extraInfo = null,
         ?string $forceUsername = null,
-        string|null $cid = null
+        string|null $cid = null,
+        bool $flush = true
     ): void {
         if (!empty($forceUsername)) {
             $user = $forceUsername;
@@ -557,7 +562,9 @@ class DOMJudgeService
             ->setExtrainfo($extraInfo);
 
         $this->em->persist($auditLog);
-        $this->em->flush();
+        if ($flush) {
+            $this->em->flush();
+        }
     }
 
     /**
