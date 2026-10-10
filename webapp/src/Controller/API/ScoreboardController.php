@@ -11,6 +11,7 @@ use App\Entity\Event;
 use App\Entity\ScoreboardType;
 use App\Entity\TeamCategory;
 use App\Service\AuthorizedUserService;
+use App\Service\AwardService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -44,6 +45,7 @@ class ScoreboardController extends AbstractApiController
         ConfigurationService $config,
         EventLogService $eventLogService,
         protected readonly ScoreboardService $scoreboardService,
+        protected readonly AwardService $awards
     ) {
         parent::__construct($authService, $em, $dj, $config, $eventLogService);
     }
@@ -236,10 +238,16 @@ class ScoreboardController extends AbstractApiController
 
             usort($problems, fn(Problem $a, Problem $b) => $a->label <=> $b->label);
 
+            $medal = null;
+            if ($strict === false) {
+                $medal = $this->awards->medalType($teamScore->team, $contest, $scoreboard);
+            }
+
             $row = new Row(
                 rank: $teamScore->rank,
                 teamId: $teamScore->team->getExternalid(),
                 score: $score,
+                medal: $medal,
                 problems: $problems,
             );
 
