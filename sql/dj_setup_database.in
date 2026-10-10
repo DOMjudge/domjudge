@@ -48,9 +48,12 @@ Options:
   -q         be (mostly) quiet
   -r         read DB admin password from prompt
   -s         connect via local socket (do not specify port)
+  -S         don't add submissions for example problems
 
-Note: you may want to store your credentials in ~/.my.cnf in order to
-not have to pass any of the options above.
+Store your credentials in ~/.my.cnf in order to not have to pass any of
+the connection options above.
+If the environment variable APP_ENV=test is set, then '_test' is appended
+to the database name to create a database as used by tests.
 
 EOF
 }
@@ -208,6 +211,12 @@ read_dbpasswords()
 		echo "Error: no login info found."
 		return 1
 	fi
+	if [ "$APP_ENV" = 'test' ]; then
+		# Don't add the `_test` suffix to $domjudge_DBNAME as that
+		# is passed to Symfony, which will itself add it.
+		DBNAME="${DBNAME}_test"
+		verbose "Using test database '$DBNAME'."
+	fi
 	verbose "Database credentials read from '$PASSWDFILE'."
 }
 
@@ -300,13 +309,25 @@ update_password()
 install_pass_fail_problems()
 {
 	"$EXAMPLEPROBDIR"/generate-contest-yaml
+	if [ -n "$SKIP_SUBMISSIONS" ]; then
+		echo "UPDATE user SET teamid = null WHERE userid = 1;" | mysql "$DBNAME"
+	fi
 	( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
+	if [ -n "$SKIP_SUBMISSIONS" ]; then
+		echo "UPDATE user SET teamid = 1 WHERE userid = 1;" | mysql "$DBNAME"
+	fi
 }
 
 install_scoring_problems()
 {
 	"$SCORINGEXAMPLEPROBDIR"/generate-contest-yaml
+	if [ -n "$SKIP_SUBMISSIONS" ]; then
+		echo "UPDATE user SET teamid = null WHERE userid = 1;" | mysql "$DBNAME"
+	fi
 	( cd "$SCORINGEXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
+	if [ -n "$SKIP_SUBMISSIONS" ]; then
+		echo "UPDATE user SET teamid = 1 WHERE userid = 1;" | mysql "$DBNAME"
+	fi
 }
 
 load_example_data()
@@ -337,7 +358,7 @@ install_examples()
 ### Script starts here ###
 
 # Parse command-line options:
-while getopts ':u:p:qrs' OPT ; do
+while getopts ':u:p:qrsS' OPT ; do
 	case "$OPT" in
 		u)
 			DBA_USER=$OPTARG
@@ -353,6 +374,9 @@ while getopts ':u:p:qrs' OPT ; do
 			;;
 		s)
 			USE_SOCKET=1
+			;;
+		S)
+			SKIP_SUBMISSIONS=1
 			;;
 		:)
 			echo "Error: option '$OPTARG' requires an argument."
