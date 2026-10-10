@@ -27,4 +27,8 @@ return [
     // No test: needs a judging in a rejudging with auto-apply.
     'App\Controller\API\JudgehostController::updateJudgingAction'
         => 'TODO: guard the compile-error claim, drop the transaction.',
+
+    // JudgehostWorkflowTest::testCompletingAnAutoApplyRejudgingAppliesIt
+    'App\Service\RejudgingService::createRejudging'
+        => 'locks the judging this transaction inserted a few statements earlier, which no other transaction can change.',
 ];
