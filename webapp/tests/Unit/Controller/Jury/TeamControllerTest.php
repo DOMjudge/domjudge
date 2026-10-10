@@ -250,7 +250,7 @@ class TeamControllerTest extends JuryControllerTestCase
             'name' => 'Example teamname',
         ]);
         $contest = $em->getRepository(Contest::class)->findOneBy([
-            'shortname' => 'beforeStart',
+            'shortname' => 'noDeactivationNFr',
         ]);
 
         self::assertNotNull($team);
@@ -278,7 +278,7 @@ class TeamControllerTest extends JuryControllerTestCase
             'name' => 'Example teamname',
         ]);
         $contest = $em->getRepository(Contest::class)->findOneBy([
-            'shortname' => 'beforeStart',
+            'shortname' => 'noDeactivationNFr',
         ]);
 
         self::assertNotNull($team);
