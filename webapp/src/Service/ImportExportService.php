@@ -1557,6 +1557,7 @@ readonly class ImportExportService
         ?string &$message = null
     ): int {
         $newTeams     = [];
+        $autoCreatedTeams = [];
         $anyErrors    = false;
         $allUsers     = [];
         foreach ($accountData as $index => $accountItem) {
@@ -1636,8 +1637,9 @@ readonly class ImportExportService
                             $anyErrors = true;
                         } else {
                             $this->em->persist($team);
-                            $this->dj->auditlog('team', $team->getExternalid(),
-                                'added', 'imported from tsv');
+                            // Audit logged below, since auditlog() would flush now,
+                            // before we know whether all accounts are valid.
+                            $autoCreatedTeams[] = $team;
                         }
                     }
                 }
@@ -1675,28 +1677,44 @@ readonly class ImportExportService
             return -1;
         }
 
-        foreach ($allUsers as $user) {
-            $this->em->persist($user);
-        }
+        $contest = $this->dj->getCurrentContest();
+        $this->em->wrapInTransaction(function () use ($allUsers, $newTeams, $autoCreatedTeams, $contest): void {
+            foreach ($allUsers as $user) {
+                $this->em->persist($user);
+            }
 
-        foreach ($newTeams as $newTeam) {
-            $team = $newTeam['team'];
-            $this->em->persist($team);
-        }
+            foreach ($newTeams as $newTeam) {
+                $team = $newTeam['team'];
+                $this->em->persist($team);
+            }
 
-        $this->em->flush();
+            // Flush first, so that external IDs are assigned for the audit log.
+            $this->em->flush();
 
-        foreach ($allUsers as $user) {
-            $this->dj->auditlog('user', $user->getExternalid(), 'replaced', 'imported from tsv');
-        }
+            foreach ($autoCreatedTeams as $team) {
+                $this->dj->auditlog('team', $team->getExternalid(),
+                    'added', 'imported from tsv', flush: false);
+            }
 
-        if ($contest = $this->dj->getCurrentContest()) {
+            foreach ($allUsers as $user) {
+                $this->dj->auditlog('user', $user->getExternalid(), 'replaced', 'imported from tsv', flush: false);
+            }
+
+            if ($contest) {
+                foreach ($newTeams as $newTeam) {
+                    /** @var Team $team */
+                    $team = $newTeam['team'];
+                    $this->dj->auditlog('team', $team->getExternalid(), 'replaced',
+                        'imported from tsv, autocreated for judge', flush: false);
+                }
+            }
+        });
+
+        if ($contest) {
             foreach ($newTeams as $newTeam) {
                 /** @var Team $team */
                 $team = $newTeam['team'];
                 $action = $newTeam['action'];
-                $this->dj->auditlog('team', $team->getExternalid(), 'replaced',
-                    'imported from tsv, autocreated for judge');
                 $this->eventLogService->log('team', $team->getTeamid(), $action, $contest->getCid());
             }
         }

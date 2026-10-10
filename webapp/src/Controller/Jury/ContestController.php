@@ -853,7 +853,6 @@ class ContestController extends BaseController
 
         $now       = (int)floor(Utils::now());
         $nowstring = date('Y-m-d H:i:s ', $now) . date_default_timezone_get();
-        $this->dj->auditlog('contest', $contest->getExternalid(), $time . ' now', $nowstring);
 
         // Special case delay/resume start (only sets/unsets starttime_undefined).
         $maxSeconds = Contest::STARTTIME_UPDATE_MIN_SECONDS_BEFORE;
@@ -868,6 +867,7 @@ class ContestController extends BaseController
                 return $this->redirectToRoute('jury_contests');
             }
             $contest->setStarttimeEnabled($enabled);
+            $this->dj->auditlog('contest', $contest->getExternalid(), $time . ' now', $nowstring, flush: false);
             $this->em->flush();
             $this->eventLogService->log(
                 'contest',
@@ -903,15 +903,15 @@ class ContestController extends BaseController
                 ->setStarttime($now)
                 ->setStarttimeString($nowstring)
                 ->setStarttimeEnabled(true);
-            $this->em->flush();
 
             $this->addFlash('scoreboard_refresh', 'After changing the contest start time, it may be '
                 . 'necessary to recalculate any cached scoreboards.');
         } else {
             $method = sprintf('set%stimeString', $time);
             $contest->{$method}($nowstring);
-            $this->em->flush();
         }
+        $this->dj->auditlog('contest', $contest->getExternalid(), $time . ' now', $nowstring, flush: false);
+        $this->em->flush();
         $this->eventLogService->log(
             'contest',
             $contest->getCid(),
@@ -1022,8 +1022,8 @@ class ContestController extends BaseController
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found.', $contestId));
         }
 
-        $this->dj->auditlog('contest', $contest->getExternalid(), $locked ? 'lock' : 'unlock');
         $contest->setIsLocked($locked);
+        $this->dj->auditlog('contest', $contest->getExternalid(), $locked ? 'lock' : 'unlock', flush: false);
         $this->em->flush();
 
         if ($locked) {

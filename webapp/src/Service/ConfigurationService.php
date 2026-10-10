@@ -196,6 +196,7 @@ EOF;
             ->getResult();
 
         $errors = [];
+        $changedValues = [];
         $logUnverifiedJudgings = false;
         foreach ($specs as $specName => $spec) {
             $oldValue = $spec->defaultValue;
@@ -282,8 +283,7 @@ EOF;
             }
             if (!isset($errors[$specName])) {
                 if ($optionToSet->getValue() != $oldValue) {
-                    $valJson = Utils::jsonEncode($optionToSet->getValue());
-                    $dj->auditlog('configuration', $specName, 'updated', $valJson);
+                    $changedValues[$specName] = Utils::jsonEncode($optionToSet->getValue());
                     if ($optionIsNew) {
                         $this->em->persist($optionToSet);
                     }
@@ -292,6 +292,10 @@ EOF;
         }
 
         if (empty($errors)) {
+            // Write the audit log entries in the same flush as the changes they describe.
+            foreach ($changedValues as $specName => $valJson) {
+                $dj->auditlog('configuration', $specName, 'updated', $valJson, flush: false);
+            }
             $this->em->flush();
         }
 

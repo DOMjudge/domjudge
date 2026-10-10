@@ -698,8 +698,10 @@ class ProblemController extends BaseController
                             }
                         }
 
+                        // Do not flush yet: the changes and their audit log entries are written
+                        // in one go below, and nothing at all if we bail out with an error.
                         $this->dj->auditlog('testcase', $problem->getExternalid(), 'updated',
-                                            sprintf('%s rank %d', $type, $rank));
+                                            sprintf('%s rank %d', $type, $rank), flush: false);
 
                         $message = sprintf('Updated %s for testcase %d with file %s (%s)',
                                            $type, $rank,
@@ -809,7 +811,8 @@ class ProblemController extends BaseController
                 }
 
                 $this->em->persist($newTestcase);
-                $this->dj->auditlog('testcase', $problem->getExternalid(), 'added', sprintf("rank %d", $maxrank));
+                $this->dj->auditlog('testcase', $problem->getExternalid(), 'added', sprintf("rank %d", $maxrank),
+                                    flush: false);
 
                 $inFile  = $request->files->get('add_input');
                 $outFile = $request->files->get('add_output');
