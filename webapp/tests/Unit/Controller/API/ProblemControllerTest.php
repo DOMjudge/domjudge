@@ -119,8 +119,30 @@ class ProblemControllerTest extends BaseTestCase
 
     protected function setUp(): void
     {
+        foreach (array_keys($this->expectedObjects) as $problemId) {
+            $this->expectedObjects[$problemId]['memory_limit'] = 2048;
+            $this->expectedObjects[$problemId]['output_limit'] = 8;
+            $this->expectedObjects[$problemId]['code_limit'] = 256;
+        }
         parent::setUp();
         $this->loadFixture(AddProblemAttachmentFixture::class);
+    }
+
+    public function testLimitsRoundedDown(): void
+    {
+        // 1600 kB is 1.56 MiB, which we must not report as 2 MiB.
+        $this->withChangedConfiguration('memory_limit', 1600, function (): void {
+            $url = $this->helperGetEndpointURL($this->apiEndpoint, 'hello');
+            $problem = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+            self::assertSame(1, $problem['memory_limit']);
+        });
+    }
+
+    public function testTestDataCountOnlyForJury(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'hello');
+        $problem = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+        self::assertSame($this->apiUser === 'admin', array_key_exists('test_data_count', $problem));
     }
 
     public function testDeleteNotAllowed(): void
