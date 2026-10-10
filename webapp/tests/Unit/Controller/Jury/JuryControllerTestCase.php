@@ -245,7 +245,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
     /**
      * @param array<string, string|bool|array<string, bool>> $element
      */
-    protected function helperSubmitFields(array $element): Crawler {
+    protected function helperSubmitFields(array $element, bool $withCsrfToken = true): Crawler {
         self::assertSelectorExists('a:contains(' . $this->addButton . ')');
         $formFields = [];
         foreach ($element as $id => $field) {
@@ -281,6 +281,9 @@ abstract class JuryControllerTestCase extends BaseTestCase
         $rawValues = $form->getPhpValues();
         if (static::$addPlus !== null && key_exists(static::$addPlus, $element)) {
             $rawValues[$formName][static::$addPlus] = $element[static::$addPlus];
+        }
+        if (!$withCsrfToken) {
+            unset($rawValues[$formName]['_token']);
         }
         return $this->client->request($form->getMethod(), $form->getUri(), $rawValues, $form->getPhpFiles());
     }
@@ -326,6 +329,18 @@ abstract class JuryControllerTestCase extends BaseTestCase
                 }
             }
         }
+    }
+
+    public function testCheckAddEntityAdminWithoutCsrfToken(): void
+    {
+        if (static::$add === '' || empty(static::$addEntities)) {
+            static::markTestSkipped('No add entities defined.');
+        }
+        [$element] = $this->helperProvideTranslateAddEntity(...$this->helperProvideMergeAddEntity(static::$addEntities[0]));
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        $this->helperSubmitFields($element, withCsrfToken: false);
+        self::assertFalse($this->client->getResponse()->isRedirect());
+        self::assertSelectorExists('body:contains("The CSRF token is invalid")');
     }
 
     /**

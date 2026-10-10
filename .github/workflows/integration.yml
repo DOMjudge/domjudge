@@ -210,7 +210,8 @@ jobs:
           CID=$(curl -sq "http://localhost/domjudge/api/contests/${{ matrix.contest }}" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
           curl $CURLOPTS http://localhost/domjudge/jury/contests/$CID/freeze/doNow || true
           curl $CURLOPTS http://localhost/domjudge/jury/contests/$CID/end/doNow || true
-          curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=' http://localhost/domjudge/jury/contests/$CID/finalize
+          FINALIZETOKEN=$(curl $CURLOPTS http://localhost/domjudge/jury/contests/$CID/finalize | grep -oP 'finalize_contest\[_token\]"[^>]*value="\K[^"]+')
+          curl $CURLOPTS -X POST -d "finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=&finalize_contest[_token]=$FINALIZETOKEN" http://localhost/domjudge/jury/contests/$CID/finalize
       - name: Verify no errors in symfony {prod,test,dev}.log
         shell: bash
         run: |
