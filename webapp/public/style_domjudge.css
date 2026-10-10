@@ -949,6 +949,10 @@ blockquote {
     margin: 0;
 }
 
+.extensions-team-interface {
+    flex-wrap: wrap;
+}
+
 .extension-badge {
     font-family: var(--bs-font-monospace);
     font-size: 0.8rem;
@@ -957,6 +961,7 @@ blockquote {
     color: #000;
     border: 1px solid #dee2e6;
     border-radius: 4px;
+    white-space: nowrap;
 }
 
 .section-label {
