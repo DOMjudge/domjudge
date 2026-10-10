@@ -13,6 +13,7 @@ Version 8.3.3DEV
    - Do not let the entry point inject runguard options
    - Hide problems with allowSubmit = 0 from teams/public
    - Prevent linking to files/media from clarifications
+   - Enforce CSRF on jury forms
  - Fix ZIP of unfrozen scoreboard using wrong rank cache
  - Many smaller bugfixes, including HTML correctness
  - Fix a number of mistakes and typos in documentation
