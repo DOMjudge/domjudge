@@ -38,8 +38,8 @@ def parse_api_response(name: str, response: requests.Response) -> bytes:
             raise RuntimeError(
                 'Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
         else:
-            raise RuntimeError(
-                f'API request {name} failed (code {response.status_code}).')
+            msg = f'API request {name} failed (code {response.status_code}).'
+            raise RuntimeError(msg)
 
     if response.status_code == 204:
         return None
@@ -101,7 +101,8 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}, decode: 
             result = json.loads(result)
         except json.decoder.JSONDecodeError as e:
             print(result)
-            raise RuntimeError(f'Failed to JSON decode the response for API request {name}')
+            msg = f'Failed to JSON decode the response for API request {name}'
+            raise RuntimeError(msg)
 
     return result
 
@@ -114,7 +115,7 @@ def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
 
     Parameters:
         name (str): the endpoint to call
-        apifilename (str): the argument name for the file to upload
+        apifilenamf'Failed to JSON decode the response for API request {name}'e (str): the argument name for the file to upload
         file (str): the file to upload
 
     Returns:
@@ -152,7 +153,8 @@ def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
             result = json.loads(result)
         except json.decoder.JSONDecodeError as e:
             print(result)
-            raise RuntimeError(f'Failed to JSON decode the response for API file upload request {name}')
+            msg = f'Failed to JSON decode the response for API file upload request {name}'
+            raise RuntimeError(msg)
     else:
         result = None
 
@@ -203,6 +205,7 @@ def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {
             result.stderr.decode('utf-8'),
             file=sys.stderr
         )
-        raise RuntimeError(f'API request {name} failed')
+        msg = f"API request {name} failed"
+        raise RuntimeError(msg)
 
     return result.stdout
