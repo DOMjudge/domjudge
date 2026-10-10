@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Controller\API\AbstractRestController as ARC;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
 use JMS\Serializer\Annotation as Serializer;
@@ -104,6 +106,13 @@ abstract class AbstractJudgement extends BaseApiEntity
     public function getApiSubmissionId(): string
     {
         return $this->getSubmission()->getExternalid();
+    }
+
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT, CcsApiVersion::Format_2026_01->value])]
+    #[Serializer\VirtualProperty]
+    public function getCurrent(): bool
+    {
+        return $this->getValid();
     }
 
     public function getMaxRuntime(): ?float

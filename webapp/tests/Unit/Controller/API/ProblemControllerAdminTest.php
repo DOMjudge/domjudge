@@ -6,6 +6,8 @@ use App\DataFixtures\Test\DummyProblemFixture;
 use App\DataFixtures\Test\LockedContestFixture;
 use App\Entity\Problem;
 use Doctrine\ORM\EntityManagerInterface;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ProblemControllerAdminTest extends ProblemControllerTest
@@ -20,7 +22,30 @@ class ProblemControllerAdminTest extends ProblemControllerTest
         $this->expectedObjects['hello']['test_data_count'] = 1;
         $this->expectedObjects['jumble']['test_data_count'] = 3+15;
         $this->expectedObjects['hangman']['test_data_count'] = 1+7;
+        foreach (array_keys($this->expectedObjects) as $problemId) {
+            $this->expectedObjects[$problemId]['memory_limit'] = 2048;
+            $this->expectedObjects[$problemId]['output_limit'] = 8;
+            $this->expectedObjects[$problemId]['code_limit'] = 256;
+        }
         parent::setUp();
+    }
+
+    #[DataProvider('provideLimitsInStrictMode')]
+    public function testLimitsInStrictMode(string $ccsApiVersion, bool $expectLimits): void
+    {
+        $this->withChangedConfiguration('ccs_api_version', $ccsApiVersion, function () use ($expectLimits): void {
+            $url = $this->helperGetEndpointURL($this->apiEndpoint, 'hello') . '?strict=true';
+            $problem = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+            foreach (['memory_limit', 'output_limit', 'code_limit'] as $field) {
+                self::assertSame($expectLimits, array_key_exists($field, $problem), $field);
+            }
+        });
+    }
+
+    public static function provideLimitsInStrictMode(): Generator
+    {
+        yield ['2023-06', false];
+        yield ['2026-01', true];
     }
 
     public function testAddJson(): void
