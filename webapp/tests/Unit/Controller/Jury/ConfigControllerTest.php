@@ -2,8 +2,12 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use App\Entity\Contest;
+use App\Entity\Event;
 use App\Service\ConfigurationService;
 use App\Tests\Unit\BaseTestCase;
+use App\Utils\CcsApiVersion;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ConfigControllerTest extends BaseTestCase
 {
@@ -65,6 +69,32 @@ class ConfigControllerTest extends BaseTestCase
                 static::assertEmpty($errors);
                 $this->verifyPageResponse('GET', '/jury/config', 200);
             });
+    }
+
+    public function testChangingCcsApiVersionUpgradesEvents(): void
+    {
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $em->createQueryBuilder()->delete(Event::class, 'e')->getQuery()->execute();
+        $em->persist((new Event())
+            ->setContest($em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']))
+            ->setEventtime('100.000')
+            ->setEndpointtype('contests')
+            ->setEndpointid('demo')
+            ->setAction('create')
+            ->setContent(['id' => 'demo', 'penalty_time' => 20])
+            ->setVersion(CcsApiVersion::Format_2020_03));
+        $em->flush();
+
+        $this->withChangedConfiguration('ccs_api_version', '2023-06', function (): void {
+            $this->submitConfig(fn(array $config) => ['ccs_api_version' => '2026-01'] + $config);
+            $this->checkStatusAndFollowRedirect();
+
+            self::assertSelectorExists('div.alert:contains("Upgraded the event feed of contests demo")');
+            $em = static::getContainer()->get(EntityManagerInterface::class);
+            $upgraded = $em->getRepository(Event::class)->findBy(['version' => CcsApiVersion::Format_2026_01]);
+            self::assertCount(1, $upgraded);
+            self::assertSame(['id' => 'demo', 'penalty_time' => '0:20:00'], $upgraded[0]->getContent());
+        });
     }
 
     /**

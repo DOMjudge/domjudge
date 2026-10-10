@@ -15,7 +15,9 @@ installing the new version of DOMjudge in a separate place and
 transferring the configuration settings from the old version.
 
 After upgrading the files, you can run ``dj_setup_database upgrade``
-to migrate the database.
+to migrate the database. When the new version changes the default CCS API
+version, this also upgrades the event feeds of all contests, so event feed
+clients have to reconnect.
 
 Upgrading from pre-7.0 versions
 -------------------------------

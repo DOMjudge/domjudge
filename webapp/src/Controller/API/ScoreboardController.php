@@ -149,6 +149,8 @@ class ScoreboardController extends AbstractApiController
         $event = $this->em->createQueryBuilder()
             ->from(Event::class, 'e')
             ->select('e')
+            ->andWhere('e.version = :version')
+            ->setParameter('version', $this->eventLogService->getContentVersion())
             ->orderBy('e.eventid', 'DESC')
             ->setMaxResults(1)
             ->getQuery()

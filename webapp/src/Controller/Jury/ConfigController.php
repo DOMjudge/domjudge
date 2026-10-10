@@ -42,7 +42,7 @@ class ConfigController extends AbstractController
         if ($form->isSubmitted()) {
             if ($form->isValid()) {
                 $before = $this->config->all();
-                $errors = $this->config->saveChanges($form->getData(), $eventLogService, $this->dj);
+                $errors = $this->config->saveChanges($form->getData(), $eventLogService, $this->dj, upgradedContests: $upgradedContests);
                 foreach ($errors as $name => $error) {
                     $form->get($name)->addError(new FormError($error));
                 }
@@ -56,6 +56,13 @@ class ConfigController extends AbstractController
                     if (in_array('Judging', $changedCategories, true)) {
                         $this->addFlash('danger', 'After changing specific ' .
                             'judging related settings, you might need to rejudge affected submissions.');
+                    }
+                    if (!empty($upgradedContests)) {
+                        $this->addFlash('info', sprintf(
+                            'Upgraded the event feed of contests %s to the new CCS API version. ' .
+                            'Event feed clients need to reconnect without a since_token.',
+                            implode(', ', $upgradedContests)
+                        ));
                     }
                     return $this->redirectToRoute('jury_config', ['diffs' => json_encode($diffs)]);
                 }
