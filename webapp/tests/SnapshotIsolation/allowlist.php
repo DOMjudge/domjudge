@@ -15,9 +15,6 @@ return [
     'App\Doctrine\ExternalIdAssigner::__invoke'
         => 'postPersist: only updates the row this transaction just inserted.',
 
-    // JudgehostWorkflowTest::testJudgingIsCompletedOnceEveryRunIsReported
-    'App\Controller\API\JudgehostController::addSingleJudgingRun'
-        => 'TODO: drop the outer transaction, lock inside maybeUpdateActiveJudging.',
     // JudgehostWorkflowTest::testCheckVersionsRecordsTheReportedVersion
     'App\Controller\API\JudgehostController::checkVersions'
         => 'TODO: guard the language auto-promote write, drop the transaction.',
@@ -39,4 +36,8 @@ return [
     // No test: JudgehostWorkflowTest reaches it with the entities already loaded.
     'App\Controller\API\JudgehostController::giveBackJudging'
         => 'TODO: replace the ORM loop with guarded bulk UPDATEs.',
+
+    // JudgehostWorkflowTest::testCompletingAnAutoApplyRejudgingAppliesIt
+    'App\Service\RejudgingService::createRejudging'
+        => 'locks the judging this transaction inserted a few statements earlier, which no other transaction can change.',
 ];
