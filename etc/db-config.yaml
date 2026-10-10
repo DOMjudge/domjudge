@@ -14,6 +14,7 @@
             description: Should submissions with compiler-error incur penalty time (and be shown on the scoreboard)?
         -   name: results_prio
             type: array_keyval
+            value_type: int
             default_value:
                 memory-limit: 99
                 output-limit: 99

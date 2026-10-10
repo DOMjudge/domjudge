@@ -171,17 +171,14 @@ EOF;
      * Save the changes from the given request.
      *
      * @throws NonUniqueResultException
-     * @param array<string, Configuration>|null $options
-     * @param-out array<string, Configuration> $options
-     * @param array<string, string|array<int|string, string>> $dataToSet
+     * @param array<string, mixed> $dataToSet
      * @return array<string,string> Error per item
      */
     public function saveChanges(
         array $dataToSet,
         EventLogService $eventLog,
         DOMJudgeService $dj,
-        bool $treatMissingBooleansAsFalse = true,
-        ?array &$options = null
+        bool $treatMissingBooleansAsFalse = true
     ): array {
         $specs = $this->getConfigSpecification();
         foreach ($specs as &$spec) {
@@ -189,7 +186,8 @@ EOF;
         }
         unset($spec);
 
-        $options ??= $this->em->createQueryBuilder()
+        /** @var array<string, Configuration> $options */
+        $options = $this->em->createQueryBuilder()
             ->from(Configuration::class, 'c', 'c.name')
             ->select('c')
             ->getQuery()
@@ -197,6 +195,7 @@ EOF;
 
         $errors = [];
         $logUnverifiedJudgings = false;
+        $unblockJudgeTasks = false;
         foreach ($specs as $specName => $spec) {
             $oldValue = $spec->defaultValue;
             if (isset($options[$specName])) {
@@ -207,7 +206,6 @@ EOF;
                 $optionToSet = new Configuration();
                 $optionToSet->setName($specName);
                 $optionIsNew = true;
-                $options[$specName] = $optionToSet;
             }
             if (!array_key_exists($specName, $dataToSet)) {
                 if ($spec->type == 'bool' && $treatMissingBooleansAsFalse) {
@@ -242,36 +240,42 @@ EOF;
             }
             switch ($spec->type) {
                 case 'bool':
-                    $optionToSet->setValue((bool)$val);
+                    $newValue = (bool)$val;
                     break;
 
                 case 'int':
-                    $optionToSet->setValue((int)$val);
+                    $newValue = (int)$val;
                     break;
 
                 case 'string':
                 case 'enum':
-                    $optionToSet->setValue($val);
+                    $newValue = $val;
                     break;
 
                 case 'array_val':
-                    $result = [];
+                    $newValue = [];
                     foreach ($val as $data) {
                         if (!empty($data)) {
-                            $result[] = $data;
+                            $newValue[] = $data;
                         }
                     }
-                    $optionToSet->setValue($result);
                     break;
 
                 case 'array_keyval':
-                    $result = [];
+                    $newValue = [];
                     foreach ($val as $key => $data) {
-                        if (!empty($data)) {
-                            $result[$key] = $data;
+                        if (empty($data)) {
+                            continue;
                         }
+                        if ($spec->valueType === 'int') {
+                            $data = filter_var($data, FILTER_VALIDATE_INT);
+                            if ($data === false) {
+                                $errors[$specName] = 'All values must be integers.';
+                                continue;
+                            }
+                        }
+                        $newValue[$key] = $data;
                     }
-                    $optionToSet->setValue($result);
                     break;
 
                 default:
@@ -279,14 +283,16 @@ EOF;
                         "configuration option '%s' has unknown type '%s'",
                         [ $specName, $spec->type ]
                     );
+                    continue 2;
             }
-            if (!isset($errors[$specName])) {
-                if ($optionToSet->getValue() != $oldValue) {
-                    $valJson = Utils::jsonEncode($optionToSet->getValue());
-                    $dj->auditlog('configuration', $specName, 'updated', $valJson);
-                    if ($optionIsNew) {
-                        $this->em->persist($optionToSet);
-                    }
+            if (!isset($errors[$specName]) && $newValue != $oldValue) {
+                $optionToSet->setValue($newValue);
+                $dj->auditlog('configuration', $specName, 'updated', Utils::jsonEncode($newValue));
+                if ($optionIsNew) {
+                    $this->em->persist($optionToSet);
+                }
+                if ($specName === 'lazy_eval_results' && $newValue !== DOMJudgeService::EVAL_DEMAND) {
+                    $unblockJudgeTasks = true;
                 }
             }
         }
@@ -300,6 +306,10 @@ EOF;
         }
 
         $this->dbConfigCache = null;
+
+        if ($unblockJudgeTasks && empty($errors)) {
+            $dj->unblockJudgeTasks();
+        }
 
         return $errors;
     }
