@@ -419,6 +419,7 @@ class ExecutableController extends BaseController
                 'showModalSubmit' => true,
                 'modalUrl' => $request->getRequestUri(),
                 'redirectUrl' => $this->generateUrl('jury_executable', ['execId' => $execId]),
+                'count' => 1,
             ];
             if ($request->isXmlHttpRequest()) {
                 return $this->render('jury/delete_modal.html.twig', $data);

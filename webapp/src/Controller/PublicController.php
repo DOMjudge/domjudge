@@ -268,7 +268,7 @@ class PublicController extends BaseController
             'problem' => $probId,
             'contest' => $contest,
         ]);
-        if (!$contestProblem) {
+        if (!$contestProblem || !$contestProblem->getAllowSubmit()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
 
@@ -330,6 +330,15 @@ class PublicController extends BaseController
         }
 
         $scoreboard = $this->scoreboardService->getScoreboard($contest);
+
+        if ($scoreboard === null) {
+            throw $this->createNotFoundException('No submission data found');
+        }
+
+        if (!$this->config->get('show_teams_submissions')) {
+            throw $this->createNotFoundException('Submissions are not visible');
+        }
+
         $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $scoreboard->getTeamsInDescendingOrder());
 
         /** @var Submission[] $submissions */

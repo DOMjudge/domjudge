@@ -2,6 +2,20 @@ DOMjudge Programming Contest Judging System
 
 Version 9.0.2DEV
 ----------------
+ - Security fixes:
+   - Return 404 when no access to submission data
+   - Hide postfreeze balloons in totals column
+   - Hide team submissions on mobile scoreboard as configured
+   - runguard: set the no_new_privs attribute before dropping root
+   - Disallow teams responding to clarifications of other teams
+   - Prevent metadata injection through compiler output
+   - Escape interpolated values in HTML-safe Twig filters
+   - Do not let the entry point inject runguard options
+   - Hide problems with allowSubmit = 0 from teams/public
+   - Prevent linking to files/media from clarifications
+ - Fix ZIP of unfrozen scoreboard using wrong rank cache
+ - Many smaller bugfixes, including HTML correctness
+ - Fix a number of mistakes and typos in documentation
 
 Version 9.0.1 - 11 June 2026
 ----------------------------

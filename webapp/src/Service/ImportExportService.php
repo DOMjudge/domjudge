@@ -612,7 +612,7 @@ class ImportExportService
                 // Teams with 0 points won't get a medal, a rank or an honor.
                 // They will always get an honorable mention.
                 $data[] = new ResultRow(
-                    $teamScore->team->getIcpcId(),
+                    $teamScore->team->getIcpcId() ?? $teamScore->team->getExternalid(),
                     null,
                     'Honorable',
                     $teamScore->numPoints,
@@ -667,7 +667,7 @@ class ImportExportService
             }
 
             $data[] = new ResultRow(
-                $teamScore->team->getIcpcId(),
+                $teamScore->team->getIcpcId() ?? $teamScore->team->getExternalid(),
                 $rank,
                 $awardString,
                 $teamScore->numPoints,

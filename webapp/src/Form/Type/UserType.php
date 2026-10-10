@@ -56,7 +56,7 @@ class UserType extends AbstractExternalIdEntityType
         $builder->add('email', EmailType::class, [
             'required' => false,
             'attr' => [
-                'autocomplete' => 'user-email',
+                'autocomplete' => 'email',
             ],
         ]);
         $builder->add('plainPassword', PasswordType::class, [

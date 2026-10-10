@@ -107,7 +107,7 @@ class ProblemController extends BaseController
             'problem' => $probId,
             'contest' => $contest,
         ]);
-        if (!$contestProblem) {
+        if (!$contestProblem || !$contestProblem->getAllowSubmit()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
 

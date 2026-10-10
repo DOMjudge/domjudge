@@ -137,12 +137,16 @@ done
 
 logmsg $LOG_INFO "starting compile"
 
-# shellcheck disable=SC2236
-if [ ! -z "$ENTRY_POINT" ]; then
-	ENVIRONMENT_VARS="-V ENTRY_POINT=$ENTRY_POINT"
-fi
+# Collect the arguments for runguard in the positional parameters, which
+# currently hold the source files. The environment variables must not be
+# expanded unquoted: ENTRY_POINT originates from the submission and a value
+# containing whitespace would otherwise inject additional runguard options.
+set -- -- "/compile-script/$(basename "$COMPILE_SCRIPT")" program "$MEMLIMIT" "$@"
 if [ -n "$DEBUG" ]; then
-	ENVIRONMENT_VARS="$ENVIRONMENT_VARS -V DEBUG=$DEBUG"
+	set -- -V "DEBUG=$DEBUG" "$@"
+fi
+if [ -n "$ENTRY_POINT" ]; then
+	set -- -V "ENTRY_POINT=$ENTRY_POINT" "$@"
 fi
 
 # First compile to 'source' then rename to 'program' to avoid problems with
@@ -151,8 +155,7 @@ exitcode=0
 $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
 	-r "$PWD/.." -d "/compile" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT --no-core -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT \
-	-M "$WORKDIR/compile.meta" $ENVIRONMENT_VARS -- \
-	"/compile-script/$(basename "$COMPILE_SCRIPT")" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
+	-M "$WORKDIR/compile.meta" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 
 # Make sure that all files are owned by the current user/group, so
@@ -181,8 +184,15 @@ fi
 
 # Check if the compile script auto-detected the entry point, and if
 # so, store it in the compile.meta for later reuse, e.g. in a replay.
-ENTRY_POINT_REGEX='[Dd]etected entry_point: '
-grep "$ENTRY_POINT_REGEX" compile.tmp | sed 's/^.*etected //' >>compile.meta
+# Only lines that start with the detection message are considered and only
+# the detected value is copied over, prefixed with the 'entry_point' key.
+# This prevents compiler output, which is under control of the submitter,
+# from injecting arbitrary keys into the metadata. When changing the regex
+# below, also update example_problems/hello/submissions/accepted/test-metadata-injection.c
+# which checks that such injections are rejected.
+ENTRY_POINT_REGEX='^(Info: )?[Dd]etected entry_point: '
+grep -E "$ENTRY_POINT_REGEX" compile.tmp | \
+	sed -E "s@$ENTRY_POINT_REGEX@entry_point: @" >>compile.meta
 
 logmsg $LOG_DEBUG "checking compilation exit-status"
 if grep '^time-result: .*timelimit' compile.meta >/dev/null 2>&1 ; then
@@ -204,7 +214,7 @@ fi
 # Remove any entry point detection message when compilation succeeded,
 # since we already stored it above and it only confuses contestants.
 # Ignore the exit code, since grep returns 1 when no line matched.
-grep -v "$ENTRY_POINT_REGEX" compile.tmp >>compile.out || true
+grep -vE "$ENTRY_POINT_REGEX" compile.tmp >>compile.out || true
 
 logmsg $LOG_INFO "Compilation successful"
 cleanexit 0
