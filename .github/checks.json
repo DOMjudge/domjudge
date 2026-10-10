@@ -3,15 +3,11 @@
   "checks": [
     {
       "app_id": 15368,
-      "context": "check-chroot-arch-gate"
+      "context": "ci-gate"
     },
     {
       "app_id": 15368,
       "context": "codespell"
-    },
-    {
-      "app_id": 15368,
-      "context": "compare"
     },
     {
       "app_id": 15368,
@@ -20,18 +16,6 @@
     {
       "app_id": 46505,
       "context": "GitGuardian Security Checks"
-    },
-    {
-      "app_id": 15368,
-      "context": "integration-gate"
-    },
-    {
-      "app_id": 15368,
-      "context": "judge-unit-tests-gate"
-    },
-    {
-      "app_id": 15368,
-      "context": "mainstream-gate"
     },
     {
       "app_id": 15368,
@@ -51,10 +35,6 @@
     },
     {
       "app_id": 15368,
-      "context": "phpstan"
-    },
-    {
-      "app_id": 15368,
       "context": "Post results assuming forks"
     },
     {
@@ -67,27 +47,11 @@
     },
     {
       "app_id": 15368,
-      "context": "runpipe"
-    },
-    {
-      "app_id": 15368,
       "context": "Scan-Build"
     },
     {
       "app_id": 15368,
-      "context": "standards-gate"
-    },
-    {
-      "app_id": 15368,
       "context": "syntax-job"
-    },
-    {
-      "app_id": 15368,
-      "context": "unit-tests-gate"
-    },
-    {
-      "app_id": 15368,
-      "context": "upgrade_test"
     }
   ]
 }
