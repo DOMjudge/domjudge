@@ -4,7 +4,7 @@ namespace App\Controller\Jury;
 
 use App\Attribute\ReleaseSessionLock;
 use App\Controller\API\AbstractRestController;
-use App\Entity\Configuration;
+use App\Form\Type\ConfigurationType;
 use App\Service\CheckConfigService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,94 +36,32 @@ class ConfigController extends AbstractController
     #[Route(path: '', name: 'jury_config')]
     public function indexAction(EventLogService $eventLogService, Request $request): Response
     {
-        $specs = $this->config->getConfigSpecification();
-        foreach ($specs as &$spec) {
-            $spec = $this->config->addOptions($spec);
-        }
+        $form = $this->createForm(ConfigurationType::class, $this->config->all());
+        $form->handleRequest($request);
 
-        unset($spec);
-        /** @var Configuration[] $options */
-        $options = $this->em->createQueryBuilder()
-            ->from(Configuration::class, 'c', 'c.name')
-            ->select('c')
-            ->getQuery()
-            ->getResult();
-        if ($request->getMethod() == 'POST' && $request->request->has('save')) {
-            $data = [];
-            foreach ($request->request->all() as $key => $value) {
-                if (str_starts_with($key, 'config_')) {
-                    $valueToUse = $value;
-                    if (is_array($value)) {
-                        $firstItem = reset($value);
-                        if (is_array($firstItem) && isset($firstItem['key'])) {
-                            $valueToUse = [];
-                            foreach ($value as $item) {
-                                $valueToUse[$item['key']] = $item['val'];
-                            }
-                        }
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $before = $this->config->all();
+                $errors = $this->config->saveChanges($form->getData(), $eventLogService, $this->dj);
+                foreach ($errors as $name => $error) {
+                    $form->get($name)->addError(new FormError($error));
+                }
+                if (empty($errors)) {
+                    $diffs = $this->compileDiffs($before, $this->config->all());
+                    $changedCategories = array_map($this->config->getCategory(...), array_keys($diffs));
+                    if (in_array('Scoring', $changedCategories, true)) {
+                        $this->addFlash('scoreboard_refresh', 'After changing specific ' .
+                            'scoring related settings, you might need to refresh the scoreboard (cache).');
                     }
-                    $data[substr($key, strlen('config_'))] = $valueToUse;
-                    if ($key === 'config_lazy_eval_results' && $value !== DOMJudgeService::EVAL_DEMAND) {
-                        $this->dj->unblockJudgeTasks();
+                    if (in_array('Judging', $changedCategories, true)) {
+                        $this->addFlash('danger', 'After changing specific ' .
+                            'judging related settings, you might need to rejudge affected submissions.');
                     }
+                    return $this->redirectToRoute('jury_config', ['diffs' => json_encode($diffs)]);
                 }
             }
-            $before = $this->config->all();
-            // In case we clear a value it would not be sent and we keep the old value, this is a mistake
-            foreach ($before as $key => $value) {
-                if (!isset($data[$key])) {
-                    if (is_array($value)) {
-                        $data[$key] = [];
-                    } else {
-                        $data[$key] = null;
-                    }
-                }
-            }
-            $errors = $this->config->saveChanges($data, $eventLogService, $this->dj, options: $options);
-            $after = $this->config->all();
-
-            // Compile a list of differences.
-            $diffs = [];
-            foreach ($before as $key => $value) {
-                if (!array_key_exists($key, $after)) {
-                    $diffs[$key] = ['before' => $value, 'after' => null];
-                } elseif ($value !== $after[$key]) {
-                    $diffs[$key] = ['before' => $value, 'after' => $after[$key]];
-                }
-            }
-            foreach ($after as $key => $value) {
-                if (!array_key_exists($key, $before)) {
-                    $diffs[$key] = ['before' => null, 'after' => $value];
-                }
-            }
-
-            if (empty($errors)) {
-                $needsRefresh = false;
-                $needsRejudging = false;
-                foreach ($diffs as $key => $diff) {
-                    $category = $this->config->getCategory($key);
-                    if ($category === 'Scoring') {
-                        $needsRefresh = true;
-                    }
-                    if ($category === 'Judging') {
-                        $needsRejudging = true;
-                    }
-                }
-
-                if ($needsRefresh) {
-                    $this->addFlash('scoreboard_refresh', 'After changing specific ' .
-                        'scoring related settings, you might need to refresh the scoreboard (cache).');
-                }
-                if ($needsRejudging) {
-                    $this->addFlash('danger', 'After changing specific ' .
-                        'judging related settings, you might need to rejudge affected submissions.');
-                }
-
-                return $this->redirectToRoute('jury_config', ['diffs' => json_encode($diffs)]);
-            } else {
-                $this->addFlash('danger', 'Some errors occurred while saving configuration, ' .
-                    'please check the data you entered.');
-            }
+            $this->addFlash('danger', 'Some errors occurred while saving configuration, ' .
+                'please check the data you entered.');
         }
 
         if (((int)$this->config->get('minimum_number_of_balloons')) !== 0) {
@@ -130,51 +69,42 @@ class ConfigController extends AbstractController
         }
 
         $categories = [];
-        foreach ($specs as $spec) {
-            if (!in_array($spec->category, $categories)) {
-                $categories[] = $spec->category;
-            }
-        }
-        $allData = [];
         $activeCategory = null;
-        foreach ($categories as $category) {
-            $data = [];
-            foreach ($specs as $specName => $spec) {
-                if ($spec->category !== $category) {
-                    continue;
-                }
-                if (isset($errors[$specName]) && $activeCategory === null) {
-                    $activeCategory = $category;
-                }
-                $data[] = [
-                    'name' => $specName,
-                    'type' => $spec->type,
-                    'value' => isset($options[$specName]) ?
-                        $options[$specName]->getValue() :
-                        $spec->defaultValue,
-                    'description' => $spec->description,
-                    'options' => $spec->options,
-                    'key_options' => $spec->keyOptions,
-                    'value_options' => $spec->valueOptions,
-                    'key_placeholder' => $spec->keyPlaceholder ?? '',
-                    'value_placeholder' => $spec->valuePlaceholder ?? '',
-                ];
+        foreach ($this->config->getConfigSpecification() as $name => $spec) {
+            $categories[$spec->category][] = $name;
+            if ($activeCategory === null && $form->get($name)->getErrors(true)->count() > 0) {
+                $activeCategory = $spec->category;
             }
-            $allData[] = [
-                'name' => $category,
-                'data' => $data
-            ];
         }
+
         $diffs = $request->query->get('diffs');
         if ($diffs !== null) {
             $diffs = json_decode($diffs, true);
         }
         return $this->render('jury/config.html.twig', [
-            'options' => $allData,
-            'errors' => $errors ?? [],
-            'activeCategory' => $activeCategory ?? 'Scoring',
+            'form' => $form,
+            'categories' => $categories,
+            'activeCategory' => $activeCategory ?? array_key_first($categories),
             'diffs' => $diffs,
         ]);
+    }
+
+    /**
+     * @param array<string, mixed> $before
+     * @param array<string, mixed> $after
+     * @return array<string, array{before: mixed, after: mixed}>
+     */
+    private function compileDiffs(array $before, array $after): array
+    {
+        $diffs = [];
+        foreach ($before + $after as $key => $value) {
+            $old = $before[$key] ?? null;
+            $new = $after[$key] ?? null;
+            if ($old !== $new) {
+                $diffs[$key] = ['before' => $old, 'after' => $new];
+            }
+        }
+        return $diffs;
     }
 
     #[Route(path: '/check', name: 'jury_config_check')]

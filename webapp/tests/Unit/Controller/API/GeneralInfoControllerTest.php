@@ -46,6 +46,22 @@ class GeneralInfoControllerTest extends BaseTestCase
         }
     }
 
+    public function testUpdateConfigStoresIntegerPriorities(): void
+    {
+        $config = $this->verifyApiJsonResponse('PUT', '/config', 200, 'admin', [
+            'results_prio' => ['correct' => '1', 'wrong-answer' => '50'],
+        ]);
+        self::assertSame(['correct' => 1, 'wrong-answer' => 50], $config['results_prio']);
+    }
+
+    public function testUpdateConfigRejectsNonIntegerPriority(): void
+    {
+        $response = $this->verifyApiJsonResponse('PUT', '/config', 422, 'admin', [
+            'results_prio' => ['correct' => 'abc'],
+        ]);
+        self::assertSame(['results_prio' => 'All values must be integers.'], $response['errors']);
+    }
+
     public function testStatusNoPublicAccess(): void
     {
         $this->verifyApiJsonResponse('GET', "/status", 401);
