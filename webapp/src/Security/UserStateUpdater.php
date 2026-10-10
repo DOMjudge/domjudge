@@ -41,14 +41,15 @@ readonly class UserStateUpdater implements EventSubscriberInterface
                 $user->setFirstLogin(Utils::now());
             }
 
-            $this->em->flush();
-
             // Only log IP address on the main firewall.
             // Otherwise, we would log every API call and we do not want that.
             if ($firewallName === 'main') {
                 $ip = $this->requestStack->getMainRequest()->getClientIp();
-                $this->dj->auditlog('user', $user->getExternalid(), 'logged on on ' . $ip, null, $user->getUserName());
+                $this->dj->auditlog('user', $user->getExternalid(), 'logged on on ' . $ip, null, $user->getUserName(),
+                    flush: false);
             }
+
+            $this->em->flush();
         }
     }
 }

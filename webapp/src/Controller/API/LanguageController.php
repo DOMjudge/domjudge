@@ -123,8 +123,8 @@ class LanguageController extends AbstractRestController
         $this->em->persist($immutableExecutable);
 
         $language->getCompileExecutable()->setImmutableExecutable($immutableExecutable);
+        $this->dj->auditlog('executable', $language->getExternalid(), 'updated', flush: false);
         $this->em->flush();
-        $this->dj->auditlog('executable', $language->getExternalid(), 'updated');
     }
 
     #[IsGranted('ROLE_ADMIN')]

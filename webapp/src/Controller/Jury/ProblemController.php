@@ -941,7 +941,7 @@ class ProblemController extends BaseController
 
         if ($current !== null && $other !== null) {
             // (probid, rank) is a unique key, so we must switch via a temporary rank, and use a transaction.
-            $this->em->wrapInTransaction(function () use ($current, $other, $numTestcases): void {
+            $this->em->wrapInTransaction(function () use ($problem, $current, $other, $numTestcases): void {
                 $otherRank   = $other->getRank();
                 $currentRank = $current->getRank();
                 $other->setRank($numTestcases + 1);
@@ -949,10 +949,10 @@ class ProblemController extends BaseController
                 $this->em->flush();
                 $current->setRank($otherRank);
                 $other->setRank($currentRank);
-            });
 
-            $this->dj->auditlog('testcase', $problem->getExternalid(), 'switch rank',
-                                             sprintf("%d <=> %d", $current->getRank(), $other->getRank()));
+                $this->dj->auditlog('testcase', $problem->getExternalid(), 'switch rank',
+                                    sprintf("%d <=> %d", $current->getRank(), $other->getRank()));
+            });
         }
 
         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);

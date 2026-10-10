@@ -328,8 +328,8 @@ class ExecutableController extends BaseController
             $immutableExecutable = new ImmutableExecutable($files);
             $this->em->persist($immutableExecutable);
             $executable->setImmutableExecutable($immutableExecutable);
+            $this->dj->auditlog('executable', $executable->getExecid(), 'updated', flush: false);
             $this->em->flush();
-            $this->dj->auditlog('executable', $executable->getExecid(), 'updated');
 
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
         }

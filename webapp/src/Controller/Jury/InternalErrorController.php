@@ -154,7 +154,7 @@ class InternalErrorController extends BaseController
         if ($action === 'ignore') {
             $internalError->setStatus(InternalErrorStatusType::STATUS_IGNORED);
             $this->dj->auditlog('internal_error', (string)$internalError->getErrorid(),
-                sprintf('internal error: %s', InternalErrorStatusType::STATUS_IGNORED));
+                sprintf('internal error: %s', InternalErrorStatusType::STATUS_IGNORED), flush: false);
             $this->em->flush();
             return $this->redirectToRoute('jury_internal_error', ['errorId' => $internalError->getErrorid()]);
         }

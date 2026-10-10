@@ -277,10 +277,10 @@ class TeamCategoryController extends BaseController
         }
 
         $teamCategory->setVisible($request->request->getBoolean('value'));
+        $this->dj->auditlog('team_category', $teamCategory->getExternalid(), 'set visible',
+            $request->request->getBoolean('value') ? 'yes' : 'no', flush: false);
         $this->em->flush();
 
-        $this->dj->auditlog('team_category', $teamCategory->getExternalid(), 'set visible',
-            $request->request->getBoolean('value') ? 'yes' : 'no');
         return $this->redirectToRoute('jury_team_category', ['categoryId' => $categoryId]);
     }
 
@@ -294,10 +294,10 @@ class TeamCategoryController extends BaseController
         }
 
         $teamCategory->setAllowSelfRegistration($request->request->getBoolean('value'));
+        $this->dj->auditlog('team_category', $teamCategory->getExternalid(), 'set allow self-registration',
+            $request->request->getBoolean('value') ? 'yes' : 'no', flush: false);
         $this->em->flush();
 
-        $this->dj->auditlog('team_category', $teamCategory->getExternalid(), 'set allow self-registration',
-            $request->request->getBoolean('value') ? 'yes' : 'no');
         return $this->redirectToRoute('jury_team_category', ['categoryId' => $categoryId]);
     }
 }

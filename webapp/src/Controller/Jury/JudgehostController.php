@@ -372,8 +372,8 @@ class JudgehostController extends BaseController
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->find($judgehostid);
         $judgehost->setEnabled(true);
+        $this->dj->auditlog('judgehost', (string)$judgehost->getJudgehostid(), 'marked enabled', flush: false);
         $this->em->flush();
-        $this->dj->auditlog('judgehost', (string)$judgehost->getJudgehostid(), 'marked enabled');
         return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_judgehosts'));
     }
 
@@ -384,8 +384,8 @@ class JudgehostController extends BaseController
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->find($judgehostid);
         $judgehost->setEnabled(false);
+        $this->dj->auditlog('judgehost', (string)$judgehost->getJudgehostid(), 'marked disabled', flush: false);
         $this->em->flush();
-        $this->dj->auditlog('judgehost', (string)$judgehost->getJudgehostid(), 'marked disabled');
         return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_judgehosts'));
     }
 
@@ -440,7 +440,7 @@ class JudgehostController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->dj->auditlog('judgehosts', null, 'updated');
+            $this->dj->auditlog('judgehosts', null, 'updated', flush: false);
             $this->em->flush();
 
             return $this->redirectToRoute('jury_judgehosts');

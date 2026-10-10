@@ -432,9 +432,9 @@ class RejudgingService
             ->setEndtime(Utils::now())
             ->setFinishUser($user)
             ->setValid($action === self::ACTION_APPLY);
+        $this->dj->auditlog('rejudging', (string)$rejudgingId, $action . 'ing rejudge', '(end)', flush: false);
         $this->em->flush();
 
-        $this->dj->auditlog('rejudging', (string)$rejudgingId, $action . 'ing rejudge', '(end)');
 
         return true;
     }

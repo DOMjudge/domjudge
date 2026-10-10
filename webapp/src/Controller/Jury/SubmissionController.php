@@ -1243,6 +1243,8 @@ class SubmissionController extends BaseController
 
         $valid      = $request->request->getBoolean('valid');
         $submission->setValid($valid);
+        $this->dj->auditlog('submission', $submission->getExternalid(),
+                                         'marked ' . ($valid ? 'valid' : 'invalid'), flush: false);
         $this->em->flush();
 
         $teamId    = $submission->getTeam()->getTeamid();
@@ -1252,8 +1254,6 @@ class SubmissionController extends BaseController
         // FIXME: We should also delete/recreate any dependent judging(runs).
         $eventLogService->log('submission', $submission->getSubmitid(), ($valid ? 'create' : 'delete'),
                               $contest->getCid(), null, null, $valid);
-        $this->dj->auditlog('submission', $submission->getExternalid(),
-                                         'marked ' . ($valid ? 'valid' : 'invalid'));
         $team    = $this->em->getRepository(Team::class)->find($teamId);
         $problem = $this->em->getRepository(Problem::class)->find($problemId);
         $scoreboardService->calculateScoreRow($contest, $team, $problem);
@@ -1392,7 +1392,6 @@ class SubmissionController extends BaseController
                     ucfirst($type), $judging->getJuryMember());
             } else {
                 $judging->setJuryMember($action === 'claim' ? $user->getUsername() : null);
-                $this->em->flush();
                 if ($judging instanceof ExternalJudgement) {
                     $auditLogType = 'external_judgement';
                     $auditLogId = $judging->getExtjudgementid();
@@ -1400,7 +1399,8 @@ class SubmissionController extends BaseController
                     $auditLogType = 'judging';
                     $auditLogId = $judging->getJudgingid();
                 }
-                $this->dj->auditlog($auditLogType, (string)$auditLogId, $action . 'ed');
+                $this->dj->auditlog($auditLogType, (string)$auditLogId, $action . 'ed', flush: false);
+                $this->em->flush();
 
                 if ($action === 'claim') {
                     return $this->redirectToRoute('jury_submission', [

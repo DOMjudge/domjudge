@@ -284,9 +284,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         }
 
         $this->em->remove($contestProblem);
-        $this->em->flush();
         $id = [$contestProblem->getContest()->getExternalId(), $contestProblem->getProblem()->getExternalId()];
-        $this->dj->auditlog('contest_problem', implode(', ', $id), 'deleted');
+        $this->dj->auditlog('contest_problem', implode(', ', $id), 'deleted', flush: false);
+        $this->em->flush();
         $this->eventLogService->log('problem', $contestProblem->getProbid(),
                                     EventLogService::ACTION_DELETE, $cid,
                                     null, null, false);
@@ -365,10 +365,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             ->setLazyEvalResults($contestProblemPut->lazyEvalResults);
 
         $this->em->persist($contestProblem);
-        $this->em->flush();
-
         $fullId = [$contestProblem->getContest()->getExternalId(), $contestProblem->getProblem()->getExternalId()];
-        $this->dj->auditlog('contest_problem', implode(', ', $fullId), 'added');
+        $this->dj->auditlog('contest_problem', implode(', ', $fullId), 'added', flush: false);
+        $this->em->flush();
         $this->eventLogService->log('problem', $contestProblem->getProbid(),
                                     EventLogService::ACTION_CREATE, $cid,
                                     null, null, false);

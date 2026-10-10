@@ -412,9 +412,9 @@ class ContestController extends BaseController
             default:
                 throw new BadRequestHttpException('Unknown toggle type');
         }
+        $this->dj->auditlog('contest', $contest->getExternalid(), $label, $value ? 'yes' : 'no', flush: false);
         $this->em->flush();
 
-        $this->dj->auditlog('contest', $contest->getExternalid(), $label, $value ? 'yes' : 'no');
         return $this->redirectToLocalReferrer(
             $router,
             $request,
@@ -816,9 +816,9 @@ class ContestController extends BaseController
 
             if ($form->isSubmitted() && $form->isValid()) {
                 $contest->setFinalizetime(Utils::now());
-                $this->em->flush();
                 $this->dj->auditlog('contest', $contest->getExternalid(), 'finalized',
-                                                 $contest->getFinalizecomment());
+                                                 $contest->getFinalizecomment(), flush: false);
+                $this->em->flush();
                 return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getExternalid()]);
             }
         }

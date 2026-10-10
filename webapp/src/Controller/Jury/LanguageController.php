@@ -275,10 +275,10 @@ class LanguageController extends BaseController
         }
 
         $language->setAllowSubmit($request->request->getBoolean('value'));
+        $this->dj->auditlog('language', $language->getExternalid(), 'set allow submit',
+                                         $request->request->getBoolean('value') ? 'yes' : 'no', flush: false);
         $this->em->flush();
 
-        $this->dj->auditlog('language', $language->getExternalid(), 'set allow submit',
-                                         $request->request->getBoolean('value') ? 'yes' : 'no');
         return $this->redirectToLocalReferrer(
             $router,
             $request,
@@ -324,10 +324,10 @@ class LanguageController extends BaseController
 
         $enabled = $request->request->getBoolean('value');
         $language->setFilterCompilerFiles($enabled);
+        $this->dj->auditlog('language', $language->getExternalid(), 'set filter compiler flags',
+            $request->request->getBoolean('value') ? 'yes' : 'no', flush: false);
         $this->em->flush();
 
-        $this->dj->auditlog('language', $language->getExternalid(), 'set filter compiler flags',
-            $request->request->getBoolean('value') ? 'yes' : 'no');
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }
 
@@ -341,10 +341,10 @@ class LanguageController extends BaseController
 
         $enabled = $request->request->getBoolean('value');
         $language->setRequireEntryPoint($enabled);
+        $this->dj->auditlog('language', $language->getExternalid(), 'set require entry point',
+            $enabled ? 'yes' : 'no', flush: false);
         $this->em->flush();
 
-        $this->dj->auditlog('language', $language->getExternalid(), 'set require entry point',
-            $enabled ? 'yes' : 'no');
         return $this->redirectToLocalReferrer(
             $router,
             $request,

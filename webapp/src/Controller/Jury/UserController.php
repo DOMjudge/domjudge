@@ -349,7 +349,8 @@ class UserController extends BaseController
                 if ($doit) {
                     $newpass = Utils::generatePassword(false);
                     $user->setPlainPassword($newpass);
-                    $this->dj->auditlog('user', $user->getExternalid(), 'set password');
+                    // Flushed together with all new passwords below.
+                    $this->dj->auditlog('user', $user->getExternalid(), 'set password', flush: false);
                     $changes[] = [
                             'type' => $role,
                             'fullname' => $user->getName(),
