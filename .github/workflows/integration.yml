@@ -21,20 +21,27 @@ jobs:
     needs: changes
     # Skip only when change detection ran and said so: a skipped job counts
     # as a passed required check, so if detection failed we must run.
-    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
+    #
+    # Skip the entire MySQL job if migrations didn't change.
+    if: |
+      !cancelled()
+      && needs.changes.outputs.code != 'false'
+      && !(matrix.db == 'mysql' && needs.changes.outputs.migrations == 'false')
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
+        mode: ['default']
+        db: ['mysql', 'mariadb']
+        contest: ['demo']
+        install_scoring: ''
+        submit_check: ['check-full']
+        expected_unverified: [2]
+        expected_no_magic: [1]
+        artifact_suffix: ['']
         include:
-          - mode: default
-            contest: demo
-            install_scoring: ''
-            submit_check: check-full
-            expected_unverified: 2
-            expected_no_magic: 1
-            artifact_suffix: ''
           - mode: scoring
+            db: mariadb
             contest: scoringdemo
             install_scoring: '1'
             submit_check: check
@@ -51,7 +58,7 @@ jobs:
       options: --privileged --cgroupns=host --init
     services:
       sqlserver:
-        image: mariadb
+        image: ${{ matrix.db }}
         ports:
           - 3306:3306
         env:
