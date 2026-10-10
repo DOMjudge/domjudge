@@ -1209,17 +1209,19 @@ class JudgehostController extends AbstractFOSRestController
 
         $rejudgingId = $judging->getRejudging()->getRejudgingid();
         $submissionId = $judging->getSubmissionId();
+        $judgingId = $judging->getJudgingid();
 
         /** @var Rejudging|null $repeatRejudging */
         $repeatRejudging = null;
 
         $this->em->wrapInTransaction(function () use (
-            $judging,
             $rejudgingId,
             $submissionId,
+            $judgingId,
             &$repeatRejudging
         ): void {
-            // Lock parent before child.
+            // Lock parent before child. The judgings are only written, never read, so they
+            // need no lock.
             /** @var Rejudging $rejudging */
             $rejudging = $this->em->find(Rejudging::class, $rejudgingId, LockMode::PESSIMISTIC_WRITE);
             /** @var Submission $submission */
@@ -1228,10 +1230,16 @@ class JudgehostController extends AbstractFOSRestController
             if ($rejudging->getAutoApply()) {
                 $submission->setRejudging(null);
 
-                foreach ($submission->getJudgings() as $j) {
-                    $j->setValid(false);
-                }
-                $judging->setValid(true);
+                // Direct queries, as in RejudgingService::finishRejudging(): a row that is never
+                // read cannot have changed since it was read.
+                $this->em->getConnection()->executeStatement(
+                    'UPDATE judging SET valid = 0 WHERE submitid = :submitid',
+                    ['submitid' => $submissionId]
+                );
+                $this->em->getConnection()->executeStatement(
+                    'UPDATE judging SET valid = 1 WHERE judgingid = :judgingid',
+                    ['judgingid' => $judgingId]
+                );
 
                 // Check whether we are completely done with this rejudging.
                 if ($rejudging->getEndtime() === null && $this->rejudgingService->calculateTodo($rejudging)['todo'] == 0) {
@@ -1281,6 +1289,9 @@ class JudgehostController extends AbstractFOSRestController
                 }
             }
         });
+
+        // Updated with direct queries above, and callers read getValid() right after this.
+        $this->em->refresh($judging);
 
         if ($repeatRejudging === null) {
             return;
