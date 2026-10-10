@@ -1065,11 +1065,10 @@ class ProblemController extends BaseController
             try {
                 $zip        = $this->dj->openZipFile($archive->getRealPath());
                 $clientName = $archive->getClientOriginalName();
-                if ($this->importProblemService->importZippedProblem(
+                // This also adds the audit log entry.
+                if (!$this->importProblemService->importZippedProblem(
                     $zip, $clientName, $problem, $contest, $messages
                 )) {
-                    $this->dj->auditlog('problem', $problem->getExternalid(), 'upload zip', $clientName);
-                } else {
                     $this->postMessages($messages);
                     return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
                 }
@@ -1306,10 +1305,9 @@ class ProblemController extends BaseController
             default:
                 throw new BadRequestHttpException('Unknown toggle type');
         }
-        $this->em->flush();
-
         $id = [$contestProblem->getExternalId(), $contestProblem->getExternalId()];
-        $this->dj->auditlog('contest_problem', implode(', ', $id), $label, $value ? 'yes' : 'no');
+        $this->dj->auditlog('contest_problem', implode(', ', $id), $label, $value ? 'yes' : 'no', flush: false);
+        $this->em->flush();
         return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_problems'));
     }
 

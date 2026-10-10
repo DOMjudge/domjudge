@@ -134,23 +134,33 @@ abstract class BaseController extends AbstractController
             $entity->$prePersistMethod();
         }
 
-        $this->em->persist($entity);
-        $this->em->flush();
+        // Use a transaction, since IDs for the audit log are only known after flushing.
+        $this->em->wrapInTransaction(function () use ($entity, &$id, $isNewEntity, $auditLogType): void {
+            $this->em->persist($entity);
+            $this->em->flush();
 
-        // If we have no ID but we do have a Doctrine entity, automatically
-        // get the primary key if possible.
-        if ($id === null) {
-            try {
-                $metadata = $this->em->getClassMetadata($entity::class);
-                if (count($metadata->getIdentifierColumnNames()) === 1) {
-                    $primaryKey = $metadata->getIdentifierColumnNames()[0];
-                    $accessor = PropertyAccess::createPropertyAccessor();
-                    $id = $accessor->getValue($entity, $primaryKey);
+            // If we have no ID but we do have a Doctrine entity, automatically
+            // get the primary key if possible.
+            if ($id === null) {
+                try {
+                    $metadata = $this->em->getClassMetadata($entity::class);
+                    if (count($metadata->getIdentifierColumnNames()) === 1) {
+                        $primaryKey = $metadata->getIdentifierColumnNames()[0];
+                        $accessor = PropertyAccess::createPropertyAccessor();
+                        $id = $accessor->getValue($entity, $primaryKey);
+                    }
+                } catch (MappingException) {
+                    // Entity is not actually a Doctrine entity, ignore.
                 }
-            } catch (MappingException) {
-                // Entity is not actually a Doctrine entity, ignore.
             }
-        }
+
+            if ($entity instanceof HasExternalIdInterface) {
+                $dataid = $entity->getExternalId();
+            } else {
+                $dataid = $id;
+            }
+            $this->dj->auditlog($auditLogType, (string)$dataid, $isNewEntity ? 'added' : 'updated');
+        });
 
         if ($endpoint = $this->eventLog->endpointForEntity($entity)) {
             foreach ($this->contestsForEntity($entity) as $contest) {
@@ -159,13 +169,6 @@ abstract class BaseController extends AbstractController
                     $contest->getCid());
             }
         }
-
-        if ($entity instanceof HasExternalIdInterface) {
-            $dataid = $entity->getExternalId();
-        } else {
-            $dataid = $id;
-        }
-        $this->dj->auditlog($auditLogType, (string)$dataid, $isNewEntity ? 'added' : 'updated');
     }
 
     /**
@@ -235,14 +238,13 @@ abstract class BaseController extends AbstractController
             $cid = $entity->getCid();
         }
 
-        // Add an audit log entry.
+        // Determine the audit log entry now, it is written together with the delete below.
         $auditLogType = Utils::tableForEntity($entity);
         if ($entity instanceof HasExternalIdInterface) {
             $dataid = $entity->getExternalId();
         } else {
             $dataid = implode(', ', $primaryKeyData);
         }
-        $this->dj->auditlog($auditLogType, $dataid, 'deleted');
 
         // Trigger the delete event. We need to do this before deleting the entity to make
         // sure we can still find the entity in the table.
@@ -265,7 +267,7 @@ abstract class BaseController extends AbstractController
         }
 
         // Now actually delete the entity.
-        $this->em->wrapInTransaction(function () use ($entity): void {
+        $this->em->wrapInTransaction(function () use ($entity, $auditLogType, $dataid): void {
             if ($entity instanceof Problem) {
                 // Deleting a problem is a special case:
                 // Its dependent tables do not form a tree (but something like a diamond shape),
@@ -380,6 +382,8 @@ abstract class BaseController extends AbstractController
                 ]);
             }
             $this->em->remove($entity);
+            // Not flushing, since the transaction does. This must come after the clear() calls above.
+            $this->dj->auditlog($auditLogType, $dataid, 'deleted', flush: false);
         });
 
         if ($entity instanceof Team) {

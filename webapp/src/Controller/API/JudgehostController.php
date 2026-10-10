@@ -2033,15 +2033,16 @@ class JudgehostController extends AbstractFOSRestController
             // TODO: There is currently a race condition when a jury member requests the remaining test cases to be
             // judged in the time between allocating the final batch and the next judgehost checking in and deleting
             // the queuetask here.
-            $this->em->createQueryBuilder()
-                ->from(QueueTask::class, 'qt')
-                ->andWhere('qt.judging = :jobid')
-                ->setParameter('jobid', $jobId)
-                ->delete()
-                ->getQuery()
-                ->execute();
-            $this->em->flush();
-            $this->dj->auditlog('queuetask', (string)$jobId, 'deleted');
+            $this->em->wrapInTransaction(function () use ($jobId): void {
+                $this->em->createQueryBuilder()
+                    ->from(QueueTask::class, 'qt')
+                    ->andWhere('qt.judging = :jobid')
+                    ->setParameter('jobid', $jobId)
+                    ->delete()
+                    ->getQuery()
+                    ->execute();
+                $this->dj->auditlog('queuetask', (string)$jobId, 'deleted');
+            });
         } else {
             return $this->serializeJudgeTasks($judgetasks, $judgehost);
         }

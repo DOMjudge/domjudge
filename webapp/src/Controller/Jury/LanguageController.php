@@ -298,15 +298,17 @@ class LanguageController extends BaseController
         }
 
         $enabled = $request->request->getBoolean('value');
-        $language->setAllowJudge($enabled);
-        $this->em->flush();
+        $this->em->wrapInTransaction(function () use ($language, $enabled): void {
+            $language->setAllowJudge($enabled);
+            $this->em->flush();
 
-        if ($enabled) {
-            $this->dj->unblockJudgeTasksForLanguage($language->getLangid());
-        }
+            if ($enabled) {
+                $this->dj->unblockJudgeTasksForLanguage($language->getLangid());
+            }
 
-        $this->dj->auditlog('language', $language->getExternalid(), 'set allow judge',
-                                         $request->request->getBoolean('value') ? 'yes' : 'no');
+            $this->dj->auditlog('language', $language->getExternalid(), 'set allow judge',
+                                $enabled ? 'yes' : 'no');
+        });
         return $this->redirectToLocalReferrer(
             $router,
             $request,

@@ -465,15 +465,19 @@ class ClarificationController extends BaseController
         $clarification->setBody($formData['message']);
         $clarification->setSubmittime(Utils::now());
 
-        $this->em->persist($clarification);
-        if ($inReplTo) {
-            $inReplTo->setAnswered(true);
-            $inReplTo->setJuryMember($this->getUser()->getUserIdentifier());
-        }
-        $this->em->flush();
+        // Use a transaction, since the external ID for the audit log is only known after flushing.
+        $this->em->wrapInTransaction(function () use ($clarification, $inReplTo, $contest): void {
+            $this->em->persist($clarification);
+            if ($inReplTo) {
+                $inReplTo->setAnswered(true);
+                $inReplTo->setJuryMember($this->getUser()->getUserIdentifier());
+            }
+            $this->em->flush();
+
+            $this->dj->auditlog('clarification', $clarification->getExternalid(), 'added', null, null, $contest->getExternalid());
+        });
 
         $clarId = $clarification->getClarId();
-        $this->dj->auditlog('clarification', $clarification->getExternalid(), 'added', null, null, $contest->getExternalid());
         $this->eventLog->log('clarification', $clarId, 'create', $contest->getCid());
         // Reload clarification to make sure we have a fresh one after calling the event log service.
         $clarification = $this->em->getRepository(Clarification::class)->find($clarId);

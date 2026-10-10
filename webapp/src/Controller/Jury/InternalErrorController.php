@@ -169,16 +169,18 @@ class InternalErrorController extends BaseController
                 flush();
             };
             return $this->streamResponse($this->requestStack, function () use ($progressReporter, $internalError): void {
-                $internalError->setStatus(InternalErrorStatusType::STATUS_RESOLVED);
-                $this->dj->setInternalError(
-                    $internalError->getDisabled(),
-                    $internalError->getContest(),
-                    true
-                );
-                $this->em->flush();
-
-                $this->dj->auditlog('internal_error', (string)$internalError->getErrorid(),
-                    sprintf('internal error: %s', InternalErrorStatusType::STATUS_RESOLVED));
+                // setInternalError() runs queries directly, so use a transaction to
+                // write those together with the status change and audit log entry.
+                $this->em->wrapInTransaction(function () use ($internalError): void {
+                    $internalError->setStatus(InternalErrorStatusType::STATUS_RESOLVED);
+                    $this->dj->setInternalError(
+                        $internalError->getDisabled(),
+                        $internalError->getContest(),
+                        true
+                    );
+                    $this->dj->auditlog('internal_error', (string)$internalError->getErrorid(),
+                        sprintf('internal error: %s', InternalErrorStatusType::STATUS_RESOLVED));
+                });
 
                 $affectedJudgings = $internalError->getAffectedJudgings();
                 if (!$affectedJudgings->isEmpty()) {

@@ -269,11 +269,14 @@ class ClarificationController extends AbstractRestController
             $clarification->setCategory(reset($clarificationCategoryNames));
         }
 
-        // We are ready to save the clarification.
-        $this->em->persist($clarification);
-        $this->em->flush();
+        // We are ready to save the clarification. Use a transaction, since the external ID
+        // for the audit log is only known after flushing.
+        $this->em->wrapInTransaction(function () use ($clarification, $contest): void {
+            $this->em->persist($clarification);
+            $this->em->flush();
 
-        $this->dj->auditlog('clarification', $clarification->getExternalid(), 'added', null, null, $contest->getExternalid());
+            $this->dj->auditlog('clarification', $clarification->getExternalid(), 'added', null, null, $contest->getExternalid());
+        });
         $this->eventLogService->log('clarification', $clarification->getClarid(), 'create', $contestId);
 
         // Refresh the clarification since the event log service will have unloaded it.

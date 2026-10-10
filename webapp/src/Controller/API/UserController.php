@@ -450,9 +450,12 @@ class UserController extends AbstractRestController
             throw new BadRequestHttpException(implode("\n", $messages));
         }
 
-        $this->em->persist($user);
-        $this->em->flush();
-        $this->dj->auditlog('user', $user->getExternalid(), 'added');
+        // Use a transaction, since the external ID for the audit log is only known after flushing.
+        $this->em->wrapInTransaction(function () use ($user): void {
+            $this->em->persist($user);
+            $this->em->flush();
+            $this->dj->auditlog('user', $user->getExternalid(), 'added');
+        });
 
         return $this->renderCreateData($request, $user, 'user', $user->getUserid());
     }

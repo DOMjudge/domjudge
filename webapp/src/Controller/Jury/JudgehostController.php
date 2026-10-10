@@ -393,8 +393,10 @@ class JudgehostController extends BaseController
     #[Route(path: '/enable-all', name: 'jury_judgehost_enable_all', methods: ['POST'])]
     public function enableAllAction(): RedirectResponse
     {
-        $this->em->createQuery('UPDATE App\Entity\Judgehost j set j.enabled = true')->execute();
-        $this->dj->auditlog('judgehost', null, 'marked all enabled');
+        $this->em->wrapInTransaction(function (): void {
+            $this->em->createQuery('UPDATE App\Entity\Judgehost j set j.enabled = true')->execute();
+            $this->dj->auditlog('judgehost', null, 'marked all enabled');
+        });
         return $this->redirectToRoute('jury_judgehosts');
     }
 
@@ -402,8 +404,10 @@ class JudgehostController extends BaseController
     #[Route(path: '/disable-all', name: 'jury_judgehost_disable_all', methods: ['POST'])]
     public function disableAllAction(): RedirectResponse
     {
-        $this->em->createQuery('UPDATE App\Entity\Judgehost j set j.enabled = false')->execute();
-        $this->dj->auditlog('judgehost', null, 'marked all disabled');
+        $this->em->wrapInTransaction(function (): void {
+            $this->em->createQuery('UPDATE App\Entity\Judgehost j set j.enabled = false')->execute();
+            $this->dj->auditlog('judgehost', null, 'marked all disabled');
+        });
         return $this->redirectToRoute('jury_judgehosts');
     }
 
@@ -415,11 +419,13 @@ class JudgehostController extends BaseController
         $time_crit = $this->config->get('judgehost_critical');
         $critical_threshold = $now - $time_crit;
 
-        $this->em->createQuery(
-            'UPDATE App\Entity\Judgehost j set j.enabled = false, j.hidden = true WHERE j.polltime IS NULL OR j.polltime < :threshold')
-            ->setParameter('threshold', $critical_threshold)
-            ->execute();
-        $this->dj->auditlog('judgehost', null, 'auto-hiding judgehosts');
+        $this->em->wrapInTransaction(function () use ($critical_threshold): void {
+            $this->em->createQuery(
+                'UPDATE App\Entity\Judgehost j set j.enabled = false, j.hidden = true WHERE j.polltime IS NULL OR j.polltime < :threshold')
+                ->setParameter('threshold', $critical_threshold)
+                ->execute();
+            $this->dj->auditlog('judgehost', null, 'auto-hiding judgehosts');
+        });
         return $this->redirectToRoute('jury_judgehosts');
     }
 

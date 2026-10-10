@@ -247,11 +247,14 @@ class ClarificationController extends BaseController
             ->setQueue($queue)
             ->setBody($formData['message']);
 
-        $this->em->persist($newClarification);
-        $this->em->flush();
+        // Use a transaction, since the external ID for the audit log is only known after flushing.
+        $this->em->wrapInTransaction(function () use ($newClarification, $contest): void {
+            $this->em->persist($newClarification);
+            $this->em->flush();
 
-        $this->dj->auditlog('clarification', $newClarification->getExternalid(), 'added', null, null,
-            $contest->getExternalid());
+            $this->dj->auditlog('clarification', $newClarification->getExternalid(), 'added', null, null,
+                $contest->getExternalid());
+        });
         $this->eventLogService->log('clarification', $newClarification->getClarid(), 'create', $contest->getCid());
 
         $this->addFlash('success', 'Clarification sent to the jury');
