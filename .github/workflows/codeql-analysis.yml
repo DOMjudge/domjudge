@@ -1,51 +1,38 @@
 name: "CodeQL"
 on:
   push:
-    branches:
-      - main
-      - '[0-9]+.[0-9]+'
-  pull_request:
-    branches:
-      - main
-      - '[0-9]+.[0-9]+'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  schedule:
+    # Run during the (work)week on main
+    - cron: "59 4 * * 2"
 
 jobs:
   analyze:
-    container:
-      image: domjudge/gitlabci:24.04
-      options: --user domjudge
-    name: Analyze
-    runs-on: ubuntu-latest
+    name: Security analysis
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
-    env:
-      COMPILED: "cpp"
-      USER: "domjudge"
     permissions:
       actions: read
       contents: read
       security-events: write
 
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ 'cpp', 'java', 'javascript', 'python' ]
-
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
+      # See: https://github.com/github/codeql-action/blob/main/init/action.yml
+      # We don't use matrix jobs as we can wait all night and let other jobs get merged
+      # Only scan the languages use by judgedaemon, frontend & misc-tools
+      # Ignore the example submissions
+      uses: github/codeql-action/init@v4
       with:
-        languages: ${{ matrix.language }}
+        languages: 	c-cpp, javascript-typescript, python
+
+    - name: Install needed packages
+      run: sudo apt-get install -y autoconf automake composer g++ libcgroup-dev make
 
     - name: Cache composer dependencies
-      if: ${{ contains(env.COMPILED, matrix.language) }}
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: webapp/vendor
         key: composer-${{ hashFiles('webapp/composer.lock') }}
@@ -53,57 +40,29 @@ jobs:
           composer-
 
     - name: Cache node modules
-      if: ${{ contains(env.COMPILED, matrix.language) }}
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: webapp/node_modules
         key: yarn-${{ hashFiles('webapp/yarn.lock') }}
         restore-keys: |
           yarn-
 
-    - name: Install composer files
-      if: ${{ contains(env.COMPILED, matrix.language) }}
-      run: |
-        cd webapp
-        composer install --no-scripts
-
-    - name: Install frontend dependencies
-      if: ${{ contains(env.COMPILED, matrix.language) }}
-      run: |
-        cd webapp
-        yarnpkg install
-
     - name: Configure Makefile
       if: ${{ contains(env.COMPILED, matrix.language) }}
       run: |
         DIR=$(pwd)
         mkdir ./installdir
-        make configure
-        ./configure --enable-doc-build=no --prefix=$DIR/installdir
+        make inplace-conf CONFIGURE_FLAGS="--enable-doc-build=no --prefix=$DIR/installdir"
 
-    - name: Compile domserver
-      if: ${{ contains(env.COMPILED, matrix.language) }}
-      run: |
-        make domserver
-        make install-domserver
-
-    - name: Compile the build scripts for languages
-      run: |
-        make build-scripts
-
-    - name: Compile judgehost
-      if: ${{ contains(env.COMPILED, matrix.language) }}
-      run: |
-        make judgehost
-        sudo make install-judgehost
+    - name: Compile domserver, build scripts for languages & judgehost
+      run: make inplace-install build-scripts
 
     - name: Remove upstream code
       run: |
         rm -rf webapp/public/js/monaco doc/manual/_static
 
     - name: Chown everything to the current runner user
-      if: ${{ contains(env.COMPILED, matrix.language) }}
       run: sudo chown -R ${USER} ./installdir
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      uses: github/codeql-action/analyze@v4
