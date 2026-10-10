@@ -135,7 +135,9 @@ jobs:
           export CURLOPTS="--fail -m 30 -b $COOKIEJAR"
           curl $CURLOPTS http://localhost/domjudge/jury/contests/1/freeze/doNow || true
           curl $CURLOPTS http://localhost/domjudge/jury/contests/1/end/doNow || true
-          curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=' http://localhost/domjudge/jury/contests/1/finalize
+          FINALIZETOKEN=$(curl $CURLOPTS http://localhost/domjudge/jury/contests/1/finalize | grep -oP 'finalize_contest\[_token\]"[^>]*value="\K[^"]+')
+          curl $CURLOPTS -X POST -d "finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=&finalize_contest[_token]=$FINALIZETOKEN" http://localhost/domjudge/jury/contests/1/finalize
+
       - name: Verify no errors in symfony {prod,test,dev}.log
         shell: bash
         run: |
