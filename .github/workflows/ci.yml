@@ -1,0 +1,87 @@
+name: CI
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    uses: ./.github/workflows/changes.yml
+    permissions:
+      contents: read
+      pull-requests: read
+
+  autoconf:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.autoconf != 'false' }}
+    uses: ./.github/workflows/autoconf-check.yml
+
+  chroot:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.chroot != 'false' }}
+    uses: ./.github/workflows/chroot-checks.yml
+
+  compare:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.compare != 'false' }}
+    uses: ./.github/workflows/compare-tests.yml
+
+  database-upgrade:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.webapp != 'false' }}
+    uses: ./.github/workflows/database-upgrade.yml
+
+  integration:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
+    uses: ./.github/workflows/integration.yml
+
+  judge-unit-tests:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.judge-unit != 'false' }}
+    uses: ./.github/workflows/judge-unit-tests.yml
+
+  phpstan:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.phpstan != 'false' }}
+    uses: ./.github/workflows/phpstan.yml
+
+  runpipe:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.judge != 'false' }}
+    uses: ./.github/workflows/runpipe.yml
+
+  unit-tests:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.webapp != 'false' }}
+    uses: ./.github/workflows/unit-tests.yml
+    permissions:
+      checks: write
+
+  webstandard:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.webapp != 'false' }}
+    uses: ./.github/workflows/webstandard.yml
+
+  # The single required check. Suites that change detection skipped report
+  # 'skipped', which passes; a failed detection runs everything instead.
+  ci-gate:
+    name: ci-gate
+    needs: [changes, autoconf, chroot, compare, database-upgrade, integration,
+            judge-unit-tests, phpstan, runpipe, unit-tests, webstandard]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          echo "One or more CI suites failed or were cancelled."
+          exit 1
+      - name: Success
+        run: echo "All CI suites passed or were intentionally skipped."
