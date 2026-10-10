@@ -1,0 +1,15 @@
+name: Run misc-tools unit tests
+on:
+  workflow_call:
+
+jobs:
+  misc-tools-unit-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    container:
+      image: domjudge/gitlabci:24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the import-contest unit tests
+        working-directory: misc-tools
+        run: python3 -m unittest import_contest_test
