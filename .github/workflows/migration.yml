@@ -1,0 +1,89 @@
+name: Apply migrations against MySQL
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    uses: ./.github/workflows/changes.yml
+    permissions:
+      contents: read
+      pull-requests: read
+
+  migration:
+    needs: changes
+    # Skip only when change detection ran and said so: a skipped job counts
+    # as a passed required check, so if detection failed we must run.
+    #
+    # Skip the entire MySQL job if migrations didn't change.
+    if: ${{ !cancelled() && needs.changes.outputs.migrations != 'false' }}
+    runs-on: ubuntu-24.04
+    env:
+      ADMIN_PASSWORD: admin_password
+      MYSQL_ROOT_PASSWORD: mysql_root_password
+    timeout-minutes: 30
+    container:
+      image: domjudge/gitlabci:24.04
+      options: --privileged --cgroupns=host --init
+    services:
+      sqlserver:
+        image: mysql
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: webapp/node_modules
+          key: yarn-${{ hashFiles('webapp/yarn.lock') }}
+          restore-keys: |
+            yarn-
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: webapp/vendor
+          key: composer-${{ hashFiles('webapp/composer.lock') }}
+          restore-keys: |
+            composer-
+      - name: Install DOMjudge
+        run: .github/jobs/baseinstall.sh all
+      - name: Get SQL logs
+        run: docker logs "${{ job.services.sqlserver.id }}"
+      - name: Collect docker logs on failure
+        if: ${{ !cancelled() }}
+        uses: jwalton/gh-docker-logs@v1
+        with:
+          dest: '/tmp/docker-logs'
+      - name: Upload all logs/artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs${{ matrix.artifact_suffix }}
+          path: |
+            /tmp/docker-logs
+            /tmp/artifacts
+
+  migration-gate:
+    name: migration-gate
+    needs: [changes, migration]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check matrix status
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          echo "One or more matrix jobs failed or were cancelled."
+          exit 1
+      - name: Success
+        run: echo "All required jobs passed or were intentionally skipped."
