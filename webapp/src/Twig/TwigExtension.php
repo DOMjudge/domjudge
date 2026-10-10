@@ -28,6 +28,7 @@ use Ramsey\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Exception\MissingResourceException;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -269,7 +270,7 @@ class TwigExtension
     }
 
     #[AsTwigFilter('countryFlag', isSafe: ['html'])]
-    public function countryFlag(?string $alpha3CountryCode, bool $showFullname = false): string
+    public function countryFlag(?string $alpha3CountryCode, bool $showFullname = false, bool $relative = false): string
     {
         if (empty($alpha3CountryCode)) {
             return '';
@@ -282,6 +283,7 @@ class TwigExtension
         }
         $assetFunction  = $this->twig->getFunction('asset')->getCallable();
         $countryFlagUrl = call_user_func($assetFunction, sprintf('flags/4x3/%s.svg', $countryAlpha2));
+        $countryFlagUrl = $this->relativePath($countryFlagUrl, $relative);
 
         $countryName    = Countries::getAlpha3Name($alpha3CountryCode);
 
@@ -294,11 +296,12 @@ class TwigExtension
     }
 
     #[AsTwigFilter('affiliationLogo', isSafe: ['html'])]
-    public function affiliationLogo(string $affiliationId, string $shortName): string
+    public function affiliationLogo(string $affiliationId, string $shortName, bool $relative = false): string
     {
         if ($asset = $this->dj->assetPath($affiliationId, 'affiliation')) {
             $assetFunction = $this->twig->getFunction('asset')->getCallable();
             $assetUrl      = call_user_func($assetFunction, $asset);
+            $assetUrl      = $this->relativePath($assetUrl, $relative);
             return sprintf('<img src="%s" alt="%s" class="affiliation-logo">',
                            htmlspecialchars($assetUrl), htmlspecialchars($shortName));
         }
@@ -1339,5 +1342,24 @@ EOF;
             },
             $markdown
         );
+    }
+
+    #[AsTwigFilter('relativePath')]
+    public function relativePath(string $path, bool $relative = true): string
+    {
+        if (!$relative) {
+            return $path;
+        }
+
+        // When generating a static scoreboard ZIP, asset paths are prefixed with a temporary base path
+        // so getScoreboardZip() can detect them and package them into the archive.
+        // Keep them untouched here; getScoreboardZip() will strip the prefix to make them relative.
+        if (str_starts_with($path, DOMJudgeService::SCOREBOARD_ZIP_BASE_PATH . '/')) {
+            return $path;
+        }
+
+        return UrlGenerator::getRelativePath(
+            $this->router->getContext()->getBaseUrl()
+            . $this->router->getContext()->getPathInfo(), $path);
     }
 }
