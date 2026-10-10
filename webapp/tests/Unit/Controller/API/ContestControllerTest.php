@@ -8,6 +8,8 @@ use App\Entity\Event;
 use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class ContestControllerTest extends BaseTestCase
 {
@@ -106,5 +108,30 @@ class ContestControllerTest extends BaseTestCase
 
         $this->verifyApiResponse('GET', $url . '&since_token=' . $events['2026-01'], 200, 'admin', attachment: true);
         $this->verifyApiResponse('GET', $url . '&since_token=' . $events['2020-03'], 400, 'admin');
+    }
+
+    #[DataProvider('provideProblemLimitsInStrictEventFeed')]
+    public function testProblemLimitsInStrictEventFeed(string $ccsApiVersion, bool $expectLimits): void
+    {
+        $this->withChangedConfiguration('ccs_api_version', $ccsApiVersion, function () use ($expectLimits): void {
+            $url = '/contests/' . $this->getDemoContestId() . '/event-feed?stream=false&types=problems&strict=true';
+            $feed = $this->verifyApiResponse('GET', $url, 200, 'admin', attachment: true);
+            $problems = array_map(
+                fn(string $line) => json_decode($line, true)['data'],
+                array_filter(explode("\n", $feed))
+            );
+            self::assertNotEmpty($problems);
+            foreach ($problems as $problem) {
+                foreach (['memory_limit', 'output_limit', 'code_limit'] as $field) {
+                    self::assertSame($expectLimits, array_key_exists($field, $problem), $field);
+                }
+            }
+        });
+    }
+
+    public static function provideProblemLimitsInStrictEventFeed(): Generator
+    {
+        yield ['2023-06', false];
+        yield ['2026-01', true];
     }
 }

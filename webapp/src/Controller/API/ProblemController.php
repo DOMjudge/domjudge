@@ -128,7 +128,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         description: 'Returns all the problems for this contest',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: ContestProblem::class))
+            items: new OA\Items(ref: new Model(type: ContestProblemWrapper::class))
         )
     )]
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
@@ -302,7 +302,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     #[OA\Response(
         response: 200,
         description: 'Returns the linked problem for this contest',
-        content: new OA\JsonContent(ref: new Model(type: ContestProblem::class))
+        content: new OA\JsonContent(ref: new Model(type: ContestProblemWrapper::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function linkProblemAction(
@@ -384,7 +384,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     #[OA\Response(
         response: 200,
         description: 'Returns the given problem for this contest',
-        content: new OA\JsonContent(ref: new Model(type: ContestProblem::class))
+        content: new OA\JsonContent(ref: new Model(type: ContestProblemWrapper::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
@@ -539,18 +539,14 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     public function transformObject($object): ContestProblem|ContestProblemWrapper
     {
         /** @var ContestProblem $problem */
-        $problem       = $object[0];
-        $testDataCount = (int)$object['testdatacount'];
-        if ($this->authService->checkRole('jury')) {
-            return new ContestProblemWrapper(
-                $problem,
-                (int)round(($problem->getProblem()->getMemlimit() === null ? $this->config->get('memory_limit') : $problem->getProblem()->getMemlimit()) / 1024),
-                (int)round(($problem->getProblem()->getOutputlimit() === null ? $this->config->get('output_limit') : $problem->getProblem()->getOutputlimit()) / 1024),
-                $this->config->get('sourcesize_limit'),
-                $testDataCount,
-            );
-        } else {
-            return $problem;
-        }
+        $problem = $object[0];
+        // Round down, so we never report more than what is enforced.
+        return new ContestProblemWrapper(
+            $problem,
+            intdiv($problem->getProblem()->getMemlimit() ?? (int)$this->config->get('memory_limit'), 1024),
+            intdiv($problem->getProblem()->getOutputlimit() ?? (int)$this->config->get('output_limit'), 1024),
+            $this->config->get('sourcesize_limit'),
+            $this->authService->checkRole('jury') ? (int)$object['testdatacount'] : null,
+        );
     }
 }
