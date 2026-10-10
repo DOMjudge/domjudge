@@ -32,6 +32,7 @@ use BadMethodCallException;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Exception as DBALException;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -1196,8 +1197,9 @@ class JudgehostController extends AbstractFOSRestController
     /**
      * Apply a finished rejudging to its submission, when the rejudging auto-applies.
      *
-     * Opens its own transaction. Nothing happens unless the judging belongs to a rejudging,
-     * so the normal judging path does not pay for it.
+     * Opens its own transaction and locks the rows it writes at their first read. Nothing
+     * happens unless the judging belongs to a rejudging, so the normal judging path pays for
+     * neither the transaction nor the locks.
      */
     private function maybeUpdateActiveJudging(Judging $judging): void
     {
@@ -1217,10 +1219,11 @@ class JudgehostController extends AbstractFOSRestController
             $submissionId,
             &$repeatRejudging
         ): void {
+            // Lock parent before child.
             /** @var Rejudging $rejudging */
-            $rejudging = $this->em->find(Rejudging::class, $rejudgingId);
+            $rejudging = $this->em->find(Rejudging::class, $rejudgingId, LockMode::PESSIMISTIC_WRITE);
             /** @var Submission $submission */
-            $submission = $this->em->find(Submission::class, $submissionId);
+            $submission = $this->em->find(Submission::class, $submissionId, LockMode::PESSIMISTIC_WRITE);
 
             if ($rejudging->getAutoApply()) {
                 $submission->setRejudging(null);
