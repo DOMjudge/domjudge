@@ -15,9 +15,6 @@ return [
     'App\Doctrine\ExternalIdAssigner::__invoke'
         => 'postPersist: only updates the row this transaction just inserted.',
 
-    // JudgehostWorkflowTest::testCheckVersionsRecordsTheReportedVersion
-    'App\Controller\API\JudgehostController::checkVersions'
-        => 'TODO: guard the language auto-promote write, drop the transaction.',
     // RejudgingServiceTest::testUpdateFirstToSolve
     'App\Service\RejudgingService::finishRejudging'
         => 'TODO: INSERT IGNORE of balloons after plain reads in the transaction.',
