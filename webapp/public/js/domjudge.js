@@ -1143,6 +1143,216 @@ document.querySelectorAll(".desktop-scoreboard .forceWidth:not(.toolong)").forEa
     }
 });
 
+function sortCmp(a, b) {
+    return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+}
+
+function sortPassFail(a, b) {
+    // Retain first-to-solve when the time is equal
+    if (a.first_to_solve) return 1;
+    if (b.first_to_solve) return -1;
+
+    if (a.solved && b.solved) {
+        return sortCmp(b.time, a.time);
+    }
+    if (a.solved) return 1;
+    if (b.solved) return -1;
+    return sortCmp(b.num_judged, a.num_judged);
+}
+
+function renderProblemCell(cellUrlTemplate, data, type, row, meta) {
+    if (type === 'display') {
+        let className = "";
+        if (data.solved === true) {
+            className = "score_correct"
+            if (data.first_to_solve === true) {
+                className += " score_first";
+            }
+        } else if (data.num_pending > 0) {
+            className = "score_pending"
+        } else if (data.num_judged > 0) {
+            className = "score_incorrect";
+        }
+        if (data.num_in_freeze > 0 && className != "score_pending") {
+            className += " score_pending";
+        }
+        let link = cellUrlTemplate
+            .replace('__PROBLEM_ID__', data.problem_id)
+            .replace('__TEAM_ID__', row.team_id);
+        let html = `<a href="${link}" data-submissions-url="/public/submissions-data.json" data-team-id="${row.team_id}" data-problem-id="${data.problem_id}"><div class="${className}">`;
+        if (data.solved) {
+            html += data.time;
+        } else {
+            html += '&nbsp;';
+        }
+        if (data.num_judged > 0 || data.num_pending > 0) {
+            let tries = `${data.num_judged}`;
+            if (data.num_pending > 0) {
+                tries += ` + ${data.num_pending}`;
+            }
+            html += `<span>${tries} ${data.num_judged === 1 && data.num_pending === 0 ? 'try' : 'tries'}</span>`
+        }
+        html += `</div></a>`;
+        return html;
+    }
+
+    return data;
+}
+
+function renderScoreboardTable(nrProblems, teamsUrl, scoreboardUrl, cellUrlTemplate) {
+    $.ajax(teamsUrl).then((_teams) => {
+        const teams = {};
+        for (let team of _teams) {
+            teams[team.id] = team;
+        }
+
+        $.extend(DataTable.ext.type.order, {
+            "passfail-asc": (a, b) => sortPassFail(a, b),
+            "passfail-desc": (a, b) => sortPassFail(b, a),
+        });
+
+        const columns = [
+            {
+                class: 'no-border',
+                data: 'rank',
+                render: function (data, type) {
+                    if (type === 'display') {
+                        /* TODO: move to backend */
+                        if (data <= 4) {
+                            return '<i class="fa fa-medal gold-medal" style="font-size: 1.5rem;"></i>';
+                        }
+                        if (data <= 8) {
+                            return '<i class="fa fa-medal silver-medal" style="font-size: 1.5rem;"></i>';
+                        }
+                        if (data <= 12) {
+                            return '<i class="fa fa-medal bronze-medal" style="font-size: 1.5rem;"></i>';
+                        }
+                    }
+
+                    return '';
+                }
+            },
+            {
+                class: 'scorepl rank',
+                data: 'rank'
+            },
+            {
+                class: 'scoreaf cl_FFFFFF',
+                data: 'team_id',
+                render: function (data, type) {
+                    const team = teams[data];
+                    const country = countries[team.nationality];
+                    if (!country) return '';
+
+                    if (type === 'display') {
+                        return `<a>
+                        <img class="countryflag" loading="lazy" src="/flags/4x3/${country.iso2.toLowerCase()}.svg" alt="${team.nationality}" title="${country.country}">
+                    </a>`;
+                    }
+                    if (type === 'filter') {
+                        return `${country.country}\n${country.continent}`;
+                    }
+
+                    return data;
+                }
+            },
+            {
+                class: 'scoreaf cl_FFFFFF',
+                data: 'team_id',
+                render: function (data, type) {
+                    const team = teams[data];
+                    if (type === 'display') {
+                        const alt = `${team.affiliation.slice(0, 5)}`; // UNUSED
+                        return `<a href="/jury/affiliations/${team.organization_id}">
+                        <img loading="lazy" class="affiliation-logo" src="/images/affiliations/${team.organization_id}.png" alt="" title="${team.affiliation}">
+                    </a>`;
+                    }
+
+                    return data;
+                }
+            },
+            {
+                data: 'team_id',
+                render: function (data, type) {
+                    const team = teams[data];
+                    if (type === 'display') {
+                        return `<td class="scoretn cl_FFFFFF" title="${team.name}">
+                        <a href="/jury/teams/${team.teamid}">
+                            <span class="forceWidth">${team.name}</span>
+                            <span class="univ forceWidth">${team.affiliation}</span>
+                        </a>
+                    </td>`;
+                    }
+                    if (type === 'filter') {
+                        return `${team.name}\n${team.affiliation}`;
+                    }
+                    if (type === 'order') {
+                        return team.name;
+                    }
+
+                    return data;
+                }
+            },
+            {
+                class: 'scorenc',
+                data: 'score.num_solved',
+            },
+            {
+                class: 'scorett',
+                data: 'score.total_time',
+            },
+        ];
+        for (let i = 0; i < nrProblems; i++) {
+            columns.push({
+                class: "score_cell",
+                className: "min-tablet-l",
+                data: `problems.${i}`,
+                render: (data, type, row, meta) => renderProblemCell(cellUrlTemplate, data, type, row, meta),
+                type: 'passfail',
+            });
+        }
+
+        new DataTable('#scoreboard-table', {
+            autoWidth: false,
+            aLengthMenu: [
+                [25, 50, 100, 200, -1],
+                [25, 50, 100, 200, "All"]
+            ],
+            iDisplayLength: 200,
+            fixedHeader: true,
+            ajax: {
+                'url': scoreboardUrl,
+                'dataSrc': 'rows'
+            },
+            responsive: {
+                details: {
+                    display: DataTable.Responsive.display.childRowImmediate,
+                    renderer: function (api, rowIdx, columns) {
+                        var data = $.map(columns, function (col, i) {
+                            return col.hidden
+                                ? `<table>
+                                <tr data-dt-row="${col.rowIndex}" data-dt-column="${col.columnIndex}">
+                                    <td>${col.title}</td>
+                                </tr>
+                                <tr data-dt-row="${col.rowIndex}" data-dt-column="${col.columnIndex}">
+                                    <td>${col.data}</td>
+                                </tr>
+                            </table>`
+                                : '';
+                        }).join('');
+
+                        return data ? $('<div class="w-100 d-flex justify-content-center flex-wrap"/>').append(data) : false;
+                    },
+                    type: '',
+                }
+            },
+            columns: columns,
+        });
+    }).catch(e => {
+        console.error(e);
+    });
+}
+
 /**
  * Helper method to resize mobile team names and problem badges
  */

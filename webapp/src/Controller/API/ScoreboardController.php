@@ -51,7 +51,7 @@ class ScoreboardController extends AbstractApiController
      * Get the scoreboard for this contest.
      * @throws NonUniqueResultException
      */
-    #[Rest\Get(path: '')]
+    #[Rest\Get(path: '', name: 'api_contest_scoreboard')]
     #[OA\Response(
         response: 200,
         description: 'Returns the scoreboard',
