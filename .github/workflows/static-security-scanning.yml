@@ -1,4 +1,4 @@
-name: "CodeQL"
+name: "Static security scanning"
 on:
   push:
   schedule:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   analyze:
-    name: Security analysis
+    name: Static security [ShiftLeft, CodeQL]
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     permissions:
@@ -47,16 +47,6 @@ jobs:
         restore-keys: |
           yarn-
 
-    - name: Install composer files
-      run: |
-        cd webapp
-        composer install --no-scripts
-
-    - name: Install frontend dependencies
-      run: |
-        cd webapp
-        yarnpkg install
-
     - name: Configure Makefile
       run: |
         DIR=$(pwd)
@@ -75,3 +65,25 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
+
+    - name: Perform ShiftLeft Analysis
+      uses: ShiftLeftSecurity/scan-action@master
+      env:
+        WORKSPACE: ""
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SCAN_AUTO_BUILD: true
+        SCAN_ANNOTATE_PR: 0
+      with:
+        output: reports
+        type: python,bash
+
+    - name: Upload report for debugging
+      uses: actions/upload-artifact@v7
+      with:
+        name: reports-shiftleft
+        path: reports
+
+    - name: Upload ShiftLeft (sarif) report to GitHub interface
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif_file: reports
