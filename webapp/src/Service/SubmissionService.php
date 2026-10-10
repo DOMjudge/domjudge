@@ -1241,6 +1241,7 @@ class SubmissionService
             $this->em->persist($submissionFile);
         }
 
+        $judging = null;
         if (!$importError) {
             $judging = new Judging();
             $judging
@@ -1256,23 +1257,27 @@ class SubmissionService
                 // Defer flush and judge task creation to postProcessSubmissions().
                 return $submission;
             }
+        }
 
+        // Store the submission, its judge tasks and audit log entry in one transaction.
+        $this->em->wrapInTransaction(function () use ($contest, $submission, $judging, $source): void {
             // This is so that we can use the submitid/judgingid below.
             $this->em->flush();
 
-            $priority = match ($source) {
-                SubmissionSource::PROBLEM_IMPORT => JudgeTask::PRIORITY_LOW,
-                default => JudgeTask::PRIORITY_DEFAULT,
-            };
-            // Create judgetask as invalid when evaluating as analyst.
-            $lazyEval = $this->config->get('lazy_eval_results');
-            // We create invalid judgetasks, and only mark them valid when they are interesting for the analysts.
-            $start_invalid = $lazyEval === DOMJudgeService::EVAL_ANALYST && $source == SubmissionSource::SHADOWING;
-            $this->dj->maybeCreateJudgeTasks($judging, $priority, valid: !$start_invalid);
-        }
+            if ($judging !== null) {
+                $priority = match ($source) {
+                    SubmissionSource::PROBLEM_IMPORT => JudgeTask::PRIORITY_LOW,
+                    default => JudgeTask::PRIORITY_DEFAULT,
+                };
+                // Create judgetask as invalid when evaluating as analyst.
+                $lazyEval = $this->config->get('lazy_eval_results');
+                // We create invalid judgetasks, and only mark them valid when they are interesting for the analysts.
+                $start_invalid = $lazyEval === DOMJudgeService::EVAL_ANALYST && $source == SubmissionSource::SHADOWING;
+                $this->dj->maybeCreateJudgeTasks($judging, $priority, valid: !$start_invalid);
+            }
 
-        $this->em->wrapInTransaction(function () use ($contest, $submission): void {
-            $this->em->flush();
+            $this->dj->auditlog('submission', $submission->getExternalid(), 'added',
+                'via ' . $source->value, null, $contest->getExternalid());
             $this->eventLogService->log('submission', $submission->getSubmitid(),
                                         EventLogService::ACTION_CREATE, $contest->getCid());
         });
@@ -1295,9 +1300,6 @@ class SubmissionService
         $this->dj->alert('submit', sprintf('submission %d: team %d, language %s, problem %d',
                                            $submission->getSubmitid(), $team->getTeamid(),
                                            $language->getLangid(), $problem->getProblem()->getProbid()));
-
-        $this->dj->auditlog('submission', $submission->getExternalid(), 'added',
-            'via ' . $source->value, null, $contest->getExternalid());
 
         if (Utils::difftime((float)$contest->getEndtime(), $submitTime) <= 0) {
             $this->logger->info(
@@ -1322,26 +1324,34 @@ class SubmissionService
         }
 
         $contestId = $contest->getCid();
+        $contestExternalId = $contest->getExternalid();
 
-        // Single flush for all deferred submissions, judgings, and expected results.
-        // This assigns IDs to all entities at once instead of flushing per submission.
-        $this->em->flush();
-
-        // Create judge tasks for all judgings now that they have IDs.
-        foreach ($submissions as $submission) {
-            if ($submission->isImportError()) {
-                continue;
-            }
-            $judging = $submission->getJudgings()->first();
-            if ($judging) {
-                $this->dj->maybeCreateJudgeTasks($judging, JudgeTask::PRIORITY_LOW);
-            }
-        }
-
-        // Batch event logging: log all submission events in one call.
-        $submitIds = array_map(fn(Submission $s) => $s->getSubmitid(), $submissions);
-        $this->em->wrapInTransaction(function () use ($submitIds, $contestId): void {
+        // Store the submissions, their judge tasks and audit log entries in one transaction.
+        $this->em->wrapInTransaction(function () use ($submissions, $contestId, $contestExternalId): void {
+            // Single flush for all deferred submissions, judgings, and expected results.
+            // This assigns IDs to all entities at once instead of flushing per submission.
             $this->em->flush();
+
+            // Create judge tasks for all judgings now that they have IDs.
+            foreach ($submissions as $submission) {
+                if ($submission->isImportError()) {
+                    continue;
+                }
+                $judging = $submission->getJudgings()->first();
+                if ($judging) {
+                    $this->dj->maybeCreateJudgeTasks($judging, JudgeTask::PRIORITY_LOW);
+                }
+            }
+
+            // Batch audit logging. Flush before event logging, since that clears the entity manager.
+            foreach ($submissions as $submission) {
+                $this->dj->auditlog('submission', $submission->getExternalid(), 'added',
+                    'via ' . SubmissionSource::PROBLEM_IMPORT->value, null, $contestExternalId, flush: false);
+            }
+            $this->em->flush();
+
+            // Batch event logging: log all submission events in one call.
+            $submitIds = array_map(fn(Submission $s) => $s->getSubmitid(), $submissions);
             $this->eventLogService->log(
                 'submission', $submitIds, EventLogService::ACTION_CREATE, $contestId
             );
@@ -1364,14 +1374,6 @@ class SubmissionService
             $team = $this->em->getRepository(Team::class)->find($teamId);
             $problem = $this->em->getRepository(Problem::class)->find($problemId);
             $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
-        }
-
-        // Batch audit logging.
-        $contestExternalId = $contest->getExternalid();
-        foreach ($submitIds as $submitId) {
-            $submission = $this->em->getRepository(Submission::class)->find($submitId);
-            $this->dj->auditlog('submission', $submission->getExternalid(), 'added',
-                'via ' . SubmissionSource::PROBLEM_IMPORT->value, null, $contestExternalId);
         }
     }
 

@@ -872,7 +872,7 @@ class JudgehostController extends AbstractFOSRestController
     {
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ($judging) {
-            $this->em->wrapInTransaction(function () use ($judging, $judgehost): void {
+            $this->em->wrapInTransaction(function () use ($judging, $judgingId, $judgehost): void {
                 /** @var JudgingRun $run */
                 foreach ($judging->getRuns() as $run) {
                     if ($judgehost === null) {
@@ -895,31 +895,28 @@ class JudgehostController extends AbstractFOSRestController
                     }
                 }
 
-                $this->em->flush();
+                if ($judgehost === null) {
+                    // Invalidate old judging and create a new one - but without
+                    // judgetasks yet since this was triggered by an internal
+                    // error.
+                    // The new judging takes the place of the old one, so it is
+                    // only valid if the old one was; this is particularly
+                    // important in case of rejudgings.
+                    $wasValid = $judging->getValid();
+                    $judging->setValid(false);
+                    $newJudging = new Judging();
+                    $newJudging
+                        ->setContest($judging->getContest())
+                        ->setValid($wasValid)
+                        ->setSubmission($judging->getSubmission())
+                        ->setOriginalJudging($judging);
+                    $this->em->persist($newJudging);
+                }
+
+                $this->dj->auditlog('judging', (string)$judgingId, 'given back'
+                    . ($judgehost === null ? '' : ' for judgehost ' . $judgehost->getHostname()), null,
+                    $judgehost?->getHostname(), $judging->getContest()->getExternalid());
             });
-
-            if ($judgehost === null) {
-                // Invalidate old judging and create a new one - but without
-                // judgetasks yet since this was triggered by an internal
-                // error.
-                // The new judging takes the place of the old one, so it is
-                // only valid if the old one was; this is particularly
-                // important in case of rejudgings.
-                $wasValid = $judging->getValid();
-                $judging->setValid(false);
-                $newJudging = new Judging();
-                $newJudging
-                    ->setContest($judging->getContest())
-                    ->setValid($wasValid)
-                    ->setSubmission($judging->getSubmission())
-                    ->setOriginalJudging($judging);
-                $this->em->persist($newJudging);
-                $this->em->flush();
-            }
-
-            $this->dj->auditlog('judging', (string)$judgingId, 'given back'
-                . ($judgehost === null ? '' : ' for judgehost ' . $judgehost->getHostname()), null,
-                $judgehost?->getHostname(), $judging->getContest()->getExternalid());
         }
     }
 
@@ -1121,6 +1118,11 @@ class JudgehostController extends AbstractFOSRestController
                 }
                 $this->maybeUpdateActiveJudging($judging);
             }
+            if ($oldResult === null) {
+                // We have a verdict now: write the audit log entry in the same flush as the verdict.
+                $this->dj->auditlog('judging', (string)$judging->getJudgingid(), 'judged', $result, $hostname,
+                    flush: false);
+            }
             $this->em->flush();
 
             // Only update if the current result is different from what we had before.
@@ -1179,8 +1181,6 @@ class JudgehostController extends AbstractFOSRestController
                 if (!$this->config->get('verification_required') && $judging->getValid()) {
                     $this->balloonService->updateBalloons($contest, $submission, $judging);
                 }
-
-                $this->dj->auditlog('judging', (string)$judging->getJudgingid(), 'judged', $result, $hostname);
             }
 
             // Send an event for an endtime (and max runtime update).
