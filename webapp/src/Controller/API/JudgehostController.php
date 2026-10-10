@@ -1193,13 +1193,39 @@ class JudgehostController extends AbstractFOSRestController
         return $judging->getResult() === null || $judging->getJudgeCompletely() || $lazyEval === DOMJudgeService::EVAL_FULL;
     }
 
+    /**
+     * Apply a finished rejudging to its submission, when the rejudging auto-applies.
+     *
+     * Opens its own transaction. Nothing happens unless the judging belongs to a rejudging,
+     * so the normal judging path does not pay for it.
+     */
     private function maybeUpdateActiveJudging(Judging $judging): void
     {
-        if ($judging->getRejudging() !== null) {
-            $rejudging = $judging->getRejudging();
+        if ($judging->getRejudging() === null) {
+            return;
+        }
+
+        $rejudgingId = $judging->getRejudging()->getRejudgingid();
+        $submissionId = $judging->getSubmissionId();
+
+        /** @var Rejudging|null $repeatRejudging */
+        $repeatRejudging = null;
+
+        $this->em->wrapInTransaction(function () use (
+            $judging,
+            $rejudgingId,
+            $submissionId,
+            &$repeatRejudging
+        ): void {
+            /** @var Rejudging $rejudging */
+            $rejudging = $this->em->find(Rejudging::class, $rejudgingId);
+            /** @var Submission $submission */
+            $submission = $this->em->find(Submission::class, $submissionId);
+
             if ($rejudging->getAutoApply()) {
-                $judging->getSubmission()->setRejudging(null);
-                foreach ($judging->getSubmission()->getJudgings() as $j) {
+                $submission->setRejudging(null);
+
+                foreach ($submission->getJudgings() as $j) {
                     $j->setValid(false);
                 }
                 $judging->setValid(true);
@@ -1223,7 +1249,6 @@ class JudgehostController extends AbstractFOSRestController
                     ->getSingleScalarResult();
                 // Only "cancel" the rejudging if it's not the last.
                 if ($numberOfRepetitions < $rejudging->getRepeat()) {
-                    $rejudgingid = $rejudging->getRejudgingid();
                     $numUpdated = $this->em->getConnection()->executeStatement(
                         'UPDATE rejudging
                         SET endtime = :endtime, valid = 0
@@ -1231,7 +1256,7 @@ class JudgehostController extends AbstractFOSRestController
                           AND endtime IS NULL',
                         [
                             'endtime' => Utils::now(),
-                            'rejudgingid' => $rejudgingid,
+                            'rejudgingid' => $rejudgingId,
                         ]
                     );
                     $this->em->flush();
@@ -1246,28 +1271,36 @@ class JudgehostController extends AbstractFOSRestController
                         'UPDATE submission
                             SET rejudgingid = NULL
                             WHERE rejudgingid = :rejudgingid',
-                        ['rejudgingid' => $rejudgingid]);
+                        ['rejudgingid' => $rejudgingId]);
                     $this->em->flush();
 
-                    $skipped = [];
-                    /** @var Judging[] $judgings */
-                    $judgings = $this->em->createQueryBuilder()
-                        ->from(Judging::class, 'j')
-                        ->leftJoin('j.submission', 's')
-                        ->leftJoin('s.rejudging', 'r')
-                        ->leftJoin('s.team', 't')
-                        ->select('j', 's', 'r', 't')
-                        ->andWhere('j.rejudging = :rejudgingid')
-                        ->setParameter('rejudgingid', $rejudgingid)
-                        ->getQuery()
-                        ->setHint(Query::HINT_REFRESH, true)
-                        ->getResult();
-                    // TODO: Pick up priority from previous judgings?
-                    $this->rejudgingService->createRejudging($rejudging->getReason(), JudgeTask::PRIORITY_DEFAULT, $judgings,
-                        false, $rejudging->getRepeat(), 0, $rejudging->getRepeatedRejudging(), $skipped);
+                    $repeatRejudging = $rejudging;
                 }
             }
+        });
+
+        if ($repeatRejudging === null) {
+            return;
         }
+
+        // Outside the transaction: createRejudging() commits once per submission on purpose,
+        // and nesting it would turn those commits into savepoints.
+        $skipped = [];
+        /** @var Judging[] $judgings */
+        $judgings = $this->em->createQueryBuilder()
+            ->from(Judging::class, 'j')
+            ->leftJoin('j.submission', 's')
+            ->leftJoin('s.rejudging', 'r')
+            ->leftJoin('s.team', 't')
+            ->select('j', 's', 'r', 't')
+            ->andWhere('j.rejudging = :rejudgingid')
+            ->setParameter('rejudgingid', $rejudgingId)
+            ->getQuery()
+            ->setHint(Query::HINT_REFRESH, true)
+            ->getResult();
+        // TODO: Pick up priority from previous judgings?
+        $this->rejudgingService->createRejudging($repeatRejudging->getReason(), JudgeTask::PRIORITY_DEFAULT, $judgings,
+            false, $repeatRejudging->getRepeat(), 0, $repeatRejudging->getRepeatedRejudging(), $skipped);
     }
 
     /**
