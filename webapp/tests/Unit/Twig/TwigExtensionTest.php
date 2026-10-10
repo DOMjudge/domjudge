@@ -4,7 +4,6 @@ namespace App\Tests\Unit\Twig;
 
 use App\Entity\ContestProblem;
 use App\Entity\ExternalSourceWarning;
-use App\Entity\Team;
 use App\Entity\Testcase as TestcaseEntity;
 use App\Service\AwardService;
 use App\Service\ConfigurationService;
@@ -12,8 +11,6 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use App\Twig\TwigExtension;
-use App\Utils\Scoreboard\ScoreboardMatrixItem;
-use App\Utils\Scoreboard\TeamScore;
 use Closure;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
@@ -752,52 +749,20 @@ class TwigExtensionTest extends TestCase
     }
 
     /**
-     * The scoreboard variant of the badge escapes the same label, and additionally puts the
-     * team and problem external ids into data-attributes.
+     * The variables land in a style attribute, so a colour that cannot be parsed must not get
+     * through either.
      */
-    public function testProblemBadgeMaybeEscapesTheShortnameAndIds(): void
+    public function testProblemBadgeVarsIgnoresAnUnparseableColour(): void
     {
-        $html = $this->problemBadgeMaybe(
-            shortname: self::XSS_PAYLOAD,
-            teamExternalId: '" onmouseover="alert(1)',
-            problemExternalId: '" onfocus="alert(2)'
-        );
-
-        self::assertStringNotContainsString('<img', $html);
-        self::assertStringContainsString('&lt;img src=x onerror=&quot;alert(1)&quot;&gt;', $html);
-        self::assertStringContainsString('data-team-id="&quot; onmouseover=&quot;alert(1)"', $html);
-        self::assertStringContainsString('data-problem-id="&quot; onfocus=&quot;alert(2)"', $html);
-    }
-
-
-
-    private function problemBadgeMaybe(
-        string $shortname,
-        string $teamExternalId = 'team1',
-        string $problemExternalId = 'problem1',
-        bool $isCorrect = true,
-        int $numSubmissions = 1,
-        int $numPending = 0
-    ): string {
-        $this->router->method('generate')->willReturn('/submissions');
-
         $problem = $this->createMock(ContestProblem::class);
-        $problem->method('getColor')->willReturn('#ff0000');
-        $problem->method('getShortname')->willReturn($shortname);
-        $problem->method('getExternalId')->willReturn($problemExternalId);
+        $problem->method('getColor')->willReturn('"><script>alert(1)</script>');
 
-        $team = $this->createMock(Team::class);
-        $team->method('getPenalty')->willReturn(0);
-        $team->method('getExternalid')->willReturn($teamExternalId);
+        $vars = $this->twigExtension->problemBadgeVars($problem);
 
-        return $this->twigExtension->problemBadgeMaybe(
-            $problem,
-            new ScoreboardMatrixItem($isCorrect, false, $numSubmissions, $numPending, 0, 0, 0),
-            new TeamScore($team, null, true)
-        );
+        self::assertStringNotContainsString('<', $vars);
+        self::assertStringNotContainsString('"', $vars);
+        self::assertStringContainsString('--badge-bg: #F5F5F5', $vars);
     }
-
-
 
     /**
      * The submission's external id lands in a script block, and in shadow mode it comes from

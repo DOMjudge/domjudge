@@ -29,8 +29,7 @@
     </style>
 {% endif %}
 
-{# ===== DESKTOP TABLE ===== #}
-<table class="d-none d-md-table scoreboard desktop-scoreboard center {% if jury %}scoreboard_jury{% endif %}">
+<table class="scoreboard main-scoreboard center {% if jury %}scoreboard_jury{% endif %}">
 
     {% set teamColspan = 3 %}
     {% if showAffiliationLogos %}
@@ -77,58 +76,12 @@
         {% endif %}
     </colgroup>
     <thead>
-        {% include 'partials/scoreboard/_header_row.html.twig' with {isMobile: false} %}
+        {% include 'partials/scoreboard/_header_row.html.twig' %}
     </thead>
     <tbody>
     {% set prevScore = null %}
     {% for score in scores %}
-        {% include 'partials/scoreboard/_team_row.html.twig' with {score: score, prevScore: prevScore, isLast: loop.last, isMobile: false} %}
-        {% set prevScore = score %}
-    {% endfor %}
-    </tbody>
-</table>
-
-{# ===== MOBILE TABLE ===== #}
-<table class="d-md-none scoreboard mobile-scoreboard center {% if jury %}scoreboard_jury{% endif %}">
-    {# output table column groups (for the styles) #}
-    <colgroup>
-        {% if enable_ranking %}
-            <col id="scorerankmobile"/>
-        {% endif %}
-        {% if showFlags %}
-            <col id="scoreflagsmobile"/>
-        {% else %}
-            <col/>
-        {% endif %}
-        {% if showAffiliationLogos %}
-            <col id="scorelogosmobile"/>
-        {% endif %}
-        {% if public %}
-            <col id="scoreheartmobile"/>
-        {% endif %}
-        <col id="scoreteamnamemobile"/>
-    </colgroup>
-    {% if enable_ranking %}
-        <colgroup>
-            <col id="scoresolvmobile"/>
-        </colgroup>
-    {% endif %}
-    <thead>
-
-    {% set teamColspan = 2 %}
-    {% if showAffiliationLogos %}
-        {% set teamColspan = teamColspan + 1 %}
-    {% endif %}
-    {% if public %}
-        {% set teamColspan = teamColspan + 1 %}
-    {% endif %}
-
-    {% include 'partials/scoreboard/_header_row.html.twig' with {isMobile: true} %}
-    </thead>
-    <tbody>
-    {% set prevScore = null %}
-    {% for score in scores %}
-        {% include 'partials/scoreboard/_team_row.html.twig' with {score: score, prevScore: prevScore, isLast: loop.last, isMobile: true} %}
+        {% include 'partials/scoreboard/_team_row.html.twig' with {score: score, prevScore: prevScore, isLast: loop.last} %}
         {% set prevScore = score %}
     {% endfor %}
     </tbody>
