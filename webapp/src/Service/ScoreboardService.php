@@ -4,8 +4,9 @@ namespace App\Service;
 
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
-use App\Entity\ExternalJudgement;
+use App\Entity\ExternalRun;
 use App\Entity\Judging;
+use App\Entity\JudgingRun;
 use App\Entity\Problem;
 use App\Entity\RankCache;
 use App\Entity\ScoreboardType;
@@ -216,35 +217,44 @@ class ScoreboardService
         // that these will not count as solved. Correct submissions with
         // submittime after contest end should never happen, unless one
         // resets the contest time after successful judging.
+        //
+        // We only select the few columns we need instead of loading entities, as judgings
+        // can carry large compile output. The maximum runtime is only needed for correct judgings.
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
-            ->select('s, c')
-            ->leftJoin('s.contest', 'c')
-            ->andWhere('s.team = :teamid')
-            ->andWhere('s.problem = :probid')
-            ->andWhere('s.contest = :cid')
+            ->select('s.submittime AS submittime')
+            ->join('s.contest', 'c')
+            ->andWhere('s.team = :team')
+            ->andWhere('s.problem = :problem')
+            ->andWhere('s.contest = :contest')
             ->andWhere('s.valid = 1')
             ->andWhere('s.submittime < c.endtime')
-            ->setParameter('teamid', $team)
-            ->setParameter('probid', $problem)
-            ->setParameter('cid', $contest)
-            ->orderBy('s.submittime');
+            ->setParameter('team', $team)
+            ->setParameter('problem', $problem)
+            ->setParameter('contest', $contest)
+            ->setParameter('correctResult', Judging::RESULT_CORRECT)
+            ->orderBy('s.submittime')
+            ->addOrderBy('s.submitid');
 
         if ($useExternalJudgements) {
             $queryBuilder
-                ->addSelect('ej')
+                ->addSelect('ej.result AS result', 'ej.score AS score')
+                ->addSelect('(SELECT MAX(er.runtime) FROM ' . ExternalRun::class . ' er
+                              WHERE er.external_judgement = ej AND ej.result = :correctResult) AS max_runtime')
                 ->leftJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1');
         } else {
             $queryBuilder
-                ->addSelect('j')
+                ->addSelect('j.result AS result', 'j.verified AS verified', 'j.score AS score')
+                ->addSelect('(SELECT MAX(jr.runtime) FROM ' . JudgingRun::class . ' jr
+                              WHERE jr.judging = j AND j.result = :correctResult) AS max_runtime')
                 ->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1');
         }
 
+        /** @var array<array{submittime: string, result: ?string, verified?: bool, score: ?string, max_runtime: string|float|null}> $submissions */
+        $submissions = $queryBuilder->getQuery()->getScalarResult();
+
         // Check if we need to count compile error as a penalty.
         $compilePenalty = $this->config->get('compile_penalty');
-
-        /** @var Submission[] $submissions */
-        $submissions = $queryBuilder->getQuery()->getResult();
 
         $verificationRequired = $this->config->get('verification_required');
 
@@ -263,21 +273,19 @@ class ScoreboardService
 
         $firstAbsSubmitTime = null;
 
+        $freezeTime = $contest->getFreezetime();
+
         foreach ($submissions as $submission) {
-            /** @var Judging|ExternalJudgement|null $judging */
-            if ($useExternalJudgements) {
-                $judging = $submission->getValidExternalJudgement();
-            } else {
-                $judging = $submission->getValidJudging();
-            }
+            $result        = $submission['result'];
+            $isAfterFreeze = $freezeTime !== null && (float)$submission['submittime'] >= $freezeTime;
 
             if ($problem->isScoringProblem()) {
-                $score = $judging?->getScore();
+                $score = $submission['score'];
                 if ($score !== null) {
                     if (bccomp($pointsJury, $score, scale: self::SCALE) < 0) {
                         $pointsJury = $score;
                     }
-                    if (!$submission->isAfterFreeze() &&
+                    if (!$isAfterFreeze &&
                         bccomp($pointsPubl, $score, scale: self::SCALE) < 0) {
                         $pointsPubl = $score;
                     }
@@ -291,10 +299,10 @@ class ScoreboardService
 
             // STEP 1:
             // runtime improvements should be possible for all correct submissions
-            if (!is_null($judging) && $judging->getResult() == Judging::RESULT_CORRECT) {
-                $runtime = (int) floor(1000*$judging->getMaxRuntime()); // round to milliseconds
+            if ($result == Judging::RESULT_CORRECT) {
+                $runtime = (int) floor(1000*(float)$submission['max_runtime']); // round to milliseconds
                 $runtimeJury = min($runtimeJury, $runtime);
-                if (!$submission->isAfterFreeze()) {
+                if (!$isAfterFreeze) {
                     $runtimePubl = min($runtimePubl, $runtime);
                 }
             }
@@ -307,8 +315,8 @@ class ScoreboardService
 
             // STEP 2:
             // Check if this submission has a publicly visible judging result:
-            if ($judging === null || empty($judging->getResult()) ||
-                (!$useExternalJudgements && $verificationRequired && !$judging->getVerified())) {
+            if (empty($result) ||
+                (!$useExternalJudgements && $verificationRequired && !$submission['verified'])) {
                 // For the jury: only consider it pending if we don't have a
                 // correct one yet. This is needed because during the freeze
                 // we consider submissions after the correct one for the
@@ -323,7 +331,7 @@ class ScoreboardService
 
             // We need to count the submission always, except when we don't want
             // to count compiler penalties and the judging is a compiler error.
-            $countSubmission = $compilePenalty || $judging->getResult() != Judging::RESULT_COMPILER_ERROR;
+            $countSubmission = $compilePenalty || $result != Judging::RESULT_COMPILER_ERROR;
 
             if (($problem->isScoringProblem() || !$correctJury) && $countSubmission) {
                 // For the jury: only consider it as a submission if we don't
@@ -332,7 +340,7 @@ class ScoreboardService
                 // the public to not leak any info. Note that this only holds for pass-fail problems.
                 $submissionsJury++;
             }
-            if ($submission->isAfterFreeze()) {
+            if ($isAfterFreeze) {
                 // Show submissions after freeze as pending to the public (if
                 // SHOW_PENDING is enabled). Note that we even show these
                 // submissions if they are a compiler-error and
@@ -349,7 +357,7 @@ class ScoreboardService
             }
 
             // STEP 3:
-            $absSubmitTime = (float)$submission->getSubmittime();
+            $absSubmitTime = (float)$submission['submittime'];
             // Negative numbers don't make sense on the scoreboard, cap them to the contest start.
             $absSubmitTime = max($absSubmitTime, $contestStartTime);
             $submitTime    = $contest->getContestTime($absSubmitTime);
@@ -361,10 +369,10 @@ class ScoreboardService
                 $firstAbsSubmitTime = $absSubmitTime;
             }
 
-            if ($judging->getResult() == Judging::RESULT_CORRECT) {
+            if ($result == Judging::RESULT_CORRECT) {
                 $correctJury = true;
                 $timeJury    = $submitTime;
-                if (!$submission->isAfterFreeze()) {
+                if (!$isAfterFreeze) {
                     $correctPubl = true;
                     $timePubl    = $submitTime;
                 }
