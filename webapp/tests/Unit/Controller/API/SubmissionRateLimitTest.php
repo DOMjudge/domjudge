@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\SubmissionRateLimitFixture;
 use App\Entity\Problem;
+use App\Entity\Submission;
 use App\Entity\Contest;
 use App\Tests\Unit\BaseTestCase as UnitBaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
@@ -66,6 +67,18 @@ class SubmissionRateLimitTest extends UnitBaseTestCase
         return $this->verifyApiRequest('POST', "/contests/$contestId/$apiEndpoint", $expectedStatus, $user, $password, $data, $files);
     }
 
+    /**
+     * Simulate the passing of time by moving all existing submissions into
+     * the past, instead of sleeping for real.
+     */
+    protected function ageSubmissions(int $seconds): void
+    {
+        static::getContainer()->get(EntityManagerInterface::class)
+            ->createQuery('UPDATE ' . Submission::class . ' s SET s.submittime = s.submittime - :seconds')
+            ->setParameter('seconds', $seconds)
+            ->execute();
+    }
+
     public function testRateLimitEnforcement(): void
     {
         $this->loadFixture(SubmissionRateLimitFixture::class);
@@ -95,15 +108,15 @@ class SubmissionRateLimitTest extends UnitBaseTestCase
             // 1st submission
             $this->submitSolution('ratelimit-user', 'ratelimit-password', 200);
 
-            // Wait 11s to clear the 10s window but stay within the 60s window
-            sleep(11);
+            // Let 11s pass to clear the 10s window but stay within the 60s window
+            $this->ageSubmissions(11);
 
             // 2nd submission (t=11s after 1st)
             // 10s window: OK (0 existing), 60s window: OK (1 existing)
             $this->submitSolution('ratelimit-user', 'ratelimit-password', 200);
 
-            // Wait another 11s
-            sleep(11);
+            // Let another 11s pass
+            $this->ageSubmissions(11);
 
             // 3rd submission (t=22s after 1st, t=11s after 2nd)
             // 10s window: OK (0 existing)
