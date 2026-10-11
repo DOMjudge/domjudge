@@ -537,6 +537,29 @@ class SubmissionController extends BaseController
                 if ($firstJudgingRun) {
                     $runResult['testcasedir'] = $firstJudgingRun->getTestcaseDir();
                 }
+                $runResult['passes'] = [];
+                // Only multi-pass problems have passes, so don't query for them otherwise.
+                if ($firstJudgingRun && $submission->getProblem()->isMultipassProblem()) {
+                    $truncate = static fn(?string $text): ?string => $text !== null
+                        && $outputDisplayLimit >= 0 && strlen($text) > $outputDisplayLimit
+                        ? substr($text, 0, $outputDisplayLimit) . $outputTruncateMessage
+                        : $text;
+                    foreach ($firstJudgingRun->getPasses() as $judgingRunPass) {
+                        $passOutput = $judgingRunPass->getOutput();
+                        $runResult['passes'][] = [
+                            'pass' => $judgingRunPass->getPass(),
+                            'runresult' => $judgingRunPass->getRunresult(),
+                            'runtime' => $judgingRunPass->getRuntime(),
+                            'input' => $truncate($passOutput?->getInput()),
+                            'output_run' => $truncate($passOutput?->getOutputRun()),
+                            'output_diff' => $truncate($passOutput?->getOutputDiff()),
+                            'output_error' => $truncate($passOutput?->getOutputError()),
+                            'output_system' => $truncate($passOutput?->getOutputSystem()),
+                            'metadata' => $passOutput?->getMetadata(),
+                            'validator_metadata' => $passOutput?->getValidatorMetadata(),
+                        ];
+                    }
+                }
                 $runsOutput[] = $runResult;
             }
         }
