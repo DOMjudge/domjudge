@@ -1561,22 +1561,20 @@ class ExternalContestSourceService
             ? null
             : $this->em->getRepository(User::class)->findOneBy(['externalid' => $data->accountId]);
 
-        $teamId = $data->teamId;
-        if ($teamId === null) {
-            if ($data->accountId === null) {
-                $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_DEPENDENCY_MISSING, [
-                    'dependencies' => [['type' => 'team', 'id' => '(none provided)']],
-                ]);
+        if ($data->teamId !== null) {
+            $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $data->teamId]);
+            if (!$team) {
+                $this->addPendingEvent('team', $data->teamId, $event, $data);
                 return;
             }
+        } elseif ($data->accountId !== null) {
             // Our data model requires a team, so use the one of the account or a team just for it.
             $team = $user?->getTeam() ?? $this->getShadowTeamForAccount($data->accountId);
         } else {
-            $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
-            if (!$team) {
-                $this->addPendingEvent('team', $teamId, $event, $data);
-                return;
-            }
+            $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_DEPENDENCY_MISSING, [
+                'dependencies' => [['type' => 'team', 'id' => '(neither team nor account provided)']],
+            ]);
+            return;
         }
 
         $this->removeWarning($event->type, $data->id, ExternalSourceWarning::TYPE_DEPENDENCY_MISSING);
