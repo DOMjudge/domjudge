@@ -1130,6 +1130,25 @@ class JudgehostController extends AbstractFOSRestController
                 $lazyEval = $problemLazy;
             }
 
+            if ($oldResult === null) {
+                // Claim the verdict with a guarded update. Judgehosts reporting the last runs of
+                // a judging at the same time all compute the same verdict from the runs they
+                // see, and only the first one to write it may act on the change from "no result".
+                $claimed = $this->em->getConnection()->executeStatement(
+                    'UPDATE judging SET result = :result WHERE judgingid = :judgingid AND result IS NULL',
+                    ['result' => $result, 'judgingid' => $judging->getJudgingid()]
+                );
+                if ($claimed === 0) {
+                    // Somebody else recorded a verdict in the meantime.
+                    $this->em->refresh($judging);
+                    $oldResult = $judging->getResult();
+                    if ($oldResult === 'aborted') {
+                        // Cancelled while we worked on it: throw away our work.
+                        return false;
+                    }
+                }
+            }
+
             $judging->setResult($result);
             if ($problem->isScoringProblem()) {
                 $judging->setScore($score);
@@ -1150,9 +1169,6 @@ class JudgehostController extends AbstractFOSRestController
                 // so that the API doesn't update these values once they are set.
                 // We also don't want to send judging events after the verdict is known.
                 if (!$judging->getEndtime()) {
-                    $sendJudgingEvent = true;
-                    $judging->setEndtime(Utils::now());
-
                     // Also calculate the max run time and set it
                     $maxRunTime = $this->em->createQueryBuilder()
                         ->from(Judging::class, 'j')
@@ -1163,7 +1179,26 @@ class JudgehostController extends AbstractFOSRestController
                         ->setParameter('judgingid', $judging->getJudgingid())
                         ->getQuery()
                         ->getSingleScalarResult();
-                    $judging->setMaxRuntimeForVerdict($maxRunTime);
+
+                    // Claim the end of the judging with a guarded update, so that exactly one
+                    // judgehost sets it and sends the event, even if several saw it unset.
+                    $endtime = Utils::now();
+                    $claimed = $this->em->getConnection()->executeStatement(
+                        'UPDATE judging SET endtime = :endtime, max_runtime_for_verdict = :maxruntime'
+                        . ' WHERE judgingid = :judgingid AND endtime IS NULL',
+                        [
+                            'endtime' => $endtime,
+                            'maxruntime' => $maxRunTime,
+                            'judgingid' => $judging->getJudgingid(),
+                        ]
+                    );
+                    if ($claimed > 0) {
+                        $sendJudgingEvent = true;
+                        // The values are in the database already; keep the entity in step so
+                        // that the flush below writes the same.
+                        $judging->setEndtime($endtime);
+                        $judging->setMaxRuntimeForVerdict($maxRunTime);
+                    }
                 }
                 $this->maybeUpdateActiveJudging($judging);
             }
