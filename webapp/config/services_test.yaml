@@ -1,3 +1,7 @@
+parameters:
+    # The benchmark is a busy loop, don't spend seconds on it on every visit of the check page.
+    hash_benchmark_seconds: 0
+
 services:
     _defaults:
         autowire: true
