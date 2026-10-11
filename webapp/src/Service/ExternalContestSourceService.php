@@ -1371,7 +1371,16 @@ class ExternalContestSourceService
             }
         }
 
-        $toTeamId = $data->toTeamId;
+        // We only support a single recipient team; importing anything else would send it to everyone.
+        if (count($data->toTeamIds ?? []) > 1 || !empty($data->toGroupIds)) {
+            $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_UNSUPORTED_ACTION, [
+                'action' => 'sending to multiple teams or to groups',
+            ]);
+            return;
+        }
+        $this->removeWarning($event->type, $data->id, ExternalSourceWarning::TYPE_UNSUPORTED_ACTION);
+
+        $toTeamId = $data->toTeamIds[0] ?? $data->toTeamId;
         $toTeam   = null;
         if ($toTeamId !== null) {
             $toTeam = $this->em

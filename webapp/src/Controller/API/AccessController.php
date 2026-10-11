@@ -286,7 +286,7 @@ class AccessController extends AbstractApiController
                     properties: [
                         'id',
                         'from_team_id',
-                        'to_team_id',
+                        ...($ccsApiVersion === CcsApiVersion::Format_2026_01 ? ['to_team_ids', 'to_group_ids'] : ['to_team_id']),
                         'reply_to_id',
                         'problem_id',
                         'text',

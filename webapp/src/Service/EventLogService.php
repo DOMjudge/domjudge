@@ -726,8 +726,10 @@ class EventLogService
                 ]];
                 break;
             case 'clarifications':
+                // to_team_id was replaced by to_team_ids in 2026-01.
+                $toTeamIds = $data['to_team_ids'] ?? [$data['to_team_id'] ?? null];
                 $toCheck = array_merge($toCheck, [
-                    'teams' => [$data['from_team_id'], $data['to_team_id']],
+                    'teams' => [$data['from_team_id'], ...$toTeamIds],
                     'problems' => $data['problem_id'],
                 ]);
                 break;
