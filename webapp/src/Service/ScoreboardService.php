@@ -436,7 +436,8 @@ class ScoreboardService
             ['cid' => $contest->getCid(), 'teamid' => $team->getTeamid(), 'probid' => $problem->getProbid()]
         );
 
-        // Use a direct REPLACE INTO query to drastically speed this up
+        // Use a direct upsert query to drastically speed this up. We do not use REPLACE, as that
+        // deletes and reinserts the row, which also writes rows that did not change.
         $params = [
             'cid' => $contest->getCid(),
             'teamid' => $team->getTeamid(),
@@ -455,12 +456,21 @@ class ScoreboardService
             'scorePublic' => $pointsPubl,
             'isFirstToSolve' => (int)$firstToSolve,
         ];
-        $this->em->getConnection()->executeQuery('REPLACE INTO scorecache
+        $scoreCacheColumns = [
+            'submissions_restricted', 'pending_restricted', 'solvetime_restricted', 'runtime_restricted',
+            'is_correct_restricted', 'score_restricted', 'submissions_public', 'pending_public',
+            'solvetime_public', 'runtime_public', 'is_correct_public', 'score_public', 'is_first_to_solve',
+        ];
+        $this->em->getConnection()->executeQuery('INSERT INTO scorecache
             (cid, teamid, probid,
              submissions_restricted, pending_restricted, solvetime_restricted, runtime_restricted, is_correct_restricted, score_restricted,
              submissions_public, pending_public, solvetime_public, runtime_public, is_correct_public, score_public, is_first_to_solve)
             VALUES (:cid, :teamid, :probid, :submissionsRestricted, :pendingRestricted, :solvetimeRestricted, :runtimeRestricted, :isCorrectRestricted, :scoreRestricted,
-            :submissionsPublic, :pendingPublic, :solvetimePublic, :runtimePublic, :isCorrectPublic, :scorePublic, :isFirstToSolve)', $params);
+            :submissionsPublic, :pendingPublic, :solvetimePublic, :runtimePublic, :isCorrectPublic, :scorePublic, :isFirstToSolve)
+            ON DUPLICATE KEY UPDATE ' . implode(', ', array_map(
+                static fn(string $column) => "$column = VALUES($column)",
+                $scoreCacheColumns
+            )), $params);
 
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                                                     ['lock' => $lockString]) != 1) {
@@ -596,7 +606,7 @@ class ScoreboardService
             }
         }
 
-        // Use a direct REPLACE INTO query to drastically speed this up.
+        // Use a direct upsert query to drastically speed this up.
         $params = [
             'cid' => $contest->getCid(),
             'teamid' => $team->getTeamid(),
@@ -611,11 +621,20 @@ class ScoreboardService
             'scoreRestricted' => $score['restricted'],
             'scorePublic' => $score['public'],
         ];
-        $this->em->getConnection()->executeQuery('REPLACE INTO rankcache (cid, teamid,
+        $rankCacheColumns = [
+            'points_restricted', 'totaltime_restricted', 'totalruntime_restricted', 'score_restricted',
+            'points_public', 'totaltime_public', 'totalruntime_public', 'sort_key_restricted',
+            'sort_key_public', 'score_public',
+        ];
+        $this->em->getConnection()->executeQuery('INSERT INTO rankcache (cid, teamid,
             points_restricted, totaltime_restricted, totalruntime_restricted, score_restricted,
             points_public, totaltime_public, totalruntime_public, sort_key_restricted, sort_key_public, score_public)
             VALUES (:cid, :teamid, :pointsRestricted, :totalTimeRestricted, :totalRuntimeRestricted, :scoreRestricted,
-            :pointsPublic, :totalTimePublic, :totalRuntimePublic, :sortKeyRestricted, :sortKeyPublic, :scorePublic)', $params);
+            :pointsPublic, :totalTimePublic, :totalRuntimePublic, :sortKeyRestricted, :sortKeyPublic, :scorePublic)
+            ON DUPLICATE KEY UPDATE ' . implode(', ', array_map(
+                static fn(string $column) => "$column = VALUES($column)",
+                $rankCacheColumns
+            )), $params);
 
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                                                     ['lock' => $lockString]) != 1) {
