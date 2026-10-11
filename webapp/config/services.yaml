@@ -42,3 +42,10 @@ when@test:
             autoconfigure: false
             tags:
                 - { name: 'doctrine.middleware', priority: -100 }
+
+        # Lets a test run code right before a given statement, to play the other side of a
+        # race. See tests/StatementHook/StatementHookMiddleware.php.
+        App\Tests\StatementHook\StatementHookMiddleware:
+            autoconfigure: false
+            tags:
+                - { name: 'doctrine.middleware', priority: -100 }

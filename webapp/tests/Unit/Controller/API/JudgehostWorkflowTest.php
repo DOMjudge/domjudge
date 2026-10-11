@@ -18,6 +18,7 @@ use App\Entity\Team;
 use App\Entity\Version;
 use App\Service\RejudgingService;
 use App\Service\SubmissionService;
+use App\Tests\StatementHook\StatementHookMiddleware;
 use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -43,6 +44,13 @@ class JudgehostWorkflowTest extends BaseTestCase
         // fetch-work hands out the globally highest-priority queue task, so a database that
         // already has queued work would hand these tests somebody else's job.
         $this->em()->getConnection()->executeStatement('DELETE FROM queuetask');
+    }
+
+    protected function tearDown(): void
+    {
+        StatementHookMiddleware::reset();
+
+        parent::tearDown();
     }
 
     private function em(): EntityManagerInterface
@@ -410,6 +418,100 @@ class JudgehostWorkflowTest extends BaseTestCase
     }
 
     /**
+     * How often a judging was logged as judged. This happens once, by the judgehost that
+     * records the verdict.
+     */
+    private function judgedCount(int $judgingId): int
+    {
+        return (int)$this->em()->getConnection()->fetchOne(
+            'SELECT COUNT(*) FROM auditlog WHERE datatype = :type AND dataid = :id AND action = :action',
+            ['type' => 'judging', 'id' => (string)$judgingId, 'action' => 'judged']
+        );
+    }
+
+    /**
+     * Claim work and report every run but the last, returning what is needed to report the
+     * last one. The test problem may have a single test case, so that the last run is the
+     * only one.
+     *
+     * @return array{int, int} judging id, judge task id of the run still to report
+     */
+    private function claimAndReportAllButTheLastRun(): array
+    {
+        $tasks = $this->claimWorkForOneSubmission();
+        $lastTaskId = (int)array_pop($tasks)['judgetaskid'];
+        foreach ($tasks as $task) {
+            $this->reportRun((int)$task['judgetaskid'], 'correct');
+        }
+
+        return [$this->judgingForTask($lastTaskId)->getJudgingid(), $lastTaskId];
+    }
+
+    public function testTheJudgehostThatCompletesAJudgingLogsItAsJudged(): void
+    {
+        [$judgingId, $lastTaskId] = $this->claimAndReportAllButTheLastRun();
+        $before = $this->judgedCount($judgingId);
+
+        $this->reportRun($lastTaskId, 'correct');
+
+        self::assertSame($before + 1, $this->judgedCount($judgingId));
+    }
+
+    /**
+     * Two judgehosts report the last runs of a judging at the same time: both see it complete
+     * and compute the same verdict. Playing the other judgehost, record the verdict just
+     * before this one claims it. The loser must not act on the change from "no result".
+     */
+    public function testALostVerdictClaimDoesNotLogTheJudgingAgain(): void
+    {
+        [$judgingId, $lastTaskId] = $this->claimAndReportAllButTheLastRun();
+        $before = $this->judgedCount($judgingId);
+
+        $conn = $this->em()->getConnection();
+        StatementHookMiddleware::once(
+            'UPDATE judging SET result = ',
+            static function () use ($conn, $judgingId): void {
+                $conn->executeStatement(
+                    'UPDATE judging SET result = :result WHERE judgingid = :id AND result IS NULL',
+                    ['result' => Judging::RESULT_CORRECT, 'id' => $judgingId]
+                );
+            }
+        );
+
+        $this->reportRun($lastTaskId, 'correct');
+
+        self::assertSame($before, $this->judgedCount($judgingId), 'only the winner acts on the verdict');
+        self::assertSame(Judging::RESULT_CORRECT, $this->freshEm()->getRepository(Judging::class)->find($judgingId)->getResult());
+    }
+
+    /**
+     * As above, for the end time: the other judgehost sets it between this one seeing it unset
+     * and writing it. The end time it set must stand.
+     */
+    public function testALostEndtimeClaimKeepsTheOtherEndtime(): void
+    {
+        [$judgingId, $lastTaskId] = $this->claimAndReportAllButTheLastRun();
+
+        $otherEndtime = '1000000000.000000000';
+        $conn = $this->em()->getConnection();
+        StatementHookMiddleware::once(
+            'UPDATE judging SET endtime = ',
+            static function () use ($conn, $judgingId, $otherEndtime): void {
+                $conn->executeStatement(
+                    'UPDATE judging SET endtime = :endtime WHERE judgingid = :id AND endtime IS NULL',
+                    ['endtime' => $otherEndtime, 'id' => $judgingId]
+                );
+            }
+        );
+
+        $this->reportRun($lastTaskId, 'correct');
+
+        $judging = $this->freshEm()->getRepository(Judging::class)->find($judgingId);
+        self::assertEquals((float)$otherEndtime, (float)$judging->getEndtime());
+        self::assertSame(Judging::RESULT_CORRECT, $judging->getResult());
+    }
+
+    /**
      * An auto-applying rejudging is applied by the judgehost that reports its last run: the
      * new judging becomes the valid one, the submission is released from the rejudging and
      * the rejudging is finished. This is the only path that reaches the auto-apply branch of
@@ -432,6 +534,8 @@ class JudgehostWorkflowTest extends BaseTestCase
         $newJudging = $this->judgingForTask((int)$rejudgeTasks[0]['judgetaskid']);
         self::assertSame($rejudgingId, $newJudging->getRejudging()?->getRejudgingid());
         self::assertTrue($newJudging->getValid(), 'the rejudged judging must become the valid one');
+        self::assertSame(Judging::RESULT_CORRECT, $newJudging->getResult(), 'the rejudged judging must record its verdict');
+        self::assertNotNull($newJudging->getEndtime(), 'the rejudged judging must be ended');
 
         $superseded = $em->getRepository(Judging::class)->find($originalJudgingId);
         self::assertFalse($superseded->getValid(), 'the original judging must be superseded');
