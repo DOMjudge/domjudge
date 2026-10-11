@@ -418,6 +418,72 @@ class ScoreboardIntegrationTest extends KernelTestCase
     }
 
     /**
+     * A team that solved a problem while an earlier submission of another
+     * team was still pending is not first to solve. Once that earlier
+     * submission is judged wrong, it has to become first to solve.
+     */
+    public function testFTSUpdatedWhenEarlierSubmissionIsJudgedWrong(): void
+    {
+        $lang = $this->em->getRepository(Language::class)->findByExternalId('c');
+
+        $earlier = $this->createSubmission($lang, $this->problems[0], $this->teams[0], 20*60, null);
+        $this->createSubmission($lang, $this->problems[0], $this->teams[1], 30*60, 'correct', true);
+
+        $this->ss->calculateScoreRow($this->contest, $this->teams[0], $this->problems[0]);
+        $this->ss->calculateScoreRow($this->contest, $this->teams[1], $this->problems[0]);
+        static::assertFalse($this->isFirstToSolve($this->teams[1]), 'Blocked by pending submission');
+
+        $judging = new Judging();
+        $judging
+            ->setSubmission($earlier)
+            ->setContest($this->contest)
+            ->setStarttime($earlier->getSubmittime() + 5)
+            ->setEndtime($earlier->getSubmittime() + 10)
+            ->setResult('wrong-answer');
+        $this->em->persist($judging);
+        $earlier->addJudging($judging);
+        $this->em->flush();
+
+        $this->ss->calculateScoreRow($this->contest, $this->teams[0], $this->problems[0]);
+        static::assertTrue($this->isFirstToSolve($this->teams[1]), 'First after earlier judged wrong');
+    }
+
+    /**
+     * Invalidating the earliest solve makes the next solver first to solve.
+     */
+    public function testFTSUpdatedWhenEarlierSolveIsInvalidated(): void
+    {
+        $lang = $this->em->getRepository(Language::class)->findByExternalId('c');
+
+        $earlier = $this->createSubmission($lang, $this->problems[0], $this->teams[0], 20*60, 'correct', true);
+        $this->createSubmission($lang, $this->problems[0], $this->teams[1], 30*60, 'correct', true);
+
+        $this->ss->calculateScoreRow($this->contest, $this->teams[0], $this->problems[0]);
+        $this->ss->calculateScoreRow($this->contest, $this->teams[1], $this->problems[0]);
+        static::assertTrue($this->isFirstToSolve($this->teams[0]));
+        static::assertFalse($this->isFirstToSolve($this->teams[1]));
+
+        $earlier->setValid(false);
+        $this->em->flush();
+        $this->ss->calculateScoreRow($this->contest, $this->teams[0], $this->problems[0]);
+
+        static::assertFalse($this->isFirstToSolve($this->teams[0]));
+        static::assertTrue($this->isFirstToSolve($this->teams[1]));
+    }
+
+    private function isFirstToSolve(Team $team): bool
+    {
+        return (bool)$this->em->getConnection()->fetchOne(
+            'SELECT is_first_to_solve FROM scorecache WHERE cid = :cid AND teamid = :teamid AND probid = :probid',
+            [
+                'cid' => $this->contest->getCid(),
+                'teamid' => $team->getTeamid(),
+                'probid' => $this->problems[0]->getProbid(),
+            ]
+        );
+    }
+
+    /**
      * Test that delaying the contest start (disabling start time) doesn't cause
      * negative score key values when a jury test submission exists before the start time.
      * Regression test for https://github.com/DOMjudge/domjudge/issues/3417

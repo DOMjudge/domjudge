@@ -177,13 +177,16 @@ class ScoreboardService
      * inside a transaction.
      *
      * @param bool $updateRankCache If set to false, do not update the rankcache.
+     * @param bool $refreshFirstToSolvePeers If set to false, do not recalculate the team that might
+     *             have its first to solve status changed by this update.
      * @throws DBALException
      */
     public function calculateScoreRow(
         Contest $contest,
         Team    $team,
         Problem $problem,
-        bool    $updateRankCache = true
+        bool    $updateRankCache = true,
+        bool    $refreshFirstToSolvePeers = true
     ): void {
         $this->logger->debug(
             "ScoreboardService::calculateScoreRow '%d' '%d' '%d'",
@@ -263,6 +266,10 @@ class ScoreboardService
 
         $firstAbsSubmitTime = null;
 
+        // Whether this team has a submission that is pending or correct, and thus may prevent
+        // submissions of other teams from being first to solve.
+        $mayBlockFirstToSolve = false;
+
         foreach ($submissions as $submission) {
             /** @var Judging|ExternalJudgement|null $judging */
             if ($useExternalJudgements) {
@@ -317,6 +324,7 @@ class ScoreboardService
                     $pendingJury++;
                 }
                 $pendingPubl++;
+                $mayBlockFirstToSolve = true;
                 // Don't do any more counting for this submission.
                 continue;
             }
@@ -362,6 +370,7 @@ class ScoreboardService
             }
 
             if ($judging->getResult() == Judging::RESULT_CORRECT) {
+                $mayBlockFirstToSolve = true;
                 $correctJury = true;
                 $timeJury    = $submitTime;
                 if (!$submission->isAfterFreeze()) {
@@ -428,13 +437,15 @@ class ScoreboardService
             }
         }
 
-        // Remember whether this cell used to count as solved: the rank cache
-        // has to be updated when a solve is taken away as well.
-        $wasCorrect = (bool)$this->em->getConnection()->fetchOne(
-            'SELECT is_correct_restricted OR is_correct_public FROM scorecache
-             WHERE cid = :cid AND teamid = :teamid AND probid = :probid',
+        // Remember whether this cell used to count as solved (the rank cache has to be updated
+        // when a solve is taken away) and whether it used to prevent other teams from being first to solve.
+        $previous = $this->em->getConnection()->fetchAssociative(
+            'SELECT is_correct_restricted OR is_correct_public AS was_correct, pending_restricted
+             FROM scorecache WHERE cid = :cid AND teamid = :teamid AND probid = :probid',
             ['cid' => $contest->getCid(), 'teamid' => $team->getTeamid(), 'probid' => $problem->getProbid()]
         );
+        $wasCorrect = $previous !== false && (bool)$previous['was_correct'];
+        $hadBlockedFirstToSolve = $wasCorrect || ($previous !== false && $previous['pending_restricted'] > 0);
 
         // Use a direct REPLACE INTO query to drastically speed this up
         $params = [
@@ -472,6 +483,78 @@ class ScoreboardService
         if ($updateRankCache &&
             ($correctJury || $correctPubl || $wasCorrect || $problem->isScoringProblem())) {
             $this->updateRankCache($contest, $team);
+        }
+
+        // Whether another team is first to solve depends on the submissions of all teams, so
+        // changing the state of this team can change the status of another team.
+        if ($refreshFirstToSolvePeers && ($hadBlockedFirstToSolve || $mayBlockFirstToSolve)) {
+            $this->refreshFirstToSolvePeers($contest, $team, $problem);
+        }
+    }
+
+    /**
+     * Recalculate the team that might be first to solve a problem, after the score of
+     * another team for that problem has changed.
+     *
+     * Only the team(s) with the earliest solve can be first to solve, as every other
+     * team has that solve before it. This is the only team that needs to be looked at.
+     *
+     * Due to current transactions usage, this function MUST NOT do anything
+     * inside a transaction.
+     */
+    private function refreshFirstToSolvePeers(Contest $contest, Team $team, Problem $problem): void
+    {
+        $connection = $this->em->getConnection();
+
+        $peers = $connection->fetchAllAssociative(
+            'SELECT sc.teamid, sc.solvetime_restricted
+             FROM scorecache sc
+             JOIN team_category_team tcc ON tcc.teamid = sc.teamid
+             JOIN team_category tc ON tc.categoryid = tcc.categoryid AND (tc.types & :scoring) = :scoring
+             WHERE sc.cid = :cid AND sc.probid = :probid AND sc.teamid != :teamid
+                 AND sc.is_correct_restricted = 1 AND tc.sortorder = :sortorder
+             ORDER BY sc.solvetime_restricted
+             LIMIT 25',
+            [
+                'cid' => $contest->getCid(),
+                'probid' => $problem->getProbid(),
+                'teamid' => $team->getTeamid(),
+                'sortorder' => $team->getSortorder(),
+                'scoring' => TeamCategory::TYPE_SCORING,
+            ]
+        );
+        if (empty($peers)) {
+            return;
+        }
+
+        // A team can only have influenced peers that solved the problem after its first submission,
+        // including submissions that have been invalidated in the meantime.
+        $firstSubmitTime = $connection->fetchOne(
+            'SELECT MIN(submittime) FROM submission WHERE cid = :cid AND teamid = :teamid AND probid = :probid',
+            ['cid' => $contest->getCid(), 'teamid' => $team->getTeamid(), 'probid' => $problem->getProbid()]
+        );
+        if ($firstSubmitTime === null || $firstSubmitTime === false) {
+            return;
+        }
+        $firstSubmitContestTime = (int)floor($contest->getContestTime((float)$firstSubmitTime));
+
+        $earliest = $peers[0]['solvetime_restricted'];
+        if ($earliest < $firstSubmitContestTime) {
+            return;
+        }
+
+        foreach ($peers as $peer) {
+            if ($peer['solvetime_restricted'] != $earliest) {
+                break;
+            }
+            $peerTeam = $this->em->getRepository(Team::class)->find($peer['teamid']);
+            if ($peerTeam !== null) {
+                $this->calculateScoreRow(
+                    $contest, $peerTeam, $problem,
+                    updateRankCache: false,
+                    refreshFirstToSolvePeers: false
+                );
+            }
         }
     }
 
@@ -743,7 +826,11 @@ class ScoreboardService
 
             // for each problem fetch the result
             foreach ($problems as $problem) {
-                $this->calculateScoreRow($contest, $team, $problem, false);
+                $this->calculateScoreRow(
+                    $contest, $team, $problem,
+                    updateRankCache: false,
+                    refreshFirstToSolvePeers: false
+                );
             }
 
             $this->updateRankCache($contest, $team);
