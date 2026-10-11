@@ -1,0 +1,64 @@
+name: CI
+on:
+  merge_group:
+  push:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    uses: ./.github/workflows/changes.yml
+    permissions:
+      contents: read
+      pull-requests: read
+
+  autoconf:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.autoconf != 'false' }}
+    uses: ./.github/workflows/autoconf-check.yml
+
+  autoconf-other-distros:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.autoconf != 'false' }}
+    uses: ./.github/workflows/autoconf-check-different-distro.yml
+
+  phpstan:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.phpstan != 'false' }}
+    uses: ./.github/workflows/phpstan.yml
+
+  runpipe:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.judge != 'false' }}
+    uses: ./.github/workflows/runpipe.yml
+
+  unit-tests:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.webapp != 'false' }}
+    uses: ./.github/workflows/unit-tests.yml
+
+  # The single required check. Suites that change detection skipped report
+  # 'skipped', which passes; a failed detection runs everything instead.
+  ci-gate:
+    name: ci-gate
+    needs: [changes, autoconf, autoconf-other-distros, phpstan, runpipe,
+            unit-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          echo "One or more CI suites failed or were cancelled."
+          exit 1
+      - name: Success
+        run: echo "All CI suites passed or were intentionally skipped."
