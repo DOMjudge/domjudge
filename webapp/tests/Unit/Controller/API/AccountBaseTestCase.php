@@ -67,11 +67,10 @@ abstract class AccountBaseTestCase extends BaseTestCase
             }
             $newItemValue = $newItems[$listKey][$key];
             if (strval($key) === 'roles' &&
-                (in_array('admin', $newItemValue) || in_array('jury', $newItemValue)) &&
-                self::getContainer()->getParameter('kernel.debug')
+                (in_array('admin', $newItemValue) || in_array('jury', $newItemValue))
             ) {
+                // Importing an admin or jury account also gives it a jury team and the team role.
                 $newItemValue = array_diff($newItemValue, ['team']);
-                // In development mode we add a team role to admin users for some API endpoints.
             }
             if (is_array($newItemValue)) {
                 sort($newItemValue);
