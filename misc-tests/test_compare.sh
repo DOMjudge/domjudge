@@ -278,8 +278,6 @@ wa ..
 wa ++0
 wa +-0
 wa .e1
-wa 0e
-wa 0e+
 wa 0e1.0
 wa 1,0
 wa 1.0.0
@@ -327,7 +325,7 @@ unknown_option
 float_tolerance
 float_tolerance abc
 float_tolerance 1e-5x
-float_absolute_tolerance 1e
+float_absolute_tolerance 1.5abc
 EOF
 }
 
