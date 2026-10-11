@@ -285,37 +285,40 @@ wa 1.0abcdefghijklmnop
 EOF
 }
 
-test_group_float_current_behavior() {
-    # Current behavior: sscanf parses hexadecimal floats, infinity and nan.
-    # They should be plain words, so all "ac" cases below should be "wa".
-    compare_group "Hexadecimal floats" '0' float_tolerance 0 <<'EOF'
-ac 0x0
-ac 0X0p0
+test_group_float_current_new_behavior() {
+    # 2025-09 behavior: floats must match {sign}? {significand} {exponent}?.
+    # (no hexadecimal floats, infinity and nan)
+    compare_group "no hexadecimal floats" '0' float_tolerance 0 <<'EOF'
+wa 0x0
+wa 0X0p0
 EOF
-    compare_group "Spellings of inf" 'inf' float_tolerance 0.5 <<'EOF'
-ac infinity
+    compare_group "no inf" 'inf' float_tolerance 0.5 <<'EOF'
+wa infinity
 wa -inf
 wa nan
 EOF
-    compare_group "Spellings of nan" 'nan' float_tolerance 0.5 <<'EOF'
-ac NaN
-ac -nan
+    compare_group "no nan" 'nan' float_tolerance 0.5 <<'EOF'
+wa -nan
 wa inf
 EOF
     compare_group "inf, case sensitive" 'inf' float_tolerance 0.5 case_sensitive <<'EOF'
 ac inf
-ac INF
+wa INF
 EOF
-    # Current behavior: numbers outside of the long double range become
-    # infinity or zero, so different huge numbers compare equal.
+    compare_group "nan, case sensitive" 'nan' float_tolerance 0.5 case_sensitive <<'EOF'
+ac nan
+wa NAN
+wa NaN
+EOF
+    # numbers outside of the long double range become strings.
     compare_group "Out of range" '1e5000' float_tolerance 0 <<'EOF'
 ac 1e5000
-ac 1e5001
-ac inf
+wa 1e5001
+wa inf
 EOF
     compare_group "Out of range, tiny" '0' float_tolerance 0 <<'EOF'
 wa 1e-4000
-ac 1e-20000
+wa 1e-20000
 EOF
 }
 
