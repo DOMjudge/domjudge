@@ -50,7 +50,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        self::bootKernel(['debug' => 0]);
+        self::bootKernel();
 
         // Default configuration values:
         $this->configValues = [
