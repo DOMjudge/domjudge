@@ -897,7 +897,6 @@
                                 </div>
                             {% endif %}
                         {% endif %}
-                    </div>
                     {% if run.description is not null %}
                         <p><em>
                             {{ run.description(true) | descriptionExpand }}
@@ -997,6 +996,7 @@
 
                         {% endif %}
                     {% endif %}
+                    </div>
                 </div>
             {% endfor %}
 
