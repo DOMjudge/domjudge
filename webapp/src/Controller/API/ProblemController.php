@@ -119,6 +119,54 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     }
 
     /**
+     * @internal Bypasses HTTP firewall and controller #[IsGranted] attributes; intended for internal/event-log callers.
+     * @return mixed[]
+     * @throws NonUniqueResultException
+     */
+    public function getEndpointObjects(Request $request, bool $refresh = false): array
+    {
+        // This method adds ordinal values.
+        $queryBuilder = $this->getQueryBuilder($request);
+
+        $objects = $this->buildQuery($queryBuilder, $refresh)
+            ->getResult();
+
+        if (empty($objects)) {
+            return [];
+        }
+
+        $objects = array_map($this->transformObject(...), $objects);
+
+        $ordinalArray = new ContestProblemArray($objects);
+        $objects      = $ordinalArray->getItems();
+
+        if ($request->query->has('ids')) {
+            $ids = $request->query->all('ids');
+            $ids = array_unique($ids);
+
+            $filtered = [];
+            foreach ($ordinalArray->getItems() as $item) {
+                /** @var ContestProblemWrapper|ContestProblem $contestProblem */
+                $contestProblem = $item->getContestProblemWrapper();
+                if ($contestProblem instanceof ContestProblemWrapper) {
+                    $contestProblem = $contestProblem->getContestProblem();
+                }
+                if (in_array($contestProblem->getExternalId(), $ids)) {
+                    $filtered[] = $item;
+                }
+            }
+
+            if (count($filtered) !== count($ids)) {
+                throw new NotFoundHttpException('One or more objects not found');
+            }
+
+            $objects = $filtered;
+        }
+
+        return $objects;
+    }
+
+    /**
      * Get all the problems for this contest.
      * @throws NonUniqueResultException
      */
@@ -134,43 +182,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
     public function listAction(Request $request): Response
     {
-        // This method is overwritten, because we need to add ordinal values.
-        $queryBuilder = $this->getQueryBuilder($request);
-
-        $objects = $this->buildQuery($queryBuilder, $this->shouldRefresh($request))
-            ->getResult();
-
-        if (empty($objects)) {
-            return $this->renderData($request, []);
-        }
-
-        $objects = array_map($this->transformObject(...), $objects);
-
-        $ordinalArray = new ContestProblemArray($objects);
-        $objects      = $ordinalArray->getItems();
-
-        if ($request->query->has('ids')) {
-            $ids = $request->query->all('ids');
-            $ids = array_unique($ids);
-
-            $objects = [];
-            foreach ($ordinalArray->getItems() as $item) {
-                /** @var ContestProblemWrapper|ContestProblem $contestProblem */
-                $contestProblem = $item->getContestProblemWrapper();
-                if ($contestProblem instanceof ContestProblemWrapper) {
-                    $contestProblem = $contestProblem->getContestProblem();
-                }
-                if (in_array($contestProblem->getExternalId(), $ids)) {
-                    $objects[] = $item;
-                }
-            }
-
-            if (count($objects) !== count($ids)) {
-                throw new NotFoundHttpException('One or more objects not found');
-            }
-        }
-
-        return $this->renderData($request, $objects);
+        return $this->performListAction($request);
     }
 
     /**
@@ -373,19 +385,12 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     }
 
     /**
-     * Get the given problem for this contest.
+     * @internal Bypasses HTTP firewall and controller #[IsGranted] attributes; intended for internal/event-log callers.
      * @throws NonUniqueResultException
      */
-    #[Rest\Get(path: '/{id}')]
-    #[OA\Response(
-        response: 200,
-        description: 'Returns the given problem for this contest',
-        content: new OA\JsonContent(ref: new Model(type: ContestProblemWrapper::class))
-    )]
-    #[OA\Parameter(ref: '#/components/parameters/id')]
-    public function singleAction(Request $request, string $id): Response
+    public function getSingleEndpointObject(Request $request, string $id, bool $refresh = false): mixed
     {
-        $ordinalArray = new ContestProblemArray($this->listActionHelper($request, $this->shouldRefresh($request)));
+        $ordinalArray = new ContestProblemArray($this->listActionHelper($request, $refresh));
 
         $object = null;
         foreach ($ordinalArray->getItems() as $item) {
@@ -404,7 +409,23 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
         }
 
-        return $this->renderData($request, $object);
+        return $object;
+    }
+
+    /**
+     * Get the given problem for this contest.
+     * @throws NonUniqueResultException
+     */
+    #[Rest\Get(path: '/{id}')]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the given problem for this contest',
+        content: new OA\JsonContent(ref: new Model(type: ContestProblemWrapper::class))
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
+    public function singleAction(Request $request, string $id): Response
+    {
+        return $this->performSingleAction($request, $id);
     }
 
     /**

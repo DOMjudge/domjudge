@@ -68,7 +68,7 @@ readonly class TeamVisitor implements EventSubscriberInterface
         $id = $team->getExternalid();
 
         // Check if the asset actually exists
-        if (!($teamPhoto = $this->dj->assetPath($id, 'team', true))) {
+        if (!($teamPhoto = $this->dj->assetPath($id, 'team', true)) || !file_exists($teamPhoto)) {
             $team->setPhotoForApi();
             return;
         }
@@ -78,7 +78,7 @@ readonly class TeamVisitor implements EventSubscriberInterface
 
         $imageSize = Utils::getImageSize($teamPhoto);
 
-        if ($cid = $this->requestStack->getCurrentRequest()->attributes->get('cid')) {
+        if ($cid = $this->requestStack->getCurrentRequest()?->attributes->get('cid')) {
             $route = $this->dj->apiRelativeUrl(
                 'v4_team_photo',
                 [

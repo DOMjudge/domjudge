@@ -56,8 +56,6 @@ class AccountController extends AbstractRestController
     )]
     public function listAction(Request $request): Response
     {
-        // Get the contest ID to make sure the contest exists
-        $this->getContestId($request);
         return parent::performListAction($request);
     }
 
@@ -75,8 +73,6 @@ class AccountController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
     {
-        // Get the contest ID to make sure the contest exists
-        $this->getContestId($request);
         return parent::performSingleAction($request, $id);
     }
 
@@ -104,6 +100,9 @@ class AccountController extends AbstractRestController
 
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
+        // Get the contest ID to make sure the contest exists.
+        $this->getContestId($request);
+
         $queryBuilder = $this->em->createQueryBuilder()
                                  ->from(User::class, 'u')
                                  ->leftJoin('u.team', 't')

@@ -90,9 +90,6 @@ class TeamController extends AbstractRestController
     )]
     public function listAction(Request $request): Response
     {
-        if (!$this->config->get('enable_ranking') && !$this->authService->checkRole('api_reader')) {
-            throw new BadRequestHttpException("teams list not available.");
-        }
         return parent::performListAction($request);
     }
 
@@ -110,9 +107,6 @@ class TeamController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
     {
-        if (!$this->config->get('enable_ranking') && !$this->authService->checkRole('jury')) {
-            throw new BadRequestHttpException("team not available.");
-        }
         return parent::performSingleAction($request, $id);
     }
 
@@ -391,6 +385,22 @@ class TeamController extends AbstractRestController
         }
 
         return $this->importSingle($request, $importExport->importTeamsJson(...), $data, 'team', created: false);
+    }
+
+    public function getEndpointObjects(Request $request, bool $refresh = false): array
+    {
+        if (!$this->config->get('enable_ranking') && !$this->authService->checkRole('api_reader')) {
+            throw new BadRequestHttpException("teams list not available.");
+        }
+        return parent::getEndpointObjects($request, $refresh);
+    }
+
+    public function getSingleEndpointObject(Request $request, string $id, bool $refresh = false): mixed
+    {
+        if (!$this->config->get('enable_ranking') && !$this->authService->checkRole('jury')) {
+            throw new BadRequestHttpException("team not available.");
+        }
+        return parent::getSingleEndpointObject($request, $id, $refresh);
     }
 
     protected function getQueryBuilder(Request $request): QueryBuilder

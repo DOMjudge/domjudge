@@ -2,6 +2,20 @@
 
 namespace App\Service;
 
+use App\Controller\API\AbstractRestController;
+use App\Controller\API\AccountController;
+use App\Controller\API\AwardsController;
+use App\Controller\API\ClarificationController;
+use App\Controller\API\ContestController;
+use App\Controller\API\GroupController;
+use App\Controller\API\JudgementController;
+use App\Controller\API\JudgementTypeController;
+use App\Controller\API\LanguageController;
+use App\Controller\API\OrganizationController;
+use App\Controller\API\ProblemController;
+use App\Controller\API\RunController;
+use App\Controller\API\SubmissionController;
+use App\Controller\API\TeamController;
 use App\Entity\BaseApiEntity;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -22,8 +36,19 @@ use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutowireLocator;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Exception\ExceptionInterface as RoutingExceptionInterface;
+use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
+use Symfony\Component\Routing\RouterInterface;
+use Throwable;
 
 /**
  * This class is used to log events in the events table.
@@ -107,7 +132,26 @@ class EventLogService
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly EntityManagerInterface $em,
-        protected readonly LoggerInterface $logger
+        protected readonly LoggerInterface $logger,
+        protected readonly ApiResourceSerializer $apiSerializer,
+        protected readonly RouterInterface $router,
+        protected readonly RequestStack $requestStack,
+        #[AutowireLocator([
+            AccountController::class,
+            AwardsController::class,
+            ClarificationController::class,
+            ContestController::class,
+            GroupController::class,
+            JudgementController::class,
+            JudgementTypeController::class,
+            LanguageController::class,
+            OrganizationController::class,
+            ProblemController::class,
+            RunController::class,
+            SubmissionController::class,
+            TeamController::class,
+        ])]
+        protected readonly ContainerInterface $apiControllers,
     ) {
         $inflector = null;
         foreach ($this->apiEndpoints as $endpoint => $data) {
@@ -135,6 +179,124 @@ class EventLogService
                 $this->entityToEndpoint[$this->apiEndpoints[$endpoint][self::KEY_ENTITY]] = $endpoint;
             }
         }
+    }
+
+    /**
+     * Directly fetch and serialize endpoint data without dispatching an HTTP sub-request.
+     *
+     * Note: Direct dispatch invokes controller data providers (getEndpointData/getSingleEndpointData)
+     * and ApiResourceSerializer directly, evaluating permissions in an administrative context (withAllRoles)
+     * during event feed generation.
+     *
+     * @internal Bypasses HTTP firewall and controller #[IsGranted] attributes; intended for event feed generation.
+     * @param array<string, mixed> $query
+     * @return mixed[]|null
+     */
+    public function fetchEndpointData(string $url, array $query = []): ?array
+    {
+        $result = null;
+        $this->dj->withAllRoles(function () use ($url, $query, &$result): void {
+            $result = $this->doFetchEndpointData($url, $query);
+        });
+
+        return $result;
+    }
+
+    /**
+     * @param array<string, mixed> $query
+     * @return mixed[]|null
+     */
+    private function doFetchEndpointData(string $url, array $query = []): ?array
+    {
+        $request = Request::create('/api' . $url, Request::METHOD_GET, $query);
+
+        $matched = false;
+        $parameters = [];
+        try {
+            // Ensure the route matcher checks GET routes, regardless of current request method (e.g. POST from judgehost).
+            if ($this->router instanceof RequestMatcherInterface) {
+                $parameters = $this->router->matchRequest($request);
+            } else {
+                $context = $this->router->getContext();
+                $originalMethod = $context->getMethod();
+                $context->setMethod(Request::METHOD_GET);
+                try {
+                    $parameters = $this->router->match($request->getPathInfo());
+                } finally {
+                    $context->setMethod($originalMethod);
+                }
+            }
+            $matched = true;
+        } catch (RoutingExceptionInterface $e) {
+            $this->logger->warning('fetchEndpointData route matching failed for URL %s: %s', [
+                $url,
+                $e->getMessage(),
+            ]);
+        }
+
+        if ($matched && isset($parameters['_controller'])) {
+            $controllerName = $parameters['_controller'];
+            if (str_contains($controllerName, '::')) {
+                [$controllerClass, $method] = explode('::', $controllerName, 2);
+                if ($this->apiControllers->has($controllerClass)) {
+                    $controller = $this->apiControllers->get($controllerClass);
+                    $request->attributes->add($parameters);
+                    if ($this->requestStack->getCurrentRequest()?->hasSession()) {
+                        $request->setSession($this->requestStack->getSession());
+                    } else {
+                        $request->setSession(new Session(new MockArraySessionStorage()));
+                    }
+                    $this->requestStack->push($request);
+
+                    try {
+                        if ($controller instanceof AbstractRestController) {
+                            if ($method === 'listAction') {
+                                return $controller->getEndpointData($request);
+                            }
+                            if ($method === 'singleAction') {
+                                $id = $parameters['id'] ?? $parameters['cid'] ?? null;
+                                if ($id !== null) {
+                                    return $controller->getSingleEndpointData($request, (string)$id);
+                                }
+                            }
+                        } elseif ($controller instanceof AwardsController || $controller instanceof JudgementTypeController) {
+                            $strict = $request->query->getBoolean('strict');
+                            if ($method === 'listAction') {
+                                return $this->apiSerializer->toArray($controller->listAction($request), $strict);
+                            }
+                            if ($method === 'singleAction') {
+                                $id = $parameters['id'] ?? $parameters['cid'] ?? null;
+                                if ($id !== null) {
+                                    return $this->apiSerializer->toArray($controller->singleAction($request, (string)$id), $strict);
+                                }
+                            }
+                        }
+                    } catch (NotFoundHttpException) {
+                        return null;
+                    } catch (HttpExceptionInterface $e) {
+                        $this->logger->warning('fetchEndpointData controller returned HTTP %d for %s: %s', [
+                            $e->getStatusCode(),
+                            $url,
+                            $e->getMessage(),
+                        ]);
+                        return null;
+                    } catch (Throwable $e) {
+                        $this->logger->warning('fetchEndpointData failed for %s: %s', [
+                            $url,
+                            $e->getMessage(),
+                        ]);
+                        return null;
+                    } finally {
+                        $this->requestStack->pop();
+                    }
+                }
+            }
+        }
+
+        // Fallback to internalApiRequest if direct dispatch is unavailable or not an expected controller action
+        $this->logger->warning('fetchEndpointData falling back to internalApiRequest for URL %s', [$url]);
+        $response = $this->dj->internalApiRequest($url, Request::METHOD_GET, $query);
+        return empty($response) ? null : Utils::jsonDecode($response);
     }
 
     /**
@@ -322,11 +484,9 @@ class EventLogService
                 $query = ['ids' => $ids];
             }
 
-            $this->dj->withAllRoles(function () use ($query, $url, &$response): void {
-                $response = $this->dj->internalApiRequest($url, Request::METHOD_GET, $query);
-            });
+            $json = $this->fetchEndpointData($url, $query);
 
-            if ($response === null || $response === '') {
+            if ($json === null) {
                 $this->logger->warning(
                     "EventLogService::log got no data from '%s'", [ $url ]
                 );
@@ -336,8 +496,6 @@ class EventLogService
                 // have data, there's also no point in trying to insert
                 // anything in the eventlog table.
                 return;
-            } else {
-                $json = Utils::jsonDecode($response);
             }
         }
 
@@ -494,13 +652,7 @@ class EventLogService
             if ($field === 'finalized') {
                 // Insert all awards events.
                 $url = sprintf('/contests/%s/awards', $contest->getExternalid());
-                $awards = [];
-                $this->dj->withAllRoles(function () use ($url, &$awards): void {
-                    $response = $this->dj->internalApiRequest($url);
-                    if (!empty($response)) {
-                        $awards = Utils::jsonDecode($response);
-                    }
-                });
+                $awards = $this->fetchEndpointData($url) ?? [];
                 foreach ($awards as $award) {
                     $this->insertEvent($contest, 'awards', $award['id'], $award);
                 }
@@ -636,14 +788,10 @@ class EventLogService
             if (in_array($endpoint, $staticEventTypes, true)) {
                 $contestId = $contest->getExternalid();
 
-                // Do an internal API request to the overview URL
-                // of the endpoint to get current data.
+                // Fetch endpoint data directly without HTTP sub-requests.
                 $urlPart = $endpoint === 'contests' ? '' : ('/' . $endpoint);
                 $url = sprintf('/contests/%s%s', $contestId, $urlPart);
-                $this->dj->withAllRoles(function () use ($url, &$data): void {
-                    $response = $this->dj->internalApiRequest($url);
-                    $data = (empty($response) ? null : Utils::jsonDecode($response));
-                });
+                $data = $this->fetchEndpointData($url);
 
                 // Get a partial reference to the contest,
                 // because calling internalApiRequest above will clear the entity manager.
@@ -657,7 +805,7 @@ class EventLogService
 
                 // Special case 'contests' since it is a single object:
                 if ($endpoint === 'contests') {
-                    if (!is_array($data) || is_numeric(array_keys($data)[0])) {
+                    if (is_numeric(array_keys($data)[0])) {
                         throw new Exception(sprintf("EventLogService::initializeStaticEvents Endpoint '%s' did not return a JSON object.",
                                                     $endpoint));
                     }
@@ -666,7 +814,7 @@ class EventLogService
                     continue;
                 }
 
-                if (!is_array($data) || (!empty($data) && !is_numeric(array_keys($data)[0]))) {
+                if (!empty($data) && !is_numeric(array_keys($data)[0])) {
                     throw new Exception(sprintf("EventLogService::initializeStaticEvents Endpoint '%s' did not return a JSON list.",
                                                 $endpoint));
                 }

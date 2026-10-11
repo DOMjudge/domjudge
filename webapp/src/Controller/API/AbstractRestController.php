@@ -38,25 +38,30 @@ abstract class AbstractRestController extends AbstractApiController
     }
 
     /**
-     * Get all objects for this endpoint.
+     * Get the objects for this endpoint and request.
+     *
+     * @internal Bypasses HTTP firewall and controller #[IsGranted] attributes; intended for internal/event-log callers.
+     * @return mixed[]
      * @throws NonUniqueResultException
      */
-    protected function performListAction(Request $request): Response
+    public function getEndpointObjects(Request $request, bool $refresh = false): array
     {
-        return $this->renderData($request, $this->listActionHelper($request, $this->shouldRefresh($request)));
+        return $this->listActionHelper($request, $refresh);
     }
 
     /**
-     * Get a single object for this endpoint.
+     * Get a single object for this endpoint and ID.
+     *
+     * @internal Bypasses HTTP firewall and controller #[IsGranted] attributes; intended for internal/event-log callers.
      * @throws NonUniqueResultException
      */
-    protected function performSingleAction(Request $request, string $id): Response
+    public function getSingleEndpointObject(Request $request, string $id, bool $refresh = false): mixed
     {
         $queryBuilder = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $id);
 
-        $object = $this->buildQuery($queryBuilder, $this->shouldRefresh($request))
+        $object = $this->buildQuery($queryBuilder, $refresh)
             ->getOneOrNullResult();
 
         if ($object === null) {
@@ -67,6 +72,52 @@ abstract class AbstractRestController extends AbstractApiController
             $object = $this->transformObject($object);
         }
 
+        return $object;
+    }
+
+    protected function isStrict(Request $request): bool
+    {
+        return $request->query->getBoolean('strict');
+    }
+
+    /**
+     * Get the serialized endpoint data as an array directly without HTTP sub-requests.
+     *
+     * @internal Bypasses HTTP firewall and controller #[IsGranted] attributes; intended for EventLogService.
+     * @return mixed[]
+     * @throws NonUniqueResultException
+     */
+    public function getEndpointData(Request $request): array
+    {
+        $objects = $this->getEndpointObjects($request, refresh: true);
+        return $this->apiResourceSerializer->toArray($objects, $this->isStrict($request));
+    }
+
+    /**
+     * Get the serialized single endpoint data as an array directly without HTTP sub-requests.
+     *
+     * @internal Bypasses HTTP firewall and controller #[IsGranted] attributes; intended for EventLogService.
+     * @return mixed[]
+     * @throws NonUniqueResultException
+     */
+    public function getSingleEndpointData(Request $request, string $id): array
+    {
+        $object = $this->getSingleEndpointObject($request, $id, refresh: true);
+        return $this->apiResourceSerializer->toArray($object, $this->isStrict($request));
+    }
+
+    protected function performListAction(Request $request): Response
+    {
+        return $this->renderData($request, $this->getEndpointObjects($request, $this->shouldRefresh($request)));
+    }
+
+    /**
+     * Get a single object for this endpoint.
+     * @throws NonUniqueResultException
+     */
+    protected function performSingleAction(Request $request, string $id): Response
+    {
+        $object = $this->getSingleEndpointObject($request, $id, $this->shouldRefresh($request));
         return $this->renderData($request, $object);
     }
 
@@ -87,8 +138,7 @@ abstract class AbstractRestController extends AbstractApiController
         $view->getContext()->setAttribute('authorized_user_service', $this->authService);
         $view->getContext()->setAttribute('config_service', $this->config);
 
-        $strict = $request->query->getBoolean('strict');
-        $groups = $this->apiResourceSerializer->getSerializationGroups($strict);
+        $groups = $this->apiResourceSerializer->getSerializationGroups($this->isStrict($request));
         $view->getContext()->setGroups($groups);
 
         $response = $this->handleView($view);
