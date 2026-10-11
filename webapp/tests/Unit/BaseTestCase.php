@@ -338,8 +338,8 @@ abstract class BaseTestCase extends WebTestCase
     protected function removeTestContainer(): void
     {
         self::ensureKernelShutdown();
-        $container = __DIR__ . '/../../var/cache/test/App_KernelTestDebugContainer.php';
-        if (file_exists($container)) {
+        // The container file name depends on whether the kernel runs in debug mode.
+        foreach (glob(__DIR__ . '/../../var/cache/test/App_KernelTest*Container.php') as $container) {
             unlink($container);
         }
         self::bootKernel();
