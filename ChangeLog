@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 9.0.2DEV
-----------------
+Version 9.0.2 - 11 October 2026
+-------------------------------
  - Security fixes:
    - Return 404 when no access to submission data
    - Hide postfreeze balloons in totals column
@@ -13,6 +13,7 @@ Version 9.0.2DEV
    - Do not let the entry point inject runguard options
    - Hide problems with allowSubmit = 0 from teams/public
    - Prevent linking to files/media from clarifications
+   - Enforce CSRF on jury forms
  - Fix ZIP of unfrozen scoreboard using wrong rank cache
  - Many smaller bugfixes, including HTML correctness
  - Fix a number of mistakes and typos in documentation
