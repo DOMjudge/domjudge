@@ -40,7 +40,7 @@ class AccessControllerTest extends BaseTestCase
 
         $expectedTypes = [
             'contest' => ['id', 'name', 'formal_name', 'start_time', 'duration', 'scoreboard_freeze_duration', 'penalty_time'],
-            'judgement-types' => ['id', 'name', 'penalty', 'solved'],
+            'judgement-types' => ['id', 'name', 'penalty', 'solved', 'simplified_judgement_type_id'],
             'languages' => ['id', 'name', 'entry_point_required', 'entry_point_name', 'extensions'],
             'problems' => ['id', 'label', 'name', 'ordinal', 'rgb', 'color', 'time_limit', 'memory_limit', 'output_limit', 'code_limit', 'test_data_count', 'statement'],
             'groups' => ['id', 'icpc_id', 'name', 'hidden'],
@@ -49,7 +49,7 @@ class AccessControllerTest extends BaseTestCase
             'accounts' => ['id', 'username', 'name', 'type'],
             'state' => ['started', 'frozen', 'ended', 'thawed', 'finalized', 'end_of_updates'],
             'submissions' => ['id', 'language_id', 'problem_id', 'team_id', 'time', 'contest_time', 'entry_point', 'files'],
-            'judgements' => ['id', 'submission_id', 'judgement_type_id', 'start_time', 'start_contest_time', 'end_time', 'end_contest_time', 'max_run_time', 'current'],
+            'judgements' => ['id', 'submission_id', 'judgement_type_id', 'simplified_judgement_type_id', 'start_time', 'start_contest_time', 'end_time', 'end_contest_time', 'max_run_time', 'current'],
             'runs' => ['id', 'judgement_id', 'ordinal', 'judgement_type_id', 'time', 'contest_time', 'run_time'],
             'clarifications' => ['id', 'from_team_id', 'problem_id', 'text', 'time', 'contest_time'],
             'awards' => ['id', 'citation', 'team_ids'],

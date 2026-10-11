@@ -140,6 +140,7 @@ class AccessController extends AbstractApiController
                         'name',
                         'penalty',
                         'solved',
+                        'simplified_judgement_type_id',
                     ],
                 ),
                 new AccessEndpoint(
@@ -257,6 +258,7 @@ class AccessController extends AbstractApiController
                         'id',
                         'submission_id',
                         'judgement_type_id',
+                        'simplified_judgement_type_id',
                         'start_time',
                         'start_contest_time',
                         'end_time',
