@@ -285,7 +285,7 @@ wa 1.0abcdefghijklmnop
 EOF
 }
 
-test_group_float_current_new_behavior() {
+test_group_float_2025_09_behavior() {
     # 2025-09 behavior: floats must match {sign}? {significand} {exponent}?.
     # (no hexadecimal floats, infinity and nan)
     compare_group "no hexadecimal floats" '0' float_tolerance 0 <<'EOF'
