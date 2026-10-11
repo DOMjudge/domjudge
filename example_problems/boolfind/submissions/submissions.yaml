@@ -1,0 +1,4 @@
+mixed-verdicts/boolfind-test-random.py:
+  permitted: [AC, WA]
+mixed-verdicts/boolfind-test-correct-*:
+  permitted: [AC]
