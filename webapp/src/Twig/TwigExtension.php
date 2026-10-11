@@ -496,7 +496,6 @@ class TwigExtension
         ?string $result,
         bool $valid = true,
         bool $jury = false,
-        bool $onlyRejectedForIncorrect = false,
     ): string {
         $result = strtolower($result ?? '');
         switch ($result) {
@@ -529,9 +528,6 @@ class TwigExtension
                 break;
             default:
                 $style = 'sol_incorrect';
-                if ($onlyRejectedForIncorrect) {
-                    $result = 'rejected';
-                }
         }
 
         return sprintf('<span class="sol %s">%s</span>', $valid ? $style : 'disabled',
