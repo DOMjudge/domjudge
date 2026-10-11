@@ -52,25 +52,25 @@ void judge_error(const char *err, ...) {
 	assert(!"Judge Error");
 }
 
-bool issign(char c) {return c == '+' || c == '-';}
-bool isdigit(char c) {return c >= '0' && c <= '9';}
-bool isexp(char c) {return c == 'e' || c == 'E';}
-bool isfloat(const char *s, flt &val) {
+bool is_sign(char c) {return c == '+' || c == '-';}
+bool is_digit(char c) {return c >= '0' && c <= '9';}
+bool is_exp(char c) {return c == 'e' || c == 'E';}
+bool is_float(const char *s, flt &val) {
 	std::ptrdiff_t i = 0;
-	if (issign(s[i])) i++;
-	bool digits = isdigit(s[i]);
-	while (isdigit(s[i])) i++;
+	if (is_sign(s[i])) i++;
+	bool digits = is_digit(s[i]);
+	while (is_digit(s[i])) i++;
 	if (s[i] == '.') {
 		i++;
-		digits |= isdigit(s[i]);
-		while (isdigit(s[i])) i++;
+		digits |= is_digit(s[i]);
+		while (is_digit(s[i])) i++;
 	}
 	if (!digits) return false;
-	if (isexp(s[i])) {
+	if (is_exp(s[i])) {
 		i++;
-		if (issign(s[i])) i++;
-		if (!isdigit(s[i])) return false;
-		while (isdigit(s[i])) i++;
+		if (is_sign(s[i])) i++;
+		if (!is_digit(s[i])) return false;
+		while (is_digit(s[i])) i++;
 	}
 	if (s[i] != '\0') return false;
 
@@ -116,7 +116,7 @@ bool equal_case_insensitive(std::string a, std::string b) {
 void compare_float(const std::string &judge, const std::string &team, flt jval, flt tval, flt float_abs_tol, flt float_rel_tol, const std::string &extra_msg) {
 	assert(std::isfinite(jval));
 	assert(std::isfinite(tval));
-	
+
 	flt absdiff = fabsl(tval-jval);
 	flt reldiff = fabsl((tval-jval)/jval);
 	if (float_abs_tol >= 0 && float_rel_tol >= 0) {
@@ -163,15 +163,15 @@ int main(int argc, char **argv) {
 		} else if (!strcmp(argv[a], "space_change_sensitive")) {
 			space_change_sensitive = true;
 		} else if (!strcmp(argv[a], "float_absolute_tolerance")) {
-			if (a+1 == argc || !isfloat(argv[a+1], float_abs_tol))
+			if (a+1 == argc || !is_float(argv[a+1], float_abs_tol))
 				judge_error(USAGE, argv[0]);
 			++a;
 		} else if (!strcmp(argv[a], "float_relative_tolerance")) {
-			if (a+1 == argc || !isfloat(argv[a+1], float_rel_tol))
+			if (a+1 == argc || !is_float(argv[a+1], float_rel_tol))
 				judge_error(USAGE, argv[0]);
 			++a;
 		} else if (!strcmp(argv[a], "float_tolerance")) {
-			if (a+1 == argc || !isfloat(argv[a+1], float_rel_tol))
+			if (a+1 == argc || !is_float(argv[a+1], float_rel_tol))
 				judge_error(USAGE, argv[0]);
 			float_abs_tol = float_rel_tol;
 			++a;
@@ -238,8 +238,8 @@ int main(int argc, char **argv) {
 		}
 
 		flt jval, tval;
-		if (use_floats && isfloat(judge.c_str(), jval)) {
-			if (!isfloat(team.c_str(), tval)) {
+		if (use_floats && is_float(judge.c_str(), jval)) {
+			if (!is_float(team.c_str(), tval)) {
 				wrong_answer("Expected float, got: %s%s", team.c_str(), extra_msg.c_str());
 			}
 			compare_float(judge, team, jval, tval, float_abs_tol, float_rel_tol, extra_msg);
