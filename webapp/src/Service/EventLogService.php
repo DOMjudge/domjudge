@@ -109,10 +109,11 @@ class EventLogService
         protected readonly EntityManagerInterface $em,
         protected readonly LoggerInterface $logger
     ) {
+        $inflector = null;
         foreach ($this->apiEndpoints as $endpoint => $data) {
             if (!array_key_exists(self::KEY_ENTITY, $data)) {
                 // Determine default controller
-                $inflector = InflectorFactory::create()->build();
+                $inflector ??= InflectorFactory::create()->build();
                 $singular  = $inflector->singularize($endpoint);
                 $entity    = $inflector->classify($singular);
                 $fullClass = sprintf('App\Entity\%s', $entity);

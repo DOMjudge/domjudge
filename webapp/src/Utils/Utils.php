@@ -911,7 +911,9 @@ class Utils
         $class        = $entity::class;
         $parts        = explode('\\', $class);
         $entityType   = $parts[count($parts) - 1];
-        $inflector    = InflectorFactory::create()->build();
+        // Building an inflector is relatively expensive, so only do it once.
+        static $inflector = null;
+        $inflector ??= InflectorFactory::create()->build();
         return $inflector->tableize($entityType);
     }
 
