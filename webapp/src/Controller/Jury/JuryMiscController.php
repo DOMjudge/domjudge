@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\Attribute\ReleaseSessionLock;
 use App\Controller\BaseController;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -76,6 +77,7 @@ class JuryMiscController extends BaseController
 
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')"))]
     #[Route(path: '/updates', name: 'jury_ajax_updates', methods: ['GET'])]
+    #[ReleaseSessionLock]
     public function updatesAction(): JsonResponse
     {
         return $this->json($this->dj->getUpdates());

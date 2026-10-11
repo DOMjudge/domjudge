@@ -5,6 +5,7 @@ namespace App\Tests\Unit\Session;
 use App\Attribute\ReleaseSessionLock;
 use App\Entity\Contest;
 use App\DataFixtures\Test\RejudgingFirstToSolveFixture;
+use App\Entity\Judgehost;
 use App\Entity\Judging;
 use App\Entity\Rejudging;
 use App\Entity\Team;
@@ -106,9 +107,21 @@ class ReleaseSessionLockTest extends BaseTestCase
             'analysis_team'    => ['team' => 'exteam'],
             'analysis_problem' => ['probid' => 'hello'],
             'jury_balloons'    => ['contestId' => 'demo'],
+            'jury_judgehost'   => ['judgehostid' => $this->anyJudgehostId()],
             'jury_rejudging'   => ['rejudgingId' => $this->rejudgingWithJudgings()],
             'jury_submissions' => ['contestId' => 'demo'],
         ];
+    }
+
+    private function anyJudgehostId(): string
+    {
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $judgehost = $em->getRepository(Judgehost::class)->findOneBy([]);
+        self::assertNotNull($judgehost, 'expected the test database to contain a judgehost');
+
+        return (string)$judgehost->getJudgehostid();
     }
 
     /**
