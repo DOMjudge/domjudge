@@ -1553,7 +1553,7 @@ EOF;
     }
 
     #[DataProvider('provideGetResultsData')]
-    public function testGetResultsData(bool $full, bool $honors, string $dataSet, string $expectedResultsFile): void
+    public function testGetResultsData(string $dataSet, array $expectations): void
     {
         // Set up some results we can test with
         // This data is based on the ICPC World Finals 47
@@ -1686,32 +1686,40 @@ EOF;
         $request->cookies->set('domjudge_cid', (string)$contest->getExternalid());
         $requestStack->push($request);
 
-        $results = $importExportService->getResultsData(37, $full, $honors);
-
-        $resultsContents = file_get_contents(__DIR__ . '/../Fixtures/' . $dataSet . '/' . $expectedResultsFile);
-        $resultsContents = substr($resultsContents, strpos($resultsContents, "\n") + 1);
-        // Prefix file with a fake header, so we can deserialize them
-        $resultsContents = "team_id\trank\taward\tnum_solved\ttotal_time\ttime_of_last_submission\tgroup_winner\n" . $resultsContents;
-
         $serializer = static::getContainer()->get(SerializerInterface::class);
 
-        $expectedResults = $serializer->deserialize($resultsContents, ResultRow::class . '[]', 'csv', [
-            CsvEncoder::DELIMITER_KEY => "\t",
-        ]);
+        foreach ($expectations as [$full, $honors, $expectedResultsFile]) {
+            $results = $importExportService->getResultsData(37, $full, $honors);
 
-        self::assertEquals($expectedResults, $results);
+            $resultsContents = file_get_contents(__DIR__ . '/../Fixtures/' . $dataSet . '/' . $expectedResultsFile);
+            $resultsContents = substr($resultsContents, strpos($resultsContents, "\n") + 1);
+            // Prefix file with a fake header, so we can deserialize them
+            $resultsContents = "team_id\trank\taward\tnum_solved\ttotal_time\ttime_of_last_submission\tgroup_winner\n" . $resultsContents;
+
+            $expectedResults = $serializer->deserialize($resultsContents, ResultRow::class . '[]', 'csv', [
+                CsvEncoder::DELIMITER_KEY => "\t",
+            ]);
+
+            self::assertEquals($expectedResults, $results, sprintf(
+                'results for %s with full=%s, honors=%s', $dataSet, var_export($full, true), var_export($honors, true)
+            ));
+        }
     }
 
     public static function provideGetResultsData(): Generator
     {
-        yield [true, true, 'wf', 'results-full-honors.tsv'];
-        yield [false, true, 'wf', 'results-wf-honors.tsv'];
-        yield [true, false, 'wf', 'results-full-ranked.tsv'];
-        yield [false, false, 'wf', 'results-wf-ranked.tsv'];
-        yield [true, true, 'sample', 'results-full-honors.tsv'];
-        yield [false, true, 'sample', 'results-wf-honors.tsv'];
-        yield [true, false, 'sample', 'results-full-ranked.tsv'];
-        yield [false, true, 'sample', 'results-wf-honors.tsv'];
+        yield 'wf' => ['wf', [
+            [true, true, 'results-full-honors.tsv'],
+            [false, true, 'results-wf-honors.tsv'],
+            [true, false, 'results-full-ranked.tsv'],
+            [false, false, 'results-wf-ranked.tsv'],
+        ]];
+        yield 'sample' => ['sample', [
+            [true, true, 'results-full-honors.tsv'],
+            [false, true, 'results-wf-honors.tsv'],
+            [true, false, 'results-full-ranked.tsv'],
+            [false, true, 'results-wf-honors.tsv'],
+        ]];
     }
 
     /**
