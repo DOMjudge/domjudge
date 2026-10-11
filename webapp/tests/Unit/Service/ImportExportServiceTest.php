@@ -1718,7 +1718,7 @@ EOF;
             [true, true, 'results-full-honors.tsv'],
             [false, true, 'results-wf-honors.tsv'],
             [true, false, 'results-full-ranked.tsv'],
-            [false, true, 'results-wf-honors.tsv'],
+            [false, false, 'results-wf-ranked.tsv'],
         ]];
     }
 
