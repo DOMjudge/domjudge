@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judging;
+use App\Entity\JudgingRun;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Team;
@@ -236,12 +237,12 @@ class StatisticsService
         //   - The submission was made by a team in a visible category
         /** @var Judging[] $judgings */
         $judgings = $this->em->createQueryBuilder()
-            ->select('j, jr', 's', 'team', 'p')
+            ->select('j', 's', 'team', 'p')
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
             ->join('s.problem', 'p')
-            ->join('j.runs', 'jr')
             ->join('s.team', 'team')
+            ->andWhere('EXISTS (SELECT 1 FROM ' . JudgingRun::class . ' jr WHERE jr.judging = j)')
             // ->andWhere('j.valid = true')
             ->andWhere('s.contest = :contest')
             ->andWhere('s.team = :team')
@@ -319,14 +320,14 @@ class StatisticsService
         //   - The submission was made by a team in a visible category
         /** @var Judging[] $judgings */
         $judgings = $this->applyFilter($this->em->createQueryBuilder()
-            ->select('j, jr', 's', 'team', 'sj')
+            ->select('j', 's', 'team', 'sj')
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
             ->join('s.problem', 'p')
             ->join('s.judgings', 'sj')
-            ->join('j.runs', 'jr')
             ->join('s.team', 'team')
             ->join('team.categories', 'tc')
+            ->andWhere('EXISTS (SELECT 1 FROM ' . JudgingRun::class . ' jr WHERE jr.judging = j)')
             ->andWhere('j.valid = true')
             ->andWhere('j.result IS NOT NULL')
             ->andWhere('s.contest = :contest')
