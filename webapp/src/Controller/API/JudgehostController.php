@@ -175,7 +175,7 @@ class JudgehostController extends AbstractFOSRestController
             ->andWhere('jh.hostname = :hostname')
             ->andWhere('j.judgingid = jt.jobid')
             ->andWhere('jr.runresult IS NULL')
-            ->andWhere('j.valid = 1 OR r.valid = 1')
+            ->andWhere('j.valid = 1 OR j.rejudging IS NOT NULL')
             ->andWhere('j.result != :compiler_error')
             ->setParameter('hostname', $hostname)
             ->setParameter('compiler_error', 'compiler-error')
@@ -294,6 +294,9 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgetaskid]);
+        if (!$judgingRun) {
+            throw new BadRequestHttpException("Unknown judging run for judgetaskid $judgetaskid.");
+        }
         $query = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')

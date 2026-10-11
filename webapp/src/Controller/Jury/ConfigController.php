@@ -66,6 +66,16 @@ class ConfigController extends AbstractController
                 }
             }
             $before = $this->config->all();
+            // In case we clear a value it would not be sent and we keep the old value, this is a mistake
+            foreach ($before as $key => $value) {
+                if (!isset($data[$key])) {
+                    if (is_array($value)) {
+                        $data[$key] = [];
+                    } else {
+                        $data[$key] = null;
+                    }
+                }
+            }
             $errors = $this->config->saveChanges($data, $eventLogService, $this->dj, options: $options);
             $after = $this->config->all();
 

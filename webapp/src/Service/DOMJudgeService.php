@@ -868,6 +868,7 @@ class DOMJudgeService
             ->leftJoin('p.problemStatementContent', 'content')
             ->select('c', 'cp', 'p', 'a', 'content')
             ->andWhere('c.cid = :cid')
+            ->andWhere('cp.allowSubmit = 1')
             ->setParameter('cid', $contest->getCid())
             ->getQuery()
             ->getSingleResult();
@@ -1664,5 +1665,21 @@ class DOMJudgeService
         }
 
         $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParamsWithoutColon);
+    }
+
+    /** @return Team[] */
+    public function getTeamsForContest(?Contest $contest) : array {
+        if ($contest && !$contest->isOpenToAllTeams()) {
+            $contestTeams = $contest->getTeams()->toArray();
+            foreach ($contest->getTeamCategories() as $category) {
+                $contestTeams = array_merge($contestTeams, $category->getTeams()->toArray());
+            }
+            return $contestTeams;
+        }
+        return $this->em->createQueryBuilder()
+            ->select('l')
+            ->from(Team::class, 'l')
+            ->getQuery()
+            ->getResult();
     }
 }

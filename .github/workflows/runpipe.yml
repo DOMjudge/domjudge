@@ -1,15 +1,6 @@
 name: Run runpipe tests
 on:
-  push:
-    branches-ignore:
-      - main
-      - '[0-9]+.[0-9]+'
-      - gh-readonly-queue/main/*
-      - gh-readonly-queue/main/[0-9]+.[0-9]+
-  pull_request:
-    branches:
-      - main
-      - '[0-9]+.[0-9]+'
+  workflow_call:
 
 jobs:
   runpipe:

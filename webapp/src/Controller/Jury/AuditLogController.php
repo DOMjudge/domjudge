@@ -155,11 +155,8 @@ class AuditLogController extends AbstractController
                 }
                 return $this->generateUrl('jury_user', ['userId' => $id]);
             case 'testcase':
-                $testcase = $this->em->getRepository(Testcase::class)->find($id);
-                if ($testcase && $testcase->getProblem()) {
-                    return $this->generateUrl('jury_problem_testcases', ['probId' => $testcase->getProblem()->getProbid()]);
-                }
-                break;
+                // For testcase audit logs, the ID is actually the problem ID
+                return $this->generateUrl('jury_problem_testcases', ['probId' => $id]);
         }
         return null;
     }
