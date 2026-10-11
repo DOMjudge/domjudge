@@ -26,7 +26,8 @@ class ClarificationControllerTest extends BaseTestCase
         ClarificationFixture::class . ':0' => [
             "problem_id"   => "hello",
             "from_team_id" => "exteam",
-            "to_team_id"   => null,
+            "to_team_ids"  => null,
+            "to_group_ids" => null,
             "reply_to_id"  => null,
             "time"         => "2018-02-11T21:48:58.901+00:00",
             "text"         => "Is it necessary to read the problem statement carefully?",
@@ -35,7 +36,8 @@ class ClarificationControllerTest extends BaseTestCase
         ClarificationFixture::class . ':1' => [
             "problem_id"   => null,
             "from_team_id" => null,
-            "to_team_id"   => null,
+            "to_team_ids"  => null,
+            "to_group_ids" => null,
             "reply_to_id"  => null,
             "time"         => "2018-02-11T21:53:20.000+00:00",
             "text"         => "Lunch is served",
@@ -44,7 +46,8 @@ class ClarificationControllerTest extends BaseTestCase
         ClarificationFixture::class . ':2' => [
             "problem_id"   => "hello",
             "from_team_id" => null,
-            "to_team_id"   => "exteam",
+            "to_team_ids"  => ["exteam"],
+            "to_group_ids" => [],
             "reply_to_id"  => null,
             "time"         => "2018-02-11T21:47:43.689+00:00",
             "text"         => "There was a mistake in judging this problem. Please try again",
@@ -106,12 +109,12 @@ class ClarificationControllerTest extends BaseTestCase
             static::assertArrayNotHasKey('answered', $clarificationFromApi[0]);
 
             if (!$problemId) {
-                static::assertNull($clarificationFromApi[1]['to_team_id']);
+                static::assertNull($clarificationFromApi[1]['to_team_ids']);
                 static::assertEquals("Lunch is served", $clarificationFromApi[1]['text']);
                 static::assertArrayNotHasKey('answered', $clarificationFromApi[1]);
             }
 
-            static::assertEquals("exteam", $clarificationFromApi[$mistakJudgingId]['to_team_id']);
+            static::assertEquals(["exteam"], $clarificationFromApi[$mistakJudgingId]['to_team_ids']);
             static::assertEquals("There was a mistake in judging this problem. Please try again", $clarificationFromApi[$mistakJudgingId]['text']);
             static::assertArrayNotHasKey('answered', $clarificationFromApi[$mistakJudgingId]);
 
@@ -187,6 +190,8 @@ class ClarificationControllerTest extends BaseTestCase
         yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => 'noteam'], "Team with ID 'noteam' not found in contest or not enabled."];
         yield ['admin', ['text' => 'This is a clarification', 'to_team_id' => 'noteam'], "Team with ID 'noteam' not found in contest or not enabled."];
         yield ['admin', ['text' => 'This is a clarification', 'time' => 'this is not a time'], "Can not parse time 'this is not a time'."];
+        yield ['admin', ['text' => 'This is a clarification', 'to_team_ids' => ['exteam', 'domjudge']], "Only a single recipient team is supported."];
+        yield ['admin', ['text' => 'This is a clarification', 'to_group_ids' => ['participants']], "Sending a clarification to groups is not supported."];
         yield ['nav-alpha-user', ['text' => 'This is a response to a clarification of another team', 'reply_to_id' => '%s'], "Clarification '%s' not found.", '0'];
     }
 
@@ -292,8 +297,28 @@ class ClarificationControllerTest extends BaseTestCase
         }
         static::assertEquals($expectedProblemId, $clarificationFromApi['problem_id'], 'Wrong problem ID');
         static::assertEquals($expectedSenderId, $clarificationFromApi['from_team_id'], 'Wrong sender ID');
-        static::assertEquals($expectedRecipientId, $clarificationFromApi['to_team_id'], 'Wrong recipient ID');
+        if ($expectedRecipientId === null) {
+            static::assertNull($clarificationFromApi['to_team_ids'], 'Wrong recipient ID');
+            static::assertNull($clarificationFromApi['to_group_ids'], 'Wrong recipient groups');
+        } else {
+            static::assertEquals([$expectedRecipientId], $clarificationFromApi['to_team_ids'], 'Wrong recipient ID');
+            static::assertSame([], $clarificationFromApi['to_group_ids'], 'Wrong recipient groups');
+        }
         static::assertEquals($expectedInReplyToId, $clarificationFromApi['reply_to_id'], 'Wrong in reply to ID');
+    }
+
+    public function testRecipientAsToTeamIdBefore2026(): void
+    {
+        $this->withChangedConfiguration('ccs_api_version', '2023-06', function (): void {
+            $url = $this->helperGetEndpointURL($this->apiEndpoint);
+            $clarifications = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
+            static::assertNotEmpty($clarifications);
+            foreach ($clarifications as $clarification) {
+                static::assertArrayHasKey('to_team_id', $clarification);
+                static::assertArrayNotHasKey('to_team_ids', $clarification);
+                static::assertArrayNotHasKey('to_group_ids', $clarification);
+            }
+        });
     }
 
     public static function provideAddSuccess(): Generator
@@ -351,6 +376,31 @@ class ClarificationControllerTest extends BaseTestCase
             ['text' => 'This is a clarification to a specific team', 'to_team_id' => 'exteam'],
             false,
             'This is a clarification to a specific team',
+            null,
+            null,
+            null,
+            'exteam',
+            null,
+            null,
+        ];
+        yield [
+            'admin',
+            ['text' => 'Clarification to a team via to_team_ids array', 'to_team_ids' => ['exteam']],
+            false,
+            'Clarification to a team via to_team_ids array',
+            null,
+            null,
+            null,
+            'exteam',
+            null,
+            null,
+        ];
+        yield [
+            'admin',
+            // Cross-version client: also sends an empty to_team_ids; we should still honour to_team_id.
+            ['text' => 'Empty to_team_ids falls back to to_team_id', 'to_team_id' => 'exteam', 'to_team_ids' => []],
+            false,
+            'Empty to_team_ids falls back to to_team_id',
             null,
             null,
             null,

@@ -188,9 +188,18 @@ class ClarificationController extends AbstractRestController
 
         $clarification->setSender($fromTeam);
 
+        // We only support a single recipient team, given as to_team_ids since 2026-01 and to_team_id before.
+        if (count($clarificationPost->toTeamIds ?? []) > 1) {
+            throw new BadRequestHttpException('Only a single recipient team is supported.');
+        }
+        if (!empty($clarificationPost->toGroupIds)) {
+            throw new BadRequestHttpException('Sending a clarification to groups is not supported.');
+        }
+        $toTeamId = $clarificationPost->toTeamIds[0] ?? $clarificationPost->toTeamId;
+
         // By default, send to jury.
         $toTeam = null;
-        if ($toTeamId = $clarificationPost->toTeamId) {
+        if ($toTeamId) {
             // If the user is an admin or API writer, allow it to specify the team.
             if ($this->isGranted('ROLE_API_WRITER')) {
                 $toTeam = $this->dj->loadTeam($toTeamId, $contest);
