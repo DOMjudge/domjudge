@@ -1270,18 +1270,13 @@ class SubmissionController extends BaseController
         $submission->setValid($valid);
         $this->em->flush();
 
-        $teamId    = $submission->getTeam()->getTeamid();
-        $problemId = $submission->getProblem()->getProbid();
-
         // KLUDGE: We can't log an "undelete", so we re-"create".
         // FIXME: We should also delete/recreate any dependent judging(runs).
         $eventLogService->log('submission', $submission->getSubmitid(), ($valid ? 'create' : 'delete'),
                               $contest->getCid(), null, null, $valid);
         $this->dj->auditlog('submission', $submission->getExternalid(),
                                          'marked ' . ($valid ? 'valid' : 'invalid'));
-        $team    = $this->em->getRepository(Team::class)->find($teamId);
-        $problem = $this->em->getRepository(Problem::class)->find($problemId);
-        $scoreboardService->calculateScoreRow($contest, $team, $problem);
+        $scoreboardService->calculateScoreRow($contest, $submission->getTeam(), $submission->getProblem());
 
         return $this->redirectToLocalReferrer($this->router, $request,
             $this->generateUrl('jury_submission', ['contestId' => $contestId, 'submitId' => $submission->getExternalid()])

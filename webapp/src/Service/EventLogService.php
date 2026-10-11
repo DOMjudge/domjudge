@@ -534,9 +534,6 @@ class EventLogService
                     if ($action !== static::ACTION_DELETE && !$this->hasAllDependentObjectEvents($contest, $type, $jsonElement)) {
                         // Not all dependent objects are present, so insert all static events.
                         $this->initStaticEvents($contest);
-                        // If new references are added, we need to reload the contest,
-                        // because the entity manager has been cleared.
-                        $contest = $this->em->getRepository(Contest::class)->find($contest->getCid());
                     }
 
                     // Add missing state events that should have happened already.
@@ -792,11 +789,6 @@ class EventLogService
                 $urlPart = $endpoint === 'contests' ? '' : ('/' . $endpoint);
                 $url = sprintf('/contests/%s%s', $contestId, $urlPart);
                 $data = $this->fetchEndpointData($url);
-
-                // Get a partial reference to the contest,
-                // because calling internalApiRequest above will clear the entity manager.
-                /** @var Contest $contest */
-                $contest = $this->em->getReference(Contest::class, $contest->getCid());
 
                 if ($data === null) {
                     throw new Exception(sprintf("EventLogService::initializeStaticEvents no response data for endpoint '%s'.",

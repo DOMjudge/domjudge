@@ -15,6 +15,7 @@ use App\Entity\Testcase;
 use App\Entity\User;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Service\ImportProblemService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Handler\TestHandler;
@@ -23,6 +24,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
+use ZipArchive;
 
 class EventLogIntegrationTest extends KernelTestCase
 {
@@ -342,5 +344,66 @@ class EventLogIntegrationTest extends KernelTestCase
             self::assertNotNull($data);
             self::assertSame([], $data['group_ids'], 'Fetch-joined categories collection becoming empty must serialize as []');
         }, $adminUser);
+    }
+
+    public function testImportZippedProblemWithJurySolutionIntoDisabledContest(): void
+    {
+        $container = static::getContainer();
+        /** @var EntityManagerInterface $em */
+        $em = $container->get(EntityManagerInterface::class);
+        /** @var ImportProblemService $importProblemService */
+        $importProblemService = $container->get(ImportProblemService::class);
+        /** @var DOMJudgeService $dj */
+        $dj = $container->get(DOMJudgeService::class);
+
+        $adminUser = $em->getRepository(User::class)->findOneBy(['username' => 'admin']);
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        self::assertNotNull($adminUser);
+        self::assertNotNull($contest);
+
+        // Disable the contest: ProblemController::getContestId() throws NotFoundHttpException during
+        // EventLogService::log('problem', ...), so ImportProblemService cannot rely on EventLogService
+        // refreshing $problem->testcases as a side effect.
+        $contest->setEnabled(false);
+        $em->flush();
+
+        $tmpZip = tempnam(sys_get_temp_dir(), 'dj-disabled-import-') . '.zip';
+        $zip = new ZipArchive();
+        self::assertSame(true, $zip->open($tmpZip, ZipArchive::CREATE | ZipArchive::OVERWRITE));
+        $zip->addFromString('problem.yaml', "name: Disabled Contest Import Test\n");
+        $zip->addFromString('domjudge-problem.ini', "short-name=DISIMP\ntimelimit=1\n");
+        $zip->addFromString('data/secret/1.in', "1\n");
+        $zip->addFromString('data/secret/1.ans', "42\n");
+        $zip->addFromString('submissions/accepted/sol.c', "#include <stdio.h>\nint main(void) { puts(\"42\"); return 0; }\n");
+        $zip->close();
+
+        $reopenedZip = new ZipArchive();
+        self::assertSame(true, $reopenedZip->open($tmpZip));
+
+        try {
+            $dj->withAllRoles(function () use ($importProblemService, $reopenedZip, $contest, $em): void {
+                $messages = ['info' => [], 'warning' => [], 'danger' => []];
+                $problem = $importProblemService->importZippedProblem(
+                    $reopenedZip,
+                    'disabledcontestprob.zip',
+                    null,
+                    $contest,
+                    $messages
+                );
+
+                self::assertNotNull($problem, 'Problem import into disabled contest should succeed');
+                self::assertSame([], $messages['danger'], 'Import into disabled contest must not produce danger messages');
+                self::assertCount(1, $problem->getTestcases(), 'Imported problem must expose its testcase collection');
+
+                $submissions = $em->getRepository(Submission::class)->findBy([
+                    'contest' => $contest,
+                    'problem' => $problem,
+                ]);
+                self::assertCount(1, $submissions, 'Jury reference solution must be submitted into disabled contest');
+            }, $adminUser);
+        } finally {
+            $reopenedZip->close();
+            @unlink($tmpZip);
+        }
     }
 }

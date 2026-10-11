@@ -285,9 +285,6 @@ class ClarificationController extends AbstractRestController
         $this->dj->auditlog('clarification', $clarification->getExternalid(), 'added', null, null, $contest->getExternalid());
         $this->eventLogService->log('clarification', $clarification->getClarid(), 'create', $contestId);
 
-        // Refresh the clarification since the event log service will have unloaded it.
-        $clarification = $this->em->getRepository(Clarification::class)->find($clarification->getClarid());
-
         if ($clarification->getRecipient()) {
             $clarification->getRecipient()->addUnreadClarification($clarification);
         } else {

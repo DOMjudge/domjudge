@@ -1091,8 +1091,7 @@ class SubmissionService
                         $problem->getProbid(), $contest->getCid()));
         }
 
-        // If this method is called multiple times, we loose the user from Doctrine because of the internal API call
-        // to add the submission to the event table. To fix this, reload the user if this is the case.
+        // If the user entity is not currently managed in Doctrine's identity map, reload it.
         if ($user && !$this->em->contains($user)) {
             $user = $this->em->getRepository(User::class)->find($user->getUserid());
         }
@@ -1277,19 +1276,6 @@ class SubmissionService
                                         EventLogService::ACTION_CREATE, $contest->getCid());
         });
 
-        // Reload submission, contest, team and contestproblem for now, as
-        // EventLogService::log will clear the Doctrine entity manager.
-        /** @var Contest $contest */
-        /** @var Team $team */
-        /** @var ContestProblem $problem */
-        $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
-        $contest    = $this->em->getRepository(Contest::class)->find($contest->getCid());
-        $team       = $this->em->getRepository(Team::class)->find($team->getTeamid());
-        $problem    = $this->em->getRepository(ContestProblem::class)->find([
-            'problem' => $problem->getProblem(),
-            'contest' => $problem->getContest(),
-        ]);
-
         $this->scoreboardService->calculateScoreRow($contest, $team, $problem->getProblem());
 
         $this->dj->alert('submit', sprintf('submission %d: team %d, language %s, problem %d',
@@ -1347,29 +1333,23 @@ class SubmissionService
             );
         });
 
-        // Reload contest after EM clear (caused by internal API request in event logging).
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
-
         // Batch scoreboard: calculate once per unique (team, problem) pair.
         $scoreboardPairs = [];
         foreach ($submissions as $submission) {
-            $teamId = $submission->getTeam()->getTeamid();
-            $problemId = $submission->getProblem()->getProbid();
-            $key = $teamId . '-' . $problemId;
+            $team = $submission->getTeam();
+            $problem = $submission->getProblem();
+            $key = $team->getTeamid() . '-' . $problem->getProbid();
             if (!isset($scoreboardPairs[$key])) {
-                $scoreboardPairs[$key] = [$teamId, $problemId];
+                $scoreboardPairs[$key] = [$team, $problem];
             }
         }
-        foreach ($scoreboardPairs as [$teamId, $problemId]) {
-            $team = $this->em->getRepository(Team::class)->find($teamId);
-            $problem = $this->em->getRepository(Problem::class)->find($problemId);
+        foreach ($scoreboardPairs as [$team, $problem]) {
             $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
         }
 
         // Batch audit logging.
         $contestExternalId = $contest->getExternalid();
-        foreach ($submitIds as $submitId) {
-            $submission = $this->em->getRepository(Submission::class)->find($submitId);
+        foreach ($submissions as $submission) {
             $this->dj->auditlog('submission', $submission->getExternalid(), 'added',
                 'via ' . SubmissionSource::PROBLEM_IMPORT->value, null, $contestExternalId);
         }
