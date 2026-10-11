@@ -897,169 +897,169 @@
                                 </div>
                             {% endif %}
                         {% endif %}
-                    {% if run.description is not null %}
-                        <p><em>
-                            {{ run.description(true) | descriptionExpand }}
-                        </em></p>
-                    {% endif %}
-                    {% if runsOutput[runIdx].image_thumb %}
-                        <span style="float:right; border: 3px solid #438ec3; margin: 5px; padding: 5px;">
-                            {% set imgUrl = path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'image'}) %}
-                            <a href="{{ imgUrl }}">
-                                <img class="image_thumb" src="data:{{ run.imageType | extensionToMime }};base64,{{ runsOutput[runIdx].image_thumb | base64 }}"/>
-                            </a>
-                        </span>
-                    {% endif %}
-
-                    {% set runDone = false %}
-                    {% if run is not null and run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
-                        {% set runDone = true %}
-                    {% endif %}
-                    {% if not runDone %}
-                        <p class="nodata">
-                            {% if selectedJudging is not null and selectedJudging.result %}
-                                Run not used for final result.
-                            {% else %}
-                                Run not started/finished yet.
-                            {% endif %}
-                        </p>
-                    {% else %}
-                        {% if run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
-                            {% if combinedRunCompare %}
-                                <h4>Validator output</h4>
-                                {% if runsOutput[runIdx].output_diff is empty %}
-                                    <p class="nodata">There was no validator output.</p>
-                                {% else %}
-                                    <pre class="output_text">{{ runsOutput[runIdx].output_diff | convertUnprintableChars }}</pre>
-                                {% endif %}
-
-                                <h5>Validator/Submission interaction</h5>
-                                {% if runsOutput[runIdx].output_run is empty %}
-                                    <p class="nodata">There was no interaction log.</p>
-                                {% else %}
-                                    {{ runsOutput[runIdx].output_run | interactiveLog }}
-                                {% endif %}
-                            {% else %}
-                                <h4>Diff output</h4>
-                                {% if runsOutput[runIdx].output_diff is empty %}
-                                    <p class="nodata">There was no diff output.</p>
-                                {% else %}
-                                    <pre class="output_text">{{ runsOutput[runIdx].output_diff | convertUnprintableChars}}</pre>
-                                {% endif %}
-
-                                {% if run.firstJudgingRun.runresult != 'correct' %}
-                                    {{ runsOutput[runIdx] | runDiff }}
-                                {% endif %}
-
-                                <h5>Program output</h5>
-                                {% if runsOutput[runIdx].output_run is empty %}
-                                    <p class="nodata">There was no program output.</p>
-                                {% else %}
-                                    <pre class="output_text">{{ runsOutput[runIdx].output_run | convertUnprintableChars }}</pre>
-                                {% endif %}
-                            {% endif %}
-
-                            <h5>Program error output</h5>
-                            {% if runsOutput[runIdx].output_error is empty %}
-                                <p class="nodata">There was no stderr output.</p>
-                            {% else %}
-                                <pre class="output_text">{{ runsOutput[runIdx].output_error | convertUnprintableChars }}</pre>
-                            {% endif %}
-
-                            <h5>Judging system output (info/debug/errors)</h5>
-                            {% if runsOutput[runIdx].output_system is empty %}
-                                <p class="nodata">There was no judging system output.</p>
-                            {% else %}
-                                <pre class="output_text">{{ runsOutput[runIdx].output_system | convertUnprintableChars }}</pre>
-                            {% endif %}
-
-                            {% if runsOutput[runIdx].team_message is not empty %}
-                                <h5>Judge message for the team</h5>
-                                <pre class="output_text">
-                                    {{- runsOutput[runIdx].team_message | convertUnprintableChars }}
-                                </pre>
-                            {% endif %}
+                        {% if run.description is not null %}
+                            <p><em>
+                                {{ run.description(true) | descriptionExpand }}
+                            </em></p>
+                        {% endif %}
+                        {% if runsOutput[runIdx].image_thumb %}
+                            <span style="float:right; border: 3px solid #438ec3; margin: 5px; padding: 5px;">
+                                {% set imgUrl = path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'image'}) %}
+                                <a href="{{ imgUrl }}">
+                                    <img class="image_thumb" src="data:{{ run.imageType | extensionToMime }};base64,{{ runsOutput[runIdx].image_thumb | base64 }}"/>
+                                </a>
+                            </span>
                         {% endif %}
 
-                        {% if runsOutput[runIdx].passes is not empty %}
-                            <hr/>
-                            <h5>Passes</h5>
-                            <p>
-                                This is a multi-pass problem. The output above is that of the last pass that ran.
+                        {% set runDone = false %}
+                        {% if run is not null and run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
+                            {% set runDone = true %}
+                        {% endif %}
+                        {% if not runDone %}
+                            <p class="nodata">
+                                {% if selectedJudging is not null and selectedJudging.result %}
+                                    Run not used for final result.
+                                {% else %}
+                                    Run not started/finished yet.
+                                {% endif %}
                             </p>
-                            {% for passData in runsOutput[runIdx].passes %}
-                                <div class="card mb-2">
-                                    <div class="card-header">
-                                        <a data-bs-toggle="collapse" href="#collapsePass-{{ runIdx }}-{{ passData.pass }}"
-                                           role="button" aria-expanded="false">
-                                            Pass {{ passData.pass }}:
-                                            {{ passData.runresult | default('not finished') }}
-                                            {% if passData.runtime is not null %}
-                                                ({{ passData.runtime | number_format(3) }}s)
-                                            {% endif %}
-                                        </a>
-                                    </div>
-                                    <div class="collapse" id="collapsePass-{{ runIdx }}-{{ passData.pass }}">
-                                        <div class="card-body">
-                                            {% if passData.input is not null %}
-                                                <h6>Input generated by the validator</h6>
-                                                <pre class="output_text">{{ passData.input | convertUnprintableChars }}</pre>
-                                            {% endif %}
-                                            <h6>{{ combinedRunCompare ? 'Validator output' : 'Diff output' }}</h6>
-                                            {% if passData.output_diff is empty %}
-                                                <p class="nodata">There was no {{ combinedRunCompare ? 'validator' : 'diff' }} output.</p>
-                                            {% else %}
-                                                <pre class="output_text">{{ passData.output_diff | convertUnprintableChars }}</pre>
-                                            {% endif %}
-                                            <h6>{{ combinedRunCompare ? 'Validator/Submission interaction' : 'Program output' }}</h6>
-                                            {% if passData.output_run is empty %}
-                                                <p class="nodata">There was no {{ combinedRunCompare ? 'interaction log' : 'program output' }}.</p>
-                                            {% elseif combinedRunCompare %}
-                                                {{ passData.output_run | interactiveLog }}
-                                            {% else %}
-                                                <pre class="output_text">{{ passData.output_run | convertUnprintableChars }}</pre>
-                                            {% endif %}
-                                            <h6>Program error output</h6>
-                                            {% if passData.output_error is empty %}
-                                                <p class="nodata">There was no stderr output.</p>
-                                            {% else %}
-                                                <pre class="output_text">{{ passData.output_error | convertUnprintableChars }}</pre>
-                                            {% endif %}
-                                            <h6>Judging system output (info/debug/errors)</h6>
-                                            {% if passData.output_system is empty %}
-                                                <p class="nodata">There was no judging system output.</p>
-                                            {% else %}
-                                                <pre class="output_text">{{ passData.output_system | convertUnprintableChars }}</pre>
-                                            {% endif %}
-                                            {% if passData.metadata is not empty %}
-                                                <h6>Metadata</h6>
-                                                {{ passData.metadata | printMetadata }}
-                                            {% endif %}
-                                            {% if passData.validator_metadata is not empty %}
-                                                <h6>Validator metadata</h6>
-                                                {{ passData.validator_metadata | printMetadata }}
-                                            {% endif %}
+                        {% else %}
+                            {% if run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
+                                {% if combinedRunCompare %}
+                                    <h4>Validator output</h4>
+                                    {% if runsOutput[runIdx].output_diff is empty %}
+                                        <p class="nodata">There was no validator output.</p>
+                                    {% else %}
+                                        <pre class="output_text">{{ runsOutput[runIdx].output_diff | convertUnprintableChars }}</pre>
+                                    {% endif %}
+
+                                    <h5>Validator/Submission interaction</h5>
+                                    {% if runsOutput[runIdx].output_run is empty %}
+                                        <p class="nodata">There was no interaction log.</p>
+                                    {% else %}
+                                        {{ runsOutput[runIdx].output_run | interactiveLog }}
+                                    {% endif %}
+                                {% else %}
+                                    <h4>Diff output</h4>
+                                    {% if runsOutput[runIdx].output_diff is empty %}
+                                        <p class="nodata">There was no diff output.</p>
+                                    {% else %}
+                                        <pre class="output_text">{{ runsOutput[runIdx].output_diff | convertUnprintableChars}}</pre>
+                                    {% endif %}
+
+                                    {% if run.firstJudgingRun.runresult != 'correct' %}
+                                        {{ runsOutput[runIdx] | runDiff }}
+                                    {% endif %}
+
+                                    <h5>Program output</h5>
+                                    {% if runsOutput[runIdx].output_run is empty %}
+                                        <p class="nodata">There was no program output.</p>
+                                    {% else %}
+                                        <pre class="output_text">{{ runsOutput[runIdx].output_run | convertUnprintableChars }}</pre>
+                                    {% endif %}
+                                {% endif %}
+
+                                <h5>Program error output</h5>
+                                {% if runsOutput[runIdx].output_error is empty %}
+                                    <p class="nodata">There was no stderr output.</p>
+                                {% else %}
+                                    <pre class="output_text">{{ runsOutput[runIdx].output_error | convertUnprintableChars }}</pre>
+                                {% endif %}
+
+                                <h5>Judging system output (info/debug/errors)</h5>
+                                {% if runsOutput[runIdx].output_system is empty %}
+                                    <p class="nodata">There was no judging system output.</p>
+                                {% else %}
+                                    <pre class="output_text">{{ runsOutput[runIdx].output_system | convertUnprintableChars }}</pre>
+                                {% endif %}
+
+                                {% if runsOutput[runIdx].team_message is not empty %}
+                                    <h5>Judge message for the team</h5>
+                                    <pre class="output_text">
+                                        {{- runsOutput[runIdx].team_message | convertUnprintableChars }}
+                                    </pre>
+                                {% endif %}
+                            {% endif %}
+
+                            {% if runsOutput[runIdx].passes is not empty %}
+                                <hr/>
+                                <h5>Passes</h5>
+                                <p>
+                                    This is a multi-pass problem. The output above is that of the last pass that ran.
+                                </p>
+                                {% for passData in runsOutput[runIdx].passes %}
+                                    <div class="card mb-2">
+                                        <div class="card-header">
+                                            <a data-bs-toggle="collapse" href="#collapsePass-{{ runIdx }}-{{ passData.pass }}"
+                                               role="button" aria-expanded="false">
+                                                Pass {{ passData.pass }}:
+                                                {{ passData.runresult | default('not finished') }}
+                                                {% if passData.runtime is not null %}
+                                                    ({{ passData.runtime | number_format(3) }}s)
+                                                {% endif %}
+                                            </a>
+                                        </div>
+                                        <div class="collapse" id="collapsePass-{{ runIdx }}-{{ passData.pass }}">
+                                            <div class="card-body">
+                                                {% if passData.input is not null %}
+                                                    <h6>Input generated by the validator</h6>
+                                                    <pre class="output_text">{{ passData.input | convertUnprintableChars }}</pre>
+                                                {% endif %}
+                                                <h6>{{ combinedRunCompare ? 'Validator output' : 'Diff output' }}</h6>
+                                                {% if passData.output_diff is empty %}
+                                                    <p class="nodata">There was no {{ combinedRunCompare ? 'validator' : 'diff' }} output.</p>
+                                                {% else %}
+                                                    <pre class="output_text">{{ passData.output_diff | convertUnprintableChars }}</pre>
+                                                {% endif %}
+                                                <h6>{{ combinedRunCompare ? 'Validator/Submission interaction' : 'Program output' }}</h6>
+                                                {% if passData.output_run is empty %}
+                                                    <p class="nodata">There was no {{ combinedRunCompare ? 'interaction log' : 'program output' }}.</p>
+                                                {% elseif combinedRunCompare %}
+                                                    {{ passData.output_run | interactiveLog }}
+                                                {% else %}
+                                                    <pre class="output_text">{{ passData.output_run | convertUnprintableChars }}</pre>
+                                                {% endif %}
+                                                <h6>Program error output</h6>
+                                                {% if passData.output_error is empty %}
+                                                    <p class="nodata">There was no stderr output.</p>
+                                                {% else %}
+                                                    <pre class="output_text">{{ passData.output_error | convertUnprintableChars }}</pre>
+                                                {% endif %}
+                                                <h6>Judging system output (info/debug/errors)</h6>
+                                                {% if passData.output_system is empty %}
+                                                    <p class="nodata">There was no judging system output.</p>
+                                                {% else %}
+                                                    <pre class="output_text">{{ passData.output_system | convertUnprintableChars }}</pre>
+                                                {% endif %}
+                                                {% if passData.metadata is not empty %}
+                                                    <h6>Metadata</h6>
+                                                    {{ passData.metadata | printMetadata }}
+                                                {% endif %}
+                                                {% if passData.validator_metadata is not empty %}
+                                                    <h6>Validator metadata</h6>
+                                                    {{ passData.validator_metadata | printMetadata }}
+                                                {% endif %}
+                                            </div>
                                         </div>
                                     </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            {% if runsOutput[runIdx].validatorMetadata is not empty %}
+                                <hr/>
+                                <h5>Validator metadata</h5>
+                                {{ runsOutput[runIdx].validatorMetadata | printMetadata }}
+                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseValMeta-{{ runIdx }}"
+                                        aria-expanded="false">
+                                    show complete validator metadata
+                                </button>
+                                <div class="collapse" id="collapseValMeta-{{ runIdx }}">
+                                    <div class="card card-body output_text">{{ runsOutput[runIdx].validatorMetadata  }}</div>
                                 </div>
-                            {% endfor %}
-                        {% endif %}
 
-                        {% if runsOutput[runIdx].validatorMetadata is not empty %}
-                            <hr/>
-                            <h5>Validator metadata</h5>
-                            {{ runsOutput[runIdx].validatorMetadata | printMetadata }}
-                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
-                                    data-bs-target="#collapseValMeta-{{ runIdx }}"
-                                    aria-expanded="false">
-                                show complete validator metadata
-                            </button>
-                            <div class="collapse" id="collapseValMeta-{{ runIdx }}">
-                                <div class="card card-body output_text">{{ runsOutput[runIdx].validatorMetadata  }}</div>
-                            </div>
-
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
                     </div>
                 </div>
             {% endfor %}
