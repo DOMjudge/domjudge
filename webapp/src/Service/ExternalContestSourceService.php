@@ -1642,7 +1642,8 @@ class ExternalContestSourceService
                 if (preg_match('/^https?:\/\//', $zipUrl) === 0) {
                     // Relative URL, prepend the base URL.
                     // If the base URL ends with a slash and the zip URL starts with one, remove the slash.
-                    if (str_ends_with($this->basePath, '/') && str_starts_with($zipUrl, '/')) {
+                    // Contest packages have no base URL.
+                    if (str_ends_with($this->basePath ?? '', '/') && str_starts_with($zipUrl, '/')) {
                         $zipUrl = substr($zipUrl, 1);
                     }
                     $zipUrl = ($this->basePath ?? '') . $zipUrl;
