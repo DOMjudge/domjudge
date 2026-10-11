@@ -14,6 +14,8 @@ use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\JudgingRunOutput;
+use App\Entity\JudgingRunPass;
+use App\Entity\JudgingRunPassOutput;
 use App\Entity\QueueTask;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
@@ -620,6 +622,13 @@ class JudgehostController extends AbstractFOSRestController
                         description: 'The (base64-encoded) metadata of the validator',
                         type: 'string'
                     ),
+                    new OA\Property(
+                        property: 'passes',
+                        description: 'JSON encoded list of the individual passes of a multi-pass run. Each entry '
+                            . 'has a `pass` number and the same fields as the run itself, plus an optional '
+                            . '(base64-encoded) `input` for the pass',
+                        type: 'string'
+                    ),
                 ]
             )
         )
@@ -663,6 +672,7 @@ class JudgehostController extends AbstractFOSRestController
         $compareMeta  = $request->request->get('compare_metadata');
         $score        = $request->request->get('score');
         $pass         = $request->request->get('pass');
+        $passes       = $request->request->get('passes');
 
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
@@ -670,12 +680,74 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime, $startTime, $endTime,
-            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta, $score, $pass);
+            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta, $score, $pass, $passes);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
 
         return (int)$hasFinalResult;
+    }
+
+    /**
+     * Store the details of every pass of a multi-pass run.
+     *
+     * Passes are keyed by their number, so reporting the same run again
+     * replaces what was stored before instead of adding to it.
+     *
+     * @param string $passes JSON encoded list of passes
+     */
+    private function storeJudgingRunPasses(JudgingRun $judgingRun, string $passes, int $judgeTaskId): void
+    {
+        $decoded = Utils::jsonDecode($passes);
+        if (!is_array($decoded) || !array_is_list($decoded)) {
+            throw new BadRequestHttpException(
+                sprintf("Invalid passes for judgetask %d: not a list.", $judgeTaskId));
+        }
+
+        $existing = [];
+        foreach ($judgingRun->getPasses() as $judgingRunPass) {
+            $existing[$judgingRunPass->getPass()] = $judgingRunPass;
+        }
+
+        $seen = [];
+        foreach ($decoded as $data) {
+            if (!is_array($data) || !isset($data['pass']) || (int)$data['pass'] < 1) {
+                throw new BadRequestHttpException(
+                    sprintf("Invalid passes for judgetask %d: entry without pass number.", $judgeTaskId));
+            }
+            $number = (int)$data['pass'];
+            if (isset($seen[$number])) {
+                throw new BadRequestHttpException(
+                    sprintf("Invalid passes for judgetask %d: pass %d given twice.", $judgeTaskId, $number));
+            }
+            $seen[$number] = true;
+
+            $judgingRunPass = $existing[$number] ?? null;
+            if ($judgingRunPass === null) {
+                $judgingRunPass = (new JudgingRunPass())->setPass($number);
+                $judgingRun->addPass($judgingRunPass);
+            }
+            $output = $judgingRunPass->getOutput();
+            if ($output === null) {
+                $output = new JudgingRunPassOutput();
+                $judgingRunPass->setOutput($output);
+            }
+
+            $decode = static fn(string $key): ?string => isset($data[$key]) ? base64_decode((string)$data[$key]) : null;
+            $judgingRunPass
+                ->setRunresult($data['runresult'] ?? null)
+                ->setRuntime(isset($data['runtime']) ? (float)$data['runtime'] : null)
+                ->setStartTime($data['start_time'] ?? null)
+                ->setEndtime($data['end_time'] ?? null);
+            $output
+                ->setInput($decode('input'))
+                ->setOutputRun($decode('output_run'))
+                ->setOutputDiff($decode('output_diff'))
+                ->setOutputError($decode('output_error'))
+                ->setOutputSystem($decode('output_system'))
+                ->setMetadata($decode('metadata'))
+                ->setValidatorMetadata($decode('compare_metadata'));
+        }
     }
 
     /**
@@ -933,7 +1005,8 @@ class JudgehostController extends AbstractFOSRestController
         ?string $testcasedir,
         ?string $compareMeta,
         ?string $score = null,
-        ?string $pass = null
+        ?string $pass = null,
+        ?string $passes = null
     ): bool {
         $resultsRemap = $this->config->get('results_remap');
         $resultsPrio  = $this->config->get('results_prio');
@@ -971,6 +1044,10 @@ class JudgehostController extends AbstractFOSRestController
 
         if ($compareMeta) {
             $judgingRunOutput->setValidatorMetadata(base64_decode($compareMeta));
+        }
+
+        if ($passes !== null) {
+            $this->storeJudgingRunPasses($judgingRun, $passes, $judgeTaskId);
         }
 
         if ($teamMessage) {
