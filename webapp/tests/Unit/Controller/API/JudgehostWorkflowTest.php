@@ -8,6 +8,7 @@ use App\Entity\JudgeTask;
 use App\Entity\Judgehost;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
+use App\Entity\JudgingRunPass;
 use App\Entity\Problem;
 use App\Entity\QueueTask;
 use App\Entity\Rejudging;
@@ -160,8 +161,12 @@ class JudgehostWorkflowTest extends BaseTestCase
 
     /**
      */
-    private function reportRun(int $judgeTaskId, string $runResult): mixed
-    {
+    private function reportRun(
+        int $judgeTaskId,
+        string $runResult,
+        array $extra = [],
+        int $expectedStatus = 200
+    ): mixed {
         return $this->request(
             'POST',
             sprintf('/judgehosts/add-judging-run/%s/%d', self::HOSTNAME, $judgeTaskId),
@@ -176,7 +181,8 @@ class JudgehostWorkflowTest extends BaseTestCase
                 // Mandatory, and a real judgedaemon always sends them.
                 'start_time' => (string)(microtime(true) - 1),
                 'end_time' => (string)microtime(true),
-            ]
+            ] + $extra,
+            $expectedStatus
         );
     }
 
@@ -333,6 +339,74 @@ class JudgehostWorkflowTest extends BaseTestCase
         $judging = $this->judgingForTask((int)$tasks[0]['judgetaskid']);
         self::assertSame(Judging::RESULT_CORRECT, $judging->getResult());
         self::assertNotNull($judging->getEndtime());
+    }
+
+    public function testRunStoresTheDetailsOfEveryPass(): void
+    {
+        $tasks = $this->claimWorkForOneSubmission();
+        $judgeTaskId = (int)$tasks[0]['judgetaskid'];
+
+        $passes = [
+            [
+                'pass' => 1,
+                'runresult' => 'correct',
+                'runtime' => '0.01',
+                'start_time' => '1000.5',
+                'end_time' => '1001.5',
+                'output_run' => base64_encode('run 1'),
+                'output_diff' => base64_encode('diff 1'),
+                'metadata' => base64_encode('meta 1'),
+            ],
+            [
+                'pass' => 2,
+                'runresult' => 'wrong-answer',
+                'runtime' => '0.02',
+                'start_time' => '1002.5',
+                'end_time' => '1003.5',
+                'input' => base64_encode('input 2'),
+                'output_run' => base64_encode('run 2'),
+                'compare_metadata' => base64_encode('validator 2'),
+            ],
+        ];
+        $this->reportRun($judgeTaskId, 'wrong-answer', ['pass' => '2', 'passes' => json_encode($passes)]);
+        // The judgedaemon retries a report it got no answer to, which must not add the passes again.
+        $this->reportRun($judgeTaskId, 'wrong-answer', ['pass' => '2', 'passes' => json_encode($passes)]);
+
+        $run = $this->freshEm()->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
+        self::assertSame(2, $run->getPass());
+        self::assertSame('wrong-answer', $run->getRunresult());
+
+        $stored = $run->getPasses()->toArray();
+        self::assertCount(2, $stored);
+        self::assertContainsOnlyInstancesOf(JudgingRunPass::class, $stored);
+        self::assertSame([1, 2], array_map(static fn(JudgingRunPass $p) => $p->getPass(), $stored));
+        self::assertSame('correct', $stored[0]->getRunresult());
+        self::assertSame('run 1', $stored[0]->getOutput()->getOutputRun());
+        self::assertSame('meta 1', $stored[0]->getOutput()->getMetadata());
+        self::assertNull($stored[0]->getOutput()->getInput());
+        self::assertSame('wrong-answer', $stored[1]->getRunresult());
+        self::assertSame('input 2', $stored[1]->getOutput()->getInput());
+        self::assertSame('validator 2', $stored[1]->getOutput()->getValidatorMetadata());
+    }
+
+    public function testRunWithoutPassesStoresNone(): void
+    {
+        $tasks = $this->claimWorkForOneSubmission();
+        $judgeTaskId = (int)$tasks[0]['judgetaskid'];
+        $this->reportRun($judgeTaskId, 'correct');
+
+        $run = $this->freshEm()->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
+        self::assertCount(0, $run->getPasses());
+    }
+
+    public function testRunRejectsMalformedPasses(): void
+    {
+        $tasks = $this->claimWorkForOneSubmission();
+        $judgeTaskId = (int)$tasks[0]['judgetaskid'];
+
+        $this->reportRun($judgeTaskId, 'correct', ['passes' => json_encode(['pass' => 1])], 400);
+        $this->reportRun($judgeTaskId, 'correct', ['passes' => json_encode([['runresult' => 'correct']])], 400);
+        $this->reportRun($judgeTaskId, 'correct', ['passes' => json_encode([['pass' => 1], ['pass' => 1]])], 400);
     }
 
     /**
