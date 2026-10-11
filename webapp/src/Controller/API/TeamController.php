@@ -3,6 +3,8 @@
 namespace App\Controller\API;
 
 use App\DataTransferObject\AddTeam;
+use App\DataTransferObject\PatchTeam;
+use App\DataTransferObject\PutTeam;
 use App\Entity\Contest;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
@@ -276,32 +278,119 @@ class TeamController extends AbstractRestController
         Request $request,
         ImportExportService $importExport
     ): Response {
-        $saved = [];
-        $importExport->importTeamsJson([
-            [
-                'id' => $addTeam->id,
-                'icpc_id' => $addTeam->icpcId,
-                'label' => $addTeam->label,
-                'group_ids' => $addTeam->groupIds,
-                'name' => $addTeam->name,
-                'display_name' => $addTeam->displayName,
-                'public_description' => $addTeam->publicDescription,
-                'members' => $addTeam->members,
-                'location' => [
-                    'description' => $addTeam->location?->description,
-                ],
-                'organization_id' => $addTeam->organizationId,
-            ],
-        ], $message, $saved);
-        if (!empty($message)) {
-            throw new BadRequestHttpException("Error while adding team: $message");
+        if ($addTeam->id !== null && $this->em->getRepository(Team::class)->findOneBy(['externalid' => $addTeam->id])) {
+            throw new BadRequestHttpException(sprintf("Team with ID '%s' already exists", $addTeam->id));
         }
 
-        /** @var Team $team */
-        $team = $saved[0];
-        $id = $team->getExternalid();
+        return $this->importSingle(
+            $request,
+            $importExport->importTeamsJson(...),
+            $this->normalizePayload($addTeam),
+            'team',
+            created: true,
+        );
+    }
 
-        return $this->renderCreateData($request, $saved[0], 'team', $id);
+    /**
+     * Replace an existing team or create one with the given ID.
+     */
+    #[IsGranted('ROLE_API_WRITER')]
+    #[Rest\Put(path: 'contests/{cid}/teams/{id}')]
+    #[Rest\Put(path: 'teams/{id}')]
+    #[OA\RequestBody(
+        required: true,
+        content: [
+            new OA\MediaType(
+                mediaType: 'application/x-www-form-urlencoded',
+                schema: new OA\Schema(ref: new Model(type: PutTeam::class))),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the replaced team',
+        content: new Model(type: Team::class)
+    )]
+    #[OA\Response(
+        response: 201,
+        description: 'Returns the added team',
+        content: new Model(type: Team::class)
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
+    public function updateAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        PutTeam $putTeam,
+        Request $request,
+        ImportExportService $importExport,
+        string $id,
+    ): Response {
+        $this->checkPayloadId($id, $putTeam->id);
+
+        return $this->importSingle(
+            $request,
+            $importExport->importTeamsJson(...),
+            $this->normalizePayload($putTeam),
+            'team',
+            created: $this->em->getRepository(Team::class)->findOneBy(['externalid' => $id]) === null,
+        );
+    }
+
+    /**
+     * Update only the provided fields of an existing team.
+     */
+    #[IsGranted('ROLE_API_WRITER')]
+    #[Rest\Patch(path: 'contests/{cid}/teams/{id}')]
+    #[Rest\Patch(path: 'teams/{id}')]
+    #[OA\RequestBody(
+        required: true,
+        content: [
+            new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(ref: new Model(type: PatchTeam::class))),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the updated team',
+        content: new Model(type: Team::class)
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
+    public function patchAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        PatchTeam $patchTeam,
+        Request $request,
+        ImportExportService $importExport,
+        string $id,
+    ): Response {
+        $this->checkPayloadId($id, $patchTeam->id ?? $id);
+
+        /** @var Team|null $team */
+        $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $id]);
+        if ($team === null) {
+            throw new NotFoundHttpException(sprintf("Team with ID '%s' not found", $id));
+        }
+
+        $data = $this->mergePatch($request, $patchTeam, [
+            'id' => $team->getExternalid(),
+            'icpc_id' => $team->getIcpcId(),
+            'label' => $team->getLabel(),
+            'group_ids' => array_map(
+                fn(TeamCategory $category) => $category->getExternalid(),
+                $team->getCategories()->toArray()
+            ),
+            'name' => $team->getName(),
+            'display_name' => $team->getDisplayName(),
+            'public_description' => $team->getPublicDescription(),
+            'location' => ['description' => $team->getLocation()],
+            'organization_id' => $team->getAffiliation()?->getExternalid(),
+        ]);
+
+        // `members` is an alias of `public_description`, which takes precedence in the import.
+        $sent = $request->getPayload()->all();
+        if (array_key_exists('members', $sent) && !array_key_exists('public_description', $sent)) {
+            $data['public_description'] = $data['members'];
+        }
+
+        return $this->importSingle($request, $importExport->importTeamsJson(...), $data, 'team', created: false);
     }
 
     protected function getQueryBuilder(Request $request): QueryBuilder

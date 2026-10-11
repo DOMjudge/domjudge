@@ -3,6 +3,8 @@
 namespace App\Controller\API;
 
 use App\DataTransferObject\AddOrganization;
+use App\DataTransferObject\PatchOrganization;
+use App\DataTransferObject\PutOrganization;
 use App\Entity\TeamAffiliation;
 use App\Service\AssetUpdateService;
 use App\Service\AuthorizedUserService;
@@ -254,25 +256,116 @@ class OrganizationController extends AbstractRestController
         Request $request,
         ImportExportService $importExport
     ): Response {
-        $saved = [];
-        $importExport->importOrganizationsJson([
-            [
-                'id' => $addOrganization->id,
-                'shortname' => $addOrganization->shortname,
-                'name' => $addOrganization->formalName ?? $addOrganization->name,
-                'country' => $addOrganization->country,
-                'icpc_id' => $addOrganization->icpcId,
-            ],
-        ], $message, $saved);
-        if (!empty($message)) {
-            throw new BadRequestHttpException("Error while adding organization: $message");
+        if ($addOrganization->id !== null
+            && $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $addOrganization->id])) {
+            throw new BadRequestHttpException(sprintf("Organization with ID '%s' already exists", $addOrganization->id));
         }
 
-        /** @var TeamAffiliation $organization */
-        $organization = $saved[0];
-        $id = $organization->getExternalid();
+        return $this->importSingle(
+            $request,
+            $importExport->importOrganizationsJson(...),
+            $this->normalizePayload($addOrganization),
+            'organization',
+            created: true,
+        );
+    }
 
-        return $this->renderCreateData($request, $saved[0], 'organization', $id);
+    /**
+     * Replace an existing organization or create one with the given ID.
+     */
+    #[IsGranted('ROLE_API_WRITER')]
+    #[Rest\Put(path: 'contests/{cid}/organizations/{id}')]
+    #[Rest\Put(path: 'organizations/{id}')]
+    #[OA\RequestBody(
+        required: true,
+        content: [
+            new OA\MediaType(
+                mediaType: 'application/x-www-form-urlencoded',
+                schema: new OA\Schema(ref: new Model(type: PutOrganization::class))
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the replaced organization',
+        content: new Model(type: TeamAffiliation::class)
+    )]
+    #[OA\Response(
+        response: 201,
+        description: 'Returns the added organization',
+        content: new Model(type: TeamAffiliation::class)
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
+    public function updateAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        PutOrganization $putOrganization,
+        Request $request,
+        ImportExportService $importExport,
+        string $id,
+    ): Response {
+        $this->checkPayloadId($id, $putOrganization->id);
+
+        return $this->importSingle(
+            $request,
+            $importExport->importOrganizationsJson(...),
+            $this->normalizePayload($putOrganization),
+            'organization',
+            created: $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $id]) === null,
+        );
+    }
+
+    /**
+     * Update only the provided fields of an existing organization.
+     */
+    #[IsGranted('ROLE_API_WRITER')]
+    #[Rest\Patch(path: 'contests/{cid}/organizations/{id}')]
+    #[Rest\Patch(path: 'organizations/{id}')]
+    #[OA\RequestBody(
+        required: true,
+        content: [
+            new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(ref: new Model(type: PatchOrganization::class))
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the updated organization',
+        content: new Model(type: TeamAffiliation::class)
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
+    public function patchAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        PatchOrganization $patchOrganization,
+        Request $request,
+        ImportExportService $importExport,
+        string $id,
+    ): Response {
+        $this->checkPayloadId($id, $patchOrganization->id ?? $id);
+
+        /** @var TeamAffiliation|null $organization */
+        $organization = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $id]);
+        if ($organization === null) {
+            throw new NotFoundHttpException(sprintf("Organization with ID '%s' not found", $id));
+        }
+
+        // No `shortname` here: the import falls back to `name` for it, which is the short name in the API.
+        $data = $this->mergePatch($request, $patchOrganization, [
+            'id' => $organization->getExternalid(),
+            'name' => $organization->getShortname(),
+            'formal_name' => $organization->getName(),
+            'country' => $organization->getCountry(),
+            'icpc_id' => $organization->getIcpcid(),
+        ]);
+
+        return $this->importSingle(
+            $request,
+            $importExport->importOrganizationsJson(...),
+            $data,
+            'organization',
+            created: false,
+        );
     }
 
     protected function getQueryBuilder(Request $request): QueryBuilder

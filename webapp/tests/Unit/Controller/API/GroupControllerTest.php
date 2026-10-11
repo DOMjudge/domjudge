@@ -137,4 +137,71 @@ class GroupControllerTest extends BaseTestCase
         $response = $this->verifyApiJsonResponse('PUT', $url . '/invalid%20id!', 400, 'admin', $data);
         self::assertStringContainsString('Only letters, numbers, dashes, underscores and dots are allowed.', $response['message']);
     }
+
+    public function testPutReplacesGroup(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'observers');
+        $data = ['id' => 'observers', 'name' => 'Replaced'];
+        $response = $this->verifyApiJsonResponse('PUT', $url, 200, 'admin', $data);
+        self::assertEquals('Replaced', $response['name']);
+        self::assertEquals(0, $response['sortorder']);
+        self::assertArrayNotHasKey('color', $response);
+    }
+
+    public function testPutWithTypesAndCssClass(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'someid');
+        $data = ['id' => 'someid', 'name' => 'Styled', 'types' => ['css-class'], 'css_class' => 'styled-row'];
+        $response = $this->verifyApiJsonResponse('PUT', $url, 201, 'admin', $data);
+        self::assertEquals(['css-class'], $response['types']);
+        self::assertEquals('styled-row', $response['css_class']);
+    }
+
+    public function testPutWithInvalidType(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'someid');
+        $data = ['id' => 'someid', 'name' => 'Styled', 'types' => ['nonexistent']];
+        $response = $this->verifyApiJsonResponse('PUT', $url, 400, 'admin', $data);
+        self::assertStringContainsString('types', $response['message']);
+    }
+
+    public function testPatchKeepsOtherFields(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'observers');
+        $before = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
+
+        $response = $this->verifyApiJsonResponse('PATCH', $url, 200, 'admin', ['name' => 'Patched', 'hidden' => true]);
+        self::assertEquals('Patched', $response['name']);
+        self::assertTrue($response['hidden']);
+        self::assertEquals('#ffcc33', $response['color']);
+        self::assertEquals(1, $response['sortorder']);
+        self::assertEquals($before['types'], $response['types']);
+    }
+
+    public function testPatchClearsNullFields(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'participants');
+        $this->verifyApiJsonResponse('PATCH', $url, 200, 'admin', ['icpc_id' => 'icpc1']);
+
+        $response = $this->verifyApiJsonResponse('PATCH', $url, 200, 'admin', ['icpc_id' => null]);
+        self::assertNull($response['icpc_id']);
+        self::assertEquals('Participants', $response['name']);
+    }
+
+    public function testAllowPasswordChange(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'participants');
+        $response = $this->verifyApiJsonResponse('PATCH', $url, 200, 'admin', ['allow_password_change' => true]);
+        self::assertTrue($response['allow_password_change']);
+        self::assertEquals('Participants', $response['name']);
+
+        $response = $this->verifyApiJsonResponse('PUT', $url, 200, 'admin', ['id' => 'participants', 'name' => 'Participants']);
+        self::assertFalse($response['allow_password_change']);
+    }
+
+    public function testPatchNotFound(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'nonexistent');
+        $this->verifyApiJsonResponse('PATCH', $url, 404, 'admin', ['name' => 'Patched']);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\SelfRegisteredUserFixture;
+use App\Entity\Team;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -80,7 +81,84 @@ class UserControllerTest extends AccountBaseTestCase
         static::assertEquals(['team'], $response['roles']);
     }
 
-    public function testUpdateNotAllFields(): void
+    public function testUpdateReplacesAllFields(): void
+    {
+        $user = $this->prepareSelfRegisteredUser();
+
+        $data = [
+            'id' => 'selfregister',
+            'username' => 'selfregister',
+            'name' => 'Test User',
+            'roles' => ['balloon'],
+        ];
+
+        $response = $this->verifyApiJsonResponse('PUT', $this->helperGetEndpointURL($this->apiEndpoint) . '/selfregister', 200, 'admin', $data);
+        static::assertEquals('Test User', $response['name']);
+
+        $user = $this->reloadUser($user);
+        static::assertEmpty($user->getPassword());
+        static::assertNull($user->getIpAddress());
+        static::assertNull($user->getTeam());
+        static::assertTrue($user->getEnabled());
+        static::assertEquals(['balloon'], $user->getRoleList());
+    }
+
+    public function testUpdateWithoutRoles(): void
+    {
+        $data = [
+            'id' => 'someid',
+            'username' => 'testuser',
+            'name' => 'Test User',
+        ];
+
+        $this->verifyApiJsonResponse('PUT', $this->helperGetEndpointURL($this->apiEndpoint) . '/someid', 400, 'admin', $data);
+    }
+
+    public function testPatchKeepsOtherFields(): void
+    {
+        $user = $this->prepareSelfRegisteredUser();
+        $password = $user->getPassword();
+
+        $response = $this->verifyApiJsonResponse('PATCH', $this->helperGetEndpointURL($this->apiEndpoint) . '/selfregister', 200, 'admin', ['name' => 'Test User']);
+        static::assertEquals('Test User', $response['name']);
+
+        $user = $this->reloadUser($user);
+        static::assertEquals($password, $user->getPassword());
+        static::assertEquals('10.0.0.1', $user->getIpAddress());
+        static::assertEquals('exteam', $user->getTeam()->getExternalid());
+        static::assertFalse($user->getEnabled());
+        static::assertEquals(['team'], $user->getRoleList());
+    }
+
+    public function testPatchClearsNullFields(): void
+    {
+        $user = $this->prepareSelfRegisteredUser();
+
+        $data = ['ip' => null, 'team_id' => null, 'password' => null];
+        $this->verifyApiJsonResponse('PATCH', $this->helperGetEndpointURL($this->apiEndpoint) . '/selfregister', 200, 'admin', $data);
+
+        $user = $this->reloadUser($user);
+        static::assertEmpty($user->getPassword());
+        static::assertNull($user->getIpAddress());
+        static::assertNull($user->getTeam());
+        static::assertEquals('selfregistered user for example team', $user->getName());
+    }
+
+    public function testPatchNotFound(): void
+    {
+        $this->verifyApiJsonResponse('PATCH', $this->helperGetEndpointURL($this->apiEndpoint) . '/nonexistent', 404, 'admin', ['name' => 'Test User']);
+    }
+
+    public function testPatchIdMismatch(): void
+    {
+        static::loadFixture(SelfRegisteredUserFixture::class);
+
+        $data = ['id' => 'otherid', 'name' => 'Test User'];
+        $response = $this->verifyApiJsonResponse('PATCH', $this->helperGetEndpointURL($this->apiEndpoint) . '/selfregister', 400, 'admin', $data);
+        static::assertEquals('ID in URL does not match ID in payload', $response['message']);
+    }
+
+    private function prepareSelfRegisteredUser(): User
     {
         static::loadFixture(SelfRegisteredUserFixture::class);
 
@@ -88,25 +166,22 @@ class UserControllerTest extends AccountBaseTestCase
         $manager = static::getContainer()->get(EntityManagerInterface::class);
         /** @var User $user */
         $user = $manager->getRepository(User::class)->findOneBy(['username' => 'selfregister']);
-
-        // Set the user to not enabled. It should stay that way. Also keep track of its password
-        $password = $user->getPassword();
-
-        $user->setEnabled(false);
+        $user
+            ->setEnabled(false)
+            ->setIpAddress('10.0.0.1')
+            ->setTeam($manager->getRepository(Team::class)->findOneBy(['externalid' => 'exteam']));
         $manager->flush();
 
-        $data = [
-            'id' => 'selfregister',
-            'username' => 'selfregister',
-            'name' => 'Test User',
-        ];
+        return $user;
+    }
 
-        $this->verifyApiJsonResponse('PUT', $this->helperGetEndpointURL($this->apiEndpoint) . '/selfregister', 201, 'admin', $data);
+    private function reloadUser(User $user): User
+    {
+        /** @var EntityManagerInterface $manager */
+        $manager = static::getContainer()->get(EntityManagerInterface::class);
+        $manager->clear();
 
-        $user = $manager->getRepository(User::class)->findOneBy(['username' => 'selfregister']);
-        static::assertEquals($password, $user->getPassword());
-        static::assertFalse($user->getEnabled());
-        static::assertEquals(['team'], $user->getRoleList());
+        return $manager->getRepository(User::class)->find($user->getUserid());
     }
 
     public function testUpdateNoId(): void

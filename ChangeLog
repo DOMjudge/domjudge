@@ -35,6 +35,10 @@ Version 10.0.0DEV
    configured with a base URL without a path, e.g.
    `--with-baseurl=https://example.org/`, now get a webserver configuration
    serving DOMjudge from the root rather than from `/domjudge`.
+ - API: allow updating users, teams, groups and organizations with `PUT`
+   (replaces the entity) and `PATCH` (updates only the given fields). `POST` to
+   teams and organizations no longer updates an existing entity. Groups now
+   accept `types`, `css_class` and `allow_password_change` in the API.
  - Configuration changes
    - `show_balloons_postfreeze` configuration variable superseded by
      `minimum_number_of_balloons` and `any_balloon_postfreeze`.
