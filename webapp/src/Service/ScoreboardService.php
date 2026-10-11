@@ -486,23 +486,6 @@ class ScoreboardService
             throw new Exception(sprintf("ScoreboardService::updateRankCache failed to obtain lock '%s'", $lockString));
         }
 
-        // Fetch contest problems. We can not add it as a relation on
-        // ScoreCache as Doctrine doesn't seem to like that its keys are part
-        // of the primary key.
-        /** @var ContestProblem[] $contestProblems */
-        $contestProblems = $this->em->createQueryBuilder()
-            ->from(ContestProblem::class, 'cp')
-            ->select('cp')
-            ->andWhere('cp.contest = :contest')
-            ->setParameter('contest', $contest)
-            ->getQuery()
-            ->getResult();
-        $contestProblemsIndexed = [];
-        foreach ($contestProblems as $cp) {
-            $contestProblemsIndexed[$cp->getProblem()->getProbid()] = $cp;
-        }
-        $contestProblems = $contestProblemsIndexed;
-
         // Initialize our data
         $variants  = ['public' => false, 'restricted' => true];
         $numPoints = [];
@@ -521,48 +504,58 @@ class ScoreboardService
         $penaltyTime      = $contest->getPenaltyTime();
         $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
 
-        // Now fetch the ScoreCache entries.
-        /** @var ScoreCache[] $scoreCacheCells */
+        // Fetch the score cache cells of the problems that are in the contest. This only needs a
+        // few columns, so do not load entities for them.
         $scoreCacheCells = $this->em->createQueryBuilder()
             ->from(ScoreCache::class, 's')
-            ->select('s')
+            ->join(ContestProblem::class, 'cp', Join::WITH, 'cp.contest = s.contest AND cp.problem = s.problem')
+            ->select('cp.points AS points')
+            ->addSelect('s.is_correct_restricted AS is_correct_restricted')
+            ->addSelect('s.submissions_restricted AS submissions_restricted')
+            ->addSelect('s.solvetime_restricted AS solvetime_restricted')
+            ->addSelect('s.runtime_restricted AS runtime_restricted')
+            ->addSelect('s.scoreRestricted AS score_restricted')
+            ->addSelect('s.is_correct_public AS is_correct_public')
+            ->addSelect('s.submissions_public AS submissions_public')
+            ->addSelect('s.solvetime_public AS solvetime_public')
+            ->addSelect('s.runtime_public AS runtime_public')
+            ->addSelect('s.scorePublic AS score_public')
             ->andWhere('s.contest = :contest')
             ->andWhere('s.team = :team')
             ->setParameter('contest', $contest)
             ->setParameter('team', $team)
             ->getQuery()
-            ->getResult();
+            ->getScalarResult();
 
         // Process all score cache cells.
         foreach ($scoreCacheCells as $scoreCacheCell) {
             foreach ($variants as $variant => $isRestricted) {
-                $probId = $scoreCacheCell->getProblem()->getProbid();
-                if (!isset($contestProblems[$probId])) {
-                    continue;
-                }
+                $suffix = $isRestricted ? 'restricted' : 'public';
+                $isCorrect = (bool)$scoreCacheCell['is_correct_' . $suffix];
+                $cellScore = (string)$scoreCacheCell['score_' . $suffix];
 
                 // For scoring contests, add the score even if not fully correct (partial scores)
                 if ($contest->getScoreboardType() === ScoreboardType::SCORE) {
-                    $score[$variant] = bcadd($score[$variant], $scoreCacheCell->getScore($isRestricted), self::SCALE);
+                    $score[$variant] = bcadd($score[$variant], $cellScore, self::SCALE);
                 }
 
                 // For pass-fail contests (and correct submissions in scoring contests), add points/time
-                if ($scoreCacheCell->getIsCorrect($isRestricted)) {
-                    $penalty = Utils::calcPenaltyTime($scoreCacheCell->getIsCorrect($isRestricted),
-                                                      $scoreCacheCell->getSubmissions($isRestricted),
+                if ($isCorrect) {
+                    $penalty = Utils::calcPenaltyTime($isCorrect,
+                                                      (int)$scoreCacheCell['submissions_' . $suffix],
                                                       $penaltyTime, $scoreIsInSeconds);
 
-                    $numPoints[$variant] += $contestProblems[$probId]->getPoints();
+                    $numPoints[$variant] += (int)$scoreCacheCell['points'];
                     $solveTimeForProblem = Utils::scoretime(
-                        (float)$scoreCacheCell->getSolveTime($isRestricted),
+                        (float)$scoreCacheCell['solvetime_' . $suffix],
                         $scoreIsInSeconds
                     );
                     $timeOfLastCorrect[$variant] = max($timeOfLastCorrect[$variant], $solveTimeForProblem);
                     $totalTime[$variant] += $solveTimeForProblem + $penalty;
-                    $totalRuntime[$variant] += $scoreCacheCell->getRuntime($isRestricted);
+                    $totalRuntime[$variant] += (int)$scoreCacheCell['runtime_' . $suffix];
                     // For pass-fail contests, also add the score here (even though it's not really used)
                     if ($contest->getScoreboardType() !== ScoreboardType::SCORE) {
-                        $score[$variant] = bcadd($score[$variant], $scoreCacheCell->getScore($isRestricted), self::SCALE);
+                        $score[$variant] = bcadd($score[$variant], $cellScore, self::SCALE);
                     }
                 }
             }
