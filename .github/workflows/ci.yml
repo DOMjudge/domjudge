@@ -58,6 +58,7 @@ jobs:
     uses: ./.github/workflows/unit-tests.yml
     permissions:
       checks: write
+      pull-requests: write
 
   webstandard:
     needs: changes
