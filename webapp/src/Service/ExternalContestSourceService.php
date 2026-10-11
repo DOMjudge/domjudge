@@ -120,6 +120,9 @@ class ExternalContestSourceService
      */
     protected const SERVICES_RESET_INTERVAL = 100;
 
+    // Hidden category for teams we create for submissions from accounts without a team.
+    protected const SHADOW_TEAMS_CATEGORY_ID = 'shadowing';
+
     /**
      * This array will hold all events that are waiting on a dependent event
      * because it has an ID that does not exist yet. According to the official
@@ -1560,14 +1563,14 @@ class ExternalContestSourceService
 
         $teamId = $data->teamId;
         if ($teamId === null) {
-            // Our data model requires a team, so derive it from the account.
-            $team = $user?->getTeam();
-            if (!$team) {
+            if ($data->accountId === null) {
                 $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_DEPENDENCY_MISSING, [
                     'dependencies' => [['type' => 'team', 'id' => '(none provided)']],
                 ]);
                 return;
             }
+            // Our data model requires a team, so use the one of the account or a team just for it.
+            $team = $user?->getTeam() ?? $this->getShadowTeamForAccount($data->accountId);
         } else {
             $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
             if (!$team) {
@@ -2122,6 +2125,47 @@ class ExternalContestSourceService
             // Otherwise, judge with normal priority.
             default => 0,
         };
+    }
+
+    /**
+     * Get the team for submissions from an account that is not a team in the source, like a jury account.
+     */
+    protected function getShadowTeamForAccount(string $accountId): Team
+    {
+        $teamExternalId = 'shadow_team_' . $accountId;
+        $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamExternalId]);
+        if ($team) {
+            return $team;
+        }
+
+        $category = $this->em->getRepository(TeamCategory::class)
+            ->findOneBy(['externalid' => self::SHADOW_TEAMS_CATEGORY_ID]);
+        if (!$category) {
+            $category = (new TeamCategory())
+                ->setExternalid(self::SHADOW_TEAMS_CATEGORY_ID)
+                ->setName('Shadowing')
+                ->setTypes([TeamCategory::TYPE_SCORING])
+                // The highest possible sortorder, to put these teams below everyone else.
+                ->setSortorder(255)
+                ->setVisible(false);
+            $this->em->persist($category);
+        }
+
+        $team = (new Team())
+            ->setExternalid($teamExternalId)
+            ->setName($teamExternalId)
+            ->addCategory($category);
+        $this->em->persist($team);
+
+        $contest = $this->em->getRepository(Contest::class)->find($this->getSourceContestId());
+        if (!$contest->isOpenToAllTeams()) {
+            $contest->addTeam($team);
+        }
+        // No events are logged here, since that clears the entity manager halfway the submission import.
+        // The submission event adds the missing team and group events.
+        $this->em->flush();
+
+        return $team;
     }
 
     protected function processPendingEvents(string $type, string|int $id): void
