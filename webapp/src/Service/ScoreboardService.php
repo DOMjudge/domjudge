@@ -236,8 +236,7 @@ class ScoreboardService
         } else {
             $queryBuilder
                 ->addSelect('j')
-                ->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1')
-                ->leftJoin('j.runs', 'jr');
+                ->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1');
         }
 
         // Check if we need to count compile error as a penalty.
