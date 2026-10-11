@@ -275,6 +275,7 @@ class JudgehostController extends BaseController
      * @throws NonUniqueResultException
      */
     #[Route(path: '/{judgehostid<\d+>}', name: 'jury_judgehost', methods: ['GET'])]
+    #[ReleaseSessionLock]
     public function viewAction(Request $request, int $judgehostid): Response
     {
         /** @var Judgehost|null $judgehost */
