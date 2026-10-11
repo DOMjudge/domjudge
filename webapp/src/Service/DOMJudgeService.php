@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Controller\API\AbstractRestController;
 use App\DataTransferObject\ContestStatus;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\AssetEntityInterface;
@@ -681,6 +682,7 @@ class DOMJudgeService implements ResetInterface
     public function internalApiRequest(string $url, string $method = Request::METHOD_GET, array $queryOrPostData = [], array $files = [], bool $throw = false)
     {
         $request  = Request::create('/api' . $url, $method, $queryOrPostData, [], $files);
+        $request->attributes->set(AbstractRestController::ATTR_REFRESH_ENTITIES, true);
         if ($this->requestStack->getCurrentRequest() && $this->requestStack->getCurrentRequest()->hasSession()) {
             $request->setSession($this->requestStack->getSession());
         } else {

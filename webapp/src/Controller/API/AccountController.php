@@ -106,11 +106,11 @@ class AccountController extends AbstractRestController
     {
         $queryBuilder = $this->em->createQueryBuilder()
                                  ->from(User::class, 'u')
-                                 ->select('u');
+                                 ->leftJoin('u.team', 't')
+                                 ->select('u, t');
 
         if ($request->query->has('team')) {
             $queryBuilder
-                ->leftJoin('u.team', 't')
                 ->andWhere('t.externalid = :team')
                 ->setParameter('team', $request->query->get('team'));
         }

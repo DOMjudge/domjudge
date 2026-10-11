@@ -140,6 +140,10 @@ class EventLogService
     /**
      * Log an event
      *
+     * Note: Controllers querying the database use Query::HINT_REFRESH to obtain the latest state.
+     * Callers must flush pending changes on affected entities prior to calling log() so that
+     * the query results reflect those changes.
+     *
      * @param string      $type        Either an API endpoint or a DB table
      * @param mixed       $dataIds     Identifier(s) of the row in the associated
      *                                 DB table as either one ID or an array of ID's.

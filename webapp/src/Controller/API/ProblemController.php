@@ -134,14 +134,10 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
     public function listAction(Request $request): Response
     {
-        // Make sure we clear the entity manager class, for when this method is called multiple times
-        // by internal requests.
-        $this->em->clear();
         // This method is overwritten, because we need to add ordinal values.
         $queryBuilder = $this->getQueryBuilder($request);
 
-        $objects = $queryBuilder
-            ->getQuery()
+        $objects = $this->buildQuery($queryBuilder, $this->shouldRefresh($request))
             ->getResult();
 
         if (empty($objects)) {
@@ -389,7 +385,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
     {
-        $ordinalArray = new ContestProblemArray($this->listActionHelper($request));
+        $ordinalArray = new ContestProblemArray($this->listActionHelper($request, $this->shouldRefresh($request)));
 
         $object = null;
         foreach ($ordinalArray->getItems() as $item) {

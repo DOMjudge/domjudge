@@ -306,7 +306,7 @@ class ClarificationController extends AbstractRestController
         $contestId = $this->getContestId($request);
         $problem = $request->query->get('problem');
         return $this->clarificationService->getQueryBuilder(internalContestId: $contestId, problem: $problem)
-            ->select('clar, c, r, reply, p')
+            ->select('clar, c, s, r, reply, p')
             ->orderBy('clar.clarid');
     }
 

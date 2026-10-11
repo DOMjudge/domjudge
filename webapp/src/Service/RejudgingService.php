@@ -385,6 +385,13 @@ class RejudgingService
             }
         }
 
+        // Direct SQL queries above bypassed the ORM for both ACTION_APPLY and ACTION_CANCEL,
+        // so clear the identity map to avoid leaving stale Submission or Judging entities attached.
+        // Note: callers of finishRejudging() should be aware that the identity map is cleared here.
+        if (!empty($submissions)) {
+            $this->em->clear();
+        }
+
         if (!empty($scoreboardRowsToUpdate)) {
             if ($progressReporter) {
                 $log .= ', updating scoreboard cache';
