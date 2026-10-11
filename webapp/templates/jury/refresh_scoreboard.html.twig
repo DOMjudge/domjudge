@@ -4,7 +4,7 @@
     <p>{{ message }}</p>
     <form action="{{ path('jury_refresh_cache') }}" method="POST">
         {% if current_contest is not empty %}
-            <input type="hidden" name="cid" value="{{ current_contest.cid }}"/>
+            <input type="hidden" name="cid" value="{{ current_contest.externalid }}"/>
         {% endif %}
         <input type="submit" name="refresh" value="Recalculate caches now" class="btn btn-primary"/>
     </form>
