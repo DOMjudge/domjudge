@@ -934,8 +934,12 @@ class DOMJudgeService implements ResetInterface
             ->andWhere('cp.allowSubmit = 1')
             ->setParameter('cid', $contest->getCid());
 
-        /** @var Contest $contest */
+        /** @var ?Contest $contest */
         $contest = $contestQuery->getQuery()->getOneOrNullResult();
+        // The inner joins yield no result when the contest has no submittable problems.
+        if ($contest === null) {
+            return false;
+        }
         if ($contest->getContestProblemsetType()) {
             return true;
         }
