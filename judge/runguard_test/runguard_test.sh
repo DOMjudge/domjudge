@@ -30,9 +30,9 @@ expect_meta() {
 
 # Check that a numeric metadata value lies in [min, max). Timings are
 # never exact: runguard only notices the command's exit when it wakes
-# up, and after a hard time limit it sends SIGTERM, waits, sends SIGKILL
-# and waits again before it records the end time. Matching an exact
-# value would make the test depend on how busy the machine is.
+# up, and after a hard time limit it waits for the command to die on a
+# SIGTERM before it sends a SIGKILL. Matching an exact value would make
+# the test depend on how busy the machine is.
 expect_meta_between() {
 	key="$1"
 	min="$2"
@@ -263,6 +263,25 @@ test_nprocs() {
 	expect_stderr "fork: retry: Resource temporarily unavailable"
 }
 
+test_walltime_kill() {
+	# The command dies on the SIGTERM.
+	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -t 1 -M "$META" sleep 60
+	expect_stderr "hard wall time"
+	expect_meta_between wall-time 1.0 1.3
+
+	# This one ignores the SIGTERM, so runguard escalates to a SIGKILL after
+	# its kill delay of 0.1s.
+	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -t 1 -M "$META" ./ignore-sigterm.py
+	expect_stdout "ignoring SIGTERM"
+	expect_meta_between wall-time 1.1 1.4
+
+	# Here only a child of the command ignores the SIGTERM. runguard must
+	# SIGKILL it too, or it keeps the command's stdout open until it exits.
+	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -t 1 -M "$META" ./ignore-sigterm-child.py
+	expect_stdout "child ignoring SIGTERM"
+	expect_meta_between wall-time 1.1 1.4
+}
+
 test_meta() {
 	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS -t 2 -M "$META" sleep 1
 	expect_meta_between wall-time 1.0 1.3
@@ -286,9 +305,8 @@ test_meta() {
 	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -C 3.1 -t 1.4 -M "$META" ./threads 2 3
 	expect_meta 'exitcode: 143'
 	expect_meta 'signal: 14'
-	# Killed at the 1.4s limit, plus the 0.1s runguard waits after SIGTERM
-	# and again after SIGKILL, minus whichever of those the exit cuts short.
-	expect_meta_between wall-time 1.5 1.8
+	# Killed at the 1.4s limit; the command dies on the SIGTERM.
+	expect_meta_between wall-time 1.4 1.7
 	expect_meta 'time-result: hard-timelimit'
 
 	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS -C 1:5 -M "$META" ./threads 2 3
