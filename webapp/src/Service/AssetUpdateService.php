@@ -34,5 +34,7 @@ readonly class AssetUpdateService
                 $fs->copy($entity->getAssetFile($assetProperty)->getRealPath(), $assetPath);
             }
         }
+
+        $this->dj->clearAssetFilesCache();
     }
 }
