@@ -13,6 +13,8 @@ parameters:
     removed_intervals: false
     # Minimum password length for users
     min_password_length: 10
+    # Number of seconds the configuration check measures the password hashing speed for.
+    hash_benchmark_seconds: 2
 
 services:
     # default configuration for services in *this* file
