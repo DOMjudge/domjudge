@@ -5,6 +5,7 @@ namespace App\Controller\API;
 use App\Entity\BaseApiEntity;
 use App\Utils\CcsApiVersion;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -38,14 +39,11 @@ abstract class AbstractRestController extends AbstractApiController
      */
     protected function performSingleAction(Request $request, string $id): Response
     {
-        // Make sure we clear the entity manager class, for when this method is called multiple times
-        // by internal requests.
-        $this->em->clear();
-
         $object = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $id)
             ->getQuery()
+            ->setHint(Query::HINT_REFRESH, true)
             ->getOneOrNullResult();
 
         if ($object === null) {
@@ -219,9 +217,6 @@ abstract class AbstractRestController extends AbstractApiController
      */
     protected function listActionHelper(Request $request): array
     {
-        // Make sure we clear the entity manager class, for when this method is called multiple times
-        // by internal requests.
-        $this->em->clear();
         $queryBuilder = $this->getQueryBuilder($request);
 
         if ($request->query->has('ids')) {
@@ -235,6 +230,7 @@ abstract class AbstractRestController extends AbstractApiController
         /** @var array<T> $objects */
         $objects = $queryBuilder
             ->getQuery()
+            ->setHint(Query::HINT_REFRESH, true)
             ->getResult();
 
         if (isset($ids) && count($objects) !== count($ids)) {

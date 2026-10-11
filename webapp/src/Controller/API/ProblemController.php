@@ -19,6 +19,7 @@ use App\Service\ImportProblemService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -134,14 +135,12 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
     public function listAction(Request $request): Response
     {
-        // Make sure we clear the entity manager class, for when this method is called multiple times
-        // by internal requests.
-        $this->em->clear();
         // This method is overwritten, because we need to add ordinal values.
         $queryBuilder = $this->getQueryBuilder($request);
 
         $objects = $queryBuilder
             ->getQuery()
+            ->setHint(Query::HINT_REFRESH, true)
             ->getResult();
 
         if (empty($objects)) {
