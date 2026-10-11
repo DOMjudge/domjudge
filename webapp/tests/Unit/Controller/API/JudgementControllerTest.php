@@ -2,7 +2,18 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\AnotherVisibleTeamSubmissionFixture;
+use App\DataFixtures\Test\DemoPreFreezeContestFixture;
+use App\DataFixtures\Test\DemoPreUnfreezeContestFixture;
+use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectFixture;
+use App\Entity\Contest;
+use App\Entity\Judging;
+use App\Entity\Language;
+use App\Entity\Submission;
+use App\Entity\Team;
+use App\Utils\Utils;
+use Doctrine\ORM\EntityManagerInterface;
 
 class JudgementControllerTest extends BaseTestCase
 {
@@ -62,5 +73,99 @@ class JudgementControllerTest extends BaseTestCase
                 }
             }
         });
+    }
+
+    public function testTeamSeesSimplifiedOnlyForOtherTeamsWhenNotFrozen(): void
+    {
+        $this->loadFixtures([DemoPreFreezeContestFixture::class, AnotherVisibleTeamSubmissionFixture::class]);
+
+        $judgements = $this->getJudgementsPerTeam('demo');
+        static::assertNotEmpty($judgements['exteam'] ?? []);
+        foreach ($judgements['exteam'] as $judgement) {
+            static::assertNotNull($judgement['judgement_type_id'], 'own judgements should expose the full verdict');
+        }
+        static::assertCount(1, $judgements['othervisibleteam'] ?? []);
+        static::assertNull($judgements['othervisibleteam'][0]['judgement_type_id']);
+        static::assertSame('RE', $judgements['othervisibleteam'][0]['simplified_judgement_type_id']);
+    }
+
+    public function testTeamSeesOnlyOwnDuringFreeze(): void
+    {
+        $this->loadFixtures([DemoPreUnfreezeContestFixture::class, AnotherVisibleTeamSubmissionFixture::class]);
+
+        $judgements = $this->getJudgementsPerTeam('demo');
+        static::assertSame(['exteam'], array_keys($judgements));
+    }
+
+    public function testTeamSeesOnlyOwnBefore2026(): void
+    {
+        $this->loadFixtures([DemoPreFreezeContestFixture::class, AnotherVisibleTeamSubmissionFixture::class]);
+
+        $this->withChangedConfiguration('ccs_api_version', '2023-06', function (): void {
+            $judgements = $this->getJudgementsPerTeam('demo');
+            static::assertSame(['exteam'], array_keys($judgements));
+        });
+    }
+
+    public function testTeamNeverSeesHiddenTeamJudgements(): void
+    {
+        $this->loadFixtures([DemoPreFreezeContestFixture::class]);
+        // Team DOMjudge is in the hidden System category.
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        $submittime = Utils::toEpochFloat('2021-02-15 10:00:00');
+        $submission = (new Submission())
+            ->setContest($contest)
+            ->setTeam($em->getRepository(Team::class)->findOneBy(['name' => 'DOMjudge']))
+            ->setContestProblem($contest->getProblems()->first())
+            ->setLanguage($em->getRepository(Language::class)->findByExternalId('cpp'))
+            ->setSubmittime($submittime);
+        $judging = (new Judging())
+            ->setContest($contest)
+            ->setSubmission($submission)
+            ->setStarttime($submittime)
+            ->setEndtime($submittime + 5)
+            ->setValid(true)
+            ->setResult('wrong-answer');
+        $submission->addJudging($judging);
+        $em->persist($submission);
+        $em->persist($judging);
+        $em->flush();
+
+        static::assertArrayHasKey('domjudge', $this->getJudgementsPerTeam('admin'));
+        static::assertArrayNotHasKey('domjudge', $this->getJudgementsPerTeam('demo'));
+    }
+
+    public function testTeamUserWithoutTeamSeesNoDetailedVerdicts(): void
+    {
+        $this->loadFixtures([
+            DemoPreFreezeContestFixture::class,
+            AnotherVisibleTeamSubmissionFixture::class,
+            RemoveTeamFromDemoUserFixture::class,
+        ]);
+
+        $judgementsPerTeam = $this->getJudgementsPerTeam('demo');
+        static::assertNotEmpty($judgementsPerTeam);
+        foreach ($judgementsPerTeam as $judgements) {
+            foreach ($judgements as $judgement) {
+                static::assertNull($judgement['judgement_type_id']);
+            }
+        }
+    }
+
+    /**
+     * @return array<string, list<array<string, mixed>>> Judgements visible to the user, per team ID
+     */
+    private function getJudgementsPerTeam(string $user): array
+    {
+        $contestId = $this->getDemoContestId();
+        $submissions = $this->verifyApiJsonResponse('GET', "/contests/$contestId/submissions", 200, 'admin');
+        $teamPerSubmission = array_column($submissions, 'team_id', 'id');
+
+        $judgementsPerTeam = [];
+        foreach ($this->verifyApiJsonResponse('GET', "/contests/$contestId/judgements", 200, $user) as $judgement) {
+            $judgementsPerTeam[$teamPerSubmission[$judgement['submission_id']]][] = $judgement;
+        }
+        return $judgementsPerTeam;
     }
 }
