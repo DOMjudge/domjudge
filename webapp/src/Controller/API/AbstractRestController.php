@@ -3,7 +3,6 @@
 namespace App\Controller\API;
 
 use App\Entity\BaseApiEntity;
-use App\Utils\CcsApiVersion;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
@@ -74,18 +73,8 @@ abstract class AbstractRestController extends AbstractApiController
         $view->getContext()->setAttribute('authorized_user_service', $this->authService);
         $view->getContext()->setAttribute('config_service', $this->config);
 
-        /** @var CcsApiVersion $ccsApiVersion */
-        $ccsApiVersion = $this->config->get('ccs_api_version');
-        $groups = [static::GROUP_DEFAULT, $ccsApiVersion->value];
-        if (!$request->query->has('strict') || !$request->query->getBoolean('strict')) {
-            $groups[] = static::GROUP_NONSTRICT;
-        }
-        if ($this->authService->checkRole('api_reader')) {
-            $groups[] = static::GROUP_RESTRICTED;
-        }
-        if (in_array(static::GROUP_NONSTRICT, $groups) && in_array(static::GROUP_RESTRICTED, $groups)) {
-            $groups[] = static::GROUP_RESTRICTED_NONSTRICT;
-        }
+        $strict = $request->query->getBoolean('strict');
+        $groups = $this->apiResourceSerializer->getSerializationGroups($strict);
         $view->getContext()->setGroups($groups);
 
         $response = $this->handleView($view);
