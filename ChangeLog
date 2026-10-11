@@ -45,6 +45,8 @@ Version 10.0.0DEV
      Changing it converts the existing events to the new version, as does
      `dj_setup_database upgrade` when the default changes. To do this from
      the command line, use `webapp/bin/console domjudge:upgrade-events`.
+ - Support the `brute_force` and `rejected` submission directories and
+   `submissions/submissions.yaml` from problem package format 2025-09.
 
 Version 9.0.0 - 5 October 2025
 ------------------------------

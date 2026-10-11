@@ -17,11 +17,10 @@ On top, DOMjudge defines a few extensions:
    that will be accepted by the Judging verifier.
    This extension is in consideration to be added to the ICPC specification,
    see https://github.com/Kattis/problem-package-format/pull/4.
-   Note that, to match with the current ICPC specification,
-   the ``@EXPECTED_RESULTS@:`` tag is ignored in
-   the four official submission subdirectories,
-   but it will work if the tagged solution is in, e.g.,
-   ``submissions/mixed-verdicts``, ``submissions/mixed/`` or ``submissions/rejected/``.
+   The annotation is restricted to the verdicts that the submission
+   directory and ``submissions/submissions.yaml`` allow (see below),
+   and taken as is in any other directory, e.g.
+   ``submissions/mixed-verdicts`` or ``submissions/mixed/``.
 
    .. literalinclude:: ../../example_problems/boolfind/submissions/mixed-verdicts/boolfind-test-random.py
       :language: python
@@ -56,4 +55,15 @@ configured problem by uploading a zip file that contains only testcase files.
 Any jury solutions present will be automatically submitted when ``allow_submit``
 is ``1`` and there's a team associated with the uploading user.
 
+The verdicts the Judging verifier expects for a jury solution follow the
+`example submissions`_ requirements: the default directories (including
+``brute_force`` and ``rejected``) and the ``permitted``, ``required``,
+``score``, ``language`` and ``entrypoint`` keys of
+``submissions/submissions.yaml``. Since DOMjudge only reports the verdict of the
+first test case that is not accepted, requirements on specific test data
+groups and on the judge message are ignored. Other directories whose name is a
+DOMjudge verdict, such as ``no_output`` or ``compiler_error``, expect that
+verdict.
+
 .. _ICPC problem package specification: https://icpc.io/problem-package-format/spec/legacy-icpc
+.. _example submissions: https://icpc.io/problem-package-format/spec/2025-09.html#example-submissions

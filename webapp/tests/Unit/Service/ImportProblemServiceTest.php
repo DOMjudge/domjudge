@@ -656,6 +656,43 @@ YAML;
     }
 
     /**
+     * @param array{results: string[]|null, score: string|null}|false|null $annotation
+     * @param string[]|null $allowedResults
+     * @param string[]|null $expected
+     */
+    #[DataProvider('provideExpectedResults')]
+    public function testExpectedResults(
+        array|false|null $annotation,
+        ?array $allowedResults,
+        ?array $expected,
+        ?string $expectedMessageType
+    ): void {
+        $messages = [];
+        $results = ImportProblemService::expectedResults('submissions/dir/sol.py', $annotation,
+            $allowedResults, 'DIR', $messages);
+        self::assertSame($expected, $results);
+        self::assertSame($expectedMessageType === null ? [] : [$expectedMessageType], array_keys($messages));
+    }
+
+    public static function provideExpectedResults(): Generator
+    {
+        $annotate = fn(?array $results, ?string $score = null) => ['results' => $results, 'score' => $score];
+        yield 'no annotation' => [null, ['RUN-ERROR', 'TIMELIMIT'], ['RUN-ERROR', 'TIMELIMIT'], null];
+        yield 'invalid annotation' => [false, ['CORRECT'], ['CORRECT'], null];
+        yield 'no annotation, unknown directory' => [null, null, ['DIR'], null];
+        yield 'annotation, unknown directory' => [$annotate(['CORRECT', 'WRONG-ANSWER']), null,
+            ['CORRECT', 'WRONG-ANSWER'], null];
+        yield 'annotation within allowed' => [$annotate(['TIMELIMIT']), ['RUN-ERROR', 'TIMELIMIT'],
+            ['TIMELIMIT'], null];
+        yield 'annotation lists correct' => [$annotate(['CORRECT', 'RUN-ERROR', 'TIMELIMIT']),
+            ['RUN-ERROR', 'TIMELIMIT'], ['RUN-ERROR', 'TIMELIMIT'], null];
+        yield 'annotation restricted' => [$annotate(['WRONG-ANSWER', 'TIMELIMIT']), ['TIMELIMIT'],
+            ['TIMELIMIT'], 'warning'];
+        yield 'annotation mismatch' => [$annotate(['WRONG-ANSWER']), ['TIMELIMIT'], ['WRONG-ANSWER'], 'danger'];
+        yield 'score only' => [$annotate(null, '100'), ['CORRECT'], null, null];
+    }
+
+    /**
      * Create a temporary zip file with the given contents.
      *
      * @param array<string, string> $files Map of filename => content
