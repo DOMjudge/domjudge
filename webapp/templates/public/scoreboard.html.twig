@@ -1,4 +1,9 @@
 {% extends "public/base.html.twig" %}
+{% import 'macros.html.twig' as macros %}
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
 
 {% block title %}Scoreboard {{ contest.shortname | default('') }} - {{ parent() }}{% endblock %}
 {% block content %}
