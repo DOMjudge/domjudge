@@ -756,13 +756,6 @@ readonly class ImportProblemService
             $too_large_subs = [];
             $successful_subs = [];
 
-            // As EventLogService::log() will clear the entity manager, the problem and the contest became detached. We
-            // need to reload them.
-            // We seem to need to explicitly clear the EntityManager, otherwise we will receive inconsistent data.
-            $this->em->clear();
-            $problem = $this->em->getRepository(Problem::class)->find($probid);
-            $contest = $this->em->getRepository(Contest::class)->find($cid);
-
             // First find all submittable languages:
             $allowedLanguages = $this->dj->getAllowedLanguagesForContest($contest);
 
