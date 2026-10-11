@@ -307,13 +307,13 @@ class JudgehostController extends BaseController
         if ($contests = $this->dj->getCurrentContest()) {
             $judgings = $this->em->createQueryBuilder()
                 ->from(Judging::class, 'j')
-                ->select('j', 'r', 'jr', 'jt')
-                ->distinct()
-                ->innerJoin('j.runs', 'jr')
-                ->innerJoin('jr.judgetask', 'jt')
+                ->select('j', 'r')
                 ->leftJoin('j.rejudging', 'r')
                 ->andWhere('j.contest IN (:contests)')
-                ->andWhere('jt.judgehost = :judgehost')
+                ->andWhere(
+                    'EXISTS (SELECT 1 FROM ' . JudgingRun::class . ' jr JOIN jr.judgetask jt'
+                    . ' WHERE jr.judging = j AND jt.judgehost = :judgehost)'
+                )
                 ->setParameter('contests', $contests)
                 ->setParameter('judgehost', $judgehost)
                 ->orderBy('j.starttime', 'DESC')
