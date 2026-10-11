@@ -10657,16 +10657,16 @@
         },
         {
             "name": "zircote/swagger-php",
-            "version": "6.12.0",
+            "version": "6.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "f7c0fc65cb9cdb84bdf0e4e21460d348888b41a2"
+                "reference": "6cbca4b611f03ae9ee58a5f2d341a0bc685c4903"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/f7c0fc65cb9cdb84bdf0e4e21460d348888b41a2",
-                "reference": "f7c0fc65cb9cdb84bdf0e4e21460d348888b41a2",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/6cbca4b611f03ae9ee58a5f2d341a0bc685c4903",
+                "reference": "6cbca4b611f03ae9ee58a5f2d341a0bc685c4903",
                 "shasum": ""
             },
             "require": {
@@ -10701,7 +10701,8 @@
             },
             "autoload": {
                 "psr-4": {
-                    "OpenApi\\": "src"
+                    "OpenApi\\": "src",
+                    "OpenApi\\Rector\\": "rector/src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -10734,7 +10735,7 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/6.12.0"
+                "source": "https://github.com/zircote/swagger-php/tree/6.13.0"
             },
             "funding": [
                 {
@@ -10742,7 +10743,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-06T03:39:01+00:00"
+            "time": "2026-10-11T02:19:20+00:00"
         }
     ],
     "packages-dev": [
