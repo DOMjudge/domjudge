@@ -388,6 +388,36 @@ class ScoreboardIntegrationTest extends KernelTestCase
     }
 
     /**
+     * Taking away a solve (here: invalidating the submission) must also
+     * take it away from the rank cache, not only from the score cache.
+     */
+    public function testRankCacheUpdatedWhenSolveIsRemoved(): void
+    {
+        $lang = $this->em->getRepository(Language::class)->findByExternalId('c');
+
+        $team = $this->teams[0];
+        $submission = $this->createSubmission($lang, $this->problems[0], $team, 30*60, 'correct', true);
+
+        $this->ss->calculateScoreRow($this->contest, $team, $this->problems[0]);
+        static::assertEquals(1, $this->getRankCachePoints($team), 'Solved before invalidation');
+
+        $submission->setValid(false);
+        $this->em->flush();
+        $this->ss->calculateScoreRow($this->contest, $team, $this->problems[0]);
+
+        static::assertEquals(0, $this->getRankCachePoints($team), 'Solved after invalidation');
+    }
+
+    private function getRankCachePoints(Team $team): int
+    {
+        // Read directly: the entity manager may still hold stale rank cache entities.
+        return (int)$this->em->getConnection()->fetchOne(
+            'SELECT points_restricted FROM rankcache WHERE cid = :cid AND teamid = :teamid',
+            ['cid' => $this->contest->getCid(), 'teamid' => $team->getTeamid()]
+        );
+    }
+
+    /**
      * Test that delaying the contest start (disabling start time) doesn't cause
      * negative score key values when a jury test submission exists before the start time.
      * Regression test for https://github.com/DOMjudge/domjudge/issues/3417

@@ -25,6 +25,7 @@ use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -427,6 +428,14 @@ class ScoreboardService
             }
         }
 
+        // Remember whether this cell used to count as solved: the rank cache
+        // has to be updated when a solve is taken away as well.
+        $wasCorrect = (bool)$this->em->getConnection()->fetchOne(
+            'SELECT is_correct_restricted OR is_correct_public FROM scorecache
+             WHERE cid = :cid AND teamid = :teamid AND probid = :probid',
+            ['cid' => $contest->getCid(), 'teamid' => $team->getTeamid(), 'probid' => $problem->getProbid()]
+        );
+
         // Use a direct REPLACE INTO query to drastically speed this up
         $params = [
             'cid' => $contest->getCid(),
@@ -458,8 +467,10 @@ class ScoreboardService
             throw new Exception('ScoreboardService::calculateScoreRow failed to release lock');
         }
 
-        // If we found a new correct result (or any result for scoring problems), update the rank cache too.
-        if ($updateRankCache && (($correctJury || $correctPubl) || $problem->isScoringProblem())) {
+        // If we found a new correct result (or any result for scoring problems), or lost a previously
+        // correct one, update the rank cache too.
+        if ($updateRankCache &&
+            ($correctJury || $correctPubl || $wasCorrect || $problem->isScoringProblem())) {
             $this->updateRankCache($contest, $team);
         }
     }
@@ -530,6 +541,9 @@ class ScoreboardService
             ->setParameter('contest', $contest)
             ->setParameter('team', $team)
             ->getQuery()
+            // The cells were just rewritten with a direct query, so do not
+            // reuse copies that this entity manager may still have loaded.
+            ->setHint(Query::HINT_REFRESH, true)
             ->getResult();
 
         // Process all score cache cells.
