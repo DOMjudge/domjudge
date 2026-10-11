@@ -1713,4 +1713,80 @@ EOF;
         yield [true, false, 'sample', 'results-full-ranked.tsv'];
         yield [false, true, 'sample', 'results-wf-honors.tsv'];
     }
+
+    /**
+     * Test how the account type and username of an imported account map to
+     * roles, for both the TSV and the JSON importer.
+     *
+     * @param string[] $expectedRoles
+     */
+    #[DataProvider('provideAccountRoleMapping')]
+    public function testImportAccountRoleMapping(
+        string $format,
+        string $type,
+        string $username,
+        ?array $expectedRoles
+    ): void {
+        $this->loadFixture(TeamWithExternalIdEqualsOneFixture::class);
+
+        $name = 'Mapped account';
+        if ($format === 'tsv') {
+            $content = "accounts\t1\n$type\t$name\t$username\tsecret\n";
+        } else {
+            $content = json_encode([['id' => $username, 'username' => $username, 'name' => $name, 'password' => 'secret', 'type' => $type]]);
+        }
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'accounts-map');
+        file_put_contents($fileName, $content);
+        $file = new UploadedFile($fileName, "accounts.$format");
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $format === 'tsv'
+            ? $importExportService->importTsv('accounts', $file, $message)
+            : $importExportService->importJson('accounts', $file, $message);
+        unlink($fileName);
+
+        self::assertNull($message);
+        self::assertSame($expectedRoles === null ? 0 : 1, $importCount);
+
+        /** @var User|null $user */
+        $user = static::getContainer()->get(EntityManagerInterface::class)
+            ->getRepository(User::class)->findOneBy(['username' => $username]);
+        if ($expectedRoles === null) {
+            self::assertNull($user);
+            return;
+        }
+        self::assertNotNull($user);
+        self::assertSame($name, $user->getName());
+        $roles = $user->getRoleList();
+        sort($roles);
+        sort($expectedRoles);
+        self::assertSame($expectedRoles, $roles);
+    }
+
+    public static function provideAccountRoleMapping(): Generator
+    {
+        $cds = ['api_reader', 'api_source_reader', 'api_writer'];
+        $cases = [
+            'team' => ['team', 'newTeam-001', ['team']],
+            'admin' => ['admin', 'newadmin', ['admin', 'team']],
+            'admin with team-like name' => ['admin', 'newTeam-001', ['admin', 'team']],
+            'judge is a jury' => ['judge', 'newjudge', ['jury', 'team']],
+            'jury' => ['jury', 'newjury', ['jury', 'team']],
+            'api_writer' => ['api_writer', 'newwriter', ['api_writer']],
+            'api_reader' => ['api_reader', 'newreader', ['api_reader']],
+            'api_source_reader' => ['api_source_reader', 'newsource', ['api_source_reader']],
+            'balloon' => ['balloon', 'newballoon', ['balloon']],
+            'clarification_rw' => ['clarification_rw', 'newclar', ['clarification_rw']],
+            'cds type' => ['cds', 'newcds', $cds],
+            'cds username as admin' => ['admin', 'cds', $cds],
+            'cds username as jury' => ['jury', 'cds', $cds],
+            'analyst is ignored' => ['analyst', 'newanalyst', null],
+        ];
+        foreach (['tsv', 'json'] as $format) {
+            foreach ($cases as $description => [$type, $username, $roles]) {
+                yield "$format: $description" => [$format, $type, $username, $roles];
+            }
+        }
+    }
 }

@@ -14,6 +14,7 @@ use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Utils\CcsApiVersion;
+use App\Utils\ImportFileParser;
 use App\Utils\Scoreboard\Filter;
 use App\Utils\Utils;
 use Collator;
@@ -26,15 +27,12 @@ use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
-use JsonException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Yaml\Exception\ParseException;
-use Symfony\Component\Yaml\Yaml;
 
 readonly class ImportExportService
 {
@@ -806,29 +804,18 @@ readonly class ImportExportService
      */
     public function importTsv(string $type, UploadedFile $file, ?string &$message = null): int
     {
-        $content = file($file->getRealPath());
-        // The first line of the tsv is always the format with a version number.
-        // Currently, we hardcode version 1 because there are no others.
-        $version = rtrim(array_shift($content));
-        // Two variants are in use: one where the first token is a static string
-        // "File_Version" and the second where it's the type, e.g. "groups".
-        $versionMatch = '1';
-        if ($type == 'teams') {
-            $versionMatch = '[12]';
-        }
-        $regex = sprintf("/^(File_Version|%s)\t%s$/i", $type, $versionMatch);
-        if (!preg_match($regex, $version)) {
-            $message = sprintf("TSV has unknown format or version: %s != %s", $version, $versionMatch);
+        $rows = ImportFileParser::parseTsv($type, file($file->getRealPath()), $message);
+        if ($rows === null) {
             return -1;
         }
 
         switch ($type) {
             case 'groups':
-                return $this->importGroupsTsv($content, $message);
+                return $this->importGroupsTsv($rows, $message);
             case 'teams':
-                return $this->importTeamsTsv($content, $message);
+                return $this->importTeamsTsv($rows, $message);
             case 'accounts':
-                return $this->importAccountsTsv($content, $message);
+                return $this->importAccountsTsv($rows, $message);
             default:
                 $message = sprintf('Invalid import type %s', $type);
                 return -1;
@@ -840,21 +827,8 @@ readonly class ImportExportService
      */
     public function importJson(string $type, UploadedFile $file, ?string &$message = null): int
     {
-        $content = file_get_contents($file->getRealPath());
-        try {
-            $data = Utils::jsonDecode($content);
-        } catch (JsonException) {
-            // Check if we can parse it as YAML
-            try {
-                $data = Yaml::parse($content, Yaml::PARSE_DATETIME);
-            } catch (ParseException $parseException) {
-                $message = "File contents is not valid JSON or YAML: " . $parseException->getMessage();
-                return -1;
-            }
-        }
-
-        if (!is_array($data) || !is_int(key($data))) {
-            $message = 'File contents does not contain JSON array';
+        $data = ImportFileParser::decodeJsonOrYaml(file_get_contents($file->getRealPath()), $message);
+        if ($data === null) {
             return -1;
         }
 
@@ -876,13 +850,12 @@ readonly class ImportExportService
     /**
      * Import groups TSV.
      *
-     * @param string[] $content
+     * @param string[][] $rows
      */
-    protected function importGroupsTsv(array $content, ?string &$message = null): int
+    protected function importGroupsTsv(array $rows, ?string &$message = null): int
     {
         $groupData = [];
-        foreach ($content as $line) {
-            $line = Utils::parseTsvLine(trim($line));
+        foreach ($rows as $line) {
             $groupData[] = [
                 'categoryid' => @$line[0],
                 'name' => @$line[1],
@@ -1161,14 +1134,13 @@ readonly class ImportExportService
     /**
      * Import teams TSV
      *
-     * @param string[] $content
+     * @param string[][] $rows
      * @throws NonUniqueResultException
      */
-    protected function importTeamsTsv(array $content, ?string &$message = null): int
+    protected function importTeamsTsv(array $rows, ?string &$message = null): int
     {
         $teamData = [];
-        foreach ($content as $line) {
-            $line = Utils::parseTsvLine(trim($line));
+        foreach ($rows as $line) {
 
             // teams.tsv contains data pertaining both to affiliations and teams.
             // Hence, return data for both tables.
@@ -1713,17 +1685,16 @@ readonly class ImportExportService
     /**
      * Import accounts TSV
      *
-     * @param string[] $content
+     * @param string[][] $rows
      */
-    protected function importAccountsTsv(array $content, ?string &$message = null): int
+    protected function importAccountsTsv(array $rows, ?string &$message = null): int
     {
         $accountData  = [];
         $juryCategory = $this->getOrCreateJuryCategory();
         $djRoles      = $this->getDjRoles();
         $lineNr       = 1;
-        foreach ($content as $line) {
+        foreach ($rows as $line) {
             $lineNr++;
-            $line = Utils::parseTsvLine(trim($line));
             if (count($line) <= 3) {
                 $message = sprintf('Not enough values on line %d', $lineNr);
                 return -1;

@@ -151,12 +151,17 @@ abstract class AccountBaseTestCase extends BaseTestCase
         unlink($tempFile);
     }
 
+    /**
+     * Upload one account in each of the supported file formats.
+     *
+     * This is an end to end test of the upload itself. The decoding of the
+     * formats is tested in ImportFileParserTest and the mapping of the account
+     * types to roles in ImportExportServiceTest.
+     */
     public function provideNewAccountFile(): Generator
     {
-        foreach ($this->provideNewAccount() as $index => $testUser) {
+        foreach ($this->provideNewAccount() as $testUser) {
             if (isset($testUser[0]['skipImportFile'])) {
-                // Not all properties which we can set via the API account endpoint can also
-                // be imported via the API file import.
                 continue;
             }
             $overwritten = $testUser[1] ?? null;
@@ -165,56 +170,18 @@ abstract class AccountBaseTestCase extends BaseTestCase
             $name = $testUser['name'];
             $pass = $testUser['password'];
             $role = $testUser['type'];
-            $tempData = ['id' => $user,  'username' => $user, 'name' => $name, 'password' => $pass, 'type' => $role];
-            // Handle TSV file
-            $fileVersions = ['accounts'];
-            if ($index === 0) {
-                $fileVersions[] = 'File_Version';
-            }
-            foreach ($fileVersions as $fileVersion) {
-                foreach (["\r\n", "\n"] as $lineEnding) {
-                    foreach ([true, false] as $fileEnding) {
-                        $file = $fileVersion . "\t1";
-                        $file .= "{$lineEnding}{$role}\t$name\t$user\t$pass";
-                        if ($fileEnding) {
-                            $file .= "$lineEnding";
-                        }
-                        yield [$file, 'tsv', $testUser, $overwritten];
-                    }
-                }
-            }
-            // Handle YAML file
-            $file = <<<EOF
-- id: $user
-  username: $user
-  name: $name
-  password: $pass
-  type: $role
-EOF;
-            yield [$file, 'yaml', $testUser, $overwritten];
-            $file = <<<EOF
-- "id": $user
-  "username": $user
-  "name": $name
-  "password": $pass
-  "type": $role
-EOF;
-            yield [$file, 'yaml', $testUser, $overwritten];
-            yield [Yaml::dump([$tempData], 1), 'yaml', $testUser, $overwritten];
-            yield [Yaml::dump([$tempData], 1, 3), 'yaml', $testUser, $overwritten];
-            yield [Yaml::dump([$tempData], 2, 2), 'yaml', $testUser, $overwritten];
-            // Handle JSON file
-            $file = <<<EOF
-[{  id: $user,
-    username: $user,
-    name: $name,
-    password: $pass,
-    type: $role,
-}]
-EOF;
-            yield [$file, 'json', $testUser, $overwritten];
-            $file = "[{id: \t$user,\tusername: $user, name:     $name,password: $pass, type: $role   }]";
-            yield [$file, 'json', $testUser, $overwritten];
+
+            yield 'tsv' => ["accounts\t1\n{$role}\t$name\t$user\t$pass\n", 'tsv', $testUser, $overwritten];
+            yield 'yaml' => [
+                Yaml::dump([['id' => $user, 'username' => $user, 'name' => $name, 'password' => $pass, 'type' => $role]]),
+                'yaml', $testUser, $overwritten,
+            ];
+            yield 'json' => [
+                json_encode([['id' => $user, 'username' => $user, 'name' => $name, 'password' => $pass, 'type' => $role]]),
+                'json', $testUser, $overwritten,
+            ];
+            // All accounts are uploaded the same way, so one is enough.
+            return;
         }
     }
 
