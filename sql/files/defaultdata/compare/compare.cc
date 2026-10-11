@@ -110,44 +110,33 @@ bool equal_case_insensitive(std::string a, std::string b) {
 	return a==b;
 }
 
-/* Test two floating-point numbers for equality, accounting for +/-INF, NaN, and precision.
+/* Test two floating-point numbers for equality, accounting for precision.
  * Float `jval` is considered the reference value for relative error.
  */
 void compare_float(const std::string &judge, const std::string &team, flt jval, flt tval, flt float_abs_tol, flt float_rel_tol, const std::string &extra_msg) {
-	/* Finite values are compared with some tolerance */
-	if (std::isfinite(tval) && std::isfinite(jval)) {
-		flt absdiff = fabsl(tval-jval);
-		flt reldiff = fabsl((tval-jval)/jval);
-		if (float_abs_tol >= 0 && float_rel_tol >= 0) {
-			if (absdiff > float_abs_tol && reldiff > float_rel_tol) {
-				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Absolute difference: %Lg (tolerance: %Lg)\n Relative difference: %Lg (tolerance: %Lg)%s",
-				             judge.c_str(), team.c_str(),
-				             absdiff, float_abs_tol,
-				             reldiff, float_rel_tol,
-				             extra_msg.c_str());
-			}
-		} else if (float_abs_tol >= 0) {
-			if (absdiff > float_abs_tol) {
-				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Absolute difference: %Lg (tolerance: %Lg)%s",
-				             judge.c_str(), team.c_str(), absdiff, float_abs_tol, extra_msg.c_str());
-			}
-		} else if (float_rel_tol >= 0) {
-			if (reldiff > float_rel_tol) {
-				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Relative difference: %Lg (tolerance: %Lg)%s",
-				             judge.c_str(), team.c_str(), reldiff, float_rel_tol, extra_msg.c_str());
-			}
+	assert(std::isfinite(jval));
+	assert(std::isfinite(tval));
+	
+	flt absdiff = fabsl(tval-jval);
+	flt reldiff = fabsl((tval-jval)/jval);
+	if (float_abs_tol >= 0 && float_rel_tol >= 0) {
+		if (absdiff > float_abs_tol && reldiff > float_rel_tol) {
+			wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Absolute difference: %Lg (tolerance: %Lg)\n Relative difference: %Lg (tolerance: %Lg)%s",
+			             judge.c_str(), team.c_str(),
+			             absdiff, float_abs_tol,
+			             reldiff, float_rel_tol,
+			             extra_msg.c_str());
 		}
-	/* NaN is equal to NaN */
-	} else if (std::isnan(jval) && std::isnan(tval)) {
-		return;
-	/* Infinite values are equal if their sign matches */
-	} else if (std::isinf(jval) && std::isinf(tval)) {
-		if (std::signbit(jval) != std::signbit(tval)) {
-			wrong_answer("Expected float %s, got: %s%s", judge.c_str(), team.c_str(), extra_msg.c_str());
+	} else if (float_abs_tol >= 0) {
+		if (absdiff > float_abs_tol) {
+			wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Absolute difference: %Lg (tolerance: %Lg)%s",
+			             judge.c_str(), team.c_str(), absdiff, float_abs_tol, extra_msg.c_str());
 		}
-	/* Values in different classes are always different. */
-	} else {
-		wrong_answer("Expected float %s, got: %s%s", judge.c_str(), team.c_str(), extra_msg.c_str());
+	} else if (float_rel_tol >= 0) {
+		if (reldiff > float_rel_tol) {
+			wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Relative difference: %Lg (tolerance: %Lg)%s",
+			             judge.c_str(), team.c_str(), reldiff, float_rel_tol, extra_msg.c_str());
+		}
 	}
 }
 
