@@ -62,13 +62,14 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
 use Twig\Attribute\AsTwigFilter;
 use Twig\Attribute\AsTwigFunction;
 use Twig\Environment;
 use ZipArchive;
 
-class DOMJudgeService
+class DOMJudgeService implements ResetInterface
 {
     protected ?Executable $defaultCompareExecutable = null;
     protected ?Executable $defaultRunExecutable = null;
@@ -77,6 +78,13 @@ class DOMJudgeService
 
     /** @var array<string, string[]> */
     private array $assetFilesCache = [];
+
+    public function reset(): void
+    {
+        $this->assetFilesCache = [];
+        $this->defaultCompareExecutable = null;
+        $this->defaultRunExecutable = null;
+    }
 
     final public const EVAL_DEFAULT = 0;
     final public const EVAL_LAZY = 1;
