@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 9.0.2DEV
-----------------
+Version 9.0.2 - 11 October 2026
+-------------------------------
  - Security fixes:
    - Return 404 when no access to submission data
    - Hide postfreeze balloons in totals column
