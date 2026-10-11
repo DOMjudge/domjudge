@@ -705,6 +705,8 @@ class ContestControllerTest extends JuryControllerTestCase
         ];
         self::assertTrue(array_intersect($titles, $expectedTitles) == $expectedTitles);
 
+        // The requests share the entity manager, so don't reuse what they loaded.
+        $em->clear();
         $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
         $contest->setIsLocked(true);
         $em->flush();
@@ -736,6 +738,7 @@ class ContestControllerTest extends JuryControllerTestCase
         $this->verifyPageResponse('GET', $deleteUrl, 302, $contestUrl);
 
         // Deleting an unlocked contest works.
+        $em->clear();
         $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
         $contest->setIsLocked(false);
         $em->flush();

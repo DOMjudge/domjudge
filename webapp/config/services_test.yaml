@@ -6,3 +6,7 @@ services:
     # Support code for tests that observe how requests use the session.
     App\Tests\Session\:
         resource: '../tests/Session/'
+
+    # Resets stateful services between requests of one test kernel.
+    App\Tests\Support\:
+        resource: '../tests/Support/'

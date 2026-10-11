@@ -46,6 +46,7 @@ abstract class BaseTestCase extends WebTestCase
 
         // Create a client to communicate with the application.
         $this->client = self::createClient();
+        $this->client->disableReboot();
 
         // Log in if we have any roles.
         if (!empty($this->roles)) {
