@@ -7,6 +7,9 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(required: ['id', 'username', 'name', 'roles'])]
 class UpdateUser extends AddUser
 {
+    /**
+     * @param array<string> $roles
+     */
     public function __construct(
         public readonly string $id,
         string $username,
@@ -15,7 +18,7 @@ class UpdateUser extends AddUser
         ?string $password,
         ?bool $enabled,
         ?string $teamId,
-        ?array $roles
+        array $roles
     ) {
         parent::__construct($username, $name, $ip, $password, $enabled, $teamId, $roles);
     }

@@ -4,6 +4,7 @@ namespace App\Controller\API;
 
 use App\DataTransferObject\AddUser;
 use App\DataTransferObject\ChangePasswordRequest;
+use App\DataTransferObject\PatchUser;
 use App\DataTransferObject\UpdateUser;
 use App\Entity\Role;
 use App\Entity\Team;
@@ -320,11 +321,13 @@ class UserController extends AbstractRestController
         AddUser $addUser,
         Request $request
     ): Response {
-        return $this->addOrUpdateUser($addUser, $request);
+        return $this->saveUser($request, new User(), $addUser, created: true);
     }
 
     /**
-     * Update an existing User or create one with the given ID
+     * Replace an existing user or create one with the given ID.
+     *
+     * Fields that are not provided are cleared, including the password.
      */
     #[IsGranted('ROLE_API_WRITER')]
     #[Rest\Put(path: '/{id}')]
@@ -338,6 +341,11 @@ class UserController extends AbstractRestController
         ]
     )]
     #[OA\Response(
+        response: 200,
+        description: 'Returns the replaced user',
+        content: new Model(type: User::class)
+    )]
+    #[OA\Response(
         response: 201,
         description: 'Returns the added user',
         content: new Model(type: User::class)
@@ -348,10 +356,14 @@ class UserController extends AbstractRestController
         Request $request,
         string $id,
     ): Response {
-        if ($id !== $updateUser->id) {
-            throw new BadRequestHttpException('ID in URL does not match ID in payload');
+        $this->checkPayloadId($id, $updateUser->id);
+
+        $user = $this->em->getRepository(User::class)->findOneBy(['externalid' => $id]);
+        if ($user === null) {
+            return $this->saveUser($request, (new User())->setExternalid($id), $updateUser, created: true);
         }
-        return $this->addOrUpdateUser($updateUser, $request);
+
+        return $this->saveUser($request, $user, $updateUser, created: false);
     }
 
     /**
@@ -414,96 +426,134 @@ class UserController extends AbstractRestController
         return new Response(null, Response::HTTP_NO_CONTENT);
     }
 
-    protected function addOrUpdateUser(AddUser $addUser, Request $request): Response
-    {
-        if ($addUser instanceof UpdateUser && !$addUser->id) {
-            throw new BadRequestHttpException('`id` field is required');
+    /**
+     * Update only the provided fields of an existing user.
+     */
+    #[IsGranted('ROLE_API_WRITER')]
+    #[Rest\Patch(path: '/{id}')]
+    #[OA\RequestBody(
+        required: true,
+        content: [
+            new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(ref: new Model(type: PatchUser::class))
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the updated user',
+        content: new Model(type: User::class)
+    )]
+    public function patchAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        PatchUser $patchUser,
+        Request $request,
+        string $id,
+    ): Response {
+        $this->checkPayloadId($id, $patchUser->id ?? $id);
+
+        $user = $this->em->getRepository(User::class)->findOneBy(['externalid' => $id]);
+        if ($user === null) {
+            throw new NotFoundHttpException(sprintf("User with ID '%s' not found", $id));
         }
 
-        if (!$addUser instanceof UpdateUser && !$addUser->roles) {
+        $data = $this->mergePatch($request, $patchUser, [
+            'username' => $user->getUsername(),
+            'name' => $user->getName(),
+            'ip' => $user->getIpAddress(),
+            'enabled' => $user->getEnabled(),
+            'team_id' => $user->getTeam()?->getExternalid(),
+            'roles' => $user->getRoleList(),
+        ]);
+        $merged = new UpdateUser(
+            id: $id,
+            username: (string)$data['username'],
+            name: (string)$data['name'],
+            ip: $data['ip'],
+            password: $patchUser->password,
+            enabled: $data['enabled'],
+            teamId: $data['team_id'],
+            roles: $data['roles'] ?? [],
+        );
+
+        return $this->saveUser(
+            $request,
+            $user,
+            $merged,
+            created: false,
+            setPassword: array_key_exists('password', $request->getPayload()->all()),
+        );
+    }
+
+    protected function saveUser(
+        Request $request,
+        User $user,
+        AddUser $data,
+        bool $created,
+        bool $setPassword = true,
+    ): Response {
+        if (!$data->roles) {
             throw new BadRequestHttpException('`roles` field is required');
         }
 
-        $user = new User();
-        if ($addUser instanceof UpdateUser) {
-            $existingUser = $this->em->getRepository(User::class)->findOneBy(['externalid' => $addUser->id]);
-            if ($existingUser) {
-                $user = $existingUser;
-            }
-        }
-
-        $existingUsername = $this->em->getRepository(User::class)->findOneBy(['username' => $addUser->username]);
+        $existingUsername = $this->em->getRepository(User::class)->findOneBy(['username' => $data->username]);
         if ($existingUsername && $existingUsername !== $user) {
-            throw new BadRequestHttpException(sprintf("User %s already exists", $addUser->username));
+            throw new BadRequestHttpException(sprintf("User %s already exists", $data->username));
         }
+
         $user
-            ->setUsername($addUser->username)
-            ->setName($addUser->name)
-            ->setIpAddress($addUser->ip);
+            ->setUsername($data->username)
+            ->setName($data->name)
+            ->setIpAddress($data->ip)
+            ->setEnabled($data->enabled ?? true);
 
-        if ($addUser instanceof UpdateUser) {
-            $user->setExternalid($addUser->id);
-
-            // Specifically allow one to update the user and enabled without changing the password.
-            // Note that for other nullable fields (ip and teamId) setting them to null is a valid action
-            if ($addUser->enabled !== null) {
-                $user->setEnabled($addUser->enabled);
-            }
-
-            if ($addUser->password !== null) {
-                $user->setPlainPassword($addUser->password);
-            }
-        } else {
-            $user
-                ->setEnabled($addUser->enabled ?? true)
-                ->setPlainPassword($addUser->password);
+        if ($setPassword) {
+            $user->setPlainPassword($data->password);
         }
 
-        if ($addUser->teamId) {
+        $team = null;
+        if ($data->teamId) {
             /** @var Team|null $team */
             $team = $this->em->createQueryBuilder()
                 ->from(Team::class, 't')
                 ->select('t')
                 ->andWhere('t.externalid = :team')
-                ->setParameter('team', $addUser->teamId)
+                ->setParameter('team', $data->teamId)
                 ->getQuery()
                 ->getOneOrNullResult();
 
             if ($team === null) {
-                throw new BadRequestHttpException(sprintf("Team %s not found", $addUser->teamId));
+                throw new BadRequestHttpException(sprintf("Team %s not found", $data->teamId));
             }
-            $user->setTeam($team);
+        }
+        $user->setTeam($team);
+
+        // Clear existing roles to avoid duplicate join table entries.
+        foreach ($user->getUserRoles() as $existingRole) {
+            $user->removeUserRole($existingRole);
         }
 
-        if (!empty($addUser->roles)) {
-            // Clear existing roles on update to avoid duplicate join table entries.
-            if ($addUser instanceof UpdateUser) {
-                foreach ($user->getUserRoles() as $existingRole) {
-                    $user->removeUserRole($existingRole);
-                }
+        $roles = $data->roles;
+        // For the file import we change a CDS user to the roles needed for ICPC CDS.
+        if ($user->getUsername() === 'cds') {
+            $roles = ['cds'];
+        }
+        if (in_array('cds', $roles)) {
+            $roles = ['api_source_reader', 'api_writer', 'api_reader', ...array_diff($roles, ['cds'])];
+        }
+        foreach ($roles as $djRole) {
+            if ($djRole === '') {
+                continue;
             }
-
-            $roles = $addUser->roles;
-            // For the file import we change a CDS user to the roles needed for ICPC CDS.
-            if ($user->getUsername() === 'cds') {
-                $roles = ['cds'];
+            if ($djRole === 'judge') {
+                $djRole = 'jury';
             }
-            if (in_array('cds', $roles)) {
-                $roles = ['api_source_reader', 'api_writer', 'api_reader', ...array_diff($roles, ['cds'])];
+            $role = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => $djRole]);
+            if ($role === null) {
+                throw new BadRequestHttpException(sprintf("Role %s not found", $djRole));
             }
-            foreach ($roles as $djRole) {
-                if ($djRole === '') {
-                    continue;
-                }
-                if ($djRole === 'judge') {
-                    $djRole = 'jury';
-                }
-                $role = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => $djRole]);
-                if ($role === null) {
-                    throw new BadRequestHttpException(sprintf("Role %s not found", $djRole));
-                }
-                $user->addUserRole($role);
-            }
+            $user->addUserRole($role);
         }
 
         $errors = $this->validator->validate($user);
@@ -517,9 +567,9 @@ class UserController extends AbstractRestController
 
         $this->em->persist($user);
         $this->em->flush();
-        $this->dj->auditlog('user', $user->getExternalid(), 'added');
+        $this->dj->auditlog('user', $user->getExternalid(), $created ? 'added' : 'updated');
 
-        return $this->renderCreateData($request, $user, 'user', $user->getUserid());
+        return $this->renderSavedData($request, $user, 'user', $user->getExternalid(), $created);
     }
 
     protected function getQueryBuilder(Request $request): QueryBuilder

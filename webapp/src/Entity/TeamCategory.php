@@ -348,6 +348,14 @@ class TeamCategory extends BaseApiEntity implements
     /**
      * @return string[]
      */
+    public static function getAllTypeNames(): array
+    {
+        return array_values(self::TYPES_TO_STRING);
+    }
+
+    /**
+     * @return string[]
+     */
     public function getTypeHumanNames(): array
     {
         $names = [];

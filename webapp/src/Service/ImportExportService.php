@@ -860,6 +860,7 @@ readonly class ImportExportService
                 'categoryid' => @$line[0],
                 'name' => @$line[1],
                 'allow_self_registration' => false,
+                'allow_password_change' => false,
             ];
         }
 
@@ -870,7 +871,8 @@ readonly class ImportExportService
      * Import groups JSON
      *
      * @param array<array{id?: string, icpc_id: string, name?: string, types?: string[], sortorder?: int,
-     *                    color?: string, css_class?: string, hidden?: bool, allow_self_registration?: bool}> $data
+     *                    color?: string, css_class?: string, hidden?: bool, allow_self_registration?: bool,
+     *                    allow_password_change?: bool}> $data
      * @param TeamCategory[]|null $saved The saved groups
      */
     public function importGroupsJson(array $data, ?string &$message = null, ?array &$saved = null): int
@@ -901,6 +903,7 @@ readonly class ImportExportService
                 'color' => @$group['color'],
                 'css_class' => @$group['css_class'],
                 'allow_self_registration' => $group['allow_self_registration'] ?? false,
+                'allow_password_change' => $group['allow_password_change'] ?? false,
             ];
         }
 
@@ -912,7 +915,7 @@ readonly class ImportExportService
      *
      * @param array<array{categoryid: string, icpc_id?: string, name: string, visible?: bool,
      *              types?: int[]|null, sortorder?: int|null, color?: string|null, css_class?: string|null,
-     *              allow_self_registration: bool}> $groupData
+     *              allow_self_registration: bool, allow_password_change: bool}> $groupData
      * @param TeamCategory[]|null $saved The saved groups
      *
      * @throws NonUniqueResultException
@@ -970,7 +973,9 @@ readonly class ImportExportService
                 ->setColor($groupItem['color'] ?? null)
                 ->setCssClass($groupItem['css_class'] ?? null)
                 ->setIcpcid($groupItem['icpc_id'] ?? null);
-            $teamCategory->setAllowSelfRegistration($groupItem['allow_self_registration']);
+            $teamCategory
+                ->setAllowSelfRegistration($groupItem['allow_self_registration'])
+                ->setAllowPasswordChange($groupItem['allow_password_change']);
 
             $errors = $this->validator->validate($teamCategory);
             if ($errors->count()) {

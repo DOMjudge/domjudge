@@ -103,4 +103,68 @@ class TeamControllerTest extends BaseTestCase
         $response = $this->verifyApiJsonResponse('POST', $url, 400, 'admin', $data);
         self::assertStringContainsString('Only letters, numbers, dashes, underscores and dots are allowed.', $response['message']);
     }
+
+    public function testAddExistingTeam(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint);
+        $data = ['id' => 'exteam', 'name' => 'Other name', 'group_ids' => ['participants']];
+        $response = $this->verifyApiJsonResponse('POST', $url, 400, 'admin', $data);
+        self::assertEquals("Team with ID 'exteam' already exists", $response['message']);
+    }
+
+    public function testPutNewTeam(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'newteam');
+        $data = ['id' => 'newteam', 'name' => 'New team', 'group_ids' => ['participants']];
+        $response = $this->verifyApiJsonResponse('PUT', $url, 201, 'admin', $data);
+        self::assertEquals('newteam', $response['id']);
+        self::assertEquals('New team', $response['name']);
+    }
+
+    public function testPutReplacesTeam(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'exteam');
+        $data = ['id' => 'exteam', 'name' => 'Replaced name', 'group_ids' => ['observers']];
+        $response = $this->verifyApiJsonResponse('PUT', $url, 200, 'admin', $data);
+        self::assertEquals('Replaced name', $response['name']);
+        self::assertEquals(['observers'], $response['group_ids']);
+        self::assertNull($response['icpc_id']);
+        self::assertNull($response['organization_id']);
+        self::assertNull($response['location']);
+    }
+
+    public function testPutIdMismatch(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'exteam');
+        $data = ['id' => 'otherid', 'name' => 'Replaced name'];
+        $response = $this->verifyApiJsonResponse('PUT', $url, 400, 'admin', $data);
+        self::assertEquals('ID in URL does not match ID in payload', $response['message']);
+    }
+
+    public function testPatchKeepsOtherFields(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'exteam');
+        $response = $this->verifyApiJsonResponse('PATCH', $url, 200, 'admin', ['display_name' => 'Patched']);
+        self::assertEquals('Patched', $response['display_name']);
+        self::assertEquals('Example teamname', $response['name']);
+        self::assertEquals('exteam', $response['icpc_id']);
+        self::assertEquals(['participants'], $response['group_ids']);
+        self::assertEquals('utrecht', $response['organization_id']);
+        self::assertEquals(['description' => 'Utrecht'], $response['location']);
+    }
+
+    public function testPatchClearsNullFields(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'exteam');
+        $response = $this->verifyApiJsonResponse('PATCH', $url, 200, 'admin', ['organization_id' => null, 'location' => null]);
+        self::assertEquals('Example teamname', $response['name']);
+        self::assertNull($response['organization_id']);
+        self::assertNull($response['location']);
+    }
+
+    public function testPatchNotFound(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, 'nonexistent');
+        $this->verifyApiJsonResponse('PATCH', $url, 404, 'admin', ['name' => 'Patched']);
+    }
 }

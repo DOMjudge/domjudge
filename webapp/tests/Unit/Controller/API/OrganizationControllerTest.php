@@ -267,4 +267,56 @@ class OrganizationControllerTest extends BaseTestCase
         $response = $this->verifyApiJsonResponse('POST', $url, 400, 'admin', $data);
         self::assertStringContainsString('Only letters, numbers, dashes, underscores and dots are allowed.', $response['message']);
     }
+
+    public function testAddExistingOrganization(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations');
+        $data = ['id' => 'utrecht', 'shortname' => 'newOrg', 'formal_name' => 'newOrgWithName'];
+        $response = $this->verifyApiJsonResponse('POST', $url, 400, 'admin', $data);
+        self::assertEquals("Organization with ID 'utrecht' already exists", $response['message']);
+    }
+
+    public function testPutNewOrganization(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations', 'neworg');
+        $data = ['id' => 'neworg', 'name' => 'NO', 'formal_name' => 'New Organization'];
+        $response = $this->verifyApiJsonResponse('PUT', $url, 201, 'admin', $data);
+        self::assertEquals('neworg', $response['id']);
+        self::assertEquals('NO', $response['name']);
+        self::assertEquals('New Organization', $response['formal_name']);
+    }
+
+    public function testPutReplacesOrganization(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations', 'utrecht');
+        $data = ['id' => 'utrecht', 'name' => 'UU2', 'formal_name' => 'Universiteit Utrecht'];
+        $response = $this->verifyApiJsonResponse('PUT', $url, 200, 'admin', $data);
+        self::assertEquals('UU2', $response['name']);
+        self::assertEquals('Universiteit Utrecht', $response['formal_name']);
+        self::assertNull($response['country']);
+    }
+
+    public function testPatchOrganizationFormalName(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations', 'utrecht');
+        $response = $this->verifyApiJsonResponse('PATCH', $url, 200, 'admin', ['formal_name' => 'Universiteit Utrecht']);
+        self::assertEquals('UU', $response['name']);
+        self::assertEquals('Universiteit Utrecht', $response['formal_name']);
+        self::assertEquals('NLD', $response['country']);
+    }
+
+    public function testPatchOrganizationName(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations', 'utrecht');
+        $response = $this->verifyApiJsonResponse('PATCH', $url, 200, 'admin', ['name' => 'UU2', 'country' => null]);
+        self::assertEquals('UU2', $response['name']);
+        self::assertEquals('Utrecht University', $response['formal_name']);
+        self::assertNull($response['country']);
+    }
+
+    public function testPatchOrganizationNotFound(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations', 'nonexistent');
+        $this->verifyApiJsonResponse('PATCH', $url, 404, 'admin', ['name' => 'UU2']);
+    }
 }
