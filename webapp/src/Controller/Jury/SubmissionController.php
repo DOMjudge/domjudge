@@ -1326,11 +1326,17 @@ class SubmissionController extends BaseController
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ((bool)$this->config->get('verification_required')) {
             // We need to update the score for all teams for this problem, since the first to solve might now
-            // have changed.
+            // have changed. Only teams that submitted for this problem can have a score for it.
             $teamsQueryBuilder = $this->em->createQueryBuilder()
                                      ->from(Team::class, 't')
                                      ->select('t')
                                      ->distinct()
+                                     ->andWhere('EXISTS (
+                                         SELECT 1 FROM ' . Submission::class . ' ts
+                                         WHERE ts.team = t AND ts.contest = :submissionContest
+                                             AND ts.problem = :submissionProblem)')
+                                     ->setParameter('submissionContest', $judging->getContest())
+                                     ->setParameter('submissionProblem', $judging->getSubmission()->getProblem())
                                      ->orderBy('t.teamid');
             if (!$judging->getContest()->isOpenToAllTeams()) {
                 $teamsQueryBuilder
