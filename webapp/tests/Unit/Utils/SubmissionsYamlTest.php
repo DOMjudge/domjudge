@@ -60,6 +60,12 @@ class SubmissionsYamlTest extends TestCase
         yield 'star within name' => ["'*/sol.*':\n  permitted: [AC]\n", 'mixed/sol.py', ['CORRECT']];
         yield 'override default' => ["time_limit_exceeded:\n  permitted: [AC, WA, TLE]\n",
             'time_limit_exceeded/sol.py', ['WRONG-ANSWER', 'TIMELIMIT']];
+        yield 'override default with trailing slash' => ["time_limit_exceeded/:\n  permitted: [AC, WA, TLE]\n",
+            'time_limit_exceeded/sol.py', ['WRONG-ANSWER', 'TIMELIMIT']];
+        yield 'trailing slash in braces' => ["'{mixed/,rejected/}':\n  permitted: [AC, WA]\n", 'mixed/sol.py',
+            ['CORRECT', 'WRONG-ANSWER']];
+        yield 'lowercase verdicts' => ["mixed:\n  permitted: [ac, wa]\n", 'mixed/sol.py', ['CORRECT', 'WRONG-ANSWER']];
+        yield 'empty rule' => ["mixed: {}\n", 'mixed/sol.py', null];
         yield 'glob adds to default' => ["time_limit_exceeded/*:\n  permitted: [AC, WA, TLE]\n",
             'time_limit_exceeded/sol.py', ['TIMELIMIT']];
         yield 'rules intersect' => ["rejected/*:\n  permitted: [AC, WA]\n", 'rejected/sol.py', ['WRONG-ANSWER']];
@@ -119,6 +125,13 @@ YAML;
         yield 'test data group' => ["accepted:\n  secret/group1:\n    permitted: [AC]\n", 'warning', 'test data group'];
         yield 'score range' => ["accepted:\n  score: [10, 20]\n", 'warning', 'single number'];
         yield 'unknown verdict' => ["accepted:\n  permitted: [MLE]\n", 'danger', 'MLE'];
+        yield 'non-string verdict' => ["accepted:\n  permitted: [[AC]]\n", 'danger', 'unknown verdict'];
+        yield 'list instead of map' => ["accepted:\n  - permitted: [AC]\n", 'danger', 'not a map'];
+        yield 'non-string language' => ["accepted:\n  language: [python3]\n", 'warning', 'not a string'];
+        yield 'submissions.json key' => ["accepted:\n  entry_point: Main\n", 'warning', "did you mean 'entrypoint'"];
+        yield 'unknown key' => ["accepted:\n  authors_list: [Someone]\n", 'warning', "unknown key 'authors_list'"];
+        yield 'invalid use_for_time_limit' => ["accepted:\n  use_for_time_limit: maybe\n", 'warning',
+            'use_for_time_limit'];
         yield 'invalid yaml' => ["accepted: [\n", 'danger', 'submissions.yaml'];
         yield 'not a map' => ["- accepted\n", 'danger', 'not a map'];
     }

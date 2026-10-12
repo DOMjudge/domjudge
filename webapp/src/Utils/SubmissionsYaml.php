@@ -30,6 +30,14 @@ class SubmissionsYaml
     // Not checkable on a judging.
     private const IGNORED_KEYS = ['authors', 'model_solution', 'message'];
 
+    // Likely mix-ups, e.g. from submissions.json.
+    private const KEY_SUGGESTIONS = [
+        'entry_point' => 'entrypoint',
+        'langid'      => 'language',
+        'lang'        => 'language',
+        'author'      => 'authors',
+    ];
+
     /** @var array<string, array<string, mixed>> */
     private array $rules = self::DEFAULT_RULES;
 
@@ -56,8 +64,8 @@ class SubmissionsYaml
         }
 
         foreach ($data as $pattern => $config) {
-            $pattern = (string)$pattern;
-            if (!is_array($config)) {
+            $pattern = rtrim((string)$pattern, '/');
+            if (!is_array($config) || ($config !== [] && array_is_list($config))) {
                 $messages['danger'][] = sprintf("Ignoring '%s' in submissions/submissions.yaml: not a map.", $pattern);
                 continue;
             }
@@ -129,14 +137,18 @@ class SubmissionsYaml
             switch ($key) {
                 case 'permitted':
                 case 'required':
-                    $verdicts = is_array($value) ? $value : [$value];
-                    $unknown = array_diff($verdicts, array_keys(self::VERDICTS));
+                    $verdicts = array_map(
+                        fn($verdict) => is_string($verdict) ? mb_strtoupper(trim($verdict)) : $verdict,
+                        is_array($value) ? array_values($value) : [$value]
+                    );
+                    $unknown = array_filter($verdicts,
+                        fn($verdict) => !is_string($verdict) || !isset(self::VERDICTS[$verdict]));
                     if (!empty($unknown)) {
                         $messages['danger'][] = sprintf("Ignoring %s for '%s' in submissions/submissions.yaml: unknown verdict(s) %s.",
-                            $key, $pattern, implode(', ', $unknown));
+                            $key, $pattern, implode(', ', array_map(fn($verdict) => json_encode($verdict), $unknown)));
                         break;
                     }
-                    $rule[$key] = array_values($verdicts);
+                    $rule[$key] = $verdicts;
                     break;
                 case 'use_for_time_limit':
                     // lower and upper are shorthands for verdict requirements.
@@ -144,6 +156,9 @@ class SubmissionsYaml
                         $rule['permitted_for_time_limit'] = ['AC', 'WA', 'RTE'];
                     } elseif ($value === 'upper') {
                         $rule['required_for_time_limit'] = ['TLE'];
+                    } elseif (!is_bool($value)) {
+                        $messages['warning'][] = sprintf("Ignoring use_for_time_limit for '%s' in submissions/submissions.yaml: must be true, false, lower or upper.",
+                            $pattern);
                     }
                     break;
                 case 'score':
@@ -156,14 +171,27 @@ class SubmissionsYaml
                     break;
                 case 'language':
                 case 'entrypoint':
-                    $rule[$key] = (string)$value;
+                    if (is_string($value)) {
+                        $rule[$key] = $value;
+                    } else {
+                        $messages['warning'][] = sprintf("Ignoring %s for '%s' in submissions/submissions.yaml: not a string.",
+                            $key, $pattern);
+                    }
                     break;
                 default:
                     if (in_array($key, self::IGNORED_KEYS, true)) {
                         break;
                     }
-                    $messages['warning'][] = sprintf("Ignoring '%s' for '%s' in submissions/submissions.yaml: requirements per test data group are not supported.",
-                        $key, $pattern);
+                    // Test data groups map to requirements, anything else is a typo.
+                    if (is_array($value) && !array_is_list($value)) {
+                        $messages['warning'][] = sprintf("Ignoring '%s' for '%s' in submissions/submissions.yaml: requirements per test data group are not supported.",
+                            $key, $pattern);
+                    } else {
+                        $suggestion = isset(self::KEY_SUGGESTIONS[$key])
+                            ? sprintf(", did you mean '%s'?", self::KEY_SUGGESTIONS[$key]) : '.';
+                        $messages['warning'][] = sprintf("Ignoring unknown key '%s' for '%s' in submissions/submissions.yaml%s",
+                            $key, $pattern, $suggestion);
+                    }
             }
         }
         return $rule;
@@ -204,9 +232,9 @@ class SubmissionsYaml
      */
     private static function matches(string $pattern, array $candidates): bool
     {
-        foreach (self::expandBraces(rtrim($pattern, '/')) as $expanded) {
+        foreach (self::expandBraces($pattern) as $expanded) {
             foreach ($candidates as $candidate) {
-                if (fnmatch($expanded, $candidate, FNM_PATHNAME)) {
+                if (fnmatch(rtrim($expanded, '/'), $candidate, FNM_PATHNAME)) {
                     return true;
                 }
             }
