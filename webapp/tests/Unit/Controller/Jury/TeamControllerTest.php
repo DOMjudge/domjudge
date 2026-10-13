@@ -10,6 +10,7 @@ use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DomCrawler\Field\ChoiceFormField;
 
 class TeamControllerTest extends JuryControllerTestCase
 {
@@ -250,7 +251,7 @@ class TeamControllerTest extends JuryControllerTestCase
             'name' => 'Example teamname',
         ]);
         $contest = $em->getRepository(Contest::class)->findOneBy([
-            'shortname' => 'noDeactivationNFr',
+            'shortname' => 'demo',
         ]);
 
         self::assertNotNull($team);
@@ -267,7 +268,9 @@ class TeamControllerTest extends JuryControllerTestCase
 
         $this->verifyPageResponse('GET', "/jury/teams/$teamId/edit", 200);
         $form = $this->client->getCrawler()->selectButton('Save')->form();
-        $form['team[enabled]']->untick();
+        $enabledField = $form['team[enabled]'];
+        assert($enabledField instanceof ChoiceFormField);
+        $enabledField->untick();
         $this->client->submit($form);
 
         self::assertNotEquals(500, $this->client->getResponse()->getStatusCode());
@@ -278,7 +281,7 @@ class TeamControllerTest extends JuryControllerTestCase
             'name' => 'Example teamname',
         ]);
         $contest = $em->getRepository(Contest::class)->findOneBy([
-            'shortname' => 'noDeactivationNFr',
+            'shortname' => 'demo',
         ]);
 
         self::assertNotNull($team);
@@ -304,7 +307,9 @@ class TeamControllerTest extends JuryControllerTestCase
         // Re-enable the team and verify that the Resolver receives a create event.
         $this->verifyPageResponse('GET', "/jury/teams/$teamId/edit", 200);
         $form = $this->client->getCrawler()->selectButton('Save')->form();
-        $form['team[enabled]']->tick();
+        $enabledField = $form['team[enabled]'];
+        assert($enabledField instanceof ChoiceFormField);
+        $enabledField->tick();
         $this->client->submit($form);
 
         self::assertNotEquals(500, $this->client->getResponse()->getStatusCode());
@@ -314,7 +319,7 @@ class TeamControllerTest extends JuryControllerTestCase
             'name' => 'Example teamname',
         ]);
         $contest = $em->getRepository(Contest::class)->findOneBy([
-            'shortname' => 'noDeactivationNFr',
+            'shortname' => 'demo',
         ]);
 
         self::assertNotNull($team);
