@@ -14,6 +14,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportProblemService;
+use App\Utils\CcsApiVersion;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -43,8 +44,6 @@ class GeneralInfoController extends AbstractFOSRestController
 {
     protected const API_VERSION = 4;
 
-    final public const CCS_SPEC_API_VERSION = '2023-06';
-    final public const CCS_SPEC_API_URL = 'https://ccs-specs.icpc.io/2023-06/contest_api';
 
     public function __construct(
         protected readonly AuthorizedUserService $authService,
@@ -96,9 +95,12 @@ class GeneralInfoController extends AbstractFOSRestController
             );
         }
 
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+
         return new ApiInfo(
-            version: self::CCS_SPEC_API_VERSION,
-            versionUrl: self::CCS_SPEC_API_URL,
+            version: $ccsApiVersion->value,
+            versionUrl: $ccsApiVersion->getCcsSpecsApiUrl(),
             name: 'DOMjudge',
             //TODO: Add DOMjudge logo
             provider: new ApiInfoProvider(

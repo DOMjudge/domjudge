@@ -6,9 +6,12 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\EnableSelfregisterFixture;
 use App\DataFixtures\Test\EnableSelfregisterSecondCategoryFixture;
 use App\DataFixtures\Test\SampleSubmissionsInBucketsFixture;
+use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectFixture;
 use App\DataFixtures\Test\SelfRegisteredUserFixture;
 use App\Entity\Contest;
+use App\Entity\Submission;
 use App\Entity\User;
+use App\Service\ScoreboardService;
 use App\Tests\Unit\BaseTestCase;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,6 +43,22 @@ class PublicControllerTest extends BaseTestCase
 
         $this->verifyPageResponse('GET', '/public', 200);
         self::assertSelectorExists('p.nodata:contains("No active contest")');
+    }
+
+    public function testStaticScoreboardOnlyUsesRelativeLinks(): void
+    {
+        $this->loadFixture(SampleSubmissionsInBucketsFixture::class);
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        static::getContainer()->get(ScoreboardService::class)->refreshCache($contest);
+
+        $this->verifyPageResponse('GET', '/public?static=1', 200);
+        $content = $this->client->getResponse()->getContent();
+
+        self::assertDoesNotMatchRegularExpression('/(href|src)="\//', $content);
+        self::assertStringContainsString('href="css/bootstrap.min.css', $content);
+        self::assertStringContainsString('href="public/scoreboard-category-color.css"', $content);
+        self::assertStringContainsString('data-submissions-url="public/submissions-data.json"', $content);
     }
 
     public function testScoreboardWarningMessage(): void
@@ -328,5 +347,29 @@ class PublicControllerTest extends BaseTestCase
         yield [false, false, 1, 1, 6]; // Keep both times, we expect one green, one red and six blue boxes (2 around the freeze and 4 at the end)
         yield [true, true, 3, 3, 0]; // Remove both times, we expect three green and three red boxes
         yield [false, true, 1, 1, 6]; // Remove the unfreeze time but not the freeze time, we expect one green, one red and six blue boxes
+    }
+
+    /**
+     * Test that the submissions popup only shows the simplified verdict of submissions.
+     */
+    public function testSubmissionsDataShowsSimplifiedVerdicts(): void
+    {
+        $this->loadFixture(SampleSubmissionsThreeTriesCorrectFixture::class);
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+        $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo'])->setFreezetimeString(null);
+        // Its submissions are judged timelimit, wrong-answer and correct; make the first one a compiler error.
+        $submissionId = $this->resolveReference(SampleSubmissionsThreeTriesCorrectFixture::class . ':0', Submission::class);
+        $em->getRepository(Submission::class)->find($submissionId)->getJudgings()->first()->setResult('compiler-error');
+        $em->flush();
+
+        $this->client->request('GET', '/public/submissions-data/team/exteam/problem/hello.json');
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $verdicts = array_map(
+            fn(array $submission) => strip_tags($submission['verdict']),
+            $data['submissions']['team-exteam']['problem-hello']
+        );
+        // Newest first.
+        self::assertSame(['correct', 'rejected', 'compiler-error'], $verdicts);
     }
 }

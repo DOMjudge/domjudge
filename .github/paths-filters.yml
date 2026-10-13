@@ -82,6 +82,11 @@ phpstan:
   - 'webapp/**'
   - 'phpstan*.neon'
 
+# The Python unit tests of the scripts in misc-tools.
+misc-tools-unit:
+  - *ci
+  - 'misc-tools/**'
+
 # The default compare script and its test.
 compare:
   - *ci

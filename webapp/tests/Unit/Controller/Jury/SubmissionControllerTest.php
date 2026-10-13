@@ -48,6 +48,38 @@ class SubmissionControllerTest extends BaseTestCase
         }
     }
 
+    public function testFilterFormSameSite(): void
+    {
+        $this->submitResultFilter([]);
+        self::assertSame(['correct'], json_decode($this->filterCookie() ?? 'null', true)['result'] ?? null);
+    }
+
+    public function testFilterFormRejectsCrossSite(): void
+    {
+        $this->submitResultFilter(['HTTP_SEC_FETCH_SITE' => 'cross-site']);
+        self::assertNull($this->filterCookie());
+    }
+
+    private function filterCookie(): ?string
+    {
+        foreach ($this->client->getResponse()->headers->getCookies() as $cookie) {
+            if ($cookie->getName() === 'domjudge_submissionsfilter') {
+                return $cookie->getValue();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param array<string, string> $server
+     */
+    private function submitResultFilter(array $server): void
+    {
+        $this->verifyPageResponse('GET', static::$baseURL, 200);
+        $form = $this->getCurrentCrawler()->selectButton('Apply filters')->form();
+        $this->client->submit($form, ['submissions_filter[result]' => ['correct']], $server);
+    }
+
     private function em(): EntityManagerInterface
     {
         return self::getContainer()->get(EntityManagerInterface::class);
@@ -120,5 +152,25 @@ class SubmissionControllerTest extends BaseTestCase
         $judging = $this->reloadJudging($judgingId);
         self::assertFalse($judging->getVerified());
         self::assertNull($judging->getJuryMember(), 'unverifying must release the claim');
+    }
+
+    /**
+     * When verification is required, the verification is also logged to the event feed.
+     */
+    public function testVerifyingLogsAnEventWhenVerificationIsRequired(): void
+    {
+        $judgingId = $this->addSubmission()->getJudgings()->first()->getJudgingid();
+
+        $this->withChangedConfiguration('verification_required', true, function () use ($judgingId): void {
+            $count = fn(): int => (int)$this->em()->getConnection()->fetchOne(
+                "SELECT COUNT(*) FROM event WHERE endpointtype = 'judgements' AND endpointid = ?",
+                [(string)$judgingId]
+            );
+            $before = $count();
+
+            $this->postVerify($judgingId, ['verified' => '1', 'comment' => 'looks right']);
+
+            self::assertGreaterThan($before, $count(), 'verifying must log an event for the judging');
+        });
     }
 }

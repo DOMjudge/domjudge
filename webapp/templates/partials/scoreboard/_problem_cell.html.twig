@@ -9,19 +9,23 @@
 {% endif %}
 
 {# If correct, print time scored. The format will vary depending on the scoreboard resolution setting #}
-{% set time = '' %}
+{% set time = '&nbsp;' %}
 {% if matrixItem.isCorrect %}
     {% set time = matrixItem.time %}
     {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
         {% set time = "%0.3f s" | format(matrixItem.runtime / 1000.0) %}
     {% elseif scoreInSeconds %}
-        {% set time = time | scoreTime | printTimeRelative %}
+        {% set time = time | scoreTime | printTimeRelative ~ '<br/>' %}
         {% if matrixItem.numSubmissions > 1 %}
-            {% set time = time ~ ' + ' ~ (calculatePenaltyTime(contest.penaltyTime, true, matrixItem.numSubmissions) | printTimeRelative) %}
+            {% set time = time ~ '<small>+&nbsp;' ~ (calculatePenaltyTime(contest.penaltyTime, true, matrixItem.numSubmissions) | printTimeRelative) ~ '</small>' %}
+        {% else %}
+            {% set time = time ~ '<br/>' %}
         {% endif %}
     {% else %}
         {% set time = time | scoreTime %}
     {% endif %}
+{% elseif scoreInSeconds %}
+    {% set time = time ~ '&nbsp;<br/>&nbsp;' %}
 {% endif %}
 
 {% set link = null %}
@@ -31,7 +35,7 @@
     {% set link = path('jury_team', {teamId: score.team.externalid, restrict: restrict}) %}
 {% elseif static %}
     {% set link = '#' %}
-    {% set extra = 'data-submissions-url="' ~ path('public_submissions_data') ~ '"' %}
+    {% set extra = 'data-submissions-url="' ~ path('public_submissions_data', relative = true) ~ '"' %}
     {% set extra = extra ~ ' data-team-id="' ~ score.team.externalid ~ '"' %}
     {% set extra = extra ~ ' data-problem-id="' ~ problem.externalid ~ '"' %}
 {% elseif submissions_data_route is defined %}
@@ -41,7 +45,7 @@
     {% set extra = extra ~ ' data-problem-id="' ~ problem.externalid ~ '"' %}
 {% endif %}
 
-<td class="score_cell">
+<td class="score_cell" data-problem="{{ problem.shortname | escape('html_attr') }}" style="{{ problem | problemBadgeVars }}">
     {% if numSubmissions != '0' %}
         <a {% if link %}href="{{ link }}"{% endif %} {% if extra %}{{ extra | raw }}{% endif %}>
             <div
@@ -54,7 +58,7 @@
                 {% if scoringScoreboard %}
                     {% if hasScore %}{{ matrixItem.points | round(2) }}{% else %}&nbsp;{% endif %}
                 {% else %}
-                    {% if matrixItem.isCorrect %}{{ time }}{% else %}&nbsp;{% endif %}
+                    {{ time | raw }}
                 {% endif %}
                 <span>
                     {% if numSubmissions == 1 %}

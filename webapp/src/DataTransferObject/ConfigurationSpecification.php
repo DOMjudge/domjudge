@@ -22,6 +22,7 @@ class ConfigurationSpecification
         public readonly ?string $regex = null,
         public readonly ?string $keyPlaceholder = null,
         public readonly ?string $valuePlaceholder = null,
+        public readonly ?string $valueType = null,
         public readonly ?string $errorMessage = null,
         public readonly ?string $docdescription = null,
         public readonly ?string $enumClass = null,
@@ -34,7 +35,7 @@ class ConfigurationSpecification
      * @param array{name: string, type: string, public: bool,
      *                description: string, category: string, default_value: mixed|mixed[],
      *                regex?: string, key_placeholder?: string, value_placeholder?: string,
-     *                error_message?: string, docdescription?: string, enum_class?: string,
+     *                value_type?: string, error_message?: string, docdescription?: string, enum_class?: string,
      *                options?: array<int|string, string>, key_options?: array<string, string>,
      *                value_options?: array<string, string>} $array
      */
@@ -50,6 +51,7 @@ class ConfigurationSpecification
             $array['regex'] ?? null,
             $array['key_placeholder'] ?? null,
             $array['value_placeholder'] ?? null,
+            $array['value_type'] ?? null,
             $array['error_message'] ?? null,
             $array['docdescription'] ?? null,
             $array['enum_class'] ?? null,

@@ -14,6 +14,8 @@ use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\JudgingRunOutput;
+use App\Entity\JudgingRunPass;
+use App\Entity\JudgingRunPassOutput;
 use App\Entity\QueueTask;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
@@ -32,6 +34,7 @@ use BadMethodCallException;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Exception as DBALException;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -392,80 +395,81 @@ class JudgehostController extends AbstractFOSRestController
                 }
             } else {
                 $compileMetadata = $request->request->get('compile_metadata');
-                $this->em->wrapInTransaction(function () use (
-                    $judgehost,
-                    $judging,
-                    $query,
-                    $output_compile,
-                    $compileMetadata
-                ): void {
-                    if ($judging->getOutputCompile() === null) {
-                        $judging
-                            ->setOutputCompile($output_compile)
-                            ->setResult(Judging::RESULT_COMPILER_ERROR)
-                            ->setEndtime(Utils::now());
 
-                        if ($compileMetadata !== null) {
-                            $judging->setCompileMetadata(base64_decode($compileMetadata));
-                        }
-                        $this->em->flush();
+                // Claim the compile error with one guarded update: only the first judgehost to
+                // report one records it, with no window in which two believe they were first.
+                // The same statement invalidates the judgetasks, so none of them can be fetched
+                // for a judging that is already over. The metadata column is written
+                // unconditionally because the guard only passes while output_compile is still
+                // NULL, and the branch above writes both together.
+                $claimed = $this->em->getConnection()->executeStatement(
+                    'UPDATE judging j
+                        LEFT JOIN judgetask jt ON jt.jobid = j.judgingid
+                        SET j.output_compile = :output_compile,
+                            j.metadata = :compile_metadata,
+                            j.result = :result,
+                            j.endtime = :endtime,
+                            jt.valid = 0
+                      WHERE j.judgingid = :judgingid
+                        AND j.output_compile IS NULL',
+                    [
+                        'output_compile' => $output_compile,
+                        'compile_metadata' => $compileMetadata === null ? null : base64_decode($compileMetadata),
+                        'result' => Judging::RESULT_COMPILER_ERROR,
+                        'endtime' => Utils::now(),
+                        'judgingid' => $judging->getJudgingid(),
+                    ]
+                );
+                // The row was changed behind the entity manager's back.
+                $this->em->refresh($judging);
 
-                        if ($judging->getValid()) {
-                            $this->eventLogService->log('judging', $judging->getJudgingid(),
-                                EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
-                        }
+                if ($claimed) {
+                    if ($judging->getValid()) {
+                        $this->eventLogService->log('judging', $judging->getJudgingid(),
+                            EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
 
-                        // As EventLogService::log() will clear the entity manager, so the judging has
-                        // now become detached. We will have to reload it.
+                        // As EventLogService::log() will clear the entity manager, the judging
+                        // has now become detached. We will have to reload it.
                         /** @var Judging $judging */
                         $judging = $query->getOneOrNullResult();
-
-                        // Invalidate judgetasks.
-                        $this->em->getConnection()->executeStatement(
-                            'UPDATE judgetask SET valid=0'
-                            . ' WHERE jobid=:jobid',
-                            [
-                                'jobid' => $judging->getJudgingid(),
-                            ]
-                        );
-                        $this->em->flush();
-                    } elseif ($judging->getResult() !== Judging::RESULT_COMPILER_ERROR) {
-                        // The new result contradicts a former one, that's not good.
-                        // Since at least one other judgehost was successful, but we were not, assume that the
-                        // current judgehost is broken and disable it.
-                        $this->disableJudgehostForContradiction(
-                            $judging,
-                            $judgehost->getHostname(),
-                            (string)$output_compile
-                        );
-
-                        $this->em->flush();
                     }
+                } elseif ($judging->getResult() !== Judging::RESULT_COMPILER_ERROR) {
+                    // The new result contradicts a former one, that's not good.
+                    // Since at least one other judgehost was successful, but we were not, assume that the
+                    // current judgehost is broken and disable it.
+                    $this->disableJudgehostForContradiction(
+                        $judging,
+                        $judgehost->getHostname(),
+                        (string)$output_compile
+                    );
 
-                    $judgingId = $judging->getJudgingid();
-                    $contestId = $judging->getSubmission()->getContest()->getCid();
-                    $contestExternalid = $judging->getSubmission()->getContest()->getExternalid();
-                    $this->dj->auditlog('judging', (string)$judgingId, 'judged',
-                                        'compiler-error', $judgehost->getHostname(), $contestExternalid);
-
-                    $this->maybeUpdateActiveJudging($judging);
                     $this->em->flush();
-                    if (!$this->config->get('verification_required') &&
-                        $judging->getValid()) {
-                        $this->eventLogService->log('judging', $judgingId,
-                                                    EventLogService::ACTION_UPDATE, $contestId);
-                    }
+                }
 
-                    $submission = $judging->getSubmission();
-                    $contest    = $submission->getContest();
-                    $team       = $submission->getTeam();
-                    $problem    = $submission->getProblem();
-                    $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+                $judgingId = $judging->getJudgingid();
+                $contestId = $judging->getSubmission()->getContest()->getCid();
+                $contestExternalid = $judging->getSubmission()->getContest()->getExternalid();
+                $this->dj->auditlog('judging', (string)$judgingId, 'judged',
+                                    'compiler-error', $judgehost->getHostname(), $contestExternalid);
 
-                    $message = sprintf("submission %s, judging %d: compiler-error",
-                                       $submission->getExternalid(), $judging->getJudgingid());
-                    $this->dj->alert('reject', $message);
-                });
+                $this->maybeUpdateActiveJudging($judging);
+                if (!$this->config->get('verification_required') &&
+                    $judging->getValid()) {
+                    $this->eventLogService->log('judging', $judgingId,
+                                                EventLogService::ACTION_UPDATE, $contestId);
+                }
+
+                $submission = $judging->getSubmission();
+                $contest    = $submission->getContest();
+                $team       = $submission->getTeam();
+                $problem    = $submission->getProblem();
+                // Outside any transaction, as ScoreboardService requires: it takes a MariaDB
+                // advisory lock and would otherwise hold it across the caller's row locks.
+                $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+
+                $message = sprintf("submission %s, judging %d: compiler-error",
+                                   $submission->getExternalid(), $judging->getJudgingid());
+                $this->dj->alert('reject', $message);
             }
         } else {
             throw new BadRequestHttpException('Inconsistent data, no compilation data provided.');
@@ -619,6 +623,13 @@ class JudgehostController extends AbstractFOSRestController
                         description: 'The (base64-encoded) metadata of the validator',
                         type: 'string'
                     ),
+                    new OA\Property(
+                        property: 'passes',
+                        description: 'JSON encoded list of the individual passes of a multi-pass run. Each entry '
+                            . 'has a `pass` number and the same fields as the run itself, plus an optional '
+                            . '(base64-encoded) `input` for the pass',
+                        type: 'string'
+                    ),
                 ]
             )
         )
@@ -662,6 +673,7 @@ class JudgehostController extends AbstractFOSRestController
         $compareMeta  = $request->request->get('compare_metadata');
         $score        = $request->request->get('score');
         $pass         = $request->request->get('pass');
+        $passes       = $request->request->get('passes');
 
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
@@ -669,12 +681,74 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime, $startTime, $endTime,
-            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta, $score, $pass);
+            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta, $score, $pass, $passes);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
 
         return (int)$hasFinalResult;
+    }
+
+    /**
+     * Store the details of every pass of a multi-pass run.
+     *
+     * Passes are keyed by their number, so reporting the same run again
+     * replaces what was stored before instead of adding to it.
+     *
+     * @param string $passes JSON encoded list of passes
+     */
+    private function storeJudgingRunPasses(JudgingRun $judgingRun, string $passes, int $judgeTaskId): void
+    {
+        $decoded = Utils::jsonDecode($passes);
+        if (!is_array($decoded) || !array_is_list($decoded)) {
+            throw new BadRequestHttpException(
+                sprintf("Invalid passes for judgetask %d: not a list.", $judgeTaskId));
+        }
+
+        $existing = [];
+        foreach ($judgingRun->getPasses() as $judgingRunPass) {
+            $existing[$judgingRunPass->getPass()] = $judgingRunPass;
+        }
+
+        $seen = [];
+        foreach ($decoded as $data) {
+            if (!is_array($data) || !isset($data['pass']) || (int)$data['pass'] < 1) {
+                throw new BadRequestHttpException(
+                    sprintf("Invalid passes for judgetask %d: entry without pass number.", $judgeTaskId));
+            }
+            $number = (int)$data['pass'];
+            if (isset($seen[$number])) {
+                throw new BadRequestHttpException(
+                    sprintf("Invalid passes for judgetask %d: pass %d given twice.", $judgeTaskId, $number));
+            }
+            $seen[$number] = true;
+
+            $judgingRunPass = $existing[$number] ?? null;
+            if ($judgingRunPass === null) {
+                $judgingRunPass = (new JudgingRunPass())->setPass($number);
+                $judgingRun->addPass($judgingRunPass);
+            }
+            $output = $judgingRunPass->getOutput();
+            if ($output === null) {
+                $output = new JudgingRunPassOutput();
+                $judgingRunPass->setOutput($output);
+            }
+
+            $decode = static fn(string $key): ?string => isset($data[$key]) ? base64_decode((string)$data[$key]) : null;
+            $judgingRunPass
+                ->setRunresult($data['runresult'] ?? null)
+                ->setRuntime(isset($data['runtime']) ? (float)$data['runtime'] : null)
+                ->setStartTime($data['start_time'] ?? null)
+                ->setEndtime($data['end_time'] ?? null);
+            $output
+                ->setInput($decode('input'))
+                ->setOutputRun($decode('output_run'))
+                ->setOutputDiff($decode('output_diff'))
+                ->setOutputError($decode('output_error'))
+                ->setOutputSystem($decode('output_system'))
+                ->setMetadata($decode('metadata'))
+                ->setValidatorMetadata($decode('compare_metadata'));
+        }
     }
 
     /**
@@ -818,32 +892,18 @@ class JudgehostController extends AbstractFOSRestController
 
         if ($field_name !== null) {
             // Disable any outstanding judgetasks with the same script that have not been claimed yet.
-            $this->em->wrapInTransaction(function (EntityManagerInterface $em) use ($field_name, $disabled_id, $error): void {
-                $judgingids = $em->getConnection()->executeQuery(
-                    'SELECT DISTINCT jobid'
-                    . ' FROM judgetask'
-                    . ' WHERE ' . $field_name . ' = :id'
-                    . ' AND judgehostid IS NULL'
-                    . ' AND valid = 1',
-                    [
-                        'id' => $disabled_id,
-                    ]
-                )->fetchFirstColumn();
-                $judgings = $em->getRepository(Judging::class)->findBy(['judgingid' => $judgingids]);
-                foreach ($judgings as $judging) {
-                    /** @var Judging $judging */
-                    $judging->setInternalError($error);
-                }
-                $em->flush();
-                $em->getConnection()->executeStatement(
-                    'UPDATE judgetask SET valid=0'
-                    . ' WHERE ' . $field_name . ' = :id'
-                    . ' AND judgehostid IS NULL',
-                    [
-                        'id' => $disabled_id,
-                    ]
-                );
-            });
+            $this->em->getConnection()->executeStatement(
+                'UPDATE judgetask jt'
+                . ' JOIN judging j ON j.judgingid = jt.jobid'
+                . ' SET jt.valid = 0, j.errorid = :errorid'
+                . ' WHERE jt.' . $field_name . ' = :id'
+                . ' AND jt.judgehostid IS NULL'
+                . ' AND jt.valid = 1',
+                [
+                    'errorid' => $error->getErrorid(),
+                    'id' => $disabled_id,
+                ]
+            );
         }
 
         $this->dj->setInternalError($disabled, $contest, false);
@@ -872,31 +932,28 @@ class JudgehostController extends AbstractFOSRestController
     {
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ($judging) {
-            $this->em->wrapInTransaction(function () use ($judging, $judgehost): void {
-                /** @var JudgingRun $run */
-                foreach ($judging->getRuns() as $run) {
-                    if ($judgehost === null) {
-                        // This is coming from internal errors, reset the whole judging.
-                        $run->getJudgetask()
-                            ->setValid(false);
-                        continue;
-                    }
-
-                    // We do not have to touch any finished runs
-                    if ($run->getRunresult() !== null) {
-                        continue;
-                    }
-
-                    // For the other runs, we need to reset the judge task if it belongs to the current judgehost.
-                    if ($run->getJudgetask()->getJudgehost() && $run->getJudgetask()->getJudgehost()->getHostname() === $judgehost->getHostname()) {
-                        $run->getJudgetask()
-                            ->setJudgehost(null)
-                            ->setStarttime(null);
-                    }
-                }
-
-                $this->em->flush();
-            });
+            if ($judgehost === null) {
+                // This is coming from internal errors, reset the whole judging.
+                $this->em->getConnection()->executeStatement(
+                    'UPDATE judgetask SET valid = 0 WHERE jobid = :jobid',
+                    ['jobid' => $judgingId]
+                );
+            } else {
+                // Give back only the unfinished runs that this judgehost had claimed; runs
+                // that already have a result stay where they are.
+                $this->em->getConnection()->executeStatement(
+                    'UPDATE judgetask jt
+                        INNER JOIN judging_run jr ON jr.judgetaskid = jt.judgetaskid
+                        SET jt.judgehostid = NULL, jt.starttime = NULL
+                      WHERE jt.jobid = :jobid
+                        AND jt.judgehostid = :judgehostid
+                        AND jr.runresult IS NULL',
+                    [
+                        'jobid' => $judgingId,
+                        'judgehostid' => $judgehost->getJudgehostid(),
+                    ]
+                );
+            }
 
             if ($judgehost === null) {
                 // Invalidate old judging and create a new one - but without
@@ -949,7 +1006,8 @@ class JudgehostController extends AbstractFOSRestController
         ?string $testcasedir,
         ?string $compareMeta,
         ?string $score = null,
-        ?string $pass = null
+        ?string $pass = null,
+        ?string $passes = null
     ): bool {
         $resultsRemap = $this->config->get('results_remap');
         $resultsPrio  = $this->config->get('results_prio');
@@ -960,84 +1018,72 @@ class JudgehostController extends AbstractFOSRestController
             $runResult = $resultsRemap[$runResult];
         }
 
-        $this->em->wrapInTransaction(function () use (
-            $judgeTaskId,
-            $runTime,
-            $startTime,
-            $endTime,
-            $runResult,
-            $outputSystem,
-            $outputError,
-            $outputDiff,
-            $outputRun,
-            $teamMessage,
-            $metadata,
-            $testcasedir,
-            $compareMeta,
-            $score,
-            $pass
-        ): void {
-            $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
-                ['judgetaskid' => $judgeTaskId]);
-            if ($judgingRun === null) {
+        $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
+            ['judgetaskid' => $judgeTaskId]);
+        if ($judgingRun === null) {
+            throw new BadRequestHttpException(
+                'Inconsistent data, no judging run known with judgetaskid = ' . $judgeTaskId . '.');
+        }
+        $judgingRunOutput = $judgingRun->getOutput();
+        if ($judgingRunOutput === null) {
+            $judgingRunOutput = new JudgingRunOutput();
+            $judgingRun->setOutput($judgingRunOutput);
+        }
+        $judgingRun
+            ->setRunresult($runResult)
+            ->setRuntime((float)$runTime)
+            ->setStarttime($startTime)
+            ->setEndtime($endTime)
+            ->setTestcasedir($testcasedir)
+            ->setPass($pass);
+        $judgingRunOutput
+            ->setOutputRun(base64_decode($outputRun))
+            ->setOutputDiff(base64_decode($outputDiff))
+            ->setOutputError(base64_decode($outputError))
+            ->setOutputSystem(base64_decode($outputSystem))
+            ->setMetadata(base64_decode($metadata));
+
+        if ($compareMeta) {
+            $judgingRunOutput->setValidatorMetadata(base64_decode($compareMeta));
+        }
+
+        if ($passes !== null) {
+            $this->storeJudgingRunPasses($judgingRun, $passes, $judgeTaskId);
+        }
+
+        if ($teamMessage) {
+            $judgingRunOutput->setTeamMessage(base64_decode($teamMessage));
+        }
+
+        if ($score) {
+            $decodedScore = trim(base64_decode($score));
+            if (!is_numeric($decodedScore)) {
                 throw new BadRequestHttpException(
-                    'Inconsistent data, no judging run known with judgetaskid = ' . $judgeTaskId . '.');
+                    sprintf("Invalid score '%s' for judgetask %d: not a numeric value.", $decodedScore, $judgeTaskId));
             }
-            $judgingRunOutput = $judgingRun->getOutput();
-            if ($judgingRunOutput === null) {
-                $judgingRunOutput = new JudgingRunOutput();
-                $judgingRun->setOutput($judgingRunOutput);
+            if (bccomp($decodedScore, '0', ScoreboardService::SCALE) < 0) {
+                throw new BadRequestHttpException(
+                    sprintf("Invalid score '%s' for judgetask %d: must not be negative.", $decodedScore, $judgeTaskId));
             }
-            $judgingRun
-                ->setRunresult($runResult)
-                ->setRuntime((float)$runTime)
-                ->setStarttime($startTime)
-                ->setEndtime($endTime)
-                ->setTestcasedir($testcasedir)
-                ->setPass($pass);
-            $judgingRunOutput
-                ->setOutputRun(base64_decode($outputRun))
-                ->setOutputDiff(base64_decode($outputDiff))
-                ->setOutputError(base64_decode($outputError))
-                ->setOutputSystem(base64_decode($outputSystem))
-                ->setMetadata(base64_decode($metadata));
+            $problem = $judgingRun->getJudging()->getSubmission()->getProblem();
+            if (!$problem->isScoringProblem()) {
+                throw new BadRequestHttpException(
+                    sprintf("Received score for judgetask %d, but problem '%s' is not a scoring problem.",
+                        $judgeTaskId, $problem->getExternalid()));
+            }
+            $judgingRun->setScore($decodedScore);
+        }
 
-            if ($compareMeta) {
-                $judgingRunOutput->setValidatorMetadata(base64_decode($compareMeta));
-            }
+        $judging = $judgingRun->getJudging();
+        // The run result has a single writer, so a plain flush is safe for it;
+        // maybeUpdateActiveJudging() handles its own atomicity.
+        $this->em->flush();
+        $this->maybeUpdateActiveJudging($judging);
 
-            if ($teamMessage) {
-                $judgingRunOutput->setTeamMessage(base64_decode($teamMessage));
-            }
-
-            if ($score) {
-                $decodedScore = trim(base64_decode($score));
-                if (!is_numeric($decodedScore)) {
-                    throw new BadRequestHttpException(
-                        sprintf("Invalid score '%s' for judgetask %d: not a numeric value.", $decodedScore, $judgeTaskId));
-                }
-                if (bccomp($decodedScore, '0', ScoreboardService::SCALE) < 0) {
-                    throw new BadRequestHttpException(
-                        sprintf("Invalid score '%s' for judgetask %d: must not be negative.", $decodedScore, $judgeTaskId));
-                }
-                $problem = $judgingRun->getJudging()->getSubmission()->getProblem();
-                if (!$problem->isScoringProblem()) {
-                    throw new BadRequestHttpException(
-                        sprintf("Received score for judgetask %d, but problem '%s' is not a scoring problem.",
-                            $judgeTaskId, $problem->getExternalid()));
-                }
-                $judgingRun->setScore($decodedScore);
-            }
-
-            $judging = $judgingRun->getJudging();
-            $this->maybeUpdateActiveJudging($judging);
-            $this->em->flush();
-
-            if ($judging->getValid()) {
-                $this->eventLogService->log('judging_run', $judgingRun->getRunid(),
-                                            EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
-            }
-        });
+        if ($judging->getValid()) {
+            $this->eventLogService->log('judging_run', $judgingRun->getRunid(),
+                                        EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
+        }
 
         // Reload the judging, as EventLogService::log will clear the entity manager.
         // For the judging, also load in the submission and some of its relations.
@@ -1084,6 +1130,25 @@ class JudgehostController extends AbstractFOSRestController
                 $lazyEval = $problemLazy;
             }
 
+            if ($oldResult === null) {
+                // Claim the verdict with a guarded update. Judgehosts reporting the last runs of
+                // a judging at the same time all compute the same verdict from the runs they
+                // see, and only the first one to write it may act on the change from "no result".
+                $claimed = $this->em->getConnection()->executeStatement(
+                    'UPDATE judging SET result = :result WHERE judgingid = :judgingid AND result IS NULL',
+                    ['result' => $result, 'judgingid' => $judging->getJudgingid()]
+                );
+                if ($claimed === 0) {
+                    // Somebody else recorded a verdict in the meantime.
+                    $this->em->refresh($judging);
+                    $oldResult = $judging->getResult();
+                    if ($oldResult === 'aborted') {
+                        // Cancelled while we worked on it: throw away our work.
+                        return false;
+                    }
+                }
+            }
+
             $judging->setResult($result);
             if ($problem->isScoringProblem()) {
                 $judging->setScore($score);
@@ -1104,9 +1169,6 @@ class JudgehostController extends AbstractFOSRestController
                 // so that the API doesn't update these values once they are set.
                 // We also don't want to send judging events after the verdict is known.
                 if (!$judging->getEndtime()) {
-                    $sendJudgingEvent = true;
-                    $judging->setEndtime(Utils::now());
-
                     // Also calculate the max run time and set it
                     $maxRunTime = $this->em->createQueryBuilder()
                         ->from(Judging::class, 'j')
@@ -1117,7 +1179,26 @@ class JudgehostController extends AbstractFOSRestController
                         ->setParameter('judgingid', $judging->getJudgingid())
                         ->getQuery()
                         ->getSingleScalarResult();
-                    $judging->setMaxRuntimeForVerdict($maxRunTime);
+
+                    // Claim the end of the judging with a guarded update, so that exactly one
+                    // judgehost sets it and sends the event, even if several saw it unset.
+                    $endtime = Utils::now();
+                    $claimed = $this->em->getConnection()->executeStatement(
+                        'UPDATE judging SET endtime = :endtime, max_runtime_for_verdict = :maxruntime'
+                        . ' WHERE judgingid = :judgingid AND endtime IS NULL',
+                        [
+                            'endtime' => $endtime,
+                            'maxruntime' => $maxRunTime,
+                            'judgingid' => $judging->getJudgingid(),
+                        ]
+                    );
+                    if ($claimed > 0) {
+                        $sendJudgingEvent = true;
+                        // The values are in the database already; keep the entity in step so
+                        // that the flush below writes the same.
+                        $judging->setEndtime($endtime);
+                        $judging->setMaxRuntimeForVerdict($maxRunTime);
+                    }
                 }
                 $this->maybeUpdateActiveJudging($judging);
             }
@@ -1193,16 +1274,52 @@ class JudgehostController extends AbstractFOSRestController
         return $judging->getResult() === null || $judging->getJudgeCompletely() || $lazyEval === DOMJudgeService::EVAL_FULL;
     }
 
+    /**
+     * Apply a finished rejudging to its submission, when the rejudging auto-applies.
+     *
+     * Opens its own transaction and locks the rows it writes at their first read. Nothing
+     * happens unless the judging belongs to a rejudging, so the normal judging path pays for
+     * neither the transaction nor the locks.
+     */
     private function maybeUpdateActiveJudging(Judging $judging): void
     {
-        if ($judging->getRejudging() !== null) {
-            $rejudging = $judging->getRejudging();
+        if ($judging->getRejudging() === null) {
+            return;
+        }
+
+        $rejudgingId = $judging->getRejudging()->getRejudgingid();
+        $submissionId = $judging->getSubmissionId();
+        $judgingId = $judging->getJudgingid();
+
+        /** @var Rejudging|null $repeatRejudging */
+        $repeatRejudging = null;
+
+        $this->em->wrapInTransaction(function () use (
+            $rejudgingId,
+            $submissionId,
+            $judgingId,
+            &$repeatRejudging
+        ): void {
+            // Lock parent before child. The judgings are only written, never read, so they
+            // need no lock.
+            /** @var Rejudging $rejudging */
+            $rejudging = $this->em->find(Rejudging::class, $rejudgingId, LockMode::PESSIMISTIC_WRITE);
+            /** @var Submission $submission */
+            $submission = $this->em->find(Submission::class, $submissionId, LockMode::PESSIMISTIC_WRITE);
+
             if ($rejudging->getAutoApply()) {
-                $judging->getSubmission()->setRejudging(null);
-                foreach ($judging->getSubmission()->getJudgings() as $j) {
-                    $j->setValid(false);
-                }
-                $judging->setValid(true);
+                $submission->setRejudging(null);
+
+                // Direct queries, as in RejudgingService::finishRejudging(): a row that is never
+                // read cannot have changed since it was read.
+                $this->em->getConnection()->executeStatement(
+                    'UPDATE judging SET valid = 0 WHERE submitid = :submitid',
+                    ['submitid' => $submissionId]
+                );
+                $this->em->getConnection()->executeStatement(
+                    'UPDATE judging SET valid = 1 WHERE judgingid = :judgingid',
+                    ['judgingid' => $judgingId]
+                );
 
                 // Check whether we are completely done with this rejudging.
                 if ($rejudging->getEndtime() === null && $this->rejudgingService->calculateTodo($rejudging)['todo'] == 0) {
@@ -1223,7 +1340,6 @@ class JudgehostController extends AbstractFOSRestController
                     ->getSingleScalarResult();
                 // Only "cancel" the rejudging if it's not the last.
                 if ($numberOfRepetitions < $rejudging->getRepeat()) {
-                    $rejudgingid = $rejudging->getRejudgingid();
                     $numUpdated = $this->em->getConnection()->executeStatement(
                         'UPDATE rejudging
                         SET endtime = :endtime, valid = 0
@@ -1231,7 +1347,7 @@ class JudgehostController extends AbstractFOSRestController
                           AND endtime IS NULL',
                         [
                             'endtime' => Utils::now(),
-                            'rejudgingid' => $rejudgingid,
+                            'rejudgingid' => $rejudgingId,
                         ]
                     );
                     $this->em->flush();
@@ -1246,28 +1362,39 @@ class JudgehostController extends AbstractFOSRestController
                         'UPDATE submission
                             SET rejudgingid = NULL
                             WHERE rejudgingid = :rejudgingid',
-                        ['rejudgingid' => $rejudgingid]);
+                        ['rejudgingid' => $rejudgingId]);
                     $this->em->flush();
 
-                    $skipped = [];
-                    /** @var Judging[] $judgings */
-                    $judgings = $this->em->createQueryBuilder()
-                        ->from(Judging::class, 'j')
-                        ->leftJoin('j.submission', 's')
-                        ->leftJoin('s.rejudging', 'r')
-                        ->leftJoin('s.team', 't')
-                        ->select('j', 's', 'r', 't')
-                        ->andWhere('j.rejudging = :rejudgingid')
-                        ->setParameter('rejudgingid', $rejudgingid)
-                        ->getQuery()
-                        ->setHint(Query::HINT_REFRESH, true)
-                        ->getResult();
-                    // TODO: Pick up priority from previous judgings?
-                    $this->rejudgingService->createRejudging($rejudging->getReason(), JudgeTask::PRIORITY_DEFAULT, $judgings,
-                        false, $rejudging->getRepeat(), 0, $rejudging->getRepeatedRejudging(), $skipped);
+                    $repeatRejudging = $rejudging;
                 }
             }
+        });
+
+        // Updated with direct queries above, and callers read getValid() right after this.
+        $this->em->refresh($judging);
+
+        if ($repeatRejudging === null) {
+            return;
         }
+
+        // Outside the transaction: createRejudging() commits once per submission on purpose,
+        // and nesting it would turn those commits into savepoints.
+        $skipped = [];
+        /** @var Judging[] $judgings */
+        $judgings = $this->em->createQueryBuilder()
+            ->from(Judging::class, 'j')
+            ->leftJoin('j.submission', 's')
+            ->leftJoin('s.rejudging', 'r')
+            ->leftJoin('s.team', 't')
+            ->select('j', 's', 'r', 't')
+            ->andWhere('j.rejudging = :rejudgingid')
+            ->setParameter('rejudgingid', $rejudgingId)
+            ->getQuery()
+            ->setHint(Query::HINT_REFRESH, true)
+            ->getResult();
+        // TODO: Pick up priority from previous judgings?
+        $this->rejudgingService->createRejudging($repeatRejudging->getReason(), JudgeTask::PRIORITY_DEFAULT, $judgings,
+            false, $repeatRejudging->getRepeat(), 0, $repeatRejudging->getRepeatedRejudging(), $skipped);
     }
 
     /**
@@ -1431,8 +1558,18 @@ class JudgehostController extends AbstractFOSRestController
         // Check config outside transaction to avoid repeated lookups
         $enforceVersionMatch = $this->config->get('enforce_version_match');
 
+        // The language is a lazy proxy: load it before the transaction below.
+        $this->em->initializeObject($language);
+
         // Track version mismatch for enforcement check after transaction
         $versionMismatch = null;
+        // Whether the reported version was not known yet, which is what makes it a candidate
+        // for Trust On First Use below.
+        $isNewVersion = false;
+
+        // Read before the transaction, which then locks this row by its id.
+        $activeVersion = $this->em->getRepository(Version::class)
+            ->findOneBy(['language' => $language, 'judgehost' => $judgehost, 'active' => true]);
 
         $this->em->wrapInTransaction(function () use (
             $judgehost,
@@ -1440,12 +1577,20 @@ class JudgehostController extends AbstractFOSRestController
             $language,
             $judgeTask,
             $enforceVersionMatch,
-            &$versionMismatch
+            $activeVersion,
+            &$versionMismatch,
+            &$isNewVersion
         ): void {
-            $activeVersion = $this->em->getRepository(Version::class)
-                ->findOneBy(['language' => $language, 'judgehost' => $judgehost, 'active' => true]);
+            // Lock the row we deactivate below, by its id: a locking query on judgehost and
+            // language would take a gap lock while there is none yet, and two judgehosts
+            // reporting at the same time would then deadlock on their inserts.
+            if ($activeVersion !== null) {
+                $this->em->refresh($activeVersion, LockMode::PESSIMISTIC_WRITE);
+                if (!$activeVersion->getActive()) {
+                    $activeVersion = null;
+                }
+            }
 
-            $isNewVersion = false;
             if (!$activeVersion) {
                 $isNewVersion = true;
             } else {
@@ -1482,20 +1627,6 @@ class JudgehostController extends AbstractFOSRestController
                 $activeVersion->setLastChangedTime(Utils::now());
                 $this->em->persist($activeVersion);
                 $this->em->flush();
-
-                // Trust On First Use - auto-promote first reported version as canonical.
-                if ($this->config->get('auto_promote_first_version')) {
-                    if (isset($reportedVersions['compiler']) && empty($language->getCompilerVersion())) {
-                        $language
-                            ->setCompilerVersion($reportedVersions['compiler'])
-                            ->setCompilerVersionCommand($language->getCompilerVersionCommand());
-                    }
-                    if (isset($reportedVersions['runner']) && empty($language->getRunnerVersion())) {
-                        $language
-                            ->setRunnerVersion($reportedVersions['runner'])
-                            ->setRunnerVersionCommand($language->getRunnerVersionCommand());
-                    }
-                }
             }
 
             $judgeTask->setVersion($activeVersion);
@@ -1528,6 +1659,32 @@ class JudgehostController extends AbstractFOSRestController
                 }
             }
         });
+
+        // Trust On First Use - auto-promote the first reported version as canonical.
+        //
+        // The guard carries the "still unset" condition, so losing the race to an admin
+        // promoting a version leaves the admin's value standing.
+        if ($isNewVersion && $this->config->get('auto_promote_first_version')) {
+            $commands = [
+                'compiler' => $language->getCompilerVersionCommand(),
+                'runner' => $language->getRunnerVersionCommand(),
+            ];
+            foreach ($commands as $kind => $command) {
+                if (!isset($reportedVersions[$kind])) {
+                    continue;
+                }
+                $this->em->getConnection()->executeStatement(
+                    "UPDATE language SET {$kind}_version = :version, {$kind}_version_command = :command"
+                    . " WHERE langid = :langid AND ({$kind}_version IS NULL OR {$kind}_version = '')",
+                    [
+                        'version' => $reportedVersions[$kind],
+                        'command' => $command,
+                        'langid' => $language->getLangid(),
+                    ]
+                );
+            }
+            $this->em->refresh($language);
+        }
 
         if ($versionMismatch !== null) {
             $judgingId = $judgeTask->getJobId();

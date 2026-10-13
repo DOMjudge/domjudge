@@ -296,6 +296,21 @@ class ImportExportServiceTest extends BaseTestCase
             [],
             123456,
         ];
+        // Testing penalty time as RELTIME, as used in the 2026-01 CCS API
+        yield [
+            [
+                'name'            => 'Penalty RelTime Test',
+                'short-name'      => 'penalty-reltime-test',
+                'duration'        => '5:00:00',
+                'start-time'      => '2020-01-01T12:34:56+02:00',
+                'penalty_time'    => '0:25:00',
+            ],
+            'penalty-reltime-test',
+            '2020-01-01 10:34:56 UTC',
+            null,
+            [],
+            25,
+        ];
         // Scoring contest with problems: verify problems get scoring type.
         yield [
             [
@@ -457,6 +472,27 @@ class ImportExportServiceTest extends BaseTestCase
             self::assertArrayHasKey('shadow', $data);
             self::assertEquals($expectedShadow, $data['shadow']);
         }
+    }
+
+    public function testExportImportPenaltyTimeAsRelTime(): void
+    {
+        $contestData = [
+            'name'         => 'Penalty export test contest',
+            'short-name'   => 'penalty-export-test',
+            'duration'     => '5:00:00',
+            'start-time'   => '2020-01-01T12:34:56+02:00',
+            'penalty_time' => 25,
+        ];
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        self::assertTrue($importExportService->importContestData($contestData, $message, $cid), 'Importing failed: ' . $message);
+
+        $data = $importExportService->getContestYamlData($this->getContest($cid), false);
+        self::assertSame('0:25:00', $data['penalty_time']);
+
+        $data['id'] = 'penalty-export-test-reimport';
+        self::assertTrue($importExportService->importContestData($data, $message, $cid), 'Importing failed: ' . $message);
+        self::assertSame(25, $this->getContest($cid)->getPenaltyTime());
     }
 
     public static function provideExportContestYamlDataWithShadow(): Generator
@@ -1517,7 +1553,7 @@ EOF;
     }
 
     #[DataProvider('provideGetResultsData')]
-    public function testGetResultsData(bool $full, bool $honors, string $dataSet, string $expectedResultsFile): void
+    public function testGetResultsData(string $dataSet, array $expectations): void
     {
         // Set up some results we can test with
         // This data is based on the ICPC World Finals 47
@@ -1650,31 +1686,115 @@ EOF;
         $request->cookies->set('domjudge_cid', (string)$contest->getExternalid());
         $requestStack->push($request);
 
-        $results = $importExportService->getResultsData(37, $full, $honors);
-
-        $resultsContents = file_get_contents(__DIR__ . '/../Fixtures/' . $dataSet . '/' . $expectedResultsFile);
-        $resultsContents = substr($resultsContents, strpos($resultsContents, "\n") + 1);
-        // Prefix file with a fake header, so we can deserialize them
-        $resultsContents = "team_id\trank\taward\tnum_solved\ttotal_time\ttime_of_last_submission\tgroup_winner\n" . $resultsContents;
-
         $serializer = static::getContainer()->get(SerializerInterface::class);
 
-        $expectedResults = $serializer->deserialize($resultsContents, ResultRow::class . '[]', 'csv', [
-            CsvEncoder::DELIMITER_KEY => "\t",
-        ]);
+        foreach ($expectations as [$full, $honors, $expectedResultsFile]) {
+            $results = $importExportService->getResultsData(37, $full, $honors);
 
-        self::assertEquals($expectedResults, $results);
+            $resultsContents = file_get_contents(__DIR__ . '/../Fixtures/' . $dataSet . '/' . $expectedResultsFile);
+            $resultsContents = substr($resultsContents, strpos($resultsContents, "\n") + 1);
+            // Prefix file with a fake header, so we can deserialize them
+            $resultsContents = "team_id\trank\taward\tnum_solved\ttotal_time\ttime_of_last_submission\tgroup_winner\n" . $resultsContents;
+
+            $expectedResults = $serializer->deserialize($resultsContents, ResultRow::class . '[]', 'csv', [
+                CsvEncoder::DELIMITER_KEY => "\t",
+            ]);
+
+            self::assertEquals($expectedResults, $results, sprintf(
+                'results for %s with full=%s, honors=%s', $dataSet, var_export($full, true), var_export($honors, true)
+            ));
+        }
     }
 
     public static function provideGetResultsData(): Generator
     {
-        yield [true, true, 'wf', 'results-full-honors.tsv'];
-        yield [false, true, 'wf', 'results-wf-honors.tsv'];
-        yield [true, false, 'wf', 'results-full-ranked.tsv'];
-        yield [false, false, 'wf', 'results-wf-ranked.tsv'];
-        yield [true, true, 'sample', 'results-full-honors.tsv'];
-        yield [false, true, 'sample', 'results-wf-honors.tsv'];
-        yield [true, false, 'sample', 'results-full-ranked.tsv'];
-        yield [false, true, 'sample', 'results-wf-honors.tsv'];
+        yield 'wf' => ['wf', [
+            [true, true, 'results-full-honors.tsv'],
+            [false, true, 'results-wf-honors.tsv'],
+            [true, false, 'results-full-ranked.tsv'],
+            [false, false, 'results-wf-ranked.tsv'],
+        ]];
+        yield 'sample' => ['sample', [
+            [true, true, 'results-full-honors.tsv'],
+            [false, true, 'results-wf-honors.tsv'],
+            [true, false, 'results-full-ranked.tsv'],
+            [false, false, 'results-wf-ranked.tsv'],
+        ]];
+    }
+
+    /**
+     * Test how the account type and username of an imported account map to
+     * roles, for both the TSV and the JSON importer.
+     *
+     * @param string[] $expectedRoles
+     */
+    #[DataProvider('provideAccountRoleMapping')]
+    public function testImportAccountRoleMapping(
+        string $format,
+        string $type,
+        string $username,
+        ?array $expectedRoles
+    ): void {
+        $this->loadFixture(TeamWithExternalIdEqualsOneFixture::class);
+
+        $name = 'Mapped account';
+        if ($format === 'tsv') {
+            $content = "accounts\t1\n$type\t$name\t$username\tsecret\n";
+        } else {
+            $content = json_encode([['id' => $username, 'username' => $username, 'name' => $name, 'password' => 'secret', 'type' => $type]]);
+        }
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'accounts-map');
+        file_put_contents($fileName, $content);
+        $file = new UploadedFile($fileName, "accounts.$format");
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $format === 'tsv'
+            ? $importExportService->importTsv('accounts', $file, $message)
+            : $importExportService->importJson('accounts', $file, $message);
+        unlink($fileName);
+
+        self::assertNull($message);
+        self::assertSame($expectedRoles === null ? 0 : 1, $importCount);
+
+        /** @var User|null $user */
+        $user = static::getContainer()->get(EntityManagerInterface::class)
+            ->getRepository(User::class)->findOneBy(['username' => $username]);
+        if ($expectedRoles === null) {
+            self::assertNull($user);
+            return;
+        }
+        self::assertNotNull($user);
+        self::assertSame($name, $user->getName());
+        $roles = $user->getRoleList();
+        sort($roles);
+        sort($expectedRoles);
+        self::assertSame($expectedRoles, $roles);
+    }
+
+    public static function provideAccountRoleMapping(): Generator
+    {
+        $cds = ['api_reader', 'api_source_reader', 'api_writer'];
+        $cases = [
+            'team' => ['team', 'newTeam-001', ['team']],
+            'admin' => ['admin', 'newadmin', ['admin', 'team']],
+            'admin with team-like name' => ['admin', 'newTeam-001', ['admin', 'team']],
+            'judge is a jury' => ['judge', 'newjudge', ['jury', 'team']],
+            'jury' => ['jury', 'newjury', ['jury', 'team']],
+            'api_writer' => ['api_writer', 'newwriter', ['api_writer']],
+            'api_reader' => ['api_reader', 'newreader', ['api_reader']],
+            'api_source_reader' => ['api_source_reader', 'newsource', ['api_source_reader']],
+            'balloon' => ['balloon', 'newballoon', ['balloon']],
+            'clarification_rw' => ['clarification_rw', 'newclar', ['clarification_rw']],
+            'cds type' => ['cds', 'newcds', $cds],
+            'cds username as admin' => ['admin', 'cds', $cds],
+            'cds username as jury' => ['jury', 'cds', $cds],
+            'analyst is ignored' => ['analyst', 'newanalyst', null],
+        ];
+        foreach (['tsv', 'json'] as $format) {
+            foreach ($cases as $description => [$type, $username, $roles]) {
+                yield "$format: $description" => [$format, $type, $username, $roles];
+            }
+        }
     }
 }

@@ -16,13 +16,23 @@ class AccessControllerTest extends BaseTestCase
         $this->verifyApiJsonResponse('GET', $url, 403, 'demo');
     }
 
+    public function testTeamClarCapabilityBefore2026(): void
+    {
+        $this->withChangedConfiguration('ccs_api_version', '2023-06', function (): void {
+            $url    = $this->helperGetEndpointURL('access');
+            $access = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
+            self::assertContains('team_clar', $access['capabilities']);
+            self::assertNotContains('post_clar', $access['capabilities']);
+        });
+    }
+
     public function testAccessAsAdmin(): void
     {
         $url    = $this->helperGetEndpointURL('access');
         $access = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
         self::assertArrayHasKey('capabilities', $access);
         self::assertSame(
-            ['contest_start', 'contest_thaw', 'team_submit', 'team_clar', 'proxy_submit', 'proxy_clar', 'admin_submit', 'admin_clar'],
+            ['contest_start', 'contest_thaw', 'team_submit', 'post_clar', 'proxy_submit', 'proxy_clar', 'admin_submit', 'admin_clar'],
             $access['capabilities']
         );
 
@@ -30,18 +40,18 @@ class AccessControllerTest extends BaseTestCase
 
         $expectedTypes = [
             'contest' => ['id', 'name', 'formal_name', 'start_time', 'duration', 'scoreboard_freeze_duration', 'penalty_time'],
-            'judgement-types' => ['id', 'name', 'penalty', 'solved'],
+            'judgement-types' => ['id', 'name', 'penalty', 'solved', 'simplified_judgement_type_id'],
             'languages' => ['id', 'name', 'entry_point_required', 'entry_point_name', 'extensions'],
-            'problems' => ['id', 'label', 'name', 'ordinal', 'rgb', 'color', 'time_limit', 'test_data_count', 'statement'],
+            'problems' => ['id', 'label', 'name', 'ordinal', 'rgb', 'color', 'time_limit', 'memory_limit', 'output_limit', 'code_limit', 'test_data_count', 'statement'],
             'groups' => ['id', 'icpc_id', 'name', 'hidden'],
             'organizations' => ['id', 'icpc_id', 'name', 'formal_name', 'country', 'country_flag'],
             'teams' => ['id', 'icpc_id', 'name', 'display_name', 'organization_id', 'group_ids'],
             'accounts' => ['id', 'username', 'name', 'type'],
             'state' => ['started', 'frozen', 'ended', 'thawed', 'finalized', 'end_of_updates'],
             'submissions' => ['id', 'language_id', 'problem_id', 'team_id', 'time', 'contest_time', 'entry_point', 'files'],
-            'judgements' => ['id', 'submission_id', 'judgement_type_id', 'start_time', 'start_contest_time', 'end_time', 'end_contest_time', 'max_run_time'],
+            'judgements' => ['id', 'submission_id', 'judgement_type_id', 'simplified_judgement_type_id', 'start_time', 'start_contest_time', 'end_time', 'end_contest_time', 'max_run_time', 'current'],
             'runs' => ['id', 'judgement_id', 'ordinal', 'judgement_type_id', 'time', 'contest_time', 'run_time'],
-            'clarifications' => ['id', 'from_team_id', 'problem_id', 'text', 'time', 'contest_time'],
+            'clarifications' => ['id', 'from_team_id', 'to_team_ids', 'to_group_ids', 'problem_id', 'text', 'time', 'contest_time'],
             'awards' => ['id', 'citation', 'team_ids'],
         ];
 

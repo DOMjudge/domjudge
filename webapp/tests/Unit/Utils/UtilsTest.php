@@ -151,6 +151,15 @@ class UtilsTest extends TestCase
         self::assertEquals(10.123, Utils::relTimeToSeconds('0:00:10.123'));
     }
 
+    public function testMinutesOrRelTimeToMinutes(): void
+    {
+        self::assertSame(20, Utils::minutesOrRelTimeToMinutes(20));
+        self::assertSame(20, Utils::minutesOrRelTimeToMinutes('20'));
+        self::assertSame(20, Utils::minutesOrRelTimeToMinutes('0:20:00'));
+        self::assertSame(20, Utils::minutesOrRelTimeToMinutes('0:20:59.999'));
+        self::assertSame(80, Utils::minutesOrRelTimeToMinutes('1:20:00'));
+    }
+
     /**
      * Test the relTimeToSeconds function with negative reltime.
      */

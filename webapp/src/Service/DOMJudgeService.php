@@ -62,13 +62,14 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
 use Twig\Attribute\AsTwigFilter;
 use Twig\Attribute\AsTwigFunction;
 use Twig\Environment;
 use ZipArchive;
 
-class DOMJudgeService
+class DOMJudgeService implements ResetInterface
 {
     protected ?Executable $defaultCompareExecutable = null;
     protected ?Executable $defaultRunExecutable = null;
@@ -77,6 +78,13 @@ class DOMJudgeService
 
     /** @var array<string, string[]> */
     private array $assetFilesCache = [];
+
+    public function reset(): void
+    {
+        $this->assetFilesCache = [];
+        $this->defaultCompareExecutable = null;
+        $this->defaultRunExecutable = null;
+    }
 
     final public const EVAL_DEFAULT = 0;
     final public const EVAL_LAZY = 1;
@@ -88,6 +96,9 @@ class DOMJudgeService
     // does not start with a dot or dash or ends with a dot. We could but it would make the
     // regex way more complicated and would also complicate the logic in ImportExportService::importContestYaml.
     final public const EXTERNAL_IDENTIFIER_REGEX = '/^[a-zA-Z0-9_.-]+$/';
+
+    // Temporary base path used while rendering the static scoreboard ZIP, so all used assets can be detected.
+    final public const SCOREBOARD_ZIP_BASE_PATH = '/CHANGE_ME';
 
     final public const MIMETYPE_TO_EXTENSION = [
         'image/png'     => 'png',
@@ -923,8 +934,12 @@ class DOMJudgeService
             ->andWhere('cp.allowSubmit = 1')
             ->setParameter('cid', $contest->getCid());
 
-        /** @var Contest $contest */
+        /** @var ?Contest $contest */
         $contest = $contestQuery->getQuery()->getOneOrNullResult();
+        // The inner joins yield no result when the contest has no submittable problems.
+        if ($contest === null) {
+            return false;
+        }
         if ($contest->getContestProblemsetType()) {
             return true;
         }
@@ -1635,17 +1650,21 @@ class DOMJudgeService
         // all requested and assets
         $requestReflection = new ReflectionClass($request);
         $basePathProperty  = $requestReflection->getProperty('basePath');
-        $basePathProperty->setValue($request, '/CHANGE_ME');
+        $basePathProperty->setValue($request, self::SCOREBOARD_ZIP_BASE_PATH);
         $requestStack->push($request);
 
         $contestPage = $this->twig->render('public/scoreboard.html.twig', $data);
 
         // Now get all assets that are used
-        $assetRegex = '|/CHANGE_ME/([/a-z0-9_\-\.]*)(\??[/a-z0-9_\-\.=]*)|i';
+        $assetRegex = '|' . preg_quote(self::SCOREBOARD_ZIP_BASE_PATH, '|') . '/([/a-z0-9_\-\.]*)(\??[/a-z0-9_\-\.=]*)|i';
         preg_match_all($assetRegex, $contestPage, $assetMatches);
         $contestPage = preg_replace($assetRegex, '$1$2', $contestPage);
-        $contestPage = preg_replace('|data-submissions-url="[^"]*/public/submissions-data\.json"|',
+        // Route URLs are generated relative to the current request (which might be a nested jury route),
+        // so point them to the files in the ZIP root.
+        $contestPage = preg_replace('|data-submissions-url="[^"]*submissions-data\.json"|',
             'data-submissions-url="submissions-data.json"', $contestPage);
+        $contestPage = preg_replace('|href="[^"]*scoreboard-category-color\.css"|',
+            'href="scoreboard-category-color.css"', $contestPage);
 
         $zip = new ZipArchive();
         if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "contest-"))) {
@@ -1657,6 +1676,9 @@ class DOMJudgeService
             throw new ServiceUnavailableHttpException(null, 'Could not create temporary zip file.');
         }
         $zip->addFromString('index.html', $contestPage);
+
+        $categoryColors = $this->twig->render('public/scoreboard_category_color.css.twig', $this->getScoreboardCategoryColorCss());
+        $zip->addFromString('scoreboard-category-color.css', $categoryColors);
 
         $submissionsDataRequest  = Request::create('/public/submissions-data.json', Request::METHOD_GET);
         if ($contest !== null) {

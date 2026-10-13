@@ -18,6 +18,7 @@ use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -260,6 +261,7 @@ class ExecutableController extends BaseController
     #[Route(path: '/{execId}', name: 'jury_executable')]
     public function viewAction(
         Request $request,
+        FormFactoryInterface $formFactory,
         string $execId,
         #[MapQueryParameter]
         ?int $index = null
@@ -335,7 +337,7 @@ class ExecutableController extends BaseController
         }
 
         $data       = [];
-        $uploadForm = $this->createFormBuilder($data)
+        $uploadForm = $formFactory->createNamedBuilder('executable_upload', data: $data)
             ->add('archive', FileType::class, [
                 'required' => true,
                 'attr' => [

@@ -30,6 +30,7 @@ class OrganizationControllerTest extends BaseTestCase
                     'width'    => 640,
                     'height'   => 480,
                     'filename' => 'country-flag-4x3.svg',
+                    'tags'     => ['light', 'dark'],
                 ],
                 [
                     'href'     => 'country-flags/NLD/1x1',
@@ -37,6 +38,7 @@ class OrganizationControllerTest extends BaseTestCase
                     'width'    => 512,
                     'height'   => 512,
                     'filename' => 'country-flag-1x1.svg',
+                    'tags'     => ['light', 'dark'],
                 ],
             ],
             'logo'         => null,
@@ -53,6 +55,7 @@ class OrganizationControllerTest extends BaseTestCase
                     'width'    => 640,
                     'height'   => 480,
                     'filename' => 'country-flag-4x3.svg',
+                    'tags'     => ['light', 'dark'],
                 ],
                 [
                     'href'     => 'country-flags/DEU/1x1',
@@ -60,6 +63,7 @@ class OrganizationControllerTest extends BaseTestCase
                     'width'    => 512,
                     'height'   => 512,
                     'filename' => 'country-flag-1x1.svg',
+                    'tags'     => ['light', 'dark'],
                 ],
             ],
         ],
@@ -77,6 +81,18 @@ class OrganizationControllerTest extends BaseTestCase
     protected array $expectedAbsent = ['4242', 'nonexistent'];
 
     protected static array $fixtures = [SampleAffiliationsFixture::class];
+
+    public function testNoImageTagsBefore2026(): void
+    {
+        $this->withChangedConfiguration('ccs_api_version', '2023-06', function (): void {
+            $url = $this->helperGetEndpointURL($this->apiEndpoint, 'utrecht');
+            $organization = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+            self::assertNotEmpty($organization['country_flag']);
+            foreach ($organization['country_flag'] as $flag) {
+                self::assertArrayNotHasKey('tags', $flag);
+            }
+        });
+    }
 
     public function testList(): void
     {
@@ -148,6 +164,7 @@ class OrganizationControllerTest extends BaseTestCase
                 'href'     => "contests/demo/organizations/$id/logo",
                 'mime'     => 'image/png',
                 'filename' => 'logo.png',
+                'tags'     => ['light'],
                 'width'    => 181,
                 'height'   => 101,
             ]
@@ -249,5 +266,57 @@ class OrganizationControllerTest extends BaseTestCase
         $data = ['id' => 'invalid id!', 'shortname' => 'newOrg', 'formal_name' => 'newOrgWithName', 'country' => 'NLD'];
         $response = $this->verifyApiJsonResponse('POST', $url, 400, 'admin', $data);
         self::assertStringContainsString('Only letters, numbers, dashes, underscores and dots are allowed.', $response['message']);
+    }
+
+    public function testAddExistingOrganization(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations');
+        $data = ['id' => 'utrecht', 'shortname' => 'newOrg', 'formal_name' => 'newOrgWithName'];
+        $response = $this->verifyApiJsonResponse('POST', $url, 400, 'admin', $data);
+        self::assertEquals("Organization with ID 'utrecht' already exists", $response['message']);
+    }
+
+    public function testPutNewOrganization(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations', 'neworg');
+        $data = ['id' => 'neworg', 'name' => 'NO', 'formal_name' => 'New Organization'];
+        $response = $this->verifyApiJsonResponse('PUT', $url, 201, 'admin', $data);
+        self::assertEquals('neworg', $response['id']);
+        self::assertEquals('NO', $response['name']);
+        self::assertEquals('New Organization', $response['formal_name']);
+    }
+
+    public function testPutReplacesOrganization(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations', 'utrecht');
+        $data = ['id' => 'utrecht', 'name' => 'UU2', 'formal_name' => 'Universiteit Utrecht'];
+        $response = $this->verifyApiJsonResponse('PUT', $url, 200, 'admin', $data);
+        self::assertEquals('UU2', $response['name']);
+        self::assertEquals('Universiteit Utrecht', $response['formal_name']);
+        self::assertNull($response['country']);
+    }
+
+    public function testPatchOrganizationFormalName(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations', 'utrecht');
+        $response = $this->verifyApiJsonResponse('PATCH', $url, 200, 'admin', ['formal_name' => 'Universiteit Utrecht']);
+        self::assertEquals('UU', $response['name']);
+        self::assertEquals('Universiteit Utrecht', $response['formal_name']);
+        self::assertEquals('NLD', $response['country']);
+    }
+
+    public function testPatchOrganizationName(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations', 'utrecht');
+        $response = $this->verifyApiJsonResponse('PATCH', $url, 200, 'admin', ['name' => 'UU2', 'country' => null]);
+        self::assertEquals('UU2', $response['name']);
+        self::assertEquals('Utrecht University', $response['formal_name']);
+        self::assertNull($response['country']);
+    }
+
+    public function testPatchOrganizationNotFound(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations', 'nonexistent');
+        $this->verifyApiJsonResponse('PATCH', $url, 404, 'admin', ['name' => 'UU2']);
     }
 }

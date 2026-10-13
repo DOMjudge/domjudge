@@ -8,9 +8,11 @@ use JMS\Serializer\Annotation as Serializer;
 readonly class Score
 {
     public function __construct(
-        public int  $numSolved,
+        public int $numSolved,
         #[Serializer\Exclude(if: 'object.totalTime === null')]
-        public ?int $totalTime = null,
+        public int|string|null $totalTime = null,
+        #[Serializer\Exclude(if: 'object.time === null')]
+        public int|string|null $time = null,
         #[Serializer\Exclude(if: 'object.totalRuntime === null')]
         #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
         public ?int $totalRuntime = null,

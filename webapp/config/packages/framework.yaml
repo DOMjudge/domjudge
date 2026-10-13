@@ -18,6 +18,10 @@ framework:
         cookie_samesite: lax
         storage_factory_id: session.storage.factory.native
 
+    csrf_protection:
+        # Forms on pages that release the session lock; these tokens don't need the session.
+        stateless_token_ids: [submissions_filter]
+
     php_errors:
         log: true
 

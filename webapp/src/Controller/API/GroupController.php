@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\TeamCategoryPatch;
 use App\DataTransferObject\TeamCategoryPost;
 use App\DataTransferObject\TeamCategoryPut;
 use App\Entity\TeamCategory;
@@ -14,7 +15,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
@@ -97,29 +98,17 @@ class GroupController extends AbstractRestController
         Request $request,
         ImportExportService $importExport,
     ): Response {
-        $saved = [];
-        $groupData = [
-            'name' => $teamCategoryPost->name,
-            'hidden' => $teamCategoryPost->hidden,
-            'icpc_id' => $teamCategoryPost->icpcId,
-            'sortorder' => $teamCategoryPost->sortorder,
-            'color' => $teamCategoryPost->color,
-            'allow_self_registration' => $teamCategoryPost->allowSelfRegistration,
-        ];
-        $importExport->importGroupsJson([$groupData], $message, $saved);
-        if (!empty($message)) {
-            throw new BadRequestHttpException("Error while adding group: $message");
-        }
-
-        /** @var TeamCategory $group */
-        $group = $saved[0];
-        $id = $group->getexternalid();
-
-        return $this->renderCreateData($request, $saved[0], 'group', $id);
+        return $this->importSingle(
+            $request,
+            $importExport->importGroupsJson(...),
+            $this->normalizePayload($teamCategoryPost),
+            'group',
+            created: true,
+        );
     }
 
     /**
-     * Update an existing group or create one with the given ID
+     * Replace an existing group or create one with the given ID.
      */
     #[IsGranted('ROLE_API_WRITER')]
     #[Rest\Put(path: '/{id}')]
@@ -133,8 +122,13 @@ class GroupController extends AbstractRestController
         ]
     )]
     #[OA\Response(
+        response: 200,
+        description: 'Returns the replaced group',
+        content: new Model(type: TeamCategory::class)
+    )]
+    #[OA\Response(
         response: 201,
-        description: 'Returns the updated / added group',
+        description: 'Returns the added group',
         content: new Model(type: TeamCategory::class)
     )]
     public function updateAction(
@@ -144,29 +138,65 @@ class GroupController extends AbstractRestController
         ImportExportService $importExport,
         string $id,
     ): Response {
-        $saved = [];
-        $groupData = [
-            'id' => $teamCategoryPut->id,
-            'name' => $teamCategoryPut->name,
-            'hidden' => $teamCategoryPut->hidden,
-            'icpc_id' => $teamCategoryPut->icpcId,
-            'sortorder' => $teamCategoryPut->sortorder,
-            'color' => $teamCategoryPut->color,
-            'allow_self_registration' => $teamCategoryPut->allowSelfRegistration,
-        ];
-        if ($id !== $teamCategoryPut->id) {
-            throw new BadRequestHttpException('ID in URL does not match ID in payload');
-        }
-        $importExport->importGroupsJson([$groupData], $message, $saved);
-        if (!empty($message)) {
-            throw new BadRequestHttpException("Error while adding group: $message");
+        $this->checkPayloadId($id, $teamCategoryPut->id);
+
+        return $this->importSingle(
+            $request,
+            $importExport->importGroupsJson(...),
+            $this->normalizePayload($teamCategoryPut),
+            'group',
+            created: $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $id]) === null,
+        );
+    }
+
+    /**
+     * Update only the provided fields of an existing group.
+     */
+    #[IsGranted('ROLE_API_WRITER')]
+    #[Rest\Patch(path: '/{id}')]
+    #[OA\RequestBody(
+        required: true,
+        content: [
+            new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(ref: new Model(type: TeamCategoryPatch::class))
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the updated group',
+        content: new Model(type: TeamCategory::class)
+    )]
+    public function patchAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        TeamCategoryPatch $teamCategoryPatch,
+        Request $request,
+        ImportExportService $importExport,
+        string $id,
+    ): Response {
+        $this->checkPayloadId($id, $teamCategoryPatch->id ?? $id);
+
+        /** @var TeamCategory|null $group */
+        $group = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $id]);
+        if ($group === null) {
+            throw new NotFoundHttpException(sprintf("Group with ID '%s' not found", $id));
         }
 
-        /** @var TeamCategory $group */
-        $group = $saved[0];
-        $id = $group->getexternalid();
+        $data = $this->mergePatch($request, $teamCategoryPatch, [
+            'id' => $group->getExternalid(),
+            'icpc_id' => $group->getIcpcid(),
+            'name' => $group->getName(),
+            'hidden' => !$group->getVisible(),
+            'types' => $group->getTypeNames(),
+            'sortorder' => $group->getSortorder(),
+            'color' => $group->getColor(),
+            'css_class' => $group->getCssClass(),
+            'allow_self_registration' => $group->getAllowSelfRegistration(),
+            'allow_password_change' => $group->getAllowPasswordChange(),
+        ]);
 
-        return $this->renderCreateData($request, $saved[0], 'group', $id);
+        return $this->importSingle($request, $importExport->importGroupsJson(...), $data, 'group', created: false);
     }
 
     protected function getQueryBuilder(Request $request): QueryBuilder

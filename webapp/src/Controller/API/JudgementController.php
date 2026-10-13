@@ -7,12 +7,17 @@ use App\Entity\AbstractJudgement;
 use App\Entity\Contest;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
+use App\Entity\TeamCategory;
 use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Utils\CcsApiVersion;
+use App\Utils\FreezeData;
+use App\Utils\SimplifiedVerdict;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -41,6 +46,10 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     protected readonly array $verdicts;
 
     private bool $useExternalJudgements = false;
+
+    // Whether to hide the detailed verdict of judgements of teams other than $ownTeamId.
+    private bool $redactOtherTeams = false;
+    private ?int $ownTeamId = null;
 
     public function __construct(
         AuthorizedUserService $authService,
@@ -108,6 +117,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         $contestId = null;
+        $contest = null;
         if ($request->attributes->has('cid')) {
             $contestId = $this->getContestId($request);
             $contest = $this->em->getRepository(Contest::class)->find($contestId);
@@ -153,10 +163,28 @@ class JudgementController extends AbstractRestController implements QueryObjectT
             $queryBuilder->andWhere('j.result IS NOT NULL');
         }
 
+        $this->redactOtherTeams = !$roleAllowsVisibility;
         if (!$roleAllowsVisibility) {
-            $queryBuilder
-                ->andWhere('s.team = :team')
-                ->setParameter('team', $this->authService->getUser()->getTeam());
+            $currentTeam = $this->authService->getUser()->getTeam();
+            $this->ownTeamId = $currentTeam?->getTeamid();
+            // Other teams' judgements are only shown with their simplified verdict, which only exists since
+            // 2026-01, and not during the freeze, as the scoreboard does not show their results then either.
+            $showOtherTeams = $contest !== null
+                && $this->config->get('ccs_api_version') === CcsApiVersion::Format_2026_01
+                && !(new FreezeData($contest))->showFrozen();
+            if (!$showOtherTeams) {
+                $queryBuilder
+                    ->andWhere('s.team = :team')
+                    ->setParameter('team', $currentTeam);
+            } else {
+                // Same visibility as for the submissions themselves, see SubmissionController::getQueryBuilder().
+                $queryBuilder
+                    ->join('s.team', 't')
+                    ->join('t.categories', 'cat', Join::WITH, 'BIT_AND(cat.types, :scoring) = :scoring')
+                    ->setParameter('scoring', TeamCategory::TYPE_SCORING)
+                    ->andWhere('(cat.visible = 1 AND t.enabled = 1) OR s.team = :team')
+                    ->setParameter('team', $currentTeam);
+            }
         }
 
         if ($request->query->has('submission_id')) {
@@ -193,6 +221,15 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     {
         /** @var AbstractJudgement $judging */
         $judgementTypeId = $judging->getResult() ? $this->verdicts[$judging->getResult()] : null;
-        return new JudgingWrapper($judging, $judgementTypeId);
+        // Older versions do not have the RE judgement type this can refer to.
+        $simplifiedJudgementTypeId = $judgementTypeId === null || $this->config->get('ccs_api_version') !== CcsApiVersion::Format_2026_01
+            ? null
+            : SimplifiedVerdict::for($judgementTypeId)->value;
+
+        if ($this->redactOtherTeams && $judging->getSubmission()->getTeam()->getTeamid() !== $this->ownTeamId) {
+            $judgementTypeId = null;
+        }
+
+        return new JudgingWrapper($judging, $judgementTypeId, $simplifiedJudgementTypeId);
     }
 }

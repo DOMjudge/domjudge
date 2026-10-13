@@ -35,7 +35,9 @@ readonly class CheckConfigService
         protected EventLogService             $eventLogService,
         protected RouterInterface             $router,
         protected ValidatorInterface          $validator,
-        protected UserPasswordHasherInterface $passwordHasher
+        protected UserPasswordHasherInterface $passwordHasher,
+        #[Autowire('%hash_benchmark_seconds%')]
+        protected int                         $hashBenchmarkSeconds
     ) {
         $this->stopwatch       = new Stopwatch();
     }
@@ -480,7 +482,7 @@ readonly class CheckConfigService
         $this->stopwatch->start(__FUNCTION__);
         $tmp_user = new User();
         $counter = 0;
-        $time_duration_sample = 2;
+        $time_duration_sample = $this->hashBenchmarkSeconds;
         $time_start = microtime(true);
         do {
             $plainPassword = $this->randomString(12);

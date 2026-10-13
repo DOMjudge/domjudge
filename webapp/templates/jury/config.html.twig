@@ -1,17 +1,13 @@
 {% extends "jury/base.html.twig" %}
-{% import "jury/jury_macros.twig" as macros %}
+{% form_theme form _self %}
 
 {% block title %}Configuration - {{ parent() }}{% endblock %}
 
-{% block extrahead %}
-    {{ parent() }}
-    {{ macros.toggle_extrahead() }}
-    {{ macros.select2_extrahead() }}
-    <style>
-        .btn.toggle-on {
-            right: initial;
-        }
-    </style>
+{% block config_key_value_widget %}
+    <div class="input-group" id="{{ id }}">
+        {{- form_widget(form.key) -}}
+        {{- form_widget(form.val) -}}
+    </div>
 {% endblock %}
 
 {% block content %}
@@ -39,241 +35,63 @@
     {% endif %}
     <h1>Configuration</h1>
 
-    <form method="post">
-        <ul class="nav nav-pills nav-fill" id="configtablist" role="tablist">
-            {% for category in options %}
-                <li class="nav-item" role="presentation">
-                    <a class="nav-link {{ (category.name == activeCategory) ? 'active' : '' }}" id="{{ category.name | replace({' ': ''}) }}-tab" data-bs-toggle="tab" href="#{{ category.name | replace({' ': ''}) }}" role="tab">{{ category.name }}</a>
-                </li>
-            {% endfor %}
-        </ul>
+    {{ form_start(form) }}
+    <ul class="nav nav-pills nav-fill" id="configtablist" role="tablist">
+        {% for category in categories | keys %}
+            {% set tabId = category | replace({' ': ''}) %}
+            <li class="nav-item" role="presentation">
+                <a class="nav-link {{ category == activeCategory ? 'active' }}" id="{{ tabId }}-tab" data-bs-toggle="tab" href="#{{ tabId }}" role="tab">{{ category }}</a>
+            </li>
+        {% endfor %}
+    </ul>
 
-        <div class="tab-content mb-2" id="configtab">
-        {% for category in options %}
-            <div class="tab-pane fade {{ (category.name == activeCategory) ? 'show active' : '' }}" id="{{ category.name | replace({' ': ''}) }}" role="tabpanel" aria-labelledby="{{ category.name | replace({' ': ''}) }}-tab">
+    <div class="tab-content my-2" id="configtab">
+        {% for category, names in categories %}
+            {% set tabId = category | replace({' ': ''}) %}
+            <div class="tab-pane fade {{ category == activeCategory ? 'show active' }}" id="{{ tabId }}" role="tabpanel" aria-labelledby="{{ tabId }}-tab">
                 <div class="card">
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            {% for option in category.data %}
-                                <li class="list-group-item" style="padding: 10px 0 0;">
-                                    <div class="mb-3">
-                                        <label class="form-label"
-                                        {% if option.type in ['int','string','bool','enum'] or option.type == 'array_val' and option.options is not null %}
-                                            for="config_{{ option.name }}"
-                                            {% if option.type =='bool' %} onclick="$('#config_{{ option.name }}').bootstrapToggle('toggle')"{% endif %}
-                                        {% endif %}
-                                        >{{ option.name | replace({'_': ' '}) | capitalize }}:</label>
-                                        {% if option.type == 'bool' %}
-                                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes"
-                                                   data-off="No"
-                                                   name="config_{{ option.name }}" id="config_{{ option.name }}"
-                                                {% if option.value == 1 %} checked="checked"{% endif %}>
-                                            <br/>
-                                        {% elseif option.type == 'int' %}
-                                            {% if option.options is not null %}
-                                                <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                       style="margin-left:5px;width:15em;text-align:right;display:inline-block;"
-                                                       name="config_{{ option.name }}" id="config_{{ option.name }}">
-                                                    {% for value, label in option.options %}
-                                                        <option {% if option.value == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            {% else %}
-                                                <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                       style="margin-left:5px;width:7em;text-align:right;display:inline-block;"
-                                                       type="number"
-                                                       name="config_{{ option.name }}" id="config_{{ option.name }}"
-                                                       value="{{ option.value }}">
-                                            {% endif %}
-                                            <br/>
-                                        {% elseif option.type == 'string' or option.type == 'enum' %}
-                                            {% if option.options is not null %}
-                                                <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                        style="width:30em;display: block;"
-                                                        name="config_{{ option.name }}" id="config_{{ option.name }}">
-                                                    {% for value, label in option.options %}
-                                                        <option {% if option.value == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            {% else %}
-                                                <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}" style="width:30em;" type="text"
-                                                       name="config_{{ option.name }}" id="config_{{ option.name }}"
-                                                       value="{{ option.value }}">
-                                            {% endif %}
-                                        {% elseif option.type == 'array_keyval' %}
-                                            <br/>
-                                            <div data-collection>
-                                                {% set counter = 0 %}
-                                                {% for key,val in option.value %}
-                                                    <div data-collection-item class="mb-2">
-                                                        {% if option.key_options is not null %}
-                                                            <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                                    style="width:10em;text-align:right;display:inline-block;"
-                                                                    name="config_{{ option.name }}[{{ counter }}][key]">
-                                                                {% for value, label in option.key_options %}
-                                                                    <option {% if key == value %}selected{% endif %} value="{{ value }}" label="{{ label | default('empty option') }}">{{ label }}</option>
-                                                                {% endfor %}
-                                                            </select>
-                                                        {% else %}
-                                                            <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                                   style="width:10em;text-align:right;display:inline-block;" type="text"
-                                                                   value="{{ key }}"
-                                                                   placeholder="{{ option.key_placeholder }}"
-                                                                   name="config_{{ option.name }}[{{ counter }}][key]"
-                                                                   id="config_{{ option.name }}_{{ counter }}__key_">
-                                                        {% endif %}
-                                                        {% if option.value_options is not null %}
-                                                            <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                                    style="width:30em;display:inline-block;"
-                                                                    name="config_{{ option.name }}[{{ counter }}][val]">
-                                                                {% for value, label in option.value_options %}
-                                                                    <option {% if val == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
-                                                                {% endfor %}
-                                                            </select>
-                                                        {% else %}
-                                                            <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                                   style="width:30em;display:inline-block;" type="text"
-                                                                   value="{{ val }}"
-                                                                   placeholder="{{ option.value_placeholder }}"
-                                                                   name="config_{{ option.name }}[{{ counter }}][val]"
-                                                                   id="config_{{ option.name }}_{{ counter }}__val">
-                                                            {% endif %}
-                                                        {% set counter = counter + 1 %}
-                                                    </div>
-                                                {% endfor %}
-                                                <script type="text/template" data-index="{{ counter }}">
-                                                    <div data-collection-item class="mb-2">
-                                                        {% if option.key_options is not null %}
-                                                            <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                                    style="width:10em;text-align:right;display:inline-block;"
-                                                                    name="config_{{ option.name }}[__idx__][key]">
-                                                                {% for value, label in option.key_options %}
-                                                                    <option value="{{ value }}">{{ label }}</option>
-                                                                {% endfor %}
-                                                            </select>
-                                                        {% else %}
-                                                            <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                                   style="width:10em;text-align:right;display:inline-block;" type="text"
-                                                                   placeholder="{{ option.key_placeholder }}"
-                                                                   name="config_{{ option.name }}[__idx__][key]"
-                                                                   id="config_{{ option.name }}___idx____key_">
-                                                        {% endif %}
-                                                        {% if option.value_options is not null %}
-                                                            <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                                    style="width:30em;display:inline-block;"
-                                                                    name="config_{{ option.name }}[__idx__][val]">
-                                                                {% for value, label in option.value_options %}
-                                                                    <option value="{{ value }}">{{ label }}</option>
-                                                                {% endfor %}
-                                                            </select>
-                                                        {% else %}
-                                                            <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                                   style="width:30em;display:inline-block;" type="text"
-                                                                   placeholder="{{ option.value_placeholder }}"
-                                                                   name="config_{{ option.name }}[__idx__][val]"
-                                                                   id="config_{{ option.name }}___idx____val">
-                                                        {% endif %}
-                                                    </div>
-                                                </script>
-                                            </div>
-                                            <br/>
-                                        {% elseif option.type == 'array_val' %}
-                                            <br/>
-                                                {% if option.options is not null %}
-                                                    <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                            style="width:30em;display:inline-block;"
-                                                            multiple
-                                                            name="config_{{ option.name }}[]"
-                                                            id="config_{{ option.name }}">
-                                                        {% for value in option.options %}
-                                                            <option {% if value in option.value %}selected{% endif %} value="{{ value }}">{{ value }}</option>
-                                                        {% endfor %}
-                                                    </select>
-                                                {% else %}
-                                                    <div data-collection>
-                                                        {% set counter = 0 %}
-                                                        {% for val in option.value %}
-                                                            <div data-collection-item class="mb-2">
-                                                                <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                                       style="width:30em;display:inline-block;" type="text"
-                                                                       value="{{ val }}"
-                                                                       name="config_{{ option.name }}[{{ counter }}]"
-                                                                       id="config_{{ option.name }}_{{ counter }}_">
-                                                            </div>
-                                                            {% set counter = counter + 1 %}
-                                                        {% endfor %}
-                                                        <script type="text/template" data-index="{{ counter }}">
-                                                            <div data-collection-item class="mb-2">
-                                                                <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
-                                                                       style="width:30em;display:inline-block;" type="text"
-                                                                       name="config_{{ option.name }}[__idx__]"
-                                                                       id="config_{{ option.name }}___idx___">
-                                                            </div>
-                                                        </script>
-                                                    </div>
-                                                {% endif %}
-                                        {% endif %}
-                                        {% if errors[option.name] is defined %}
-                                            <div class="invalid-feedback d-block">
-                                                {{ errors[option.name] }}
-                                            </div>
-                                        {% endif %}
-                                        <div class="small text-muted">{{ option.description | domjudgeMarkdownToHtml }}</div>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                    <div class="card-body col-xl-8">
+                        {% for name in names %}
+                            {{ form_row(form[name], {help: form[name].vars.help | domjudgeMarkdownToHtml, help_html: true}) }}
+                        {% endfor %}
                     </div>
                 </div>
             </div>
         {% endfor %}
-        </div>
-        <input class="btn btn-primary" type="submit" value="Save all changes" id="save" name="save">
-    </form>
+    </div>
+    {{ form_widget(form.save) }}
+    {{ form_end(form) }}
 {% endblock %}
 
 {% block extrafooter %}
     <script>
         $(function () {
-            function addDeleteLink($collectionItem) {
-                var $removeFormButton = $('<button type="button" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>');
-                $collectionItem.append($removeFormButton);
-
-                $removeFormButton.on('click', function(e) {
-                    $collectionItem.remove();
-                });
+            function addDeleteButton($entry) {
+                var $group = $entry.find('.input-group');
+                if (!$group.length) {
+                    $group = $entry.find(':input').first().wrap('<div class="input-group"></div>').parent();
+                }
+                $('<button type="button" class="btn btn-outline-danger"><i class="fas fa-trash"></i></button>')
+                    .on('click', function () { $entry.remove(); })
+                    .appendTo($group);
             }
 
-            function addCollectionItem($collection, $addButton) {
-                var $template = $('script[type="text/template"]', $collection);
-                var template = $template.text();
-                var index = $template.data('index');
-                var newRow = template;
-                newRow = newRow.replace(/__idx__/g, index);
-                $template.data('index', index + 1);
-                var $newRow = $(newRow);
-                $addButton.before($newRow);
-                addDeleteLink($newRow);
-            }
-
-            function addAddLink($collection) {
-                var $addButton = $('<button type="button" class="btn btn-sm btn-secondary"><i class="fas fa-plus"></i></button>');
-                $collection.append($addButton);
-
-                $addButton.on('click', function (e) {
-                    addCollectionItem($collection, $addButton);
-                });
-            }
-
-            $('[data-collection]').each(function() {
-                var $collection = $(this);
-
-                addAddLink($collection);
-
-                $('[data-collection-item]', $collection).each(function() {
-                    addDeleteLink($(this));
-                })
-            })
+            $('[data-prototype]').each(function () {
+                var holder = this;
+                var $holder = $(holder);
+                var index = $holder.children().length;
+                $holder.children().each(function () { addDeleteButton($(this)); });
+                $('<button type="button" class="btn btn-sm btn-outline-secondary mb-3"><i class="fas fa-plus"></i> Add</button>')
+                    .on('click', function () {
+                        while (document.getElementById(holder.id + '_' + index)) {
+                            index++;
+                        }
+                        var $entry = $($holder.data('prototype').replace(/__name__/g, index++));
+                        $holder.append($entry);
+                        addDeleteButton($entry);
+                    })
+                    .insertAfter($holder);
+            });
         });
     </script>
 {% endblock %}

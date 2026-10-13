@@ -19,5 +19,6 @@ class TestcaseViewRow
         public readonly ?int $inputSize = null,
         public readonly ?int $outputSize = null,
         public readonly ?int $imageSize = null,
+        public readonly ?int $interactionSize = null,
     ) {}
 }

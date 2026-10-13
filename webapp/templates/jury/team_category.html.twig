@@ -99,6 +99,16 @@
                             {% endif %}
                         </td>
                     </tr>
+                    <tr>
+                        <th>Allow password change</th>
+                        <td>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                {% include 'jury/partials/team_category_toggle.html.twig' with {route: 'jury_team_category_toggle_password_change', value: teamCategory.allowPasswordChange} %}
+                            {% else %}
+                                {{ teamCategory.allowPasswordChange | printYesNo }}
+                            {% endif %}
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>

@@ -2447,6 +2447,8 @@ class JudgeDaemon
             'hostname', 'testcasedir', 'compare_metadata'
         ];
         $new_judging_run = array_fill_keys($keys, '');
+        // The details of every pass, as the run itself only keeps the last one.
+        $passes = [];
 
         for ($passCnt = 1; $passCnt <= $passLimit; $passCnt++) {
             $nextPass = false;
@@ -2549,6 +2551,16 @@ class JudgeDaemon
 
             if ($passLimit > 1) {
                 $new_judging_run['pass'] = $passCnt;
+
+                $passData = ['pass' => $passCnt] + array_intersect_key($new_judging_run, array_flip([
+                    'runresult', 'start_time', 'end_time', 'runtime', 'output_run',
+                    'output_error', 'output_system', 'metadata', 'output_diff', 'compare_metadata',
+                ]));
+                // Every pass but the first runs on the input the validator generated.
+                if ($passCnt > 1) {
+                    $passData['input'] = $this->restEncodeFile($input, $output_storage_limit);
+                }
+                $passes[] = $passData;
             }
 
             if (file_exists($passdir . '/feedback/teammessage.txt')) {
@@ -2636,6 +2648,10 @@ class JudgeDaemon
             $description = "validator produced more passes than allowed ($passLimit)";
             $this->disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
             return false;
+        }
+
+        if ($passLimit > 1) {
+            $new_judging_run['passes'] = json_encode($passes, JSON_THROW_ON_ERROR);
         }
 
         $ret = true;

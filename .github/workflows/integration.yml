@@ -1,27 +1,9 @@
 name: Run integration tests
 on:
-  merge_group:
-  pull_request:
-    branches:
-      - main
-      - '[0-9]+.[0-9]+'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  workflow_call:
 
 jobs:
-  changes:
-    uses: ./.github/workflows/changes.yml
-    permissions:
-      contents: read
-      pull-requests: read
-
   integration:
-    needs: changes
-    # Skip only when change detection ran and said so: a skipped job counts
-    # as a passed required check, so if detection failed we must run.
-    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -228,7 +210,8 @@ jobs:
           CID=$(curl -sq "http://localhost/domjudge/api/contests/${{ matrix.contest }}" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
           curl $CURLOPTS http://localhost/domjudge/jury/contests/$CID/freeze/doNow || true
           curl $CURLOPTS http://localhost/domjudge/jury/contests/$CID/end/doNow || true
-          curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=' http://localhost/domjudge/jury/contests/$CID/finalize
+          FINALIZETOKEN=$(curl $CURLOPTS http://localhost/domjudge/jury/contests/$CID/finalize | grep -oP 'finalize_contest\[_token\]"[^>]*value="\K[^"]+')
+          curl $CURLOPTS -X POST -d "finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=&finalize_contest[_token]=$FINALIZETOKEN" http://localhost/domjudge/jury/contests/$CID/finalize
       - name: Verify no errors in symfony {prod,test,dev}.log
         shell: bash
         run: |
@@ -250,7 +233,7 @@ jobs:
 
   integration-gate:
     name: integration-gate
-    needs: [changes, integration]
+    needs: integration
     if: always()
     runs-on: ubuntu-latest
     steps:

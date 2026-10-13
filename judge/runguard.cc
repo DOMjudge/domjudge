@@ -457,38 +457,58 @@ std::set<unsigned> read_cpuset(const char *path)
 
 void check_remaining_procs()
 {
-	char path[1024];
-	snprintf(path, 1023, "/sys/fs/cgroup/%s/cgroup.procs", cgroupname);
+	/* cgroup.procs is a kernfs seq_file and always reports a size of 0,
+	   so its length cannot be used to detect membership; enumerate the
+	   PIDs instead. */
+	char mem_controller[10] = "memory";
+	pid_t *pids;
+	int size;
 
-	FILE *file = fopen(path, "r");
-	if (file == nullptr) {
-		die(errno, "opening cgroups file `{}'", path);
+	int ret = cgroup_get_procs(cgroupname, mem_controller, &pids, &size);
+	if ( ret!=0 ) {
+		logmsg(LOG_WARNING, "cgroup_get_procs while checking for left-over processes: {}",
+		       cgroup_strerror(ret));
+		return;
 	}
 
-	fseek(file, 0L, SEEK_END);
-	if (ftell(file) > 0) {
-		die(0, "found left-over processes in cgroup controller, please check!");
+	if ( size>0 ) {
+		logmsg(LOG_WARNING, "found {} left-over process(es) in cgroup controller; "
+		       "they will be killed", size);
+		for(int i = 0; i < size; i++) {
+			logmsg(LOG_DEBUG, "left-over process: pid {}", pids[i]);
+		}
 	}
-	if (fclose(file) != 0) die(errno, "closing file `{}'", path);
+	free(pids);
 }
 
 
 void output_cgroup_stats(double *cputime)
 {
-	struct cgroup *cg;
-	if ( (cg = cgroup_new_cgroup(cgroupname))==nullptr ) die(0,"cgroup_new_cgroup");
+	char *mountpoint;
+	int ret = cgroup_get_subsys_mount_point("memory", &mountpoint);
+	if ( ret!=0 ) die(ret,"getting cgroup mount point");
 
-	int ret;
-	if ((ret = cgroup_get_cgroup(cg)) != 0) die(ret,"get cgroup information");
+	char cgrouppath[1024], path[1024];
+	snprintf(cgrouppath, sizeof(cgrouppath), "%s/%s", mountpoint, cgroupname);
+	snprintf(path, sizeof(path), "%s/%s/memory.peak", mountpoint, cgroupname);
+	free(mountpoint);
 
-	struct cgroup_controller *cg_controller = cgroup_get_controller(cg, "memory");
-	int64_t max_usage = 0;
-	ret = cgroup_get_value_int64(cg_controller, "memory.peak", &max_usage);
-	if ( ret == ECGROUPVALUENOTEXIST ) {
-		die(ret, "kernel too old and does not support memory.peak");
-	} else if ( ret!=0 ) {
-		die(ret,"get cgroup value memory.peak");
+	/* Read memory.peak ourselves: cgroup_get_cgroup() would read every file
+	   of every controller of the cgroup to hand us this one value, among
+	   them memory.stat and memory.numa_stat, for which the kernel flushes
+	   its per-cpu statistics. */
+	FILE *file = fopen(path, "r");
+	if ( file==nullptr ) {
+		/* Only the file is missing, not the cgroup holding it. */
+		if ( errno==ENOENT && access(cgrouppath, F_OK)==0 ) {
+			die(0,"kernel too old and does not support memory.peak");
+		}
+		die(errno,"opening cgroups file `{}'", path);
 	}
+
+	int64_t max_usage = 0;
+	if ( fscanf(file,"%" SCNd64, &max_usage)!=1 ) die(errno,"reading from file `{}'", path);
+	if ( fclose(file)!=0 ) die(errno,"closing file `{}'", path);
 
 	// There is no need to check swap usage, as we limit it to 0.
 	logmsg(LOG_DEBUG, "total memory used: {} kB", max_usage/1024);
@@ -512,8 +532,6 @@ void output_cgroup_stats(double *cputime)
 	}
 	if ( ret!=ECGEOF ) die(ret,"get cgroup value cpu.stat");
 	cgroup_read_stats_end(&handle);
-
-	cgroup_free(&cg);
 }
 
 /* Temporary shorthand define for error handling. */
@@ -1268,7 +1286,7 @@ int main(int argc, char **argv)
 		if ( fscanf(fp,"%d", &ret)!=1 ) die(errno,"cannot read from `{}'", oom_score_path);
 		if ( ret<0 ) {
 			int oom_reset_value = 0;
-			die(0, "resetting `{}' from {} to {}", oom_score_path, ret, oom_reset_value);
+			logmsg(LOG_DEBUG, "resetting `{}' from {} to {}", oom_score_path, ret, oom_reset_value);
 			rewind(fp);
 			if ( fprintf(fp,"%d\n", oom_reset_value) <= 0 ) {
 				die(errno, "cannot write to `{}'", oom_score_path);
@@ -1432,7 +1450,10 @@ int main(int argc, char **argv)
 			pump_pipes(&readfds, data_read, data_passed);
 		}
 
-		/* Reset pipe filedescriptors to use blocking I/O. */
+		/* Set the pipe filedescriptors to non-blocking I/O: the loop below
+		   drains what is left in them, and must not wait for a process
+		   that still holds the write end, such as a child of the command
+		   that outlived it. */
 		FD_ZERO(&readfds);
 		for(int i=1; i<=2; i++) {
 			if ( child_pipefd[i][PIPE_OUT]>=0 ) {
@@ -1441,7 +1462,7 @@ int main(int argc, char **argv)
 				if (r == -1) {
 					die(errno, "fcntl, getting flags");
 				}
-				r = fcntl(child_pipefd[i][PIPE_OUT], F_SETFL, r ^ O_NONBLOCK);
+				r = fcntl(child_pipefd[i][PIPE_OUT], F_SETFL, r | O_NONBLOCK);
 				if (r == -1) {
 					die(errno, "fcntl, setting flags");
 				}

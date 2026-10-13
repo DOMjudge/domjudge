@@ -21,8 +21,6 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
-use App\Utils\Scoreboard\ScoreboardMatrixItem;
-use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,6 +28,7 @@ use Ramsey\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Exception\MissingResourceException;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -271,7 +270,7 @@ class TwigExtension
     }
 
     #[AsTwigFilter('countryFlag', isSafe: ['html'])]
-    public function countryFlag(?string $alpha3CountryCode, bool $showFullname = false): string
+    public function countryFlag(?string $alpha3CountryCode, bool $showFullname = false, bool $relative = false): string
     {
         if (empty($alpha3CountryCode)) {
             return '';
@@ -284,6 +283,7 @@ class TwigExtension
         }
         $assetFunction  = $this->twig->getFunction('asset')->getCallable();
         $countryFlagUrl = call_user_func($assetFunction, sprintf('flags/4x3/%s.svg', $countryAlpha2));
+        $countryFlagUrl = $this->relativePath($countryFlagUrl, $relative);
 
         $countryName    = Countries::getAlpha3Name($alpha3CountryCode);
 
@@ -296,11 +296,12 @@ class TwigExtension
     }
 
     #[AsTwigFilter('affiliationLogo', isSafe: ['html'])]
-    public function affiliationLogo(string $affiliationId, string $shortName): string
+    public function affiliationLogo(string $affiliationId, string $shortName, bool $relative = false): string
     {
         if ($asset = $this->dj->assetPath($affiliationId, 'affiliation')) {
             $assetFunction = $this->twig->getFunction('asset')->getCallable();
             $assetUrl      = call_user_func($assetFunction, $asset);
+            $assetUrl      = $this->relativePath($assetUrl, $relative);
             return sprintf('<img src="%s" alt="%s" class="affiliation-logo">',
                            htmlspecialchars($assetUrl), htmlspecialchars($shortName));
         }
@@ -496,7 +497,6 @@ class TwigExtension
         ?string $result,
         bool $valid = true,
         bool $jury = false,
-        bool $onlyRejectedForIncorrect = false,
     ): string {
         $result = strtolower($result ?? '');
         switch ($result) {
@@ -529,9 +529,6 @@ class TwigExtension
                 break;
             default:
                 $style = 'sol_incorrect';
-                if ($onlyRejectedForIncorrect) {
-                    $result = 'rejected';
-                }
         }
 
         return sprintf('<span class="sol %s">%s</span>', $valid ? $style : 'disabled',
@@ -1117,6 +1114,39 @@ EOF;
     #[AsTwigFilter('problemBadge', isSafe: ['html'])]
     public function problemBadge(?ContestProblem $problem, bool $grayedOut = false): string
     {
+        return sprintf(
+            '<span class="badge problem-badge" style="%s"><span>%s</span></span>',
+            $this->problemBadgeStyle($problem, $grayedOut),
+            htmlspecialchars($problem?->getShortname() ?? '?')
+        );
+    }
+
+    /**
+     * The CSS declarations that give a badge the colour of the given problem.
+     */
+    #[AsTwigFilter('problemBadgeStyle')]
+    public function problemBadgeStyle(?ContestProblem $problem, bool $grayedOut = false): string
+    {
+        [$background, $foreground, $border] = $this->problemBadgeColours($problem, $grayedOut);
+        return sprintf('background-color: %s; border: 1px solid %s; color: %s;', $background, $border, $foreground);
+    }
+
+    /**
+     * The colours of a problem badge as CSS custom properties, for stylesheets that draw
+     * the badge themselves.
+     */
+    #[AsTwigFilter('problemBadgeVars')]
+    public function problemBadgeVars(?ContestProblem $problem, bool $grayedOut = false): string
+    {
+        [$background, $foreground, $border] = $this->problemBadgeColours($problem, $grayedOut);
+        return sprintf('--badge-bg: %s; --badge-border: %s; --badge-fg: %s;', $background, $border, $foreground);
+    }
+
+    /**
+     * @return array{string, string, string} background, foreground and border colour
+     */
+    private function problemBadgeColours(?ContestProblem $problem, bool $grayedOut): array
+    {
         $rgb = Utils::convertToHex($problem?->getColor() ?? '#ffffff');
         if ($grayedOut || empty($rgb)) {
             $rgb = Utils::convertToHex('whitesmoke');
@@ -1128,66 +1158,7 @@ EOF;
             $foreground = 'silver';
             $border = 'linen';
         }
-        return sprintf(
-            '<span class="badge problem-badge" style="background-color: %s; border: 1px solid %s"><span style="color: %s;">%s</span></span>',
-            $rgb,
-            $border,
-            $foreground,
-            htmlspecialchars($problem?->getShortname() ?? '?')
-        );
-    }
-
-    #[AsTwigFilter('problemBadgeMaybe', isSafe: ['html'])]
-    public function problemBadgeMaybe(
-        ContestProblem $problem,
-        ScoreboardMatrixItem $matrixItem,
-        TeamScore $score,
-        bool $static = false,
-    ): string {
-        $rgb = Utils::convertToHex($problem->getColor() ?? '#ffffff');
-        if (!$matrixItem->isCorrect || empty($rgb)) {
-            $rgb = Utils::convertToHex('whitesmoke');
-        }
-
-        [$foreground, $border] = Utils::hexToForegroundAndBorder($rgb);
-
-        if (!$matrixItem->isCorrect) {
-            $foreground = 'silver';
-            $border = 'linen';
-        }
-
-        $submissionsUrl = $static
-            ? $this->router->generate('public_submissions_data')
-            : $this->router->generate('public_submissions_data_cell', [
-                'teamId' => $score->team->getExternalid(),
-                'problemId' => $problem->getExternalId(),
-            ]);
-
-        $ret = sprintf(<<<HTML
-                <span class="badge problem-badge"
-                      style="font-size: x-small; background-color: %s; min-width: 18px; border: 1px solid %s;"
-                      data-submissions-url="%s"
-                      data-team-id="%s"
-                      data-problem-id="%s">
-                    <span style="color: %s;">%s</span>
-                </span>
-                HTML,
-            $rgb,
-            $border,
-            $submissionsUrl,
-            htmlspecialchars((string)$score->team->getExternalid()),
-            htmlspecialchars((string)$problem->getExternalId()),
-            $foreground,
-            htmlspecialchars($problem->getShortname())
-        );
-        if (!$matrixItem->isCorrect) {
-            if ($matrixItem->numSubmissionsPending > 0) {
-                $ret = '<span><span class="mobile-pending">' . $ret . '</span></span>';
-            } elseif ($matrixItem->numSubmissions > 0) {
-                $ret = '<span><span class="strike-diagonal">' . $ret . '</span></span>';
-            }
-        }
-        return $ret;
+        return [$rgb, $foreground, $border];
     }
 
     #[AsTwigFilter('problemBadgeForContest', isSafe: ['html'])]
@@ -1371,5 +1342,24 @@ EOF;
             },
             $markdown
         );
+    }
+
+    #[AsTwigFilter('relativePath')]
+    public function relativePath(string $path, bool $relative = true): string
+    {
+        if (!$relative) {
+            return $path;
+        }
+
+        // When generating a static scoreboard ZIP, asset paths are prefixed with a temporary base path
+        // so getScoreboardZip() can detect them and package them into the archive.
+        // Keep them untouched here; getScoreboardZip() will strip the prefix to make them relative.
+        if (str_starts_with($path, DOMJudgeService::SCOREBOARD_ZIP_BASE_PATH . '/')) {
+            return $path;
+        }
+
+        return UrlGenerator::getRelativePath(
+            $this->router->getContext()->getBaseUrl()
+            . $this->router->getContext()->getPathInfo(), $path);
     }
 }

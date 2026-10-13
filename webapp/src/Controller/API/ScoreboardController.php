@@ -11,10 +11,12 @@ use App\Entity\Event;
 use App\Entity\ScoreboardType;
 use App\Entity\TeamCategory;
 use App\Service\AuthorizedUserService;
+use App\Service\AwardService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
+use App\Utils\CcsApiVersion;
 use App\Utils\Scoreboard\Filter;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -42,7 +44,8 @@ class ScoreboardController extends AbstractApiController
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        protected readonly ScoreboardService $scoreboardService
+        protected readonly ScoreboardService $scoreboardService,
+        protected readonly AwardService $awards
     ) {
         parent::__construct($authService, $em, $dj, $config, $eventLogService);
     }
@@ -148,6 +151,8 @@ class ScoreboardController extends AbstractApiController
         $event = $this->em->createQueryBuilder()
             ->from(Event::class, 'e')
             ->select('e')
+            ->andWhere('e.version = :version')
+            ->setParameter('version', $this->eventLogService->getContentVersion())
             ->orderBy('e.eventid', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
@@ -172,28 +177,17 @@ class ScoreboardController extends AbstractApiController
         }
 
         $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+
+        $isScoring = $contest->getScoreboardType() === ScoreboardType::SCORE;
 
         foreach ($scoreboard->getScores() as $teamScore) {
             if ($teamScore->team->getSortorder() !== $sortorder) {
                 continue;
             }
 
-            $isScoring = $contest->getScoreboardType() === ScoreboardType::SCORE;
-            $totalScore = $isScoring ? (float)$teamScore->score : null;
-
-            if ($contest->getRuntimeAsScoreTiebreaker()) {
-                $score = new Score(
-                    numSolved: $teamScore->numPoints,
-                    totalRuntime: $teamScore->totalRuntime,
-                    totalScore: $totalScore,
-                );
-            } else {
-                $score = new Score(
-                    numSolved: $teamScore->numPoints,
-                    totalTime: $isScoring ? null : $teamScore->totalTime,
-                    totalScore: $totalScore,
-                );
-            }
+            $lastProblemTime = null;
 
             $problems = [];
             foreach ($scoreboard->getMatrix()[$teamScore->team->getTeamid()] as $problemId => $matrixItem) {
@@ -214,7 +208,9 @@ class ScoreboardController extends AbstractApiController
                 } else {
                     $problem->firstToSolve = $matrixItem->isCorrect && $scoreboard->solvedFirst($teamScore->team, $contestProblem);
                     if ($matrixItem->isCorrect) {
-                        $problem->time = Utils::scoretime($matrixItem->time, $scoreIsInSeconds);
+                        $problemTime = Utils::scoretime($matrixItem->time, $scoreIsInSeconds);
+                        $problem->time = $this->formatTime($problemTime, $ccsApiVersion, $scoreIsInSeconds);
+                        $lastProblemTime = max($lastProblemTime ?? $problemTime, $problemTime);
                     }
                 }
 
@@ -225,12 +221,35 @@ class ScoreboardController extends AbstractApiController
                 $problems[] = $problem;
             }
 
+            $totalScore = $isScoring ? (float)$teamScore->score : null;
+
+            if ($contest->getRuntimeAsScoreTiebreaker()) {
+                $score = new Score(
+                    numSolved: $teamScore->numPoints,
+                    totalRuntime: $teamScore->totalRuntime,
+                    totalScore: $totalScore,
+                );
+            } else {
+                $score = new Score(
+                    numSolved: $teamScore->numPoints,
+                    totalTime: $isScoring ? null : $this->formatTime($teamScore->totalTime, $ccsApiVersion, $scoreIsInSeconds),
+                    time: $lastProblemTime === null ? null : $this->formatTime($lastProblemTime, $ccsApiVersion, $scoreIsInSeconds),
+                    totalScore: $totalScore,
+                );
+            }
+
             usort($problems, fn(Problem $a, Problem $b) => $a->label <=> $b->label);
+
+            $medal = null;
+            if ($strict === false) {
+                $medal = $this->awards->medalType($teamScore->team, $contest, $scoreboard);
+            }
 
             $row = new Row(
                 rank: $teamScore->rank,
                 teamId: $teamScore->team->getExternalid(),
                 score: $score,
+                medal: $medal,
                 problems: $problems,
             );
 
@@ -238,5 +257,17 @@ class ScoreboardController extends AbstractApiController
         }
 
         return $results;
+    }
+
+    protected function formatTime(
+        int $time,
+        CcsApiVersion $ccsApiVersion,
+        bool $scoreIsInSeconds
+    ): int|string {
+        if (!$ccsApiVersion->useRelTimes()) {
+            return $time;
+        }
+
+        return Utils::relTime($scoreIsInSeconds ? $time : $time * 60, floored: true);
     }
 }

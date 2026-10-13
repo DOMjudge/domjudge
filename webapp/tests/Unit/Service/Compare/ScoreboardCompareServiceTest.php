@@ -85,101 +85,101 @@ class ScoreboardCompareServiceTest extends KernelTestCase
         ];
         yield [
             new Scoreboard(rows: []),
-            new Scoreboard(rows: [new Row(1, '123', new Score(0), [])]),
+            new Scoreboard(rows: [new Row(1, '123', new Score(0), null, [])]),
             [new Message(MessageType::ERROR, 'Number of rows does not match', '0', '1')],
         ];
         yield [
-            new Scoreboard(rows: [new Row(1, '123', new Score(0), [])]),
-            new Scoreboard(rows: [new Row(1, '456', new Score(0), [])]),
+            new Scoreboard(rows: [new Row(1, '123', new Score(0), null, [])]),
+            new Scoreboard(rows: [new Row(1, '456', new Score(0), null, [])]),
             [new Message(MessageType::ERROR, 'Row 0: team ID does not match', '123', '456')],
         ];
         yield [
-            new Scoreboard(rows: [new Row(1, '123', new Score(0), [])]),
-            new Scoreboard(rows: [new Row(2, '123', new Score(0), [])]),
+            new Scoreboard(rows: [new Row(1, '123', new Score(0), null, [])]),
+            new Scoreboard(rows: [new Row(2, '123', new Score(0), null, [])]),
             [new Message(MessageType::ERROR, 'Row 0: rank does not match', '1', '2')],
         ];
         yield [
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [])]),
-            new Scoreboard(rows: [new Row(1, '123', new Score(2), [])]),
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [])]),
+            new Scoreboard(rows: [new Row(1, '123', new Score(2), null, [])]),
             [new Message(MessageType::ERROR, 'Row 0: num solved does not match', '1', '2')],
         ];
         yield [
-            new Scoreboard(rows: [new Row(1, '123', new Score(1, 123), [])]),
-            new Scoreboard(rows: [new Row(1, '123', new Score(1, 456), [])]),
+            new Scoreboard(rows: [new Row(1, '123', new Score(1, 123), null, [])]),
+            new Scoreboard(rows: [new Row(1, '123', new Score(1, 456), null, [])]),
             [new Message(MessageType::ERROR, 'Row 0: total time does not match', '123', '456')],
         ];
         yield [
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'a', 1, 0, true),
             ])]),
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'a', 1, 0, true),
             ])]),
             [],
         ];
         yield [
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'a', 1, 0, true),
             ])]),
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'a', 1, 0, false),
             ])]),
             [new Message(MessageType::ERROR, 'Row 0: Problem a solved does not match', '1', '')],
         ];
         yield [
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'a', 1, 0, true),
             ])]),
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [])]),
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [])]),
             [new Message(MessageType::ERROR, 'Row 0: Problem a solved in first file, but not found in second file')],
         ];
         yield [
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [])]),
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [])]),
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'a', 1, 0, true),
             ])]),
             [new Message(MessageType::ERROR, 'Row 0: Problem a solved in second file, but not found in first file')],
         ];
         yield [
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'a', 1, 0, true),
             ])]),
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'a', 2, 0, true),
             ])]),
             [new Message(MessageType::ERROR, 'Row 0: Problem a num judged does not match', '1', '2')],
         ];
         yield [
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'a', 1, 3, true),
             ])]),
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'a', 1, 4, true),
             ])]),
             [new Message(MessageType::ERROR, 'Row 0: Problem a num pending does not match', '3', '4')],
         ];
         yield [
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'a', 1, 3, true, 123),
             ])]),
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'a', 1, 3, true, 456),
             ])]),
             [new Message(MessageType::INFO, 'Row 0: Problem a time does not match', '123', '456')],
         ];
         // PC^2 uses different problem ID's. Also test on `Id = {problemId}-{digits}`
         yield [
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'a', 1, 0, true),
             ])]),
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'Id = a-123', 1, 0, true),
             ])]),
             [],
         ];
         yield [
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [])]),
-            new Scoreboard(rows: [new Row(1, '123', new Score(1), [
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [])]),
+            new Scoreboard(rows: [new Row(1, '123', new Score(1), null, [
                 new Problem('A', 'Id = a-123', 1, 0, true),
             ])]),
             [new Message(MessageType::ERROR, 'Row 0: Problem Id = a-123 solved in second file, but not found in first file')],

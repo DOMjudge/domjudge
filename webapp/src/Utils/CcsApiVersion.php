@@ -1,0 +1,53 @@
+<?php declare(strict_types=1);
+
+namespace App\Utils;
+
+enum CcsApiVersion: string
+{
+    case Format_2020_03 = '2020-03';
+    case Format_2023_06 = '2023-06';
+    case Format_2026_01 = '2026-01';
+
+    public function getConfigDescription(): string
+    {
+        return match ($this) {
+            self::Format_2020_03 => '`2020-03` version',
+            self::Format_2023_06 => '`2023-06` version, backwards compatible with `2022-07`',
+            self::Format_2026_01 => '`2026-01` version',
+        };
+    }
+
+    public function getCcsSpecsApiUrl(): string
+    {
+        return sprintf('https://ccs-specs.icpc.io/%s/contest_api', $this->value);
+    }
+
+    public function useRelTimes(): bool
+    {
+        return match ($this) {
+            self::Format_2020_03, self::Format_2023_06 => false,
+            default => true,
+        };
+    }
+
+    /**
+     * The oldest version whose events have the same content as this one.
+     * Events are stored per content version, so switching between versions
+     * that share one keeps the existing event feed.
+     */
+    public function getContentVersion(): self
+    {
+        return match ($this) {
+            self::Format_2020_03, self::Format_2023_06 => self::Format_2020_03,
+            self::Format_2026_01 => self::Format_2026_01,
+        };
+    }
+
+    public function clarCapability(): string
+    {
+        return match ($this) {
+            self::Format_2020_03, self::Format_2023_06 => 'team_clar',
+            default => 'post_clar',
+        };
+    }
+}

@@ -127,6 +127,8 @@ class BalloonController extends AbstractController
                 ->from(TeamCategory::class, 'c')
                 ->select('c')
                 ->where('c.visible = true')
+                ->andWhere('BIT_AND(c.types, :scoring) = :scoring')
+                ->setParameter('scoring', TeamCategory::TYPE_SCORING)
                 ->getQuery()
                 ->getResult();
             /** @var TeamCategory[] $availableCategories */
@@ -134,6 +136,8 @@ class BalloonController extends AbstractController
                 ->from(TeamCategory::class, 'c')
                 ->select('c')
                 ->where('c.visible = false')
+                ->andWhere('BIT_AND(c.types, :scoring) = :scoring')
+                ->setParameter('scoring', TeamCategory::TYPE_SCORING)
                 ->getQuery()
                 ->getResult();
         } elseif (isset($filters['category-id'])) {
@@ -142,7 +146,9 @@ class BalloonController extends AbstractController
                 ->from(TeamCategory::class, 'c')
                 ->select('c')
                 ->where('c.externalid IN (:categories)')
+                ->andWhere('BIT_AND(c.types, :scoring) = :scoring')
                 ->setParameter('categories', $filters['category-id'])
+                ->setParameter('scoring', TeamCategory::TYPE_SCORING)
                 ->getQuery()
                 ->getResult();
             /** @var TeamCategory[] $availableCategories */
@@ -150,7 +156,9 @@ class BalloonController extends AbstractController
                 ->from(TeamCategory::class, 'c')
                 ->select('c')
                 ->where('c.externalid NOT IN (:categories)')
+                ->andWhere('BIT_AND(c.types, :scoring) = :scoring')
                 ->setParameter('categories', $filters['category-id'])
+                ->setParameter('scoring', TeamCategory::TYPE_SCORING)
                 ->getQuery()
                 ->getResult();
         } else {
@@ -158,6 +166,8 @@ class BalloonController extends AbstractController
             $availableCategories = $this->em->createQueryBuilder()
                 ->from(TeamCategory::class, 'c')
                 ->select('c')
+                ->where('BIT_AND(c.types, :scoring) = :scoring')
+                ->setParameter('scoring', TeamCategory::TYPE_SCORING)
                 ->getQuery()
                 ->getResult();
         }
@@ -165,6 +175,8 @@ class BalloonController extends AbstractController
             ->from(TeamCategory::class, 'c')
             ->select('c.externalid')
             ->where('c.visible = true')
+            ->andWhere('BIT_AND(c.types, :scoring) = :scoring')
+            ->setParameter('scoring', TeamCategory::TYPE_SCORING)
             ->getQuery()
             ->getArrayResult();
         $defaultCategories = array_column($defaultCategories, "externalid");

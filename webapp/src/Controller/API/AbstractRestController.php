@@ -3,14 +3,17 @@
 namespace App\Controller\API;
 
 use App\Entity\BaseApiEntity;
+use App\Utils\CcsApiVersion;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
@@ -73,7 +76,9 @@ abstract class AbstractRestController extends AbstractApiController
         $view->getContext()->setAttribute('authorized_user_service', $this->authService);
         $view->getContext()->setAttribute('config_service', $this->config);
 
-        $groups = [static::GROUP_DEFAULT];
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+        $groups = [static::GROUP_DEFAULT, $ccsApiVersion->value];
         if (!$request->query->has('strict') || !$request->query->getBoolean('strict')) {
             $groups[] = static::GROUP_NONSTRICT;
         }
@@ -117,6 +122,84 @@ abstract class AbstractRestController extends AbstractApiController
         ];
         return $this->renderData($request, $data, Response::HTTP_CREATED,
             $headers);
+    }
+
+    /**
+     * Render data saved by a POST, PUT or PATCH request.
+     */
+    protected function renderSavedData(
+        Request $request,
+        mixed $data,
+        string $routeType,
+        int|string $id,
+        bool $created,
+    ): Response {
+        if ($created) {
+            return $this->renderCreateData($request, $data, $routeType, $id);
+        }
+
+        return $this->renderData($request, $data);
+    }
+
+    protected function checkPayloadId(string $id, ?string $payloadId): void
+    {
+        if ($id !== $payloadId) {
+            throw new BadRequestHttpException('ID in URL does not match ID in payload');
+        }
+    }
+
+    /**
+     * Overwrite the current data with the fields that were sent in the request.
+     *
+     * The patch object is only used for its validated values, since a null value means
+     * something else than a field that was not sent.
+     *
+     * @param array<string, mixed> $current
+     *
+     * @return array<string, mixed>
+     */
+    protected function mergePatch(Request $request, object $patch, array $current): array
+    {
+        $patched = $this->normalizePayload($patch);
+
+        return array_replace($current, array_intersect_key($patched, $request->getPayload()->all()));
+    }
+
+    /**
+     * Convert a request DTO back to an array with the API (snake_case) field names.
+     *
+     * @return array<string, mixed>
+     */
+    protected function normalizePayload(object $payload): array
+    {
+        /** @var NormalizerInterface $normalizer */
+        $normalizer = $this->container->get('serializer');
+
+        return $normalizer->normalize($payload);
+    }
+
+    /**
+     * Import a single entity using one of the JSON import methods and render the result.
+     *
+     * @param callable(array<array<string, mixed>>, ?string&, ?array<mixed>&): int $import
+     * @param array<string, mixed>                                                  $data
+     */
+    protected function importSingle(
+        Request $request,
+        callable $import,
+        array $data,
+        string $routeType,
+        bool $created,
+    ): Response {
+        $saved = [];
+        $import([$data], $message, $saved);
+        if (!empty($message)) {
+            throw new BadRequestHttpException(sprintf('Error while saving %s: %s', $routeType, $message));
+        }
+
+        $entity = $saved[0];
+
+        return $this->renderSavedData($request, $entity, $routeType, $entity->getExternalid(), $created);
     }
 
     /**

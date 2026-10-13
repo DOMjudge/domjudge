@@ -894,7 +894,7 @@ class ExternalContestSourceService
         }
 
         $toCheck['name'] = $data->name;
-        $toCheck['penalty_time'] = $data->penaltyTime ?? 0;
+        $toCheck['penalty_time'] = Utils::minutesOrRelTimeToMinutes($data->penaltyTime ?? 0);
 
         $this->compareOrCreateValues($event, $data->id, $contest, $toCheck);
 
@@ -1371,7 +1371,16 @@ class ExternalContestSourceService
             }
         }
 
-        $toTeamId = $data->toTeamId;
+        // We only support a single recipient team; importing anything else would send it to everyone.
+        if (count($data->toTeamIds ?? []) > 1 || !empty($data->toGroupIds)) {
+            $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_UNSUPORTED_ACTION, [
+                'action' => 'sending to multiple teams or to groups',
+            ]);
+            return;
+        }
+        $this->removeWarning($event->type, $data->id, ExternalSourceWarning::TYPE_UNSUPORTED_ACTION);
+
+        $toTeamId = $data->toTeamIds[0] ?? $data->toTeamId;
         $toTeam   = null;
         if ($toTeamId !== null) {
             $toTeam = $this->em
@@ -1633,7 +1642,8 @@ class ExternalContestSourceService
                 if (preg_match('/^https?:\/\//', $zipUrl) === 0) {
                     // Relative URL, prepend the base URL.
                     // If the base URL ends with a slash and the zip URL starts with one, remove the slash.
-                    if (str_ends_with($this->basePath, '/') && str_starts_with($zipUrl, '/')) {
+                    // Contest packages have no base URL.
+                    if (str_ends_with($this->basePath ?? '', '/') && str_starts_with($zipUrl, '/')) {
                         $zipUrl = substr($zipUrl, 1);
                     }
                     $zipUrl = ($this->basePath ?? '') . $zipUrl;
@@ -1701,7 +1711,7 @@ class ExternalContestSourceService
                 }
             }
 
-            if ($submissionDownloadSucceeded && isset($zipFile, $tmpdir)) {
+            if ($submissionDownloadSucceeded) {
                 // Open the ZIP file.
                 $zip = new ZipArchive();
                 $zip->open($zipFile);

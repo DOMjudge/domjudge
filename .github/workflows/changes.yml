@@ -13,6 +13,8 @@ on:
         value: ${{ jobs.changes.outputs.chroot }}
       compare:
         value: ${{ jobs.changes.outputs.compare }}
+      misc-tools-unit:
+        value: ${{ jobs.changes.outputs.misc-tools-unit }}
       phpstan:
         value: ${{ jobs.changes.outputs.phpstan }}
       autoconf:
@@ -33,6 +35,7 @@ jobs:
       judge-unit: ${{ steps.filter.outputs.judge-unit }}
       chroot: ${{ steps.filter.outputs.chroot }}
       compare: ${{ steps.filter.outputs.compare }}
+      misc-tools-unit: ${{ steps.filter.outputs.misc-tools-unit }}
       phpstan: ${{ steps.filter.outputs.phpstan }}
       autoconf: ${{ steps.filter.outputs.autoconf }}
       webapp: ${{ steps.filter.outputs.webapp }}

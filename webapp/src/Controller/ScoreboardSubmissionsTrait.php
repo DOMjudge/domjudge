@@ -8,6 +8,7 @@ use App\Entity\ContestProblem;
 use App\Entity\ScoreboardType;
 use App\Entity\Submission;
 use App\Entity\Team;
+use App\Utils\SimplifiedVerdict;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -153,6 +154,13 @@ trait ScoreboardSubmissionsTrait
         if ($verificationRequired && !$judging->getVerified()) {
             return $this->twigExtension->printResult('');
         }
-        return $this->twigExtension->printResult($judging->getResult(), onlyRejectedForIncorrect: true);
+        // Only show the simplified verdict, like the API does for other teams' judgements.
+        $label = $this->config->getVerdicts(['final', 'external'])[$judging->getResult()] ?? null;
+        $simplifiedVerdict = $label === null ? SimplifiedVerdict::RE : SimplifiedVerdict::for($label);
+        return $this->twigExtension->printResult(match ($simplifiedVerdict) {
+            SimplifiedVerdict::AC => 'correct',
+            SimplifiedVerdict::CE => 'compiler-error',
+            SimplifiedVerdict::RE => 'rejected',
+        });
     }
 }

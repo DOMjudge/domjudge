@@ -1,0 +1,89 @@
+name: "Static security scanning"
+on:
+  push:
+  schedule:
+    # Run during the (work)week on main
+    - cron: "59 4 * * 2"
+
+jobs:
+  analyze:
+    name: Static security [ShiftLeft, CodeQL]
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v7
+
+    - name: Initialize CodeQL
+      # See: https://github.com/github/codeql-action/blob/main/init/action.yml
+      # We don't use matrix jobs as we can wait all night and let other jobs get merged
+      # Only scan the languages use by judgedaemon, frontend & misc-tools
+      # Ignore the example submissions
+      uses: github/codeql-action/init@v4
+      with:
+        languages: 	c-cpp, javascript-typescript, python
+
+    - name: Install needed packages
+      run: sudo apt-get install -y autoconf automake composer g++ libcgroup-dev make
+
+    - name: Cache composer dependencies
+      uses: actions/cache@v6
+      with:
+        path: webapp/vendor
+        key: composer-${{ hashFiles('webapp/composer.lock') }}
+        restore-keys: |
+          composer-
+
+    - name: Cache node modules
+      uses: actions/cache@v6
+      with:
+        path: webapp/node_modules
+        key: yarn-${{ hashFiles('webapp/yarn.lock') }}
+        restore-keys: |
+          yarn-
+
+    - name: Configure Makefile
+      run: |
+        DIR=$(pwd)
+        mkdir ./installdir
+        make inplace-conf CONFIGURE_FLAGS="--enable-doc-build=no --prefix=$DIR/installdir"
+
+    - name: Compile domserver, build scripts for languages & judgehost
+      run: make inplace-install build-scripts
+
+    - name: Remove upstream code
+      run: |
+        rm -rf webapp/public/js/monaco doc/manual/_static
+
+    - name: Chown everything to the current runner user
+      run: sudo chown -R ${USER} ./installdir
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4
+
+    - name: Perform ShiftLeft Analysis
+      uses: ShiftLeftSecurity/scan-action@master
+      env:
+        WORKSPACE: ""
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SCAN_AUTO_BUILD: true
+        SCAN_ANNOTATE_PR: 0
+      with:
+        output: reports
+        type: python,bash
+
+    - name: Upload report for debugging
+      uses: actions/upload-artifact@v7
+      with:
+        name: reports-shiftleft
+        path: reports
+
+    - name: Upload ShiftLeft (sarif) report to GitHub interface
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif_file: reports

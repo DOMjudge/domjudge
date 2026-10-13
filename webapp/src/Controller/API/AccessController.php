@@ -4,6 +4,7 @@ namespace App\Controller\API;
 
 use App\DataTransferObject\Access;
 use App\DataTransferObject\AccessEndpoint;
+use App\Utils\CcsApiVersion;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -81,6 +82,9 @@ class AccessController extends AbstractApiController
             $submissionsProperties[] = 'files';
         }
 
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+
         $capabilities = [];
 
         // Add capabilities
@@ -90,7 +94,7 @@ class AccessController extends AbstractApiController
         }
         if ($this->authService->checkRole('team') && $this->authService->getUser()->getTeam()) {
             $capabilities[] = 'team_submit';
-            $capabilities[] = 'team_clar';
+            $capabilities[] = $ccsApiVersion->clarCapability();
         }
         if ($this->authService->checkRole('api_writer')) {
             $capabilities[] = 'proxy_submit';
@@ -98,6 +102,9 @@ class AccessController extends AbstractApiController
             $capabilities[] = 'admin_submit';
             $capabilities[] = 'admin_clar';
         }
+
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
 
         return new Access(
             capabilities: $capabilities,
@@ -133,6 +140,7 @@ class AccessController extends AbstractApiController
                         'name',
                         'penalty',
                         'solved',
+                        'simplified_judgement_type_id',
                     ],
                 ),
                 new AccessEndpoint(
@@ -161,6 +169,9 @@ class AccessController extends AbstractApiController
                         'rgb',
                         'color',
                         'time_limit',
+                        'memory_limit',
+                        'output_limit',
+                        'code_limit',
                         'test_data_count',
                         'statement',
                         'attachments',
@@ -247,11 +258,13 @@ class AccessController extends AbstractApiController
                         'id',
                         'submission_id',
                         'judgement_type_id',
+                        'simplified_judgement_type_id',
                         'start_time',
                         'start_contest_time',
                         'end_time',
                         'end_contest_time',
                         'max_run_time',
+                        'current',
                         // DOMjudge specific properties:
                         'valid',
                     ],
@@ -273,7 +286,7 @@ class AccessController extends AbstractApiController
                     properties: [
                         'id',
                         'from_team_id',
-                        'to_team_id',
+                        ...($ccsApiVersion === CcsApiVersion::Format_2026_01 ? ['to_team_ids', 'to_group_ids'] : ['to_team_id']),
                         'reply_to_id',
                         'problem_id',
                         'text',

@@ -22,8 +22,9 @@ class Testcase
 {
     // Mapping from type to extension
     final public const EXTENSION_MAPPING = [
-        'input'  => 'in',
-        'output' => 'ans',
+        'input'       => 'in',
+        'output'      => 'ans',
+        'interaction' => 'interaction',
     ];
 
     #[ORM\Id]

@@ -8,13 +8,17 @@ use App\Entity\JudgeTask;
 use App\Entity\Judgehost;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
+use App\Entity\JudgingRunPass;
 use App\Entity\Problem;
 use App\Entity\QueueTask;
+use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\Version;
+use App\Service\RejudgingService;
 use App\Service\SubmissionService;
+use App\Tests\StatementHook\StatementHookMiddleware;
 use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -40,6 +44,13 @@ class JudgehostWorkflowTest extends BaseTestCase
         // fetch-work hands out the globally highest-priority queue task, so a database that
         // already has queued work would hand these tests somebody else's job.
         $this->em()->getConnection()->executeStatement('DELETE FROM queuetask');
+    }
+
+    protected function tearDown(): void
+    {
+        StatementHookMiddleware::reset();
+
+        parent::tearDown();
     }
 
     private function em(): EntityManagerInterface
@@ -158,8 +169,12 @@ class JudgehostWorkflowTest extends BaseTestCase
 
     /**
      */
-    private function reportRun(int $judgeTaskId, string $runResult): mixed
-    {
+    private function reportRun(
+        int $judgeTaskId,
+        string $runResult,
+        array $extra = [],
+        int $expectedStatus = 200
+    ): mixed {
         return $this->request(
             'POST',
             sprintf('/judgehosts/add-judging-run/%s/%d', self::HOSTNAME, $judgeTaskId),
@@ -174,7 +189,8 @@ class JudgehostWorkflowTest extends BaseTestCase
                 // Mandatory, and a real judgedaemon always sends them.
                 'start_time' => (string)(microtime(true) - 1),
                 'end_time' => (string)microtime(true),
-            ]
+            ] + $extra,
+            $expectedStatus
         );
     }
 
@@ -210,6 +226,33 @@ class JudgehostWorkflowTest extends BaseTestCase
         $judgehost = $this->freshEm()->getRepository(Judgehost::class)->findOneBy(['hostname' => self::HOSTNAME]);
         self::assertNotNull($judgehost);
         self::assertFalse($judgehost->getHidden());
+    }
+
+    /**
+     * A judgedaemon registers again when it restarts. Anything it had claimed and not
+     * finished is handed back so another judgehost can pick it up.
+     */
+    public function testRegisterGivesBackUnfinishedWork(): void
+    {
+        // A problem with several test cases, so that reporting one failing run decides the
+        // verdict under lazy evaluation while leaving the other runs unfinished. Only a
+        // judging that already has a verdict is handed back on registration.
+        $this->registerJudgehost();
+        $this->addSubmission(problem: 'boolfind');
+
+        $tasks = $this->fetchWork();
+        self::assertGreaterThan(1, count($tasks), 'expected a batch of judge tasks');
+
+        $this->reportRun((int)$tasks[0]['judgetaskid'], 'wrong-answer');
+        $judgeTaskId = (int)$tasks[1]['judgetaskid'];
+
+        $unfinished = $this->registerJudgehost();
+        self::assertNotEmpty($unfinished, 'the judgehost had unfinished work to hand back');
+
+        $em = $this->freshEm();
+        $judgeTask = $em->getRepository(JudgeTask::class)->find($judgeTaskId);
+        self::assertNull($judgeTask->getJudgehost(), 'the claim must be released');
+        self::assertNull($judgeTask->getStarttime(), 'the start time must be cleared with it');
     }
 
     public function testFetchWorkClaimsTheTasksAndStartsTheJudging(): void
@@ -304,6 +347,290 @@ class JudgehostWorkflowTest extends BaseTestCase
         $judging = $this->judgingForTask((int)$tasks[0]['judgetaskid']);
         self::assertSame(Judging::RESULT_CORRECT, $judging->getResult());
         self::assertNotNull($judging->getEndtime());
+    }
+
+    public function testRunStoresTheDetailsOfEveryPass(): void
+    {
+        $tasks = $this->claimWorkForOneSubmission();
+        $judgeTaskId = (int)$tasks[0]['judgetaskid'];
+
+        $passes = [
+            [
+                'pass' => 1,
+                'runresult' => 'correct',
+                'runtime' => '0.01',
+                'start_time' => '1000.5',
+                'end_time' => '1001.5',
+                'output_run' => base64_encode('run 1'),
+                'output_diff' => base64_encode('diff 1'),
+                'metadata' => base64_encode('meta 1'),
+            ],
+            [
+                'pass' => 2,
+                'runresult' => 'wrong-answer',
+                'runtime' => '0.02',
+                'start_time' => '1002.5',
+                'end_time' => '1003.5',
+                'input' => base64_encode('input 2'),
+                'output_run' => base64_encode('run 2'),
+                'compare_metadata' => base64_encode('validator 2'),
+            ],
+        ];
+        $this->reportRun($judgeTaskId, 'wrong-answer', ['pass' => '2', 'passes' => json_encode($passes)]);
+        // The judgedaemon retries a report it got no answer to, which must not add the passes again.
+        $this->reportRun($judgeTaskId, 'wrong-answer', ['pass' => '2', 'passes' => json_encode($passes)]);
+
+        $run = $this->freshEm()->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
+        self::assertSame(2, $run->getPass());
+        self::assertSame('wrong-answer', $run->getRunresult());
+
+        $stored = $run->getPasses()->toArray();
+        self::assertCount(2, $stored);
+        self::assertContainsOnlyInstancesOf(JudgingRunPass::class, $stored);
+        self::assertSame([1, 2], array_map(static fn(JudgingRunPass $p) => $p->getPass(), $stored));
+        self::assertSame('correct', $stored[0]->getRunresult());
+        self::assertSame('run 1', $stored[0]->getOutput()->getOutputRun());
+        self::assertSame('meta 1', $stored[0]->getOutput()->getMetadata());
+        self::assertNull($stored[0]->getOutput()->getInput());
+        self::assertSame('wrong-answer', $stored[1]->getRunresult());
+        self::assertSame('input 2', $stored[1]->getOutput()->getInput());
+        self::assertSame('validator 2', $stored[1]->getOutput()->getValidatorMetadata());
+    }
+
+    public function testRunWithoutPassesStoresNone(): void
+    {
+        $tasks = $this->claimWorkForOneSubmission();
+        $judgeTaskId = (int)$tasks[0]['judgetaskid'];
+        $this->reportRun($judgeTaskId, 'correct');
+
+        $run = $this->freshEm()->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
+        self::assertCount(0, $run->getPasses());
+    }
+
+    public function testRunRejectsMalformedPasses(): void
+    {
+        $tasks = $this->claimWorkForOneSubmission();
+        $judgeTaskId = (int)$tasks[0]['judgetaskid'];
+
+        $this->reportRun($judgeTaskId, 'correct', ['passes' => json_encode(['pass' => 1])], 400);
+        $this->reportRun($judgeTaskId, 'correct', ['passes' => json_encode([['runresult' => 'correct']])], 400);
+        $this->reportRun($judgeTaskId, 'correct', ['passes' => json_encode([['pass' => 1], ['pass' => 1]])], 400);
+    }
+
+    /**
+     * How often a judging was logged as judged. This happens once, by the judgehost that
+     * records the verdict.
+     */
+    private function judgedCount(int $judgingId): int
+    {
+        return (int)$this->em()->getConnection()->fetchOne(
+            'SELECT COUNT(*) FROM auditlog WHERE datatype = :type AND dataid = :id AND action = :action',
+            ['type' => 'judging', 'id' => (string)$judgingId, 'action' => 'judged']
+        );
+    }
+
+    /**
+     * Claim work and report every run but the last, returning what is needed to report the
+     * last one. The test problem may have a single test case, so that the last run is the
+     * only one.
+     *
+     * @return array{int, int} judging id, judge task id of the run still to report
+     */
+    private function claimAndReportAllButTheLastRun(): array
+    {
+        $tasks = $this->claimWorkForOneSubmission();
+        $lastTaskId = (int)array_pop($tasks)['judgetaskid'];
+        foreach ($tasks as $task) {
+            $this->reportRun((int)$task['judgetaskid'], 'correct');
+        }
+
+        return [$this->judgingForTask($lastTaskId)->getJudgingid(), $lastTaskId];
+    }
+
+    public function testTheJudgehostThatCompletesAJudgingLogsItAsJudged(): void
+    {
+        [$judgingId, $lastTaskId] = $this->claimAndReportAllButTheLastRun();
+        $before = $this->judgedCount($judgingId);
+
+        $this->reportRun($lastTaskId, 'correct');
+
+        self::assertSame($before + 1, $this->judgedCount($judgingId));
+    }
+
+    /**
+     * Two judgehosts report the last runs of a judging at the same time: both see it complete
+     * and compute the same verdict. Playing the other judgehost, record the verdict just
+     * before this one claims it. The loser must not act on the change from "no result".
+     */
+    public function testALostVerdictClaimDoesNotLogTheJudgingAgain(): void
+    {
+        [$judgingId, $lastTaskId] = $this->claimAndReportAllButTheLastRun();
+        $before = $this->judgedCount($judgingId);
+
+        $conn = $this->em()->getConnection();
+        StatementHookMiddleware::once(
+            'UPDATE judging SET result = ',
+            static function () use ($conn, $judgingId): void {
+                $conn->executeStatement(
+                    'UPDATE judging SET result = :result WHERE judgingid = :id AND result IS NULL',
+                    ['result' => Judging::RESULT_CORRECT, 'id' => $judgingId]
+                );
+            }
+        );
+
+        $this->reportRun($lastTaskId, 'correct');
+
+        self::assertSame($before, $this->judgedCount($judgingId), 'only the winner acts on the verdict');
+        self::assertSame(Judging::RESULT_CORRECT, $this->freshEm()->getRepository(Judging::class)->find($judgingId)->getResult());
+    }
+
+    /**
+     * As above, for the end time: the other judgehost sets it between this one seeing it unset
+     * and writing it. The end time it set must stand.
+     */
+    public function testALostEndtimeClaimKeepsTheOtherEndtime(): void
+    {
+        [$judgingId, $lastTaskId] = $this->claimAndReportAllButTheLastRun();
+
+        $otherEndtime = '1000000000.000000000';
+        $conn = $this->em()->getConnection();
+        StatementHookMiddleware::once(
+            'UPDATE judging SET endtime = ',
+            static function () use ($conn, $judgingId, $otherEndtime): void {
+                $conn->executeStatement(
+                    'UPDATE judging SET endtime = :endtime WHERE judgingid = :id AND endtime IS NULL',
+                    ['endtime' => $otherEndtime, 'id' => $judgingId]
+                );
+            }
+        );
+
+        $this->reportRun($lastTaskId, 'correct');
+
+        $judging = $this->freshEm()->getRepository(Judging::class)->find($judgingId);
+        self::assertEquals((float)$otherEndtime, (float)$judging->getEndtime());
+        self::assertSame(Judging::RESULT_CORRECT, $judging->getResult());
+    }
+
+    /**
+     * An auto-applying rejudging is applied by the judgehost that reports its last run: the
+     * new judging becomes the valid one, the submission is released from the rejudging and
+     * the rejudging is finished. This is the only path that reaches the auto-apply branch of
+     * maybeUpdateActiveJudging().
+     */
+    public function testCompletingAnAutoApplyRejudgingAppliesIt(): void
+    {
+        [$originalJudgingId, $submissionId, $rejudgingId] = $this->rejudgeOneCorrectSubmission();
+
+        // Judge the submission again; the last run applies the rejudging.
+        $rejudgeTasks = $this->fetchWork();
+        self::assertNotEmpty($rejudgeTasks, 'the rejudging must produce new work');
+        self::assertNotSame('try_again', $rejudgeTasks[0]['type'] ?? null);
+        foreach ($rejudgeTasks as $task) {
+            $this->reportRun((int)$task['judgetaskid'], 'correct');
+        }
+
+        $em = $this->freshEm();
+
+        $newJudging = $this->judgingForTask((int)$rejudgeTasks[0]['judgetaskid']);
+        self::assertSame($rejudgingId, $newJudging->getRejudging()?->getRejudgingid());
+        self::assertTrue($newJudging->getValid(), 'the rejudged judging must become the valid one');
+        self::assertSame(Judging::RESULT_CORRECT, $newJudging->getResult(), 'the rejudged judging must record its verdict');
+        self::assertNotNull($newJudging->getEndtime(), 'the rejudged judging must be ended');
+
+        $superseded = $em->getRepository(Judging::class)->find($originalJudgingId);
+        self::assertFalse($superseded->getValid(), 'the original judging must be superseded');
+
+        $submission = $em->getRepository(Submission::class)->find($submissionId);
+        self::assertNull($submission->getRejudging(), 'applying releases the submission');
+
+        $rejudging = $em->getRepository(Rejudging::class)->find($rejudgingId);
+        self::assertNotNull($rejudging->getEndtime(), 'the rejudging must be finished');
+    }
+
+    /**
+     * Judge a submission, then start an auto-applying rejudging of it.
+     *
+     * @return array{int, int, int} original judging id, submission id, rejudging id
+     */
+    private function rejudgeOneCorrectSubmission(): array
+    {
+        $originalTasks = $this->claimWorkForOneSubmission();
+        foreach ($originalTasks as $task) {
+            $this->reportRun((int)$task['judgetaskid'], 'correct');
+        }
+
+        // Read the ids without hydrating entities: clearing the entity manager here would
+        // detach the security token's user, which createRejudging() records as the rejudging's
+        // start user and would then reject as an unknown entity.
+        $em = $this->em();
+        $originalJudgingId = (int)$em->getConnection()->fetchOne(
+            'SELECT judgingid FROM judging_run WHERE judgetaskid = ?',
+            [(int)$originalTasks[0]['judgetaskid']]
+        );
+        $submissionId = (int)$em->getConnection()->fetchOne(
+            'SELECT submitid FROM judging WHERE judgingid = ?',
+            [$originalJudgingId]
+        );
+
+        $originalJudging = $em->getRepository(Judging::class)->find($originalJudgingId);
+        $em->refresh($originalJudging);
+
+        // The security token still holds the judgehost user from the API calls above, which
+        // belongs to the container of a since-rebooted kernel. createRejudging() stores it as
+        // the rejudging's start user, and this entity manager would reject it as unknown.
+        // A rejudging without a start user is valid, so just drop the token.
+        self::getContainer()->get('security.token_storage')->setToken(null);
+
+        $skipped = [];
+        $rejudging = self::getContainer()->get(RejudgingService::class)->createRejudging(
+            'testing auto apply',
+            JudgeTask::PRIORITY_DEFAULT,
+            [$originalJudging],
+            true,
+            null,
+            0,
+            null,
+            $skipped
+        );
+        self::assertNotNull($rejudging, 'the rejudging should have been created');
+
+        return [$originalJudgingId, $submissionId, $rejudging->getRejudgingid()];
+    }
+
+    /**
+     * A compile error reported for a rejudged submission goes through
+     * updateJudgingAction's claim and then applies the rejudging, which is the only path that
+     * reaches both the guarded claim and the locked transaction behind it.
+     */
+    public function testCompileErrorOnARejudgingAppliesIt(): void
+    {
+        [$originalJudgingId, $submissionId, $rejudgingId] = $this->rejudgeOneCorrectSubmission();
+
+        $rejudgeTasks = $this->fetchWork();
+        self::assertNotEmpty($rejudgeTasks, 'the rejudging must produce new work');
+        self::assertNotSame('try_again', $rejudgeTasks[0]['type'] ?? null);
+
+        $this->updateJudging((int)$rejudgeTasks[0]['judgetaskid'], [
+            'compile_success' => 0,
+            'output_compile' => base64_encode('syntax error'),
+            'compile_metadata' => base64_encode('meta'),
+        ]);
+
+        $em = $this->freshEm();
+
+        $newJudging = $this->judgingForTask((int)$rejudgeTasks[0]['judgetaskid']);
+        self::assertSame(Judging::RESULT_COMPILER_ERROR, $newJudging->getResult());
+        self::assertSame('syntax error', $newJudging->getOutputCompile(true));
+        self::assertTrue($newJudging->getValid(), 'the rejudged judging must become the valid one');
+
+        $superseded = $em->getRepository(Judging::class)->find($originalJudgingId);
+        self::assertFalse($superseded->getValid(), 'the original judging must be superseded');
+
+        $submission = $em->getRepository(Submission::class)->find($submissionId);
+        self::assertNull($submission->getRejudging(), 'applying releases the submission');
+
+        $rejudging = $em->getRepository(Rejudging::class)->find($rejudgingId);
+        self::assertNotNull($rejudging->getEndtime(), 'the rejudging must be finished');
     }
 
     public function testInternalErrorDisablesTheJudgehostAndGivesBackWork(): void
@@ -405,6 +732,11 @@ class JudgehostWorkflowTest extends BaseTestCase
         self::assertTrue($version->getActive());
         self::assertSame('gcc 14.1.0', $version->getCompilerVersion());
         self::assertSame('gcc 14.1.0', $version->getRunnerVersion());
+
+        // Trust On First Use: the first reported versions become the language's canonical ones.
+        $language = $version->getLanguage();
+        self::assertSame('gcc 14.1.0', $language->getCompilerVersion());
+        self::assertSame('gcc 14.1.0', $language->getRunnerVersion());
     }
 
     public function testCheckVersionsSupersedesAPreviousVersion(): void

@@ -1,27 +1,9 @@
 name: Check autoconf
 on:
-  merge_group:
-  pull_request:
-    branches:
-      - main
-      - '[0-9]+.[0-9]+'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  workflow_call:
 
 jobs:
-  changes:
-    uses: ./.github/workflows/changes.yml
-    permissions:
-      contents: read
-      pull-requests: read
-
   mainstream:
-    needs: changes
-    # Skip only when change detection ran and said so: a skipped job counts
-    # as a passed required check, so if detection failed we must run.
-    if: ${{ !cancelled() && needs.changes.outputs.autoconf != 'false' }}
     strategy:
       matrix:
         version: [noble, rolling]
@@ -63,7 +45,7 @@ jobs:
 
   mainstream-gate:
     name: mainstream-gate
-    needs: [changes, mainstream]
+    needs: mainstream
     if: always()
     runs-on: ubuntu-latest
     steps:

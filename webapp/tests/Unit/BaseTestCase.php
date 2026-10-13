@@ -46,6 +46,7 @@ abstract class BaseTestCase extends WebTestCase
 
         // Create a client to communicate with the application.
         $this->client = self::createClient();
+        $this->client->disableReboot();
 
         // Log in if we have any roles.
         if (!empty($this->roles)) {
@@ -338,8 +339,8 @@ abstract class BaseTestCase extends WebTestCase
     protected function removeTestContainer(): void
     {
         self::ensureKernelShutdown();
-        $container = __DIR__ . '/../../var/cache/test/App_KernelTestDebugContainer.php';
-        if (file_exists($container)) {
+        // The container file name depends on whether the kernel runs in debug mode.
+        foreach (glob(__DIR__ . '/../../var/cache/test/App_KernelTest*Container.php') as $container) {
             unlink($container);
         }
         self::bootKernel();

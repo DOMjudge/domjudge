@@ -5,8 +5,10 @@ namespace App\Service;
 use App\Config\Loader\YamlConfigLoader;
 use App\DataTransferObject\ConfigurationSpecification;
 use App\Entity\Configuration;
+use App\Entity\Contest;
 use App\Entity\Executable;
 use App\Entity\Judging;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use BackedEnum;
 use Doctrine\ORM\EntityManagerInterface;
@@ -171,9 +173,9 @@ EOF;
      * Save the changes from the given request.
      *
      * @throws NonUniqueResultException
-     * @param array<string, Configuration>|null $options
-     * @param-out array<string, Configuration> $options
-     * @param array<string, string|array<int|string, string>> $dataToSet
+     * @param array<string, mixed> $dataToSet
+     * @param string[]|null $upgradedContests
+     * @param-out string[] $upgradedContests External IDs of contests whose events got upgraded
      * @return array<string,string> Error per item
      */
     public function saveChanges(
@@ -181,15 +183,17 @@ EOF;
         EventLogService $eventLog,
         DOMJudgeService $dj,
         bool $treatMissingBooleansAsFalse = true,
-        ?array &$options = null
+        ?array &$upgradedContests = null
     ): array {
+        $upgradedContests = [];
         $specs = $this->getConfigSpecification();
         foreach ($specs as &$spec) {
             $spec = $this->addOptions($spec);
         }
         unset($spec);
 
-        $options ??= $this->em->createQueryBuilder()
+        /** @var array<string, Configuration> $options */
+        $options = $this->em->createQueryBuilder()
             ->from(Configuration::class, 'c', 'c.name')
             ->select('c')
             ->getQuery()
@@ -197,6 +201,8 @@ EOF;
 
         $errors = [];
         $logUnverifiedJudgings = false;
+        $unblockJudgeTasks = false;
+        $upgradeEventsTo = null;
         foreach ($specs as $specName => $spec) {
             $oldValue = $spec->defaultValue;
             if (isset($options[$specName])) {
@@ -207,7 +213,6 @@ EOF;
                 $optionToSet = new Configuration();
                 $optionToSet->setName($specName);
                 $optionIsNew = true;
-                $options[$specName] = $optionToSet;
             }
             if (!array_key_exists($specName, $dataToSet)) {
                 if ($spec->type == 'bool' && $treatMissingBooleansAsFalse) {
@@ -240,38 +245,52 @@ EOF;
                 // since it will invalidate Doctrine entities.
                 $logUnverifiedJudgings = true;
             }
+
+            if ($specName === 'ccs_api_version') {
+                $oldVersion = CcsApiVersion::tryFrom((string)$oldValue);
+                $newVersion = CcsApiVersion::tryFrom((string)$val);
+                if ($newVersion?->getContentVersion() !== $oldVersion?->getContentVersion()) {
+                    $upgradeEventsTo = $newVersion?->getContentVersion();
+                }
+            }
             switch ($spec->type) {
                 case 'bool':
-                    $optionToSet->setValue((bool)$val);
+                    $newValue = (bool)$val;
                     break;
 
                 case 'int':
-                    $optionToSet->setValue((int)$val);
+                    $newValue = (int)$val;
                     break;
 
                 case 'string':
                 case 'enum':
-                    $optionToSet->setValue($val);
+                    $newValue = $val;
                     break;
 
                 case 'array_val':
-                    $result = [];
+                    $newValue = [];
                     foreach ($val as $data) {
                         if (!empty($data)) {
-                            $result[] = $data;
+                            $newValue[] = $data;
                         }
                     }
-                    $optionToSet->setValue($result);
                     break;
 
                 case 'array_keyval':
-                    $result = [];
+                    $newValue = [];
                     foreach ($val as $key => $data) {
-                        if (!empty($data)) {
-                            $result[$key] = $data;
+                        if (empty($data)) {
+                            continue;
                         }
+                        if ($spec->valueType === 'int') {
+                            $data = filter_var($data, FILTER_VALIDATE_INT);
+                            if ($data === false) {
+                                $errors[$specName] = 'All values must be integers.';
+                                continue;
+                            }
+                        }
+                        $newValue[$key] = $data;
                     }
-                    $optionToSet->setValue($result);
                     break;
 
                 default:
@@ -279,14 +298,16 @@ EOF;
                         "configuration option '%s' has unknown type '%s'",
                         [ $specName, $spec->type ]
                     );
+                    continue 2;
             }
-            if (!isset($errors[$specName])) {
-                if ($optionToSet->getValue() != $oldValue) {
-                    $valJson = Utils::jsonEncode($optionToSet->getValue());
-                    $dj->auditlog('configuration', $specName, 'updated', $valJson);
-                    if ($optionIsNew) {
-                        $this->em->persist($optionToSet);
-                    }
+            if (!isset($errors[$specName]) && $newValue != $oldValue) {
+                $optionToSet->setValue($newValue);
+                $dj->auditlog('configuration', $specName, 'updated', Utils::jsonEncode($newValue));
+                if ($optionIsNew) {
+                    $this->em->persist($optionToSet);
+                }
+                if ($specName === 'lazy_eval_results' && $newValue !== DOMJudgeService::EVAL_DEMAND) {
+                    $unblockJudgeTasks = true;
                 }
             }
         }
@@ -301,7 +322,38 @@ EOF;
 
         $this->dbConfigCache = null;
 
+        if ($unblockJudgeTasks && empty($errors)) {
+            $dj->unblockJudgeTasks();
+        }
+
+        if ($upgradeEventsTo !== null && empty($errors)) {
+            $upgradedContests = $this->upgradeEvents($eventLog, $upgradeEventsTo);
+        }
+
         return $errors;
+    }
+
+    /**
+     * @return string[] External IDs of the upgraded contests
+     */
+    private function upgradeEvents(EventLogService $eventLog, CcsApiVersion $version): array
+    {
+        $contests = $this->em->createQueryBuilder()
+            ->from(Contest::class, 'c')
+            ->select('c.cid, c.externalid')
+            ->getQuery()
+            ->getArrayResult();
+
+        $upgradedContests = [];
+        foreach ($contests as ['cid' => $contestId, 'externalid' => $externalId]) {
+            // Upgrading clears the entity manager, so get a fresh reference every time.
+            if ($eventLog->upgradeEvents($this->em->getReference(Contest::class, $contestId), $version) !== null) {
+                $upgradedContests[] = $externalId;
+                $this->logger->info("upgraded events of contest %s to version %s", [$externalId, $version->value]);
+            }
+        }
+
+        return $upgradedContests;
     }
 
     /**
@@ -383,11 +435,8 @@ EOF;
                 break;
             case 'results_prio':
             case 'results_remap':
-                $verdicts = $this->getVerdicts(['final']);
-                $item->keyOptions = ['' => ''];
-                foreach (array_keys($verdicts) as $verdict) {
-                    $item->keyOptions[$verdict] = $verdict;
-                }
+                $verdicts = array_keys($this->getVerdicts(['final']));
+                $item->keyOptions = array_combine($verdicts, $verdicts);
                 if ($item->name === 'results_remap') {
                     $item->valueOptions = $item->keyOptions;
                 }
