@@ -114,7 +114,7 @@ export LC_ALL=C
 if [ -n "$INTERACTIVE" ]; then
     echo "Entering chroot in '$CHROOTDIR'."
     echo "Only [$CONCAT_SUBDIRMOUNTS] will be mounted during judgement. See chroot-start-stop.sh for the current list."
-    chroot "$CHROOTDIR"
+    chroot "$CHROOTDIR" || echo "Shell: $SHELL not found in chroot, fallback to POSIX shell" && chroot "$CHROOTDIR" /bin/sh
 else
     chroot "$CHROOTDIR" /bin/sh -c "$*"
 fi
