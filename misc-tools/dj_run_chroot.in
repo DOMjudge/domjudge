@@ -106,6 +106,9 @@ mount -t proc proc "$CHROOTDIR/proc"
 mount -t sysfs sysfs "$CHROOTDIR/sys"
 
 # Required for some warning messages about writing to log files
+if [ ! -d "$CHROOTDIR/dev/pts" ]; then
+		mkdir "$CHROOTDIR/dev/pts"
+fi
 mount --bind /dev/pts "$CHROOTDIR/dev/pts"
 
 # Prevent perl locale warnings in the chroot:
