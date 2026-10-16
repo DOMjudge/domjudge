@@ -17,6 +17,7 @@ use App\Entity\Testcase;
 use App\Entity\TestcaseAggregationType;
 use App\Entity\TestcaseContent;
 use App\Entity\TestcaseGroup;
+use App\Utils\SubmissionsYaml;
 use App\Utils\Utils;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -770,6 +771,10 @@ readonly class ImportProblemService
             $submission_file_string = $zip->getFromName($submission_file);
             $submission_details = $submission_file_string===false ? [] :
                 Utils::jsonDecode($submission_file_string);
+            $submissionsYamlString = $zip->getFromName('submissions/submissions.yaml');
+            $submissionsYaml = new SubmissionsYaml(
+                $submissionsYamlString === false ? null : $submissionsYamlString, $messages
+            );
 
             $numJurySolutions = 0;
             $deferredSubmissions = [];
@@ -820,8 +825,13 @@ readonly class ImportProblemService
                         }
                     }
                 }
-                if (isset($submission_details[$path]['langid'])) {
-                    $languageToUse = $submission_details[$path]['langid'];
+                $submissionMeta = $submissionsYaml->forSubmission(
+                    $pathComponents[1] . '/' . $pathComponents[2], $messages
+                );
+                $configuredLanguage = $this->submissionsYamlOrJson('language', $submissionMeta['language'],
+                    $submission_details[$path]['langid'] ?? null, $path, $messages);
+                if ($configuredLanguage !== null) {
+                    $languageToUse = $configuredLanguage;
                 }
 
                 $tmpDir = $this->dj->getDomjudgeTmpDir();
@@ -829,7 +839,7 @@ readonly class ImportProblemService
                 if (empty($languageToUse)) {
                     $subs_with_unknown_lang[] = "'" . $path . "'";
                 } else {
-                    $expectedResult = SubmissionService::normalizeExpectedResult($pathComponents[1]);
+                    $directoryResult = SubmissionService::normalizeExpectedResult($pathComponents[1]);
                     $annotation     = null;
                     $totalSize      = 0;
                     $filesToSubmit  = [];
@@ -854,37 +864,22 @@ readonly class ImportProblemService
                         $totalSize       += filesize($tempFileName);
                         $tempFiles[]     = $tempFileName;
                     }
-                    // Parse annotation into expected results or expected score
-                    $expectedResults = null;
-                    $expectedScore = null;
-                    if ($annotation === false) {
-                        // Multiple annotations found - error already reported
-                        $expectedResults = [$expectedResult];
-                    } elseif ($annotation === null) {
-                        // No annotation found - use directory-based expected result
-                        $expectedResults = [$expectedResult];
-                    } else {
-                        $expectedScore = $annotation['score'];
-                        if ($annotation['results'] !== null) {
-                            $results = $annotation['results'];
-                            if (!in_array($expectedResult, $results)) {
-                                $messages['danger'][] = sprintf(
-                                    "Annotated result '%s' does not match directory for %s",
-                                    implode(', ', $results), $path
-                                );
-                            } elseif (!empty($expectedResult)) {
-                                if (count($results) > 1) {
-                                    $messages['warning'][] = sprintf(
-                                        "Annotated results '%s' restricted to match directory for %s",
-                                        implode(', ', $results), $path
-                                    );
-                                }
-                                $results = [$expectedResult];
-                            }
-                            $expectedResults = $results;
-                        } elseif ($expectedScore === null) {
-                            // This case should actually not happen if annotation is not null
-                            $expectedResults = [$expectedResult];
+                    $allowedResults = $submissionMeta['results'];
+                    if ($allowedResults === null &&
+                        array_key_exists(mb_strtolower($directoryResult), $this->config->getVerdicts())) {
+                        $allowedResults = [$directoryResult];
+                    }
+                    $expectedResults = self::expectedResults($path, $annotation, $allowedResults,
+                        $directoryResult, $messages);
+                    $expectedScore = is_array($annotation) ? $annotation['score'] : null;
+                    if ($submissionMeta['score'] !== null) {
+                        if ($expectedScore === null) {
+                            $expectedScore = $submissionMeta['score'];
+                        } elseif ((float)$expectedScore !== $submissionMeta['score']) {
+                            $messages['warning'][] = sprintf(
+                                "Annotated score '%s' differs from submissions.yaml score '%s' for %s, using the annotation",
+                                $expectedScore, $submissionMeta['score'], $path
+                            );
                         }
                     }
                     $jury_team_id = $this->authService->getUser()->getTeam()->getTeamid();
@@ -903,10 +898,8 @@ readonly class ImportProblemService
                             }
                         }
                     }
-                    $entry_point = '__auto__';
-                    if (isset($submission_details[$path]['entry_point'])) {
-                        $entry_point = $submission_details[$path]['entry_point'];
-                    }
+                    $entry_point = $this->submissionsYamlOrJson('entrypoint', $submissionMeta['entrypoint'],
+                        $submission_details[$path]['entry_point'] ?? null, $path, $messages) ?? '__auto__';
                     if ($totalSize <= $this->config->get('sourcesize_limit') * 1024) {
                         $contest        = $this->em->getRepository(Contest::class)->find($contest->getCid());
                         $team           = $this->em->getRepository(Team::class)->find($jury_team_id);
@@ -1064,6 +1057,63 @@ readonly class ImportProblemService
             'problem_id' => $probId,
             'messages'   => $allMessages,
         ];
+    }
+
+    /**
+     * @param array{results: string[]|null, score: string|null}|false|null $annotation
+     * @param string[]|null $allowedResults From submissions.yaml or the directory name, null if unrestricted
+     * @param array<string, string[]> $messages
+     * @return string[]|null
+     */
+    public static function expectedResults(
+        string $path,
+        array|false|null $annotation,
+        ?array $allowedResults,
+        string $directoryResult,
+        array &$messages
+    ): ?array {
+        if (!is_array($annotation)) {
+            return $allowedResults ?? [$directoryResult];
+        }
+        $results = $annotation['results'];
+        if ($results === null) {
+            return null;
+        }
+        $matching = array_values(array_intersect($results, $allowedResults ?? $results));
+        if (empty($matching)) {
+            $messages['danger'][] = sprintf(
+                "Annotated result '%s' does not match directory or submissions.yaml for %s",
+                implode(', ', $results), $path
+            );
+            return $results;
+        }
+        // Annotations may list every verdict a test case is permitted, which includes CORRECT.
+        if (!empty(array_diff($results, $matching, ['CORRECT']))) {
+            $messages['warning'][] = sprintf(
+                "Annotated results '%s' restricted to match directory or submissions.yaml for %s",
+                implode(', ', $results), $path
+            );
+        }
+        return $matching;
+    }
+
+    /**
+     * @param array<string, string[]> $messages
+     */
+    private function submissionsYamlOrJson(
+        string $key,
+        ?string $fromYaml,
+        ?string $fromJson,
+        string $path,
+        array &$messages
+    ): ?string {
+        if ($fromYaml !== null && $fromJson !== null && $fromYaml !== $fromJson) {
+            $messages['warning'][] = sprintf(
+                "Using %s '%s' from submissions.yaml instead of '%s' from submissions.json for %s",
+                $key, $fromYaml, $fromJson, $path
+            );
+        }
+        return $fromYaml ?? $fromJson;
     }
 
     /**
