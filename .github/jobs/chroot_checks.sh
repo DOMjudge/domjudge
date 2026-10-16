@@ -37,7 +37,7 @@ chown -R domjudge ./
 
 # configure, make and install (but skip documentation)
 sudo -u domjudge make configure
-sudo -u domjudge ./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge |& tee "$ARTIFACTS/configure.log"
+sudo -u domjudge ./configure --with-baseurl='http://localhost/domjudge/' --enable-judgehost-build --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge |& tee "$ARTIFACTS/configure.log"
 sudo -u domjudge make judgehost |& tee "$ARTIFACTS/make.log"
 make install-judgehost          |& tee -a "$ARTIFACTS/make.log"
 section_end setup

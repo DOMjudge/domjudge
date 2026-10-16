@@ -16,7 +16,7 @@ jobs:
       - name: Create the configure file
         run: make configure
       - name: Do the default configure
-        run: ./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge
+        run: ./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge --enable-judgehost-build
       - name: Prepare judgehost files
         run: make judgehost
       - name: Run the actual runpipe tests

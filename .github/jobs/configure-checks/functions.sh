@@ -86,7 +86,7 @@ repo-remove () {
 }
 
 compiler_c_only_assertions () {
-    run ./configure
+    run ./configure --enable-judgehost-build
     assert_failure
     assert_line "checking whether configure should try to set CXXFLAGS... yes"
     assert_line "checking whether configure should try to set LDFLAGS... yes"
@@ -111,7 +111,7 @@ compiler_c_only_assertions () {
 }
 
 compiler_assertions () {
-    run run_configure
+    run run_configure --enable-judgehost-build
     # Depending on where we run this we might runas wrong user or lack libraries
     # so we can't expect either success or failure.
     assert_line "checking baseurl... https://example.com/domjudge/"
