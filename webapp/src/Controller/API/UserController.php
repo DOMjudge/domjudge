@@ -37,10 +37,9 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 #[Rest\Route(path: '/users', defaults: ['_format' => 'json'])]
 #[OA\Tag(name: 'Users')]
-#[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
 #[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
 #[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
-#[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
+#[OA\Response(ref: '#/components/responses/NotFound', response: 404, description: 'User not found')]
 class UserController extends AbstractRestController
 {
     public function __construct(
@@ -83,6 +82,7 @@ class UserController extends AbstractRestController
             )
         )
     )]
+    #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
     #[OA\Response(response: 200, description: 'Returns a (currently meaningless) status message.')]
     public function addGroupsAction(Request $request): string
     {
@@ -125,6 +125,7 @@ class UserController extends AbstractRestController
             )
         )
     )]
+    #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
     #[OA\Response(response: 200, description: 'Returns a (currently meaningless) status message.')]
     public function addOrganizationsAction(Request $request): string
     {
@@ -169,6 +170,7 @@ class UserController extends AbstractRestController
             )
         )
     )]
+    #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
     #[OA\Response(response: 200, description: 'Returns a (currently meaningless) status message.')]
     public function addTeamsAction(Request $request): string
     {
@@ -225,6 +227,7 @@ class UserController extends AbstractRestController
         )
     )]
     #[OA\Response(ref: '#/components/responses/PostAccountResponse', response: 200)]
+    #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
     public function addAccountsAction(Request $request): string
     {
         /** @var UploadedFile|null $tsvFile */
@@ -392,14 +395,6 @@ class UserController extends AbstractRestController
         response: 400,
         description: 'Current password is incorrect or new password does not meet requirements'
     )]
-    #[OA\Response(
-        response: 403,
-        description: 'User is not permitted to change password or attempting to change another user\'s password'
-    )]
-    #[OA\Response(
-        response: 404,
-        description: 'User not found'
-    )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function changePasswordAction(
         #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
@@ -486,6 +481,7 @@ class UserController extends AbstractRestController
         );
     }
 
+    #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
     protected function saveUser(
         Request $request,
         User $user,
