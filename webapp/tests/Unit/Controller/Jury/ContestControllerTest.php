@@ -522,6 +522,7 @@ class ContestControllerTest extends JuryControllerTestCase
 
         self::assertSelectorExists('#contest_clearContestProblemset:not([disabled])');
         self::assertSelectorExists('label[for="contest_clearContestProblemset"]');
+        self::assertSelectorExists('a[target="_blank"][href$="/problemset"]');
 
         $crawler = $this->getCurrentCrawler();
         $form = $crawler->selectButton('Save')->form();
