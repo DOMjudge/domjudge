@@ -86,6 +86,11 @@ class DOMJudgeService implements ResetInterface
         $this->defaultRunExecutable = null;
     }
 
+    public function clearAssetFilesCache(): void
+    {
+        $this->assetFilesCache = [];
+    }
+
     final public const EVAL_DEFAULT = 0;
     final public const EVAL_LAZY = 1;
     final public const EVAL_FULL = 2;
@@ -673,7 +678,7 @@ class DOMJudgeService implements ResetInterface
     /**
      * Perform an internal API request to the given URL with the given data.
      *
-     * @param array<string, string[]> $queryOrPostData
+     * @param array<string, mixed> $queryOrPostData
      * @param UploadedFile[] $files
      *
      * @return mixed|null
