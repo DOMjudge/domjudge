@@ -20,3 +20,6 @@ distclean-l:
 
 clean-l:
 	-rm -f $(TARGETS) $(OBJECTS)
+
+maintainer-clean-l:
+	-rm -f reference.php
