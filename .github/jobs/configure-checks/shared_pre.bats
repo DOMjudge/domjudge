@@ -13,7 +13,7 @@ source .github/jobs/configure-checks/functions.sh
 @test "Show that 'make maintainer-clean' reverts to the git checkout keeping custom modifications/secrets" {
   expected_custom_files=$(echo ./etc/{dbpasswords,initial_admin_password,restapi,symfony_app}.secret ./webapp/.env.local | tr ' ' '\n')
   files_bare_git=$(find . -type f)
-  files_expected_git=$(echo "$files_bare_git" "$expected_custom_files" | sort)
+  files_expected_git=$(printf "%s\n%s\n" "$files_bare_git" "$expected_custom_files" | sort)
   run make maintainer-conf
   run make maintainer-install
   files_install=$(find . -type f | sort)
