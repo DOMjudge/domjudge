@@ -64,7 +64,7 @@ assert_success() {
 
 assert_failure() {
 	local -r expected_exit_code="$1"
-	if (( status != expected_exit_code )); then
+	if (( status != "$expected_exit_code" )); then
 		echo "Expected failure with exit code = $expected_exit_code, status=$status."
 		return 1
 	fi
