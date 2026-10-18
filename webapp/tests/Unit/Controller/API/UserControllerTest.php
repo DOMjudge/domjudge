@@ -84,6 +84,7 @@ class UserControllerTest extends AccountBaseTestCase
     public function testUpdateReplacesAllFields(): void
     {
         $user = $this->prepareSelfRegisteredUser();
+        $password = $user->getPassword();
 
         $data = [
             'id' => 'selfregister',
@@ -96,7 +97,8 @@ class UserControllerTest extends AccountBaseTestCase
         static::assertEquals('Test User', $response['name']);
 
         $user = $this->reloadUser($user);
-        static::assertEmpty($user->getPassword());
+        static::assertNotEmpty($password);
+        static::assertEquals($password, $user->getPassword(), 'PUT must not lock out an existing user');
         static::assertNull($user->getIpAddress());
         static::assertNull($user->getTeam());
         static::assertTrue($user->getEnabled());
