@@ -1140,6 +1140,7 @@ class JudgehostController extends AbstractFOSRestController
                 $lazyEval = $problemLazy;
             }
 
+            $claimed = true;
             if ($oldResult === null) {
                 // Claim the verdict with a guarded update. Judgehosts reporting the last runs of
                 // a judging at the same time all compute the same verdict from the runs they
@@ -1147,8 +1148,8 @@ class JudgehostController extends AbstractFOSRestController
                 $claimed = $this->em->getConnection()->executeStatement(
                     'UPDATE judging SET result = :result WHERE judgingid = :judgingid AND result IS NULL',
                     ['result' => $result, 'judgingid' => $judging->getJudgingid()]
-                );
-                if ($claimed === 0) {
+                ) > 0;
+                if (!$claimed) {
                     // Somebody else recorded a verdict in the meantime.
                     $this->em->refresh($judging);
                     $oldResult = $judging->getResult();
@@ -1156,12 +1157,17 @@ class JudgehostController extends AbstractFOSRestController
                         // Cancelled while we worked on it: throw away our work.
                         return false;
                     }
+                    // The verdict (and score) of the judgehost that got there first stands, it also
+                    // takes care of everything that follows from the change of the verdict.
+                    $result = $oldResult;
                 }
             }
 
-            $judging->setResult($result);
-            if ($problem->isScoringProblem()) {
-                $judging->setScore($score);
+            if ($claimed) {
+                $judging->setResult($result);
+                if ($problem->isScoringProblem()) {
+                    $judging->setScore($score);
+                }
             }
 
             $hasNullResults = false;
