@@ -107,6 +107,39 @@ class JudgementControllerTest extends BaseTestCase
         });
     }
 
+    public function testTeamSeesOnlyOwnWithoutRanking(): void
+    {
+        $this->loadFixtures([DemoPreFreezeContestFixture::class, AnotherVisibleTeamSubmissionFixture::class]);
+
+        $this->withChangedConfiguration('enable_ranking', false, function (): void {
+            $judgements = $this->getJudgementsPerTeam('demo');
+            static::assertSame(['exteam'], array_keys($judgements));
+        });
+    }
+
+    public function testResultFilterDoesNotRevealOtherTeams(): void
+    {
+        $this->loadFixtures([DemoPreFreezeContestFixture::class, AnotherVisibleTeamSubmissionFixture::class]);
+
+        $contestId = $this->getDemoContestId();
+        $submissions = $this->verifyApiJsonResponse('GET', "/contests/$contestId/submissions", 200, 'admin');
+        $teamPerSubmission = array_column($submissions, 'team_id', 'id');
+        $judgements = $this->verifyApiJsonResponse('GET', "/contests/$contestId/judgements", 200, 'admin');
+        $otherTeamResults = [];
+        foreach ($judgements as $judgement) {
+            if ($teamPerSubmission[$judgement['submission_id']] === 'othervisibleteam') {
+                $otherTeamResults[] = $judgement['judgement_type_id'];
+            }
+        }
+        static::assertNotEmpty($otherTeamResults);
+
+        foreach ($this->verifyApiJsonResponse(
+            'GET', "/contests/$contestId/judgements?result=" . $otherTeamResults[0], 200, 'demo'
+        ) as $judgement) {
+            static::assertSame('exteam', $teamPerSubmission[$judgement['submission_id']]);
+        }
+    }
+
     public function testTeamNeverSeesHiddenTeamJudgements(): void
     {
         $this->loadFixtures([DemoPreFreezeContestFixture::class]);

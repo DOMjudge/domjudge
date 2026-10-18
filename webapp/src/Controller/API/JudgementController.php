@@ -169,18 +169,22 @@ class JudgementController extends AbstractRestController implements QueryObjectT
             $this->ownTeamId = $currentTeam?->getTeamid();
             // Other teams' judgements are only shown with their simplified verdict, which only exists since
             // 2026-01, and not during the freeze, as the scoreboard does not show their results then either.
+            // Without ranking, contestants do not see anything of other teams.
             $showOtherTeams = $contest !== null
                 && $this->config->get('ccs_api_version') === CcsApiVersion::Format_2026_01
+                && $this->config->get('enable_ranking')
                 && !(new FreezeData($contest))->showFrozen();
-            if (!$showOtherTeams) {
+            // The result filter would reveal the detailed verdict of other teams, so it only applies to own judgements.
+            if (!$showOtherTeams || $request->query->has('result')) {
                 $queryBuilder
                     ->andWhere('s.team = :team')
                     ->setParameter('team', $currentTeam);
             } else {
                 // Same visibility as for the submissions themselves, see SubmissionController::getQueryBuilder().
+                // A team's own judgements are always visible, also if it is not in a scoring category.
                 $queryBuilder
                     ->join('s.team', 't')
-                    ->join('t.categories', 'cat', Join::WITH, 'BIT_AND(cat.types, :scoring) = :scoring')
+                    ->leftJoin('t.categories', 'cat', Join::WITH, 'BIT_AND(cat.types, :scoring) = :scoring')
                     ->setParameter('scoring', TeamCategory::TYPE_SCORING)
                     ->andWhere('(cat.visible = 1 AND t.enabled = 1) OR s.team = :team')
                     ->setParameter('team', $currentTeam);
