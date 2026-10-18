@@ -705,6 +705,8 @@ class JudgehostController extends AbstractFOSRestController
                 sprintf("Invalid passes for judgetask %d: not a list.", $judgeTaskId));
         }
 
+        $resultsRemap = $this->config->get('results_remap');
+
         $existing = [];
         foreach ($judgingRun->getPasses() as $judgingRunPass) {
             $existing[$judgingRunPass->getPass()] = $judgingRunPass;
@@ -734,9 +736,14 @@ class JudgehostController extends AbstractFOSRestController
                 $judgingRunPass->setOutput($output);
             }
 
+            $passResult = $data['runresult'] ?? null;
+            if ($passResult !== null && array_key_exists($passResult, $resultsRemap)) {
+                $passResult = $resultsRemap[$passResult];
+            }
+
             $decode = static fn(string $key): ?string => isset($data[$key]) ? base64_decode((string)$data[$key]) : null;
             $judgingRunPass
-                ->setRunresult($data['runresult'] ?? null)
+                ->setRunresult($passResult)
                 ->setRuntime(isset($data['runtime']) ? (float)$data['runtime'] : null)
                 ->setStartTime($data['start_time'] ?? null)
                 ->setEndtime($data['end_time'] ?? null);
