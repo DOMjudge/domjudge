@@ -61,11 +61,16 @@ class TeamController extends BaseController
 
         $contests                   = $this->dj->getCurrentContests();
         $currentContest             = $this->dj->getCurrentContest();
-        $open_to_all_teams_contests = $this->em->createQueryBuilder()
-            ->select('c.cid')
-            ->from(Contest::class, 'c')
-            ->andWhere('c.openToAllTeams = 1')
-            ->getQuery()->getSingleColumnResult();
+        // Contests open to all teams may also have a team or one of its
+        // categories linked explicitly, so key on contest ID to avoid double counting.
+        $open_to_all_teams_contests = array_fill_keys(
+            $this->em->createQueryBuilder()
+                ->select('c.cid')
+                ->from(Contest::class, 'c')
+                ->andWhere('c.openToAllTeams = 1')
+                ->getQuery()->getSingleColumnResult(),
+            true
+        );
         $teams_that_submitted   = $this->em->createQueryBuilder()
             ->select('t.teamid as teamid, count(t.teamid) as num_submitted')
             ->from(Team::class, 't')
@@ -199,9 +204,7 @@ class TeamController extends BaseController
             $teamdata['ip_address']['default']  = '-';
             $teamdata['ip_address']['cssclass'] = 'text-monospace small';
 
-            // Contests open to all teams may also have this team or one of its
-            // categories linked explicitly, so key on contest ID to avoid double counting.
-            $teamContests = array_fill_keys($open_to_all_teams_contests, true);
+            $teamContests = $open_to_all_teams_contests;
             foreach ($t->getContests() as $c) {
                 $teamContests[$c->getCid()] = true;
             }
