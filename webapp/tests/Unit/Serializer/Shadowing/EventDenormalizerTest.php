@@ -53,6 +53,19 @@ class EventDenormalizerTest extends KernelTestCase
         self::assertEquals($expectedData, $event->data);
     }
 
+    public function testDenormalize202111UsesOperation(): void
+    {
+        $serializer = $this->getcontainer()->get(SerializerInterface::class);
+        $event = $serializer->denormalize(
+            ['type' => 'languages', 'op' => 'delete', 'data' => ['id' => 'cpp']],
+            Event::class,
+            'json',
+            ['api_version' => '2021-11']
+        );
+        self::assertEquals(Operation::DELETE, $event->operation);
+        self::assertEquals('cpp', $event->objectId);
+    }
+
     public static function provideDenormalize(): Generator
     {
         foreach ([CcsApiVersion::Format_2023_06, CcsApiVersion::Format_2026_01] as $version) {

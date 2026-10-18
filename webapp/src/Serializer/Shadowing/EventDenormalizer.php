@@ -127,8 +127,8 @@ class EventDenormalizer implements DenormalizerInterface, SerializerAwareInterfa
     protected function getCcsApiVersion(array $event, array $context): CcsApiVersion
     {
         return match ($context['api_version']) {
-            '2020-03' => CcsApiVersion::Format_2020_03,
-            '2021-11', '2022-07', '2023-06' => CcsApiVersion::Format_2023_06,
+            '2020-03', '2021-11' => CcsApiVersion::Format_2020_03,
+            '2022-07', '2023-06' => CcsApiVersion::Format_2023_06,
             '2026-01' => CcsApiVersion::Format_2026_01,
             default => isset($event['op']) ? CcsApiVersion::Format_2020_03 : CcsApiVersion::Format_2026_01,
         };
