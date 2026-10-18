@@ -35,8 +35,18 @@ class ProfileController extends BaseController
     #[Route(path: '/password', name: 'profile_change_password')]
     public function changePasswordAction(Request $request): Response
     {
-        $isJury = $this->isGranted('ROLE_JURY') || $this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_BALLOON');
-        $redirectRoute = $isJury ? 'jury_index' : 'team_index';
+        // Users can have roles without access to the jury or team interface, e.g. API-only users.
+        if ($this->isGranted('ROLE_JURY') || $this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_BALLOON')
+            || $this->isGranted('ROLE_CLARIFICATION_RW')) {
+            $layout = 'jury';
+            $redirectRoute = 'jury_index';
+        } elseif ($this->isGranted('ROLE_TEAM')) {
+            $layout = 'team';
+            $redirectRoute = 'team_index';
+        } else {
+            $layout = 'public';
+            $redirectRoute = 'public_index';
+        }
 
         $user = $this->authService->getUser();
         if (!$user || !$this->passwordChangeService->canChangePassword($user)) {
@@ -62,7 +72,7 @@ class ProfileController extends BaseController
         return $this->render('profile/change_password.html.twig', [
             'form' => $form,
             'redirect_route' => $redirectRoute,
-            'is_jury' => $isJury,
+            'layout' => $layout,
         ]);
     }
 }
