@@ -55,11 +55,13 @@ judge-unit:
   - 'webapp/composer.json'
   - 'webapp/composer.lock'
 
-# Building the chroot needs the judgehost build, dj_make_chroot and the
-# bats assertion helper from submit/.
+# Building the chroot builds and installs the judgehost, runs
+# dj_make_chroot from that install, and needs the bats assertion helper
+# from submit/.
 chroot:
   - *ci
   - *build
+  - 'judge/**'
   - 'misc-tools/**'
   - 'submit/**'
 
@@ -74,11 +76,12 @@ autoconf:
   - 'webapp/composer.lock'
 
 # Everything phpstan.dist.neon analyses, and the configuration itself.
+# The job generates the files phpstan needs through the make targets, so
+# the build plumbing counts too.
 phpstan:
   - *ci
-  - 'etc/**'
+  - *build
   - 'judge/**'
-  - 'lib/**'
   - 'webapp/**'
   - 'phpstan*.neon'
 
