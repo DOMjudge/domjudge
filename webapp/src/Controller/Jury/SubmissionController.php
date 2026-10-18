@@ -14,6 +14,7 @@ use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
+use App\Entity\JudgingRunPass;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
@@ -497,6 +498,38 @@ class SubmissionController extends BaseController
                 ->getQuery()
                 ->getScalarResult();
 
+            // Load the passes of all runs at once, truncating their output in the database like
+            // the output of the runs themselves.
+            $passesPerRun = [];
+            if ($selectedJudging && $submission->getProblem()->isMultipassProblem()) {
+                $passQueryBuilder = $this->em->createQueryBuilder()
+                    ->from(JudgingRunPass::class, 'jrp')
+                    ->join('jrp.run', 'pjr')
+                    ->leftJoin('jrp.output', 'jrpo')
+                    ->select('IDENTITY(jrp.run) AS runid', 'jrp.pass', 'jrp.runresult', 'jrp.runtime')
+                    ->addSelect('jrpo.metadata', 'jrpo.validatorMetadata AS validator_metadata')
+                    ->andWhere('pjr.judging = :judging')
+                    ->setParameter('judging', $selectedJudging)
+                    ->orderBy('jrp.pass');
+                foreach (['input', 'output_run', 'output_diff', 'output_error', 'output_system'] as $field) {
+                    if ($outputDisplayLimit < 0) {
+                        $passQueryBuilder->addSelect(sprintf('jrpo.%1$s AS %1$s', $field));
+                    } else {
+                        $passQueryBuilder->addSelect(sprintf(
+                            'TRUNCATE(jrpo.%1$s, :outputDisplayLimit, :outputTruncateMessage) AS %1$s', $field
+                        ));
+                    }
+                }
+                if ($outputDisplayLimit >= 0) {
+                    $passQueryBuilder
+                        ->setParameter('outputDisplayLimit', $outputDisplayLimit)
+                        ->setParameter('outputTruncateMessage', $outputTruncateMessage);
+                }
+                foreach ($passQueryBuilder->getQuery()->getArrayResult() as $passRow) {
+                    $passesPerRun[$passRow['runid']][] = $passRow;
+                }
+            }
+
             $cnt = 0;
             if (count($judgingRunTestcaseHashesInOrder) !== count($runResults)) {
                 $sameTestcaseHashes = false;
@@ -540,25 +573,7 @@ class SubmissionController extends BaseController
                 $runResult['passes'] = [];
                 // Only multi-pass problems have passes, so don't query for them otherwise.
                 if ($firstJudgingRun && $submission->getProblem()->isMultipassProblem()) {
-                    $truncate = static fn(?string $text): ?string => $text !== null
-                        && $outputDisplayLimit >= 0 && strlen($text) > $outputDisplayLimit
-                        ? substr($text, 0, $outputDisplayLimit) . $outputTruncateMessage
-                        : $text;
-                    foreach ($firstJudgingRun->getPasses() as $judgingRunPass) {
-                        $passOutput = $judgingRunPass->getOutput();
-                        $runResult['passes'][] = [
-                            'pass' => $judgingRunPass->getPass(),
-                            'runresult' => $judgingRunPass->getRunresult(),
-                            'runtime' => $judgingRunPass->getRuntime(),
-                            'input' => $truncate($passOutput?->getInput()),
-                            'output_run' => $truncate($passOutput?->getOutputRun()),
-                            'output_diff' => $truncate($passOutput?->getOutputDiff()),
-                            'output_error' => $truncate($passOutput?->getOutputError()),
-                            'output_system' => $truncate($passOutput?->getOutputSystem()),
-                            'metadata' => $passOutput?->getMetadata(),
-                            'validator_metadata' => $passOutput?->getValidatorMetadata(),
-                        ];
-                    }
+                    $runResult['passes'] = $passesPerRun[$firstJudgingRun->getRunid()] ?? [];
                 }
                 $runsOutput[] = $runResult;
             }
