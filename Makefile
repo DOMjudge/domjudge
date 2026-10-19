@@ -270,7 +270,7 @@ ci-phpstan: ci-conf-phpstan
 # symlinks where necessary to let it work from the source tree.
 # This stuff is a hack!
 maintainer-install: inplace-install
-inplace-install: build domserver-create-dirs judgehost-create-dirs
+inplace-install: inplace-conf build domserver-create-dirs judgehost-create-dirs
 inplace-install-l:
 # Replace libjudgedir with symlink to prevent lots of symlinks:
 	-rmdir $(judgehost_libjudgedir)
