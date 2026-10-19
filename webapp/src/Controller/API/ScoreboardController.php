@@ -182,6 +182,13 @@ class ScoreboardController extends AbstractApiController
 
         $isScoring = $contest->getScoreboardType() === ScoreboardType::SCORE;
 
+        // Medals are awarded on the full scoreboard, like on the awards endpoint, so that they do not
+        // depend on the teams selected by the filters.
+        $medalScoreboard = $scoreboard;
+        if (!$strict && ($category || $country || $affiliation || $allTeams)) {
+            $medalScoreboard = $this->scoreboardService->getScoreboard($contest, !$public, null, true);
+        }
+
         foreach ($scoreboard->getScores() as $teamScore) {
             if ($teamScore->team->getSortorder() !== $sortorder) {
                 continue;
@@ -241,8 +248,8 @@ class ScoreboardController extends AbstractApiController
             usort($problems, fn(Problem $a, Problem $b) => $a->label <=> $b->label);
 
             $medal = null;
-            if ($strict === false) {
-                $medal = $this->awards->medalType($teamScore->team, $contest, $scoreboard);
+            if ($strict === false && $medalScoreboard !== null) {
+                $medal = $this->awards->medalType($teamScore->team, $contest, $medalScoreboard);
             }
 
             $row = new Row(
