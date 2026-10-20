@@ -396,7 +396,13 @@ class JuryMiscController extends BaseController
             } else {
                 // When switching between contests, rewrite the contest ID in the URL
                 // so the ContestCookieListener doesn't override the new selection.
-                $newReferer = preg_replace('#(/jury/contests/)[^/?\#/]+#', '$1' . $contestId, $referer);
+                // Use ${1}: with '$1', a contest ID starting with a digit would turn it into $12 etc.
+                $newReferer = preg_replace('#(/jury/contests/)[^/?\#/]+#', '${1}' . $contestId, $referer);
+                // A submission or clarification belongs to a single contest, so the same page in
+                // the new contest would be a 404: go to the list of the new contest instead.
+                $newReferer = preg_replace(
+                    '#(/jury/contests/[^/?\#]+/(?:submissions|clarifications))/(?!send(?:[?\#]|$))[^?\#]*(?:[?\#].*)?$#',
+                    '${1}', $newReferer);
                 $response = new RedirectResponse($newReferer);
             }
         } else {
