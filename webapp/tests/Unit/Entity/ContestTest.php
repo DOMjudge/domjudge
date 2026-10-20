@@ -4,6 +4,8 @@ namespace App\Tests\Unit\Entity;
 
 use App\DataTransferObject\ContestState;
 use App\Entity\Contest;
+use App\Entity\ContestProblem;
+use App\Entity\Problem;
 use App\Entity\RemovedInterval;
 use App\Utils\Utils;
 use Exception;
@@ -564,6 +566,40 @@ class ContestTest extends TestCase
             ['activatetimeString', 'Activate time is later than starttime'],
             $this->collectViolations($contest)
         );
+    }
+
+    /**
+     * @param list<string> $shortnames
+     */
+    #[DataProvider('provideProblemShortnames')]
+    public function testValidateChecksShortnamesAreUnique(array $shortnames, bool $expectDuplicate): void
+    {
+        $contest = $this->validContest();
+        foreach ($shortnames as $idx => $shortname) {
+            $contest->addProblem(
+                (new ContestProblem())
+                    ->setShortname($shortname)
+                    ->setProblem((new Problem())->setProbid($idx + 1))
+            );
+        }
+
+        $duplicates = array_filter(
+            $this->collectViolations($contest),
+            fn(array $violation) => $violation[1] === 'Each shortname should be unique within a contest'
+        );
+
+        self::assertSame($expectDuplicate, $duplicates !== []);
+    }
+
+    public static function provideProblemShortnames(): Generator
+    {
+        yield 'different' => [['A', 'B'], false];
+        yield 'equal' => [['A', 'A'], true];
+        yield 'equal ignoring case' => [['A', 'a'], true];
+        // Shortnames are strings, even when they look like numbers.
+        yield 'numeric-looking 4.1 and 4.10' => [['4.1', '4.10'], false];
+        yield 'numeric-looking 1e1 and 10' => [['1e1', '10'], false];
+        yield 'numeric-looking 1 and 01' => [['1', '01'], false];
     }
 
     private function validContest(): Contest
