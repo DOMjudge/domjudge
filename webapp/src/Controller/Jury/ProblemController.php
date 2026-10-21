@@ -1315,7 +1315,7 @@ class ProblemController extends BaseController
         }
         $this->em->flush();
 
-        $id = [$contestProblem->getExternalId(), $contestProblem->getExternalId()];
+        $id = [$contestProblem->getContest()->getExternalid(), $contestProblem->getExternalId()];
         $this->dj->auditlog('contest_problem', implode(', ', $id), $label, $value ? 'yes' : 'no');
         return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_problems'));
     }
