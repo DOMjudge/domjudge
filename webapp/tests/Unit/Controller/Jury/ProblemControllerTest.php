@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\AddProblemAttachmentFixture;
 use App\DataFixtures\Test\PreviousSubmissionTestcaseRunsFixture;
+use App\Entity\AuditLog;
 use App\Entity\Contest;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
@@ -355,5 +356,36 @@ class ProblemControllerTest extends JuryControllerTestCase
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         self::assertSelectorNotExists('body:contains("Hello World")');
         self::assertNull($em->getRepository(Problem::class)->findOneBy(['name' => 'Hello World']));
+    }
+
+    public function testToggleAllowSubmitWithLongExternalId(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => 'hello']);
+        // Twice this ID plus the separator does not fit in auditlog.dataid (64 characters).
+        $probId = 'hello-world-problem-with-long-external-id';
+        $problem->setExternalid($probId);
+        $em->flush();
+        $contestId = $contest->getExternalid();
+
+        $this->client->request('POST', "/jury/problems/$contestId/$probId/toggle/submit", ['value' => false]);
+        self::assertSame(302, $this->client->getResponse()->getStatusCode());
+
+        $em->clear();
+        $contestProblem = $em->getRepository(ContestProblem::class)->findByProblemAndContest($contestId, $probId);
+        self::assertFalse($contestProblem->getAllowSubmit());
+        /** @var AuditLog $auditLog */
+        $auditLog = $em->getRepository(AuditLog::class)->findOneBy(
+            ['datatype' => 'contest_problem', 'action' => 'set allow submit'],
+            ['logid' => 'DESC']
+        );
+        self::assertSame("$contestId, $probId", $auditLog->getDataid());
+        self::assertSame('no', $auditLog->getExtrainfo());
     }
 }
