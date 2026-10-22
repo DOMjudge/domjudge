@@ -111,12 +111,16 @@ maintainer-conf: .env.local
 
 maintainer-install: composer-dump-autoload-dev
 
-maintainer-clean-l:
+distclean-l:
 	-for d in cache log ; do \
 		for t in dev prod ; do \
 			rm -rf var/$$d/$$t ; \
 		done ; \
 	done
+
+maintainer-clean: distclean
+
+maintainer-clean-l:
 	-rm -rf vendor node_modules LICENSES.txt
 	-rm -rf .yarn/install-state.gz .yarnrc.yml
 
