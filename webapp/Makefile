@@ -118,6 +118,7 @@ maintainer-clean-l:
 		done ; \
 	done
 	-rm -rf vendor node_modules LICENSES.txt
+	-rm -rf .yarn/install-state.gz .yarnrc.yml
 
 .PHONY: composer-dump-autoload composer-dump-autoload-dev copy-bundle-assets \
         composer-dependencies composer-dependencies-dev node-dependencies
