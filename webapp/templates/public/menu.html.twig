@@ -25,6 +25,16 @@
                 {% endif %}
             </li>
 
+            {% if global_clarifications is defined and global_clarifications %}
+                <li class="nav-item">
+                    <a class="nav-link{% if current_route starts with 'public_clarifications' %} active{% endif %}"
+                       href="{{ path('public_clarifications') }}"
+                       id="menu_clarifications">
+                        <i class="fas fa-comments"></i> Announcements
+                    </a>
+                </li>
+            {% endif %}
+
             {% if is_granted('ROLE_TEAM') %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('team_index') }}">
