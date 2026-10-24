@@ -86,7 +86,17 @@ class ConfigController extends AbstractController
 
         $diffs = $request->query->get('diffs');
         if ($diffs !== null) {
-            $diffs = json_decode($diffs, true);
+            $diffs = json_decode((string)$diffs, true);
+            // The parameter is user controlled: only accept what compileDiffs() produces.
+            if (!is_array($diffs)) {
+                $diffs = null;
+            } else {
+                $diffs = array_filter(
+                    $diffs,
+                    static fn($change) => is_array($change) && array_key_exists('before', $change)
+                        && array_key_exists('after', $change)
+                );
+            }
         }
         return $this->render('jury/config.html.twig', [
             'form' => $form,
