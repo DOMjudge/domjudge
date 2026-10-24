@@ -38,6 +38,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
+use App\Entity\User;
 use App\Utils\Utils;
 use DateTime;
 use DateTimeZone;
@@ -118,6 +119,9 @@ class ExternalContestSourceService
      * memory use and GC pressure.
      */
     protected const SERVICES_RESET_INTERVAL = 100;
+
+    // Hidden category for teams we create for submissions from accounts without a team.
+    protected const SHADOW_TEAMS_CATEGORY_ID = 'shadowing';
 
     /**
      * This array will hold all events that are waiting on a dependent event
@@ -1552,10 +1556,24 @@ class ExternalContestSourceService
             return;
         }
 
-        $teamId = $data->teamId;
-        $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
-        if (!$team) {
-            $this->addPendingEvent('team', $teamId, $event, $data);
+        // Accounts are not imported, so an unknown account must not block the submission.
+        $user = $data->accountId === null
+            ? null
+            : $this->em->getRepository(User::class)->findOneBy(['externalid' => $data->accountId]);
+
+        if ($data->teamId !== null) {
+            $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $data->teamId]);
+            if (!$team) {
+                $this->addPendingEvent('team', $data->teamId, $event, $data);
+                return;
+            }
+        } elseif ($data->accountId !== null) {
+            // Our data model requires a team, so use the one of the account or a team just for it.
+            $team = $user?->getTeam() ?? $this->getShadowTeamForAccount($data->accountId);
+        } else {
+            $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_DEPENDENCY_MISSING, [
+                'dependencies' => [['type' => 'team', 'id' => '(neither team nor account provided)']],
+            ]);
             return;
         }
 
@@ -1753,7 +1771,7 @@ class ExternalContestSourceService
             $contest = $this->em->getRepository(Contest::class)->find($this->getSourceContestId());
             $submission = $this->submissionService->submitSolution(
                 team: $team,
-                user: null,
+                user: $user,
                 problem: $contestProblem,
                 contest: $contest,
                 language: $language,
@@ -2106,6 +2124,47 @@ class ExternalContestSourceService
             // Otherwise, judge with normal priority.
             default => 0,
         };
+    }
+
+    /**
+     * Get the team for submissions from an account that is not a team in the source, like a jury account.
+     */
+    protected function getShadowTeamForAccount(string $accountId): Team
+    {
+        $teamExternalId = 'shadow_team_' . $accountId;
+        $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamExternalId]);
+        if ($team) {
+            return $team;
+        }
+
+        $category = $this->em->getRepository(TeamCategory::class)
+            ->findOneBy(['externalid' => self::SHADOW_TEAMS_CATEGORY_ID]);
+        if (!$category) {
+            $category = (new TeamCategory())
+                ->setExternalid(self::SHADOW_TEAMS_CATEGORY_ID)
+                ->setName('Shadowing')
+                ->setTypes([TeamCategory::TYPE_SCORING])
+                // The highest possible sortorder, to put these teams below everyone else.
+                ->setSortorder(255)
+                ->setVisible(false);
+            $this->em->persist($category);
+        }
+
+        $team = (new Team())
+            ->setExternalid($teamExternalId)
+            ->setName($teamExternalId)
+            ->addCategory($category);
+        $this->em->persist($team);
+
+        $contest = $this->em->getRepository(Contest::class)->find($this->getSourceContestId());
+        if (!$contest->isOpenToAllTeams()) {
+            $contest->addTeam($team);
+        }
+        // No events are logged here, since that clears the entity manager halfway the submission import.
+        // The submission event adds the missing team and group events.
+        $this->em->flush();
+
+        return $team;
     }
 
     protected function processPendingEvents(string $type, string|int $id): void
