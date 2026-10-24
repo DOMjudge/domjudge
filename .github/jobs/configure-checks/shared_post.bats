@@ -436,3 +436,135 @@ source .github/jobs/configure-checks/functions.sh
   run make judgehost
   assert_failure 2
 }
+
+@test "Show that 'make maintainer-clean' reverts to the git checkout keeping custom modifications/secrets" {
+  if [ "$distro_id" = "ID=fedora" ]; then
+      # Fails as libraries are not found
+      skip
+  fi
+  # Start as clean as possible
+  run make maintainer-clean distclean clean
+  files_cleaned=$(find . -type f | sort)
+  run yarn-install
+  run repo-install acl autoconf automake bats composer debootstrap fontconfig g++ gcc glibc-static latexmk libcgroup-dev libstdc++-static lsof make mariadb-server php php-bcmath php-cli php-curl php-fpm php-gd php-intl php-json php-mbstring php-mysql php-xml php-zip pkg-config procps pv python3 python3-sphinx python3-sphinx-rtd-theme python3-yaml tex-gyre texlive-latex-extra texlive-latex-recommended unzip zip
+  assert_success
+  expected_custom_files=$(echo ./etc/{dbpasswords,initial_admin_password,restapi,symfony_app}.secret ./webapp/.env.local | tr ' ' '\n')
+  files_bare_git=$(find . -type f)
+  files_expected_git=$(printf "%s\n%s\n" "$files_bare_git" "$expected_custom_files" | sort)
+  run make maintainer-conf CONFIGURE_FLAGS="--with-domjudge-user=$u"
+  assert_success
+  run make maintainer-install
+  assert_success
+  files_install=$(find . -type f | sort)
+  refute_equal "$files_install" "$files_expected_git"
+  refute_equal "$files_install" "$files_bare_git"
+  run make maintainer-clean
+  assert_success
+  files_after=$(find . -type f | sort)
+  refute_equal "$files_install" "$files_after"
+  assert_equal "$files_expected_git" "$files_after"
+  # Remove even the customizations for next tests
+  rm -f $expected_custom_files
+
+  run make dist
+  assert_success
+  run run_configure
+  assert_success
+  run make domserver judgehost docs
+  assert_success
+  files_install=$(find . -type f | sort)
+  refute_equal "$files_bare_git" "$files_install"
+  run make maintainer-clean
+  assert_success
+  files_after=$(find . -type f | sort)
+  expected_custom_files=$(echo ./etc/{dbpasswords,initial_admin_password,restapi,symfony_app}.secret | tr ' ' '\n')
+  files_expected_git=$(printf "%s\n%s\n" "$files_bare_git" "$expected_custom_files" | sort)
+  assert_equal "$files_expected_git" "$files_after"
+  # Remove for next tests
+  rm -f $expected_custom_files
+
+  run make inplace-conf CONFIGURE_FLAGS="--with-domjudge-user=$u"
+  assert_success
+  run make inplace-install
+  assert_success
+  files_install=$(find . -type f | sort)
+  refute_equal "$files_bare_git" "$files_install"
+  run make maintainer-clean
+  files_after=$(find . -type f | sort)
+  assert_equal "$files_expected_git" "$files_after"
+  # Remove for next tests
+  rm -f $expected_custom_files
+}
+
+@test "'make distclean' cleans the state to state of 'make dist'" {
+  if [ "$distro_id" = "ID=fedora" ]; then
+      # Fails as libraries are not found
+      skip
+  fi
+  # Start clean
+  run make maintainer-clean distclean clean
+  yarn-install
+  repo-install acl autoconf automake bats composer debootstrap fontconfig g++ gcc glibc-static latexmk libcgroup-dev libstdc++-static lsof make mariadb-server php php-bcmath php-cli php-curl php-fpm php-gd php-intl php-json php-mbstring php-mysql php-xml php-zip pkg-config procps pv python3 python3-sphinx python3-sphinx-rtd-theme python3-yaml tex-gyre texlive-latex-extra texlive-latex-recommended unzip zip
+  assert_success
+  run make dist
+  assert_success
+  files_dist=$(find . -type f | sort)
+  run run_configure
+  assert_success
+  run make domserver judgehost docs
+  files_install=$(find . -type f | sort)
+  refute_equal "$files_dist" "$files_install"
+  run make distclean
+  assert_success
+  files_after=$(find . -type f | sort)
+<<<<<<< HEAD
+=======
+  run echo "Left: $files_dist Right: $files_after"
+  assert_failure
+>>>>>>> be8baa7ed (Add simple tests for {,dist,maintainer-}clean cleanup)
+  assert_equal "$files_dist" "$files_after"
+
+  run make inplace-conf CONFIGURE_FLAGS="--with-domjudge-user=$u"
+  assert_success
+  run make inplace-install
+  files_install=$(find . -type f | sort)
+  refute_equal "$files_dist" "$files_install"
+  run make distclean
+  assert_success
+  files_after=$(find . -type f | sort)
+  assert_equal "$files_dist" "$files_after"
+  # Remove for next tests
+  make maintainer-clean
+  rm -f $expected_custom_files
+}
+
+@test "'make clean' cleans the state to state after 'configure' but leaving templated files" {
+  # Don't expect the make clean to work for inplace installations
+  if [ "$distro_id" = "ID=fedora" ]; then
+      # Fails as libraries are not found
+      skip
+  fi
+  # Start clean
+  run make maintainer-clean distclean clean
+  yarn-install
+  repo-install acl autoconf automake bats composer debootstrap fontconfig g++ gcc glibc-static latexmk libcgroup-dev libstdc++-static lsof make mariadb-server php php-bcmath php-cli php-curl php-fpm php-gd php-intl php-json php-mbstring php-mysql php-xml php-zip pkg-config procps pv python3 python3-sphinx python3-sphinx-rtd-theme python3-yaml tex-gyre texlive-latex-extra texlive-latex-recommended unzip zip
+  assert_success
+  expected_custom_files=$(echo ./etc/{dbpasswords,initial_admin_password,restapi,symfony_app}.secret ./webapp/.env.local | tr ' ' '\n')
+  files_templates=$(find . -type f -name "*.in" | sort | grep -v "doc/examples\|example_problems\|example_scoring_problems" | sed 's/\.in$//')
+  run make dist
+  assert_success
+  run run_configure
+  files_configure=$(find . -type f | sort)
+  run make domserver judgehost docs
+  files_install=$(find . -type f | sort)
+  refute_equal "$files_configure" "$files_install"
+  run make clean
+  assert_success
+  files_after=$(find . -type f | sort)
+  files_expected_after=$(printf "%s\n%s\n%s\n" "$files_after" "$files_templates" "$expected_custom_files" | sort | uniq)
+  files_expected_configure=$(printf "%s\n%s\n%s\n" "$files_configure" "$files_templates" "$expected_custom_files"| sort | uniq)
+  assert_equal "$files_expected_configure" "$files_expected_after"
+  # Remove for next tests
+  make maintainer-clean
+  rm -f $expected_custom_files
+}
