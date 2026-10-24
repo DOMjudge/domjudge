@@ -59,13 +59,18 @@ class TeamController extends BaseController
             ->addOrderBy('t.name', 'ASC')
             ->getQuery()->getResult();
 
-        $contests                       = $this->dj->getCurrentContests();
-        $currentContest                 = $this->dj->getCurrentContest();
-        $num_open_to_all_teams_contests = $this->em->createQueryBuilder()
-            ->select('count(c.cid) as num_contests')
-            ->from(Contest::class, 'c')
-            ->andWhere('c.openToAllTeams = 1')
-            ->getQuery()->getSingleResult()['num_contests'];
+        $contests                   = $this->dj->getCurrentContests();
+        $currentContest             = $this->dj->getCurrentContest();
+        // Contests open to all teams may also have a team or one of its
+        // categories linked explicitly, so key on contest ID to avoid double counting.
+        $open_to_all_teams_contests = array_fill_keys(
+            $this->em->createQueryBuilder()
+                ->select('c.cid')
+                ->from(Contest::class, 'c')
+                ->andWhere('c.openToAllTeams = 1')
+                ->getQuery()->getSingleColumnResult(),
+            true
+        );
         $teams_that_submitted   = $this->em->createQueryBuilder()
             ->select('t.teamid as teamid, count(t.teamid) as num_submitted')
             ->from(Team::class, 't')
@@ -199,7 +204,7 @@ class TeamController extends BaseController
             $teamdata['ip_address']['default']  = '-';
             $teamdata['ip_address']['cssclass'] = 'text-monospace small';
 
-            $teamContests = [];
+            $teamContests = $open_to_all_teams_contests;
             foreach ($t->getContests() as $c) {
                 $teamContests[$c->getCid()] = true;
             }
@@ -210,7 +215,7 @@ class TeamController extends BaseController
             }
             // Merge in the rest of the data.
             $teamdata = array_merge($teamdata, [
-                'num_contests' => ['value' => count($teamContests) + $num_open_to_all_teams_contests],
+                'num_contests' => ['value' => count($teamContests)],
                 'status' => [
                     'value' => $status,
                     'title' => $statustitle,
