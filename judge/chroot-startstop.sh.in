@@ -33,7 +33,7 @@ set -E # properly handle trap in functions and subshells
 trap 'echo "Error: command \"$BASH_COMMAND\" on line $LINENO failed with exit code $?" >&2' ERR
 
 # Chroot subdirs needed: (optional lib64 only needed for amd64 architecture)
-SUBDIRMOUNTS="etc usr lib bin"
+SUBDIRMOUNTS="etc usr lib bin $DJ_SUBDIRMOUNTS"
 if [ "$(uname -m)" = "x86_64" ]; then
 	SUBDIRMOUNTS="$SUBDIRMOUNTS lib64"
 fi
