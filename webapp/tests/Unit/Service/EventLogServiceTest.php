@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Service;
 
+use App\Service\ApiResourceSerializer;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -10,7 +11,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\RouterInterface;
 
 class EventLogServiceTest extends TestCase
 {
@@ -27,6 +31,10 @@ class EventLogServiceTest extends TestCase
             $this->createMock(ConfigurationService::class),
             $this->createMock(EntityManagerInterface::class),
             $this->createMock(LoggerInterface::class),
+            $this->createMock(ApiResourceSerializer::class),
+            $this->createMock(RouterInterface::class),
+            $this->createMock(RequestStack::class),
+            $this->createMock(ContainerInterface::class),
         );
 
         self::assertSame($expected, $eventLogService->upgradeEventContent($endpointType, $data, $from, $to));

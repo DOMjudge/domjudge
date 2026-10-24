@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\Entity\Contest;
+use App\Service\ApiResourceSerializer;
 use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -15,13 +16,22 @@ use FOS\RestBundle\Controller\AbstractFOSRestController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractApiController extends AbstractFOSRestController
 {
-    final public const GROUP_DEFAULT = 'Default';
-    final public const GROUP_NONSTRICT = 'Nonstrict';
-    final public const GROUP_RESTRICTED = 'Restricted';
-    final public const GROUP_RESTRICTED_NONSTRICT = 'RestrictedNonstrict';
+    final public const GROUP_DEFAULT = ApiResourceSerializer::GROUP_DEFAULT;
+    final public const GROUP_NONSTRICT = ApiResourceSerializer::GROUP_NONSTRICT;
+    final public const GROUP_RESTRICTED = ApiResourceSerializer::GROUP_RESTRICTED;
+    final public const GROUP_RESTRICTED_NONSTRICT = ApiResourceSerializer::GROUP_RESTRICTED_NONSTRICT;
+
+    protected ApiResourceSerializer $apiResourceSerializer;
+
+    #[Required]
+    public function setApiResourceSerializer(ApiResourceSerializer $apiResourceSerializer): void
+    {
+        $this->apiResourceSerializer = $apiResourceSerializer;
+    }
 
     public function __construct(
         protected readonly AuthorizedUserService $authService,

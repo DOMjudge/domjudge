@@ -1091,8 +1091,7 @@ class SubmissionService
                         $problem->getProbid(), $contest->getCid()));
         }
 
-        // If this method is called multiple times, we loose the user from Doctrine because of the internal API call
-        // to add the submission to the event table. To fix this, reload the user if this is the case.
+        // If the user entity is not currently managed in Doctrine's identity map, reload it.
         if ($user && !$this->em->contains($user)) {
             $user = $this->em->getRepository(User::class)->find($user->getUserid());
         }
@@ -1276,19 +1275,6 @@ class SubmissionService
             $this->eventLogService->log('submission', $submission->getSubmitid(),
                                         EventLogService::ACTION_CREATE, $contest->getCid());
         });
-
-        // Reload submission, contest, team and contestproblem for now, as
-        // EventLogService::log will clear the Doctrine entity manager.
-        /** @var Contest $contest */
-        /** @var Team $team */
-        /** @var ContestProblem $problem */
-        $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
-        $contest    = $this->em->getRepository(Contest::class)->find($contest->getCid());
-        $team       = $this->em->getRepository(Team::class)->find($team->getTeamid());
-        $problem    = $this->em->getRepository(ContestProblem::class)->find([
-            'problem' => $problem->getProblem(),
-            'contest' => $problem->getContest(),
-        ]);
 
         $this->scoreboardService->calculateScoreRow($contest, $team, $problem->getProblem());
 
