@@ -45,6 +45,8 @@ if [ "$version" = "all" ]; then
     ./configure \
       --with-baseurl='http://localhost/domjudge/' \
       --with-domjudge-user=domjudge \
+      --enable-domserver-build \
+      --enable-judgehost-build \
       --with-judgehost-chrootdir=/home/runner/work/domjudge-packaging/domjudge-packaging/docker-gitlabci/domjudge-main/chroot | tee "$ARTIFACTS"/configure.txt
     make build-scripts domserver judgehost docs
     make install-domserver install-judgehost install-docs
@@ -53,6 +55,7 @@ else
       --with-baseurl='https://localhost/domjudge/' \
       --with-domjudge-user=root \
       --enable-doc-build=no \
+      --enable-domserver-build \
       --enable-judgehost-build=no | tee "$ARTIFACTS"/configure.txt
     make domserver
     make install-domserver

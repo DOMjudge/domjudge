@@ -15,7 +15,7 @@ DOMserver
  * Make sure PHP works for the web server and command line scripts.
 
  * Extract the `source tarball <https://www.domjudge.org/download>`_ and run
-   ``./configure --with-baseurl=<url> && make domserver``.
+   ``./configure --enable-domserver-build --with-baseurl=<url> && make domserver``.
  * Run ``sudo make install-domserver`` to install the system.
 
  * Install the MySQL database using e.g.
@@ -53,7 +53,7 @@ DOMserver
 Judgehosts
 ----------
  * Extract the `source tarball <https://www.domjudge.org/download>`_ and run
-   ``./configure --with-baseurl=<url> && make judgehost``.
+   ``./configure --enable-judgehost-build --with-baseurl=<url> && make judgehost``.
  * Run ``sudo make install-judgehost`` to install the system.
 
  * Create one or more unprivileged users:
