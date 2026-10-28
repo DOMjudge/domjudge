@@ -76,6 +76,12 @@ yarn-install () {
     fi
 }
 
+repo-optional-install () {
+    if ! dpkg-query --show $1; then
+        repo-install $2
+    fi
+}
+
 repo-install () {
     args=$(translate $@)
     if [ "$distro_id" = "ID=debian" ] && [[ "$args" == *"composer"* ]]; then

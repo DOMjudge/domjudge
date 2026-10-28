@@ -446,7 +446,8 @@ source .github/jobs/configure-checks/functions.sh
   run make maintainer-clean distclean clean
   files_cleaned=$(find . -type f | sort)
   run yarn-install
-  run repo-install acl autoconf automake bats composer debootstrap fontconfig g++ gcc glibc-static latexmk libcgroup-dev libstdc++-static lsof make mariadb-server php php-bcmath php-cli php-curl php-fpm php-gd php-intl php-json php-mbstring php-mysql php-xml php-zip pkg-config procps pv python3 python3-sphinx python3-sphinx-rtd-theme python3-yaml tex-gyre texlive-latex-extra texlive-latex-recommended unzip zip
+  run repo-optional-install clang g++
+  #run repo-install acl autoconf automake bats composer debootstrap fontconfig glibc-static latexmk libcgroup-dev libstdc++-static lsof make mariadb-server php php-bcmath php-cli php-curl php-fpm php-gd php-intl php-json php-mbstring php-mysql php-xml php-zip pkg-config procps pv python3 python3-sphinx python3-sphinx-rtd-theme python3-yaml tex-gyre texlive-latex-extra texlive-latex-recommended unzip zip
   assert_success
   expected_custom_files=$(echo ./etc/{dbpasswords,initial_admin_password,restapi,symfony_app}.secret ./webapp/.env.local | tr ' ' '\n')
   files_bare_git=$(find . -type f)
@@ -504,7 +505,7 @@ source .github/jobs/configure-checks/functions.sh
   # Start clean
   run make maintainer-clean distclean clean
   yarn-install
-  repo-install acl autoconf automake bats composer debootstrap fontconfig g++ gcc glibc-static latexmk libcgroup-dev libstdc++-static lsof make mariadb-server php php-bcmath php-cli php-curl php-fpm php-gd php-intl php-json php-mbstring php-mysql php-xml php-zip pkg-config procps pv python3 python3-sphinx python3-sphinx-rtd-theme python3-yaml tex-gyre texlive-latex-extra texlive-latex-recommended unzip zip
+  # Assume packages are installed by test above
   assert_success
   run make dist
   assert_success
@@ -541,9 +542,7 @@ source .github/jobs/configure-checks/functions.sh
   fi
   # Start clean
   run make maintainer-clean distclean clean
-  yarn-install
-  repo-install acl autoconf automake bats composer debootstrap fontconfig g++ gcc glibc-static latexmk libcgroup-dev libstdc++-static lsof make mariadb-server php php-bcmath php-cli php-curl php-fpm php-gd php-intl php-json php-mbstring php-mysql php-xml php-zip pkg-config procps pv python3 python3-sphinx python3-sphinx-rtd-theme python3-yaml tex-gyre texlive-latex-extra texlive-latex-recommended unzip zip
-  assert_success
+  # Assume packages are installed by test above
   expected_custom_files=$(echo ./etc/{dbpasswords,initial_admin_password,restapi,symfony_app}.secret ./webapp/.env.local | tr ' ' '\n')
   files_templates=$(find . -type f -name "*.in" | sort | grep -v "doc/examples\|example_problems\|example_scoring_problems" | sed 's/\.in$//')
   run make dist
