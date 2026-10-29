@@ -5,13 +5,9 @@ load 'assert'
 source .github/jobs/configure-checks/functions.sh
 
 @test "Check for missing webserver group" {
-    if [ "$distro_id" != "ID=fedora" ]; then
-        # Debian/Ubuntu start with a www-data group
-        skip
-    fi
     repo-install gcc g++
     repo-remove httpd nginx
-    for www_group in nginx apache; do
+    for www_group in nginx apache www-data; do
         userdel ${www_group} || true
         groupdel ${www_group} || true
     done
@@ -38,6 +34,11 @@ source .github/jobs/configure-checks/functions.sh
 
 @test "/opt configured" {
    setup
+   run repo-optional-install nginx "apache2 nginx"
+   assert_line "Worked"
+   run groupadd www-data
+   run cat /etc/group
+   assert_line "Worked"
    run run_configure
    assert_line " * prefix..............: /opt/domjudge"
    assert_line " * documentation.......: /opt/domjudge/doc"
