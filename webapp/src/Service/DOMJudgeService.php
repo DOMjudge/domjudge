@@ -20,6 +20,7 @@ use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
 use App\Entity\QueueTask;
+use App\Entity\ScoreCache;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\SubmissionSource;
@@ -1142,6 +1143,7 @@ class DOMJudgeService implements ResetInterface
         $problems = [];
         $samples = [];
         $clars = [];
+        $problemStatuses = [];
         if ($contest && ($forJury || $contest->getFreezeData()->started())) {
             $problems = $this->em->createQueryBuilder()
                 ->from(ContestProblem::class, 'cp')
@@ -1155,6 +1157,26 @@ class DOMJudgeService implements ResetInterface
                 ->addOrderBy('cp.shortname')
                 ->getQuery()
                 ->getResult();
+
+            if ($teamId) {
+                $scoreCache = $this->em->createQueryBuilder()
+                    ->from(ScoreCache::class, 's')
+                    ->select('s')
+                    ->andWhere('s.contest = :contest')
+                    ->andWhere('s.team = :team')
+                    ->setParameter('contest', $contest)
+                    ->setParameter('team', $this->getTeam($teamId))
+                    ->getQuery()
+                    ->getResult();
+
+                foreach ($scoreCache as $scoreRow) {
+                    $problemStatuses[$scoreRow->getProblem()->getProbid()] = [
+                        'is_correct' => $scoreRow->getIsCorrectRestricted(),
+                        'submissions' => $scoreRow->getSubmissionsRestricted(),
+                        'solvetime' => $scoreRow->getSolvetimeRestricted(),
+                    ];
+                }
+            }
 
             $samplesData = $this->em->createQueryBuilder()
                 ->from(ContestProblem::class, 'cp')
@@ -1202,6 +1224,7 @@ class DOMJudgeService implements ResetInterface
             'timeFactorDiffers' => $timeFactorDiffers,
             'clarifications' => $clars,
             'team' => $teamId ? $this->em->getRepository(Team::class)->find($teamId) : null,
+            'problemStatuses' => $problemStatuses,
         ];
 
         if ($contest && $this->config->get('show_public_stats')) {
