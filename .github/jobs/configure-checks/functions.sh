@@ -62,22 +62,6 @@ composer-install () {
     chmod +x /usr/local/bin/composer
 }
 
-repo-optional-install () {
-    if [ "$cmd" = "dnf" ]; then
-        if ! rpm -q $1; then
-            repo-install $2
-        fi
-    else
-        set -x
-            if ! dpkg-query --show $1; then
-                repo-remove $2
-                repo-install $2
-                cat /etc/group
-            fi
-        set +x
-    fi
-}
-
 repo-install () {
     args=$(translate $@)
     if [ "$distro_id" = "ID=debian" ] && [[ "$args" == *"composer"* ]]; then
@@ -86,7 +70,7 @@ repo-install () {
             composer-install
         fi
     fi
-    ${cmd} install $args -y 2>&1 #>/dev/null
+    ${cmd} install $args -y >/dev/null
 }
 
 repo-remove () {

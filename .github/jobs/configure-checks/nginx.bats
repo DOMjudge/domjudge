@@ -5,8 +5,12 @@ load 'assert'
 source .github/jobs/configure-checks/functions.sh
 
 @test "Check for newly added webserver group (Nginx)" {
+    if [ "$distro_id" != "ID=fedora" ]; then
+        # Debian/Ubuntu start with a www-data group
+        skip
+    fi
     repo-remove httpd nginx
-    for www_group in nginx apache www-data; do
+    for www_group in nginx apache; do
         userdel ${www_group} || true
         groupdel ${www_group} || true
     done
