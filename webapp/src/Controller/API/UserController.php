@@ -330,7 +330,8 @@ class UserController extends AbstractRestController
     /**
      * Replace an existing user or create one with the given ID.
      *
-     * Fields that are not provided are cleared, including the password.
+     * Fields that are not provided are cleared, except for the password of an existing user, which is kept
+     * unless a new one is provided. Use PATCH to remove a password.
      */
     #[IsGranted('ROLE_API_WRITER')]
     #[Rest\Put(path: '/{id}')]
@@ -366,7 +367,7 @@ class UserController extends AbstractRestController
             return $this->saveUser($request, (new User())->setExternalid($id), $updateUser, created: true);
         }
 
-        return $this->saveUser($request, $user, $updateUser, created: false);
+        return $this->saveUser($request, $user, $updateUser, created: false, setPassword: $updateUser->password !== null);
     }
 
     /**
