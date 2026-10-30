@@ -391,6 +391,11 @@ class RejudgingService
                 $progressReporter(static::APPLY_PROGRESS_WITH_SCOREBOARD_UPDATE, $log);
             }
 
+            // Direct SQL queries above bypassed the ORM, so clear the identity map
+            // to ensure fresh judging and submission entities are loaded for scoreboard calculations.
+            // Note: callers of rejudge() should be aware that the identity map is cleared here.
+            $this->em->clear();
+
             // Now update the scoreboard
             foreach ($scoreboardRowsToUpdate as $cid => $probids) {
                 $probids = array_keys($probids);

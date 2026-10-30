@@ -3,8 +3,8 @@
 namespace App\Controller\API;
 
 use App\Entity\BaseApiEntity;
-use App\Utils\CcsApiVersion;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,28 +24,26 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 abstract class AbstractRestController extends AbstractApiController
 {
     /**
-     * Get all objects for this endpoint.
+     * Get the objects for this endpoint and request.
+     * @return mixed[]
      * @throws NonUniqueResultException
      */
-    protected function performListAction(Request $request): Response
+    public function getEndpointObjects(Request $request): array
     {
-        return $this->renderData($request, $this->listActionHelper($request));
+        return $this->listActionHelper($request);
     }
 
     /**
-     * Get a single object for this endpoint.
+     * Get a single object for this endpoint and ID.
      * @throws NonUniqueResultException
      */
-    protected function performSingleAction(Request $request, string $id): Response
+    public function getSingleEndpointObject(Request $request, string $id): mixed
     {
-        // Make sure we clear the entity manager class, for when this method is called multiple times
-        // by internal requests.
-        $this->em->clear();
-
         $object = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $id)
             ->getQuery()
+            ->setHint(Query::HINT_REFRESH, true)
             ->getOneOrNullResult();
 
         if ($object === null) {
@@ -56,6 +54,48 @@ abstract class AbstractRestController extends AbstractApiController
             $object = $this->transformObject($object);
         }
 
+        return $object;
+    }
+
+    protected function isStrict(Request $request): bool
+    {
+        return $request->query->getBoolean('strict');
+    }
+
+    /**
+     * Get the serialized endpoint data as an array directly without HTTP sub-requests.
+     * @return mixed[]
+     * @throws NonUniqueResultException
+     */
+    public function getEndpointData(Request $request): array
+    {
+        $objects = $this->getEndpointObjects($request);
+        return $this->apiResourceSerializer->toArray($objects, $this->isStrict($request));
+    }
+
+    /**
+     * Get the serialized single endpoint data as an array directly without HTTP sub-requests.
+     * @return mixed[]
+     * @throws NonUniqueResultException
+     */
+    public function getSingleEndpointData(Request $request, string $id): array
+    {
+        $object = $this->getSingleEndpointObject($request, $id);
+        return $this->apiResourceSerializer->toArray($object, $this->isStrict($request));
+    }
+
+    protected function performListAction(Request $request): Response
+    {
+        return $this->renderData($request, $this->getEndpointObjects($request));
+    }
+
+    /**
+     * Get a single object for this endpoint.
+     * @throws NonUniqueResultException
+     */
+    protected function performSingleAction(Request $request, string $id): Response
+    {
+        $object = $this->getSingleEndpointObject($request, $id);
         return $this->renderData($request, $object);
     }
 
@@ -76,18 +116,7 @@ abstract class AbstractRestController extends AbstractApiController
         $view->getContext()->setAttribute('authorized_user_service', $this->authService);
         $view->getContext()->setAttribute('config_service', $this->config);
 
-        /** @var CcsApiVersion $ccsApiVersion */
-        $ccsApiVersion = $this->config->get('ccs_api_version');
-        $groups = [static::GROUP_DEFAULT, $ccsApiVersion->value];
-        if (!$request->query->has('strict') || !$request->query->getBoolean('strict')) {
-            $groups[] = static::GROUP_NONSTRICT;
-        }
-        if ($this->authService->checkRole('api_reader')) {
-            $groups[] = static::GROUP_RESTRICTED;
-        }
-        if (in_array(static::GROUP_NONSTRICT, $groups) && in_array(static::GROUP_RESTRICTED, $groups)) {
-            $groups[] = static::GROUP_RESTRICTED_NONSTRICT;
-        }
+        $groups = $this->apiResourceSerializer->getSerializationGroups($this->isStrict($request));
         $view->getContext()->setGroups($groups);
 
         $response = $this->handleView($view);
@@ -219,9 +248,6 @@ abstract class AbstractRestController extends AbstractApiController
      */
     protected function listActionHelper(Request $request): array
     {
-        // Make sure we clear the entity manager class, for when this method is called multiple times
-        // by internal requests.
-        $this->em->clear();
         $queryBuilder = $this->getQueryBuilder($request);
 
         if ($request->query->has('ids')) {
@@ -235,6 +261,7 @@ abstract class AbstractRestController extends AbstractApiController
         /** @var array<T> $objects */
         $objects = $queryBuilder
             ->getQuery()
+            ->setHint(Query::HINT_REFRESH, true)
             ->getResult();
 
         if (isset($ids) && count($objects) !== count($ids)) {

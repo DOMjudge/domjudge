@@ -14,3 +14,6 @@ services:
     # Resets stateful services between requests of one test kernel.
     App\Tests\Support\:
         resource: '../tests/Support/'
+
+    App\Service\ApiResourceSerializer:
+        public: true
