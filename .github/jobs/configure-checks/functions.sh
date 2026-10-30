@@ -18,6 +18,10 @@ translate () {
     args="$*"
     if [ "$distro_id" = "ID=fedora" ]; then
         args=${args/libcgroup-dev/libcgroup-devel}
+        args=${args/php-mysql/php-mysqlnd}
+    else
+        args=${args/glibc-static/}
+        args=${args/libstdc++-static/}
     fi
     echo "$args"
 }
@@ -37,7 +41,6 @@ setup() {
     for shared_file in config.log confdefs.h conftest.err; do
         chmod a+rw $shared_file || true
     done
-    echo "$testsuite"
     if [ "$distro_id" = "ID=fedora" ]; then
         if [ "$testsuite" = apache ]; then
             repo-install httpd
@@ -62,9 +65,27 @@ composer-install () {
     chmod +x /usr/local/bin/composer
 }
 
+yarn-install () {
+    if [ "$distro_id" = "ID=debian" ]; then
+        apt-get install node-corepack -y
+        echo '#!/bin/sh' > /usr/bin/yarn
+        echo 'exec corepack yarn "$@"' >> /usr/bin/yarn
+        chmod +x /usr/bin/yarn
+    else
+        repo-install yarnpkg
+    fi
+}
+
+repo-optional-install () {
+    if ! dpkg-query --show $1; then
+        repo-install $2
+    fi
+}
+
 repo-install () {
     args=$(translate $@)
     if [ "$distro_id" = "ID=debian" ] && [[ "$args" == *"composer"* ]]; then
+        apt-get update
         args=${args/composer/}
         if ! apt-get install -qq -y composer; then
             composer-install
