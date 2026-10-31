@@ -1594,7 +1594,13 @@ class JudgehostController extends AbstractFOSRestController
             if ($activeVersion !== null) {
                 $this->em->refresh($activeVersion, LockMode::PESSIMISTIC_WRITE);
                 if (!$activeVersion->getActive()) {
-                    $activeVersion = null;
+                    // A concurrent report replaced it while we waited for the lock: compare against
+                    // the version that is active now, instead of adding a second active one.
+                    $activeVersion = $this->em->getRepository(Version::class)
+                        ->findOneBy(['language' => $language, 'judgehost' => $judgehost, 'active' => true]);
+                    if ($activeVersion !== null) {
+                        $this->em->refresh($activeVersion, LockMode::PESSIMISTIC_WRITE);
+                    }
                 }
             }
 
