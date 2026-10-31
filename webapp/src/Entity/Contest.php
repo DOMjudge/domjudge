@@ -1640,7 +1640,8 @@ class Contest extends BaseApiEntity implements
                 ->map(fn(ContestProblem $problem) => strtolower($problem->getShortname()))
                 ->toArray();
             $shortname = strtolower($problem->getShortname());
-            if (in_array($shortname, $otherShortNames)) {
+            // Strict, or numeric-looking shortnames such as 4.1 and 4.10 compare as equal.
+            if (in_array($shortname, $otherShortNames, true)) {
                 $context
                     ->buildViolation('Each shortname should be unique within a contest')
                     ->atPath(sprintf('problems[%d].shortname', $idx))
