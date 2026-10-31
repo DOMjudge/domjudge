@@ -197,12 +197,15 @@ class AwardServiceTest extends KernelTestCase
 
     protected function getAwardService(): AwardService
     {
-        return new AwardService();
+        $scoreboardService = $this->createMock(ScoreboardService::class);
+        $scoreboardService->method('getScoreboard')->willReturn($this->scoreboard);
+
+        return new AwardService($scoreboardService);
     }
 
     protected function getAward(string $label): ?Award
     {
-        return $this->getAwardService()->getAward($this->contest, $this->scoreboard, $label);
+        return $this->getAwardService()->getAward($this->contest, false, $label);
     }
 
     public function testWinner(): void
@@ -239,13 +242,13 @@ class AwardServiceTest extends KernelTestCase
         static::assertEquals('Winner(s) of group Category A', $groupAWinner->citation);
         static::assertEquals(['team_A'], $groupAWinner->teamIds);
 
-        $a = $this->getAwardService()->getAwards($this->contest, $this->scoreboard);
+        $a = $this->getAwardService()->getAwards($this->contest, false);
         $groupBWinner = $this->getAward('group-winner-cat_B');
         static::assertNotNull($groupBWinner);
         static::assertEquals('Winner(s) of group Category B', $groupBWinner->citation);
         static::assertEquals(['team_D'], $groupBWinner->teamIds);
 
-        $a = $this->getAwardService()->getAwards($this->contest, $this->scoreboard);
+        $a = $this->getAwardService()->getAwards($this->contest, false);
         $groupBWinner = $this->getAward('group-winner-cat_C');
         static::assertNotNull($groupBWinner);
         static::assertEquals('Winner(s) of group Category C', $groupBWinner->citation);
