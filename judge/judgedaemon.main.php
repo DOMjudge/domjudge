@@ -606,7 +606,7 @@ class JudgeDaemon
         if ($this->lastWorkdir !== $workdir) {
             // create chroot environment
             logmsg(LOG_INFO, "  🔒 Executing chroot script: '" . self::CHROOT_SCRIPT . " start'");
-            if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'start'], $retval)) {
+            if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'start'], $retval, cwd: $workdir)) {
                 logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                 $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
                 return;
@@ -1174,10 +1174,12 @@ class JudgeDaemon
     /**
      * @param string[] $command_parts
      * @param int|DONT_CARE $retval
+     * @param ?string $cwd Working directory for the command; defaults to that of the daemon.
      */
     private function runCommandSafe(
         array $command_parts, &$retval = DONT_CARE, bool $log_nonzero_exitcode = true,
-        ?string $stdin_source = null, ?string $stdout_target = null, ?string $stderr_target = null
+        ?string $stdin_source = null, ?string $stdout_target = null, ?string $stderr_target = null,
+        ?string $cwd = null
     ): bool {
         if (empty($command_parts)) {
             logmsg(LOG_WARNING, "Need at least the command that should be called.");
@@ -1201,13 +1203,13 @@ class JudgeDaemon
         ];
 
         $command_string = implode(' ', array_map(dj_escapeshellarg(...), $command_parts));
-        logmsg(LOG_DEBUG, "Executing command: $command_string");
+        logmsg(LOG_DEBUG, "Executing command: $command_string" . ($cwd !== null ? " (in '$cwd')" : ''));
 
         // Pass the command as an array so proc_open() execvp()'s it directly
         // instead of running it through `/bin/sh -c`. This avoids one shell
         // process per call and is safer, as no shell command line (that would
         // need escaping) is ever constructed.
-        $process = proc_open($command_parts, $descriptorspec, $pipes);
+        $process = proc_open($command_parts, $descriptorspec, $pipes, $cwd);
         if (!is_resource($process)) {
             logmsg(LOG_ERR, "Failed to start process: $command_string");
             if ($stderr_temp !== null) {
@@ -1555,7 +1557,7 @@ class JudgeDaemon
 
         // destroy chroot environment
         logmsg(LOG_INFO, "  🔓 Executing chroot script: '" . self::CHROOT_SCRIPT . " stop'");
-        if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'stop'], $retval)) {
+        if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'stop'], $retval, cwd: $workdir)) {
             logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
             $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
             // Just continue here: even though we might continue a current
