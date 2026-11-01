@@ -212,6 +212,9 @@ class JudgeDaemon
     private string $lastrequest = '';
     private float $waittime = self::INITIAL_WAITTIME_SEC;
 
+    // Workdir with a currently set up chroot environment, if any.
+    private ?string $lastWorkdir = null;
+
     /** @var array<string, string[]> */
     private array $langexts = [];
 
@@ -438,7 +441,6 @@ class JudgeDaemon
 
     private function loop(): never
     {
-        $lastWorkdir = null;
         $workdirpath = JUDGEDIR . "/$this->myhost/endpoint-" . $this->endpoint['id'];
 
         while (true) {
@@ -518,10 +520,7 @@ class JudgeDaemon
             if (empty($row)) {
                 if (!$this->endpoint["waiting"]) {
                     $this->endpoint["waiting"] = true;
-                    if ($lastWorkdir !== null) {
-                        $this->cleanupJudging($lastWorkdir);
-                        $lastWorkdir = null;
-                    }
+                    $this->maybeCleanupJudging();
                     logmsg(LOG_INFO, "No submissions in queue (for endpoint " . $this->endpoint['id'] . "), waiting...");
                     $judgehosts = $this->request('judgehosts', 'GET');
                     if ($judgehosts !== null) {
@@ -547,20 +546,20 @@ class JudgeDaemon
             }
             $type = $row[0]['type'];
 
-            $this->handleTask($type, $row, $lastWorkdir, $workdirpath);
+            $this->handleTask($type, $row, $workdirpath);
         }
     }
 
     /**
      * @param JudgeTask[] $row
      */
-    private function handleJudgingTask(array $row, ?string &$lastWorkdir, string $workdirpath, string $workdir): void
+    private function handleJudgingTask(array $row, string $workdirpath, string $workdir): void
     {
         $success_file = "$workdir/.uuid_pid";
         $expected_uuid_pid = $row[0]['uuid'] . '_' . (string)getmypid();
 
         $needs_cleanup = false;
-        if ($lastWorkdir !== $workdir) {
+        if ($this->lastWorkdir !== $workdir) {
             // Switching between workdirs requires cleanup.
             $needs_cleanup = true;
         }
@@ -589,9 +588,8 @@ class JudgeDaemon
             }
         }
 
-        if ($needs_cleanup && $lastWorkdir !== null) {
-            $this->cleanupJudging($lastWorkdir);
-            $lastWorkdir = null;
+        if ($needs_cleanup) {
+            $this->maybeCleanupJudging();
         }
 
 
@@ -605,7 +603,7 @@ class JudgeDaemon
             error("Could not chdir to '$workdir'");
         }
 
-        if ($lastWorkdir !== $workdir) {
+        if ($this->lastWorkdir !== $workdir) {
             // create chroot environment
             logmsg(LOG_INFO, "  🔒 Executing chroot script: '" . self::CHROOT_SCRIPT . " start'");
             if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'start'], $retval)) {
@@ -617,7 +615,7 @@ class JudgeDaemon
             // Refresh config at start of each batch.
             $this->djconfigRefresh();
 
-            $lastWorkdir = $workdir;
+            $this->lastWorkdir = $workdir;
         }
 
         // Make sure the workdir is accessible for the domjudge-run user.
@@ -653,12 +651,9 @@ class JudgeDaemon
     /**
      * @param JudgeTask[] $row
      */
-    private function handleDebugInfoTask(array $row, ?string $lastWorkdir, string $workdirpath, string $workdir): void
+    private function handleDebugInfoTask(array $row, string $workdirpath, string $workdir): void
     {
-        if ($lastWorkdir !== null) {
-            $this->cleanupJudging($lastWorkdir);
-            $lastWorkdir = null;
-        }
+        $this->maybeCleanupJudging();
         foreach ($row as $judgeTask) {
             if (isset($judgeTask['run_script_id'])) {
                 // Full debug package requested.
@@ -710,12 +705,9 @@ class JudgeDaemon
     /**
      * @param JudgeTask[] $row
      */
-    private function handlePrefetchTask(array $row, ?string $lastWorkdir, string $workdirpath): void
+    private function handlePrefetchTask(array $row, string $workdirpath): void
     {
-        if ($lastWorkdir !== null) {
-            $this->cleanupJudging($lastWorkdir);
-            $lastWorkdir = null;
-        }
+        $this->maybeCleanupJudging();
         foreach ($row as $judgeTask) {
             foreach (['compile', 'run', 'compare'] as $script_type) {
                 if (!empty($judgeTask[$script_type . '_script_id']) && !empty($judgeTask[$script_type . '_config'])) {
@@ -743,7 +735,7 @@ class JudgeDaemon
     /**
      * @param JudgeTask[] $row
      */
-    private function handleTask(string $type, array $row, ?string &$lastWorkdir, string $workdirpath): void
+    private function handleTask(string $type, array $row, string $workdirpath): void
     {
         if ($type == 'try_again') {
             if (!$this->endpoint['retrying']) {
@@ -760,7 +752,7 @@ class JudgeDaemon
         );
 
         if ($type == 'prefetch') {
-            $this->handlePrefetchTask($row, $lastWorkdir, $workdirpath);
+            $this->handlePrefetchTask($row, $workdirpath);
             return;
         }
 
@@ -769,14 +761,14 @@ class JudgeDaemon
             $workdir = $this->judgingDirectory($workdirpath, $row[0]);
             logmsg(LOG_INFO, "  Working directory: $workdir");
 
-            $this->handleDebugInfoTask($row, $lastWorkdir, $workdirpath, $workdir);
+            $this->handleDebugInfoTask($row, $workdirpath, $workdir);
             return;
         }
 
         // Create workdir for judging.
         $workdir = $this->judgingDirectory($workdirpath, $row[0]);
         logmsg(LOG_INFO, "  Working directory: $workdir");
-        $this->handleJudgingTask($row, $lastWorkdir, $workdirpath, $workdir);
+        $this->handleJudgingTask($row, $workdirpath, $workdir);
     }
 
     private function fetchWork(): string|bool|null
@@ -1546,8 +1538,18 @@ class JudgeDaemon
         return $res;
     }
 
-    private function cleanupJudging(string $workdir): void
+    /**
+     * Tear down the chroot environment of the last workdir, if any.
+     * Resets $this->lastWorkdir so the same chroot is never stopped twice.
+     */
+    private function maybeCleanupJudging(): void
     {
+        if ($this->lastWorkdir === null) {
+            return;
+        }
+        $workdir = $this->lastWorkdir;
+        $this->lastWorkdir = null;
+
         // revoke readablity for domjudge-run user to this workdir
         chmod($workdir, 0700);
 
