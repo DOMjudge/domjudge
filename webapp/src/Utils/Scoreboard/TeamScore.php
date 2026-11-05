@@ -18,14 +18,15 @@ class TeamScore
     {
         $this->totalTime = $team->getPenalty();
         if ($this->rankCache) {
+            // The cached total time already includes the team penalty.
             if ($restricted) {
                 $this->numPoints = $rankCache->getPointsRestricted();
-                $this->totalTime += $rankCache->getTotaltimeRestricted();
+                $this->totalTime = $rankCache->getTotaltimeRestricted();
                 $this->totalRuntime = $rankCache->getTotalruntimeRestricted();
                 $this->score = $rankCache->getScoreRestricted();
             } else {
                 $this->numPoints = $rankCache->getPointsPublic();
-                $this->totalTime += $rankCache->getTotaltimePublic();
+                $this->totalTime = $rankCache->getTotaltimePublic();
                 $this->totalRuntime = $rankCache->getTotalruntimePublic();
                 $this->score = $rankCache->getScorePublic();
             }
