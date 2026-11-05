@@ -162,8 +162,8 @@ class JuryClarificationType extends AbstractType
                 ->getQuery()
                 ->getSingleResult()['jury_member'];
 
-            // If jury member changed, and we are not currently assigned, warn.
-            if ($value !== $juryMember && $this->authService->getUser()->getUserIdentifier() !== $juryMember) {
+            // If another jury member claimed it, and we are not currently assigned, warn.
+            if ($juryMember !== null && $value !== $juryMember && $this->authService->getUser()->getUserIdentifier() !== $juryMember) {
                 $context->buildViolation("Jury Member '%jury%' claimed this clarification in the meantime.
                                           Please resubmit if you want to continue.")
                         ->setParameter('%jury%', $juryMember)
