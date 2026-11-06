@@ -270,14 +270,12 @@ abstract class AbstractRestController extends AbstractApiController
             $response->headers->set('Content-Disposition', 'attachment');
         }
 
-        // Check if we need to send a 304 Not Modified and if so, send it.
+        // Mark the `Response` is not modified for the HTTP 304
         // This is done both on the
         // - ETag / If-None-Match and
         // - Last-Modified / If-Modified-Since
         // header pairs.
-        if ($response->isNotModified($request)) {
-            $response->send();
-        }
+        $response->isNotModified($request);
 
         return $response;
     }
