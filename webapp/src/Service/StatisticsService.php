@@ -446,8 +446,13 @@ class StatisticsService
             ->andWhere('s.contest = :contest')
             ->andWhere('s.problem IN (:problems)')
             ->andWhere('tc.visible = true')
+            // Only submissions during the contest fit in a bin.
+            ->andWhere('s.submittime >= :starttime')
+            ->andWhere('s.submittime < :endtime')
             ->setParameter('problems', $problems)
-            ->setParameter('contest', $contest);
+            ->setParameter('contest', $contest)
+            ->setParameter('starttime', $contest->getStarttime(false))
+            ->setParameter('endtime', $contest->getEndtime());
 
         if ($verificationRequired) {
             $queryBuilder->andWhere('j.verified = true');
