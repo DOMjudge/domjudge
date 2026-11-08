@@ -253,7 +253,7 @@ class SubmissionController extends BaseController
         }
 
         $runs = [];
-        if ($showSampleOutput && $judging?->getResult() !== 'compiler-error') {
+        if ($showSampleOutput && $judging !== null && $judging->getResult() !== 'compiler-error') {
             $outputDisplayLimit    = (int)$this->config->get('output_display_limit');
             $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
 
