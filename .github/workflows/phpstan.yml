@@ -27,7 +27,11 @@ jobs:
         run: webapp/vendor/phpstan/phpstan/phpstan --version
       - name: Generate the configuration files
         run: |
-          make inplace-conf-common CONFIGURE_FLAGS='--with-domjudge-user=root ac_cv_lib_cgroup_cgroup_init=yes'
+          make inplace-conf-common CONFIGURE_FLAGS=' \
+            --with-domjudge-user=root \
+            --enable-domserver-build \
+            --enable-judgehost-build \
+            ac_cv_lib_cgroup_cgroup_init=yes'
           make ci-conf-phpstan
       - name: Cache PHPStan results
         uses: actions/cache@v4
