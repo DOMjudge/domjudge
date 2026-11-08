@@ -44,21 +44,24 @@ composer-dump-autoload-dev:
 define detect_yarn
 YARN_CMD=$$(command -v yarn || command -v yarnpkg); \
 if [ -z "$$YARN_CMD" ]; then \
-  echo "Error: neither 'yarnpkg' nor 'yarn' found in PATH"; \
-  exit 1; \
+    echo "Error: neither 'yarnpkg' nor 'yarn' found in PATH"; \
+    exit 1; \
+fi ; \
+if [ $$(basename "$$YARN_CMD") = 'yarn' ]; then \
+    YARN_CMD="$$YARN_CMD $(subst 1,-s,$(QUIET))"; \
 fi
 endef
 
 define yarn_licenses_warn
 if ! $$YARN_CMD licenses generate-disclaimer > LICENSES.txt 2>/dev/null; then \
-  echo "Warning: 'yarn licenses' not available; skipping LICENSES.txt generation."; \
+    echo "Warning: 'yarn licenses' not available; skipping LICENSES.txt generation."; \
 fi
 endef
 
 define yarn_licenses_strict
 if ! $$YARN_CMD licenses generate-disclaimer > LICENSES.txt 2>/dev/null; then \
-  echo "Error: 'yarn licenses' not available but required"; \
-  exit 1; \
+    echo "Error: 'yarn licenses' not available but required"; \
+    exit 1; \
 fi
 endef
 
