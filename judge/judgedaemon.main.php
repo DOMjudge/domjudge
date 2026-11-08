@@ -2185,15 +2185,20 @@ class JudgeDaemon
             $this->runCommandSafe($run_args, $exitcode, log_nonzero_exitcode: false, stderr_target: "runguard.err");
 
             if (CREATE_WRITABLE_TEMP_DIR) {
-                // Revoke access to the TMPDIR as security measure
+                // Revoke access to the TMPDIR as security measure. Take back
+                // everything the submission created in it, not just the
+                // directory itself, so that we can remove it again later.
                 $writeTmpPath = "$realWorkdir/write_tmp";
                 if (is_dir($writeTmpPath)) {
-                    if (!chown($writeTmpPath, posix_getpwuid(posix_geteuid())['uid'])) {
+                    if (!$this->runCommandSafe(array_merge($gainroot, [
+                        'chown', '-R', posix_getpwuid(posix_geteuid())['name'] . ":", $writeTmpPath
+                    ]))) {
                         logmsg(LOG_WARNING, "Could not chown '$writeTmpPath' to us");
                         return Verdict::INTERNAL_ERROR;
                     }
-                    if (!chmod($writeTmpPath, 0700)) {
-                        logmsg(LOG_WARNING, "Could not chmod '$writeTmpPath' to 0700");
+                    // go=: revoke all group and other permissions.
+                    if (!$this->chmodRecursive($writeTmpPath, 0, 0077)) {
+                        logmsg(LOG_WARNING, "Could not chmod '$writeTmpPath' to go=");
                         return Verdict::INTERNAL_ERROR;
                     }
                 }
