@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\ExternalJudgement;
+use App\Entity\Judging;
 use App\Entity\ScoreboardType;
 use App\Entity\Submission;
 use App\Entity\Team;
@@ -121,7 +123,13 @@ trait ScoreboardSubmissionsTrait
                 ),
             ];
             if ($contest->getScoreboardType() === ScoreboardType::SCORE) {
-                $item['score'] = $submission->getScore();
+                // Only reveal the score when the verdict is revealed too.
+                $item['score'] = $this->submissionVisibleJudging(
+                    $submission,
+                    $contest,
+                    $verificationRequired,
+                    $forceUnfrozen
+                )?->getScore();
             }
             $submissionData[$teamKey][$problemKey][] = $item;
         }
@@ -129,6 +137,36 @@ trait ScoreboardSubmissionsTrait
         return new JsonResponse([
             'submissions' => $submissionData,
         ]);
+    }
+
+    /**
+     * Returns the judging (or external judgement) of the submission if its
+     * result may be shown, so not too late, frozen, unverified or unjudged.
+     */
+    protected function submissionVisibleJudging(
+        Submission $submission,
+        Contest $contest,
+        bool $verificationRequired,
+        bool $forceUnfrozen = false
+    ): Judging|ExternalJudgement|null {
+        if ($submission->getSubmittime() >= $contest->getEndtime()) {
+            return null;
+        }
+        if (!$forceUnfrozen && $contest->getFreezetime() && $submission->getSubmittime() >= $contest->getFreezetime() && !$contest->getFreezeData()->showFinal()) {
+            return null;
+        }
+        if ($contest->isExternalSourceUseJudgements()) {
+            $judging = $submission->getValidExternalJudgement();
+        } else {
+            $judging = $submission->getValidJudging();
+        }
+        if (!$judging || !$judging->getResult()) {
+            return null;
+        }
+        if ($verificationRequired && !$judging->getVerified()) {
+            return null;
+        }
+        return $judging;
     }
 
     protected function submissionVerdict(
@@ -140,18 +178,8 @@ trait ScoreboardSubmissionsTrait
         if ($submission->getSubmittime() >= $contest->getEndtime()) {
             return $this->twigExtension->printResult('too-late');
         }
-        if (!$forceUnfrozen && $contest->getFreezetime() && $submission->getSubmittime() >= $contest->getFreezetime() && !$contest->getFreezeData()->showFinal()) {
-            return $this->twigExtension->printResult('');
-        }
-        if ($contest->isExternalSourceUseJudgements()) {
-            $judging = $submission->getValidExternalJudgement();
-        } else {
-            $judging = $submission->getValidJudging();
-        }
-        if (!$judging || !$judging->getResult()) {
-            return $this->twigExtension->printResult('');
-        }
-        if ($verificationRequired && !$judging->getVerified()) {
+        $judging = $this->submissionVisibleJudging($submission, $contest, $verificationRequired, $forceUnfrozen);
+        if ($judging === null) {
             return $this->twigExtension->printResult('');
         }
         // Only show the simplified verdict, like the API does for other teams' judgements.
