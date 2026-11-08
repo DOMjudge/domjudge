@@ -13,6 +13,7 @@ use App\Entity\Submission;
 use App\Entity\User;
 use App\Service\ScoreboardService;
 use App\Tests\Unit\BaseTestCase;
+use App\Utils\Utils;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
@@ -304,7 +305,8 @@ class PublicControllerTest extends BaseTestCase
         int $expectedGreenBoxes,
         int $expectedRedBoxes,
         int $expectedBlueBoxes,
-        ?string $freezeTime = null
+        ?string $freezeTime = null,
+        bool $submitCorrectAfterEnd = false
     ): void {
         $this->loadFixture(SampleSubmissionsInBucketsFixture::class);
         /** @var EntityManagerInterface $em */
@@ -315,6 +317,14 @@ class PublicControllerTest extends BaseTestCase
         }
         if ($freezeTime !== null) {
             $demoContest->setFreezetimeString($freezeTime);
+        }
+        // Some data sets change the correct submission at 4:40.
+        $submission = $em->getRepository(Submission::class)->findOneBy(
+            ['submittime' => Utils::toEpochFloat('2022-01-01 04:40:00 Europe/Amsterdam')]
+        );
+        if ($submitCorrectAfterEnd) {
+            // After the contest end, where it is too late.
+            $submission->setSubmittime(Utils::toEpochFloat('2022-01-01 05:00:30 Europe/Amsterdam'));
         }
         if ($removeUnfreezeTime) {
             $demoContest->setUnfreezetimeString(null);
@@ -359,6 +369,8 @@ class PublicControllerTest extends BaseTestCase
         yield [false, true, 1, 1, 6]; // Remove the unfreeze time but not the freeze time, we expect one green, one red and six blue boxes
         // Freeze exactly at the start of bin 16, so bin 15 (3:45-4:00) ends at the freeze and should not be frozen.
         yield [false, false, 1, 1, 6, '2022-01-01 04:00:00 Europe/Amsterdam'];
+        // A correct submission after the contest end is too late and should not be shown.
+        yield [true, true, 2, 3, 0, null, true];
     }
 
     /**
