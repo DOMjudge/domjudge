@@ -406,18 +406,7 @@ class StatisticsService
             'numBuckets' => static::NUM_GROUPED_BINS,
         ];
 
-        // Determine the bins to use.
-        $contestStart = $contest->getStarttime(false);
-        $duration = $contest->getEndtime() - $contestStart;
-        $binDuration = round($duration / static::NUM_GROUPED_BINS, 0);
-
-        // Pre-compute bin boundaries.
-        $binStarts = [];
-        $binEnds = [];
-        for ($bin = 0; $bin < static::NUM_GROUPED_BINS; $bin++) {
-            $binStarts[$bin] = new DateTime(Utils::absTime($contestStart + $bin * $binDuration));
-            $binEnds[$bin] = (clone $binStarts[$bin])->add(new DateInterval(sprintf('PT%dS', $binDuration)));
-        }
+        [$binStarts, $binEnds] = $this->getGroupedBinBoundaries($contest);
 
         // Determine which bin the freeze starts in. Bins before this have
         // separate correct/incorrect counts; bins from this index onward
@@ -464,8 +453,7 @@ class StatisticsService
         // Bin the results in PHP.
         $counts = [];
         foreach ($rows as $row) {
-            $bin = (int)floor(((float)$row['submittime'] - $contestStart) / $binDuration);
-            $bin = min($bin, static::NUM_GROUPED_BINS - 1);
+            $bin = $this->getGroupedBin($contest, (float)$row['submittime']);
 
             $isCorrect = ($row['result'] === 'correct');
             if ($bin < $freezeBin) {
@@ -516,6 +504,34 @@ class StatisticsService
         $stats['freezeBucket'] = $freezeBin < static::NUM_GROUPED_BINS ? $freezeBin : null;
 
         return $stats;
+    }
+
+    /**
+     * @return array{DateTime[], DateTime[]} The start and end of each bin.
+     */
+    private function getGroupedBinBoundaries(Contest $contest): array
+    {
+        $contestStart = $contest->getStarttime(false);
+        $binDuration = $this->getGroupedBinDuration($contest);
+        $binStarts = [];
+        $binEnds = [];
+        for ($bin = 0; $bin < static::NUM_GROUPED_BINS; $bin++) {
+            $binStarts[$bin] = new DateTime(Utils::absTime($contestStart + $bin * $binDuration));
+            $binEnds[$bin] = (clone $binStarts[$bin])->add(new DateInterval(sprintf('PT%dS', $binDuration)));
+        }
+        return [$binStarts, $binEnds];
+    }
+
+    private function getGroupedBinDuration(Contest $contest): float
+    {
+        $duration = $contest->getEndtime() - $contest->getStarttime(false);
+        return round($duration / static::NUM_GROUPED_BINS, 0);
+    }
+
+    private function getGroupedBin(Contest $contest, float $submittime): int
+    {
+        $bin = (int)floor(($submittime - $contest->getStarttime(false)) / $this->getGroupedBinDuration($contest));
+        return min($bin, static::NUM_GROUPED_BINS - 1);
     }
 
     /**
