@@ -33,6 +33,9 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route(path: '/jury/judgehosts')]
 class JudgehostController extends BaseController
 {
+    /** Upper bound on the number of testcase runs sent to the timeline. */
+    private const TIMELINE_MAX_RUNS = 20000;
+
     // Note: when adding or modifying routes, make sure they do not clash with the /judgehosts/{hostname} route.
 
     public function __construct(
@@ -250,6 +253,9 @@ class JudgehostController extends BaseController
             ->andWhere('jr.endtime IS NOT NULL')
             ->andWhere('jr.endtime >= :twenty_four_hours_ago')
             ->setParameter('twenty_four_hours_ago', $twenty_four_hours_ago)
+            // Keep the response bounded on busy systems; the newest runs win.
+            ->orderBy('jr.endtime', 'DESC')
+            ->setMaxResults(self::TIMELINE_MAX_RUNS)
             ->getQuery();
 
         $results = $query->getResult();

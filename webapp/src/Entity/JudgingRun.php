@@ -18,6 +18,7 @@ use JMS\Serializer\Annotation as Serializer;
 ])]
 #[ORM\Index(name: 'judgingid', columns: ['judgingid'])]
 #[ORM\Index(name: 'testcaseid_2', columns: ['testcaseid'])]
+#[ORM\Index(name: 'endtime', columns: ['endtime'])]
 #[ORM\UniqueConstraint(name: 'testcaseid', columns: ['judgingid', 'testcaseid'])]
 class JudgingRun extends AbstractRun
 {
