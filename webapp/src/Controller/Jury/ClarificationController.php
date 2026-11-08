@@ -159,7 +159,7 @@ class ClarificationController extends BaseController
             'subject' => $subject,
         ];
         if ($clarification->getRecipient()) {
-            $formData['recipient'] = $clarification->getRecipient()->getTeamid();
+            $formData['recipient'] = $clarification->getRecipient()->getExternalid();
         }
 
         /** @var Clarification $lastClarification */
