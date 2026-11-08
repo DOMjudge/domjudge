@@ -355,6 +355,7 @@ class PublicControllerTest extends BaseTestCase
             }
         }
 
+        self::assertCount(0, $this->client->getCrawler()->filter('.problem-stats-own'));
         self::assertCount($expectedGreenBoxes, $correctBoxes);
         self::assertCount($expectedRedBoxes, $incorrectBoxes);
         self::assertCount($expectedBlueBoxes, $frozenBoxes);

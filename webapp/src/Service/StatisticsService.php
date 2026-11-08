@@ -507,6 +507,58 @@ class StatisticsService
     }
 
     /**
+     * Get the submissions of a single team per problem, grouped in the same bins as
+     * getGroupedProblemsStats(). The team always sees its own verdicts, also during
+     * the freeze, but judgings that still need verification count as pending.
+     *
+     * @param Problem[] $problems
+     * @return array<int, array<int, array{correct: int, incorrect: int, pending: int}>>
+     *         Indexed by problem ID and bin; bins without submissions are left out.
+     */
+    public function getGroupedTeamProblemStats(
+        Contest $contest,
+        Team $team,
+        array $problems,
+        bool $verificationRequired
+    ): array {
+        $rows = $this->em->createQueryBuilder()
+            ->select('s.submitid', 'p.probid', 's.submittime', 'j.result', 'j.verified')
+            ->from(Submission::class, 's')
+            ->join('s.problem', 'p')
+            ->leftJoin('s.judgings', 'j', 'WITH', 'j.valid = true')
+            ->andWhere('s.contest = :contest')
+            ->andWhere('s.team = :team')
+            ->andWhere('s.valid = true')
+            ->andWhere('s.problem IN (:problems)')
+            // Only submissions during the contest fit in a bin, as in getGroupedProblemsStats().
+            ->andWhere('s.submittime >= :starttime')
+            ->andWhere('s.submittime < :endtime')
+            ->setParameter('contest', $contest)
+            ->setParameter('team', $team)
+            ->setParameter('problems', $problems)
+            ->setParameter('starttime', $contest->getStarttime(false))
+            ->setParameter('endtime', $contest->getEndtime())
+            ->getQuery()
+            ->getArrayResult();
+
+        $stats = [];
+        foreach ($rows as $row) {
+            $bin = $this->getGroupedBin($contest, (float)$row['submittime']);
+            if ($row['result'] === null || ($verificationRequired && !$row['verified'])) {
+                $type = 'pending';
+            } elseif ($row['result'] === Judging::RESULT_CORRECT) {
+                $type = 'correct';
+            } else {
+                $type = 'incorrect';
+            }
+            $stats[$row['probid']][$bin] ??= ['correct' => 0, 'incorrect' => 0, 'pending' => 0];
+            $stats[$row['probid']][$bin][$type]++;
+        }
+
+        return $stats;
+    }
+
+    /**
      * @return array{DateTime[], DateTime[]} The start and end of each bin.
      */
     private function getGroupedBinBoundaries(Contest $contest): array

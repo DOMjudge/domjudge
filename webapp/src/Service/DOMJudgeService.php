@@ -1115,7 +1115,8 @@ class DOMJudgeService implements ResetInterface
      *               'stats': array{'numBuckets': int, 'maxBucketSizeCorrect': int,
      *                              'maxBucketSizeCorrect': int, 'maxBucketSizeIncorrect': int, 'freezeBucket': ?int,
      *                              'problems': array<array{'correct': array<array{'start': DateTime, 'end': DateTime, 'count': int}>,
-     *                                                      'incorrect': array<array{'start': DateTime, 'end': DateTime, 'count': int}>}>}}
+     *                                                      'incorrect': array<array{'start': DateTime, 'end': DateTime, 'count': int}>}>},
+     *               'teamStats'?: array<int, array<int, array{correct: int, incorrect: int, pending: int}>>}
      * @throws NonUniqueResultException
      */
     public function getTwigDataForProblemsAction(
@@ -1139,6 +1140,7 @@ class DOMJudgeService implements ResetInterface
                     ->getSingleScalarResult() > 0;
         }
 
+        $team = $teamId ? $this->em->getRepository(Team::class)->find($teamId) : null;
         $problems = [];
         $samples = [];
         $clars = [];
@@ -1201,19 +1203,29 @@ class DOMJudgeService implements ResetInterface
             'defaultMemoryLimit' => $defaultMemoryLimit,
             'timeFactorDiffers' => $timeFactorDiffers,
             'clarifications' => $clars,
-            'team' => $teamId ? $this->em->getRepository(Team::class)->find($teamId) : null,
+            'team' => $team,
         ];
 
         if ($contest && $this->config->get('show_public_stats')) {
             $freezeData = new FreezeData($contest);
             // The jury always sees the verdicts, like on its scoreboard.
             $showVerdictsInFreeze = $forJury || $freezeData->showFinal(false) || $contest->getFreezetime() === null;
+            $verificationRequired = (bool)$this->config->get('verification_required');
+            $statsProblems = array_map(fn(ContestProblem $problem) => $problem->getProblem(), $problems);
             $data['stats'] = $statistics->getGroupedProblemsStats(
                 $contest,
-                array_map(fn(ContestProblem $problem) => $problem->getProblem(), $problems),
+                $statsProblems,
                 $showVerdictsInFreeze,
-                (bool)$this->config->get('verification_required')
+                $verificationRequired
             );
+            if ($team) {
+                $data['teamStats'] = $statistics->getGroupedTeamProblemStats(
+                    $contest,
+                    $team,
+                    $statsProblems,
+                    $verificationRequired
+                );
+            }
         }
 
         return $data;

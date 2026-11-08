@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Controller\Team;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\DemoAboutToStartContestFixture;
+use App\DataFixtures\Test\SampleSubmissionsInBucketsFixture;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
 use App\Entity\Testcase;
@@ -110,6 +111,40 @@ class ProblemControllerTest extends BaseTestCase
     /**
      * Test that the problems page shows only sample data.
      */
+    /**
+     * Test that the problem statistics show the team's own submissions per time bin,
+     * including their verdicts during the freeze.
+     */
+    #[DataProvider('ownSubmissionsInStatisticsProvider')]
+    public function testOwnSubmissionsInStatistics(
+        bool $verificationRequired,
+        int $expectedCorrect,
+        int $expectedIncorrect,
+        int $expectedPending
+    ): void {
+        // The fixture adds six submissions of our own team in five bins of the first
+        // problem; two of them, one correct and one incorrect, share a bin. The
+        // scoreboard is frozen for the last four bins.
+        $this->loadFixture(SampleSubmissionsInBucketsFixture::class);
+
+        $this->withChangedConfiguration('verification_required', $verificationRequired,
+            function () use ($expectedCorrect, $expectedIncorrect, $expectedPending): void {
+                $crawler = $this->client->request('GET', '/team/problems');
+                self::assertResponseIsSuccessful();
+
+                self::assertSelectorTextContains('.problem-stats', 'you');
+                self::assertCount($expectedCorrect, $crawler->filter('.problem-stats-own.own-correct'));
+                self::assertCount($expectedIncorrect, $crawler->filter('.problem-stats-own.own-incorrect'));
+                self::assertCount($expectedPending, $crawler->filter('.problem-stats-own.own-pending'));
+            });
+    }
+
+    public static function ownSubmissionsInStatisticsProvider(): Generator
+    {
+        yield 'verdicts visible' => [false, 3, 2, 0];
+        yield 'verdicts not verified yet' => [true, 0, 0, 5];
+    }
+
     public function testSamples(): void
     {
         // First, enable two samples for the fltcmp problem.

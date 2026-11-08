@@ -119,6 +119,41 @@
                                                         </div>
                                                     {% endfor %}
                                                 {% endfor %}
+                                                {% if teamStats is defined %}
+                                                    <span class="problem-stats-label">you</span>
+                                                    {% for bucket in 0..stats.numBuckets - 1 %}
+                                                        {% set own = teamStats[probid][bucket] ?? null %}
+                                                        {% if own is null %}
+                                                            <div class="problem-stats-own"></div>
+                                                        {% else %}
+                                                            {% if own.correct > 0 %}
+                                                                {% set ownClass = 'own-correct' %}
+                                                                {% set ownIcon = 'fa-check' %}
+                                                            {% elseif own.pending > 0 %}
+                                                                {% set ownClass = 'own-pending' %}
+                                                                {% set ownIcon = 'fa-hourglass-half' %}
+                                                            {% else %}
+                                                                {% set ownClass = 'own-incorrect' %}
+                                                                {% set ownIcon = 'fa-times' %}
+                                                            {% endif %}
+                                                            {% set ownParts = [] %}
+                                                            {% for type in ['correct', 'incorrect', 'pending'] %}
+                                                                {% if own[type] > 0 %}
+                                                                    {% set ownParts = ownParts | merge([own[type] ~ ' ' ~ type]) %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                            {% set stat = stats.problems[probid].correct[bucket] %}
+                                                            <div
+                                                                class="problem-stats-own {{ ownClass }}"
+                                                                data-bs-toggle="tooltip"
+                                                                data-bs-placement="top"
+                                                                data-bs-html="true"
+                                                                title="Your submissions between {{ stat.start.timestamp | printtime(null, contest, false) }} and {{ stat.end.timestamp | printtime(null, contest, false) }}:<br/>{{ ownParts | join(', ') }}">
+                                                                <i class="fas {{ ownIcon }}"></i>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endif %}
                                                 <span></span>
                                                 <div class="problem-stats-axis">
                                                     <span>{{ stats.problems[probid].correct[0].start.timestamp | printtime(null, contest, false) }}</span>
