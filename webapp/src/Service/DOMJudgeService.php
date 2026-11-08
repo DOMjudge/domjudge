@@ -371,6 +371,13 @@ class DOMJudgeService implements ResetInterface
             $queryBuilder->andWhere('j.verified = 1');
         }
 
+        // Like the submission list, do not reveal results of submissions after the contest end.
+        if (!$this->config->get('show_too_late_result')) {
+            $queryBuilder
+                ->andWhere('s.submittime < :endtime')
+                ->setParameter('endtime', $contest->getEndtime());
+        }
+
         return $queryBuilder->getQuery()->getResult();
     }
 
