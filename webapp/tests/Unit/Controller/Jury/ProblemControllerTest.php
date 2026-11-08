@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\AddProblemAttachmentFixture;
 use App\DataFixtures\Test\PreviousSubmissionTestcaseRunsFixture;
+use App\DataFixtures\Test\SampleSubmissionsInBucketsFixture;
 use App\Entity\AuditLog;
 use App\Entity\Contest;
 use App\Entity\Problem;
@@ -387,5 +388,25 @@ class ProblemControllerTest extends JuryControllerTestCase
         );
         self::assertSame("$contestId, $probId", $auditLog->getDataid());
         self::assertSame('no', $auditLog->getExtrainfo());
+    }
+
+    /**
+     * Test that the jury sees the verdicts in the problem statistics of the problemset,
+     * also while the scoreboard is frozen.
+     */
+    public function testProblemsetStatisticsIgnoreFreeze(): void
+    {
+        // Three correct and three incorrect submissions in five bins, of which the last
+        // four are frozen for the public.
+        $this->loadFixture(SampleSubmissionsInBucketsFixture::class);
+
+        $crawler = $this->client->request('GET', '/jury/problems/problemset');
+        self::assertResponseIsSuccessful();
+
+        $levels = $crawler->filter('.problem-stats-item')->each(
+            fn(Crawler $box) => preg_match('/\b(correct|incorrect|frozen)-[1-9]\b/', $box->attr('class'), $matches)
+                ? $matches[1] : null
+        );
+        self::assertSame(['correct' => 3, 'incorrect' => 3], array_count_values(array_filter($levels)));
     }
 }

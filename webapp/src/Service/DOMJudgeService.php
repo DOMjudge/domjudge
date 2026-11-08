@@ -1206,7 +1206,8 @@ class DOMJudgeService implements ResetInterface
 
         if ($contest && $this->config->get('show_public_stats')) {
             $freezeData = new FreezeData($contest);
-            $showVerdictsInFreeze = $freezeData->showFinal(false) || $contest->getFreezetime() === null;
+            // The jury always sees the verdicts, like on its scoreboard.
+            $showVerdictsInFreeze = $forJury || $freezeData->showFinal(false) || $contest->getFreezetime() === null;
             $data['stats'] = $statistics->getGroupedProblemsStats(
                 $contest,
                 array_map(fn(ContestProblem $problem) => $problem->getProblem(), $problems),
