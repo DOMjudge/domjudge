@@ -752,17 +752,38 @@ tr.ignore td, td.ignore, span.ignore {
     text-align: center;
 }
 
+/* One row per kind of submission, with a label in front and one cell per time bin.
+   The cells shrink on narrow cards, so the grid never gets wider than the card. */
 .problem-stats {
-    padding-top: 10px;
+    display: grid;
+    grid-template-columns: max-content repeat(var(--problem-stats-bins, 20), minmax(4px, 10px));
+    gap: 3px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.problem-stats-label {
+    font-size: .7rem;
+    line-height: 1;
+    color: var(--bs-secondary-color);
+    text-align: right;
+    padding-right: 2px;
 }
 
 .problem-stats .problem-stats-item {
-    display: inline-block;
-    margin-right: 3px;
-    width: 10px;
-    height: 10px;
+    aspect-ratio: 1;
     border-radius: 2px;
     box-shadow: inset 0 0 0 1px rgba(27, 31, 35, .04);
+}
+
+.problem-stats-axis {
+    grid-column: 2 / -1;
+    display: flex;
+    justify-content: space-between;
+    font-size: .65rem;
+    line-height: 1;
+    color: var(--bs-secondary-color);
 }
 
 .problem-stats-item.correct-0 {
