@@ -111,6 +111,9 @@ class ClarificationController extends BaseController
         $user       = $this->authService->getUser();
         $team       = $user->getTeam();
         $contest    = $this->dj->getCurrentContest($team->getTeamid());
+        if (!$contest) {
+            throw new NotFoundHttpException('No active contest');
+        }
         /** @var Clarification|null $clarification */
         $clarification = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), externalClarificationId: $clarId)
             ->select('clar, p, c')

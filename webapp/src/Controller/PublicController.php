@@ -373,6 +373,9 @@ class PublicController extends BaseController
     {
         $categories = $this->config->get('clar_categories');
         $contest    = $this->dj->getCurrentContest();
+        if (!$contest) {
+            throw new NotFoundHttpException('No active contest');
+        }
         /** @var Clarification|null $clarification */
         $clarification = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), externalClarificationId: $clarId)
             ->select('clar, p, c')
