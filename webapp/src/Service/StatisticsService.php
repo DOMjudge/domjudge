@@ -391,6 +391,7 @@ class StatisticsService
     /**
      * @param Problem[] $problems
      * @return array{'numBuckets': int, 'maxBucketSizeCorrect': int, 'maxBucketSizeCorrect': int, 'maxBucketSizeIncorrect': int,
+     *               'freezeBucket': ?int,
      *               'problems': array<array{'correct': array<array{'start': DateTime, 'end': DateTime, 'count': int}>,
      *                                       'incorrect': array<array{'start': DateTime, 'end': DateTime, 'count': int}>}>}
      */
@@ -505,6 +506,8 @@ class StatisticsService
 
         $stats['maxBucketSizeCorrect'] = $maxBucketSizeCorrect;
         $stats['maxBucketSizeIncorrect'] = $maxBucketSizeIncorrect;
+        // The first frozen bin, so the template does not need to repeat the freeze logic.
+        $stats['freezeBucket'] = $freezeBin < static::NUM_GROUPED_BINS ? $freezeBin : null;
 
         return $stats;
     }

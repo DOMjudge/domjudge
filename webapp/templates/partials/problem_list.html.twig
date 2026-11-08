@@ -88,6 +88,7 @@
                                                                 {% set maxBucketSize = stats.maxBucketSizeIncorrect %}
                                                             {% endif %}
                                                             {% set stat = stats.problems[problem.problem.probid][index][bucket] %}
+                                                            {% set frozen = stats.freezeBucket is not null and bucket >= stats.freezeBucket %}
                                                             {% set count = stat.count %}
                                                             {% if maxBucketSize == 0 %}
                                                                 {% set bucket = 0 %}
@@ -99,7 +100,7 @@
                                                             {% else %}
                                                                 {% set submissionText = 'submissions' %}
                                                             {% endif %}
-                                                            {% if not contest.freezeData.showFinal and contest.freezetime and stat.end.timestamp >= contest.freezetime %}
+                                                            {% if frozen %}
                                                                 {% set maxBucketSize = max(1, stats.maxBucketSizeCorrect, stats.maxBucketSizeIncorrect) %}
                                                                 {% set bucket = (count / maxBucketSize * 9) | round(0, 'ceil') %}
                                                                 {% set itemClass = 'frozen' ~ '-' ~ bucket %}
