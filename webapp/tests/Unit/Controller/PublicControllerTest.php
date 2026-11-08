@@ -306,7 +306,8 @@ class PublicControllerTest extends BaseTestCase
         int $expectedRedBoxes,
         int $expectedBlueBoxes,
         ?string $freezeTime = null,
-        bool $submitCorrectAfterEnd = false
+        bool $submitCorrectAfterEnd = false,
+        bool $ignoreCorrectSubmission = false
     ): void {
         $this->loadFixture(SampleSubmissionsInBucketsFixture::class);
         /** @var EntityManagerInterface $em */
@@ -325,6 +326,9 @@ class PublicControllerTest extends BaseTestCase
         if ($submitCorrectAfterEnd) {
             // After the contest end, where it is too late.
             $submission->setSubmittime(Utils::toEpochFloat('2022-01-01 05:00:30 Europe/Amsterdam'));
+        }
+        if ($ignoreCorrectSubmission) {
+            $submission->setValid(false);
         }
         if ($removeUnfreezeTime) {
             $demoContest->setUnfreezetimeString(null);
@@ -371,6 +375,8 @@ class PublicControllerTest extends BaseTestCase
         yield [false, false, 1, 1, 6, '2022-01-01 04:00:00 Europe/Amsterdam'];
         // A correct submission after the contest end is too late and should not be shown.
         yield [true, true, 2, 3, 0, null, true];
+        // An ignored submission should not be shown either.
+        yield [true, true, 2, 3, 0, null, false, true];
     }
 
     /**

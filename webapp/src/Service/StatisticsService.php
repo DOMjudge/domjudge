@@ -444,6 +444,7 @@ class StatisticsService
             ->andWhere('j.valid = true')
             ->andWhere('j.result IS NOT NULL')
             ->andWhere('s.contest = :contest')
+            ->andWhere('s.valid = true')
             ->andWhere('s.problem IN (:problems)')
             ->andWhere('tc.visible = true')
             // Only submissions during the contest fit in a bin.
