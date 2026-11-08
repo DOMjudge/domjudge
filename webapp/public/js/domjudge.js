@@ -652,7 +652,7 @@ function updateTeamNotifications()
                     }
                     sendNotification('Submission judged: ' + subData[i].result,
                      {'tag': 'c' + subData[i].cid + '_sub_' + subData[i].submitid + '_judge_' + subData[i].judgingid,
-                            'link': domjudge_base_url + '/team/submission/' + subData[i].submitid,
+                            'link': domjudge_base_url + '/team/submission/' + encodeURIComponent(subData[i].externalid),
                             'body': bodyParts.join(' · ') });
                 }
             }

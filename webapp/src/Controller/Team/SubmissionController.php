@@ -215,8 +215,8 @@ class SubmissionController extends BaseController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route(path: '/submission/{submitId<\d+>}', name: 'team_submission')]
-    public function viewAction(Request $request, int $submitId): Response
+    #[Route(path: '/submission/{submitId}', name: 'team_submission')]
+    public function viewAction(Request $request, string $submitId): Response
     {
         $verificationRequired = (bool)$this->config->get('verification_required');
         $showCompile          = $this->config->get('show_compile');
@@ -237,10 +237,12 @@ class SubmissionController extends BaseController
             ->join('cp.problem', 'p')
             ->join('s.language', 'l')
             ->select('j', 's', 'cp', 'p', 'l')
-            ->andWhere('j.submission = :submitId')
+            ->andWhere('s.externalid = :submitId')
+            ->andWhere('s.contest = :contest')
             ->andWhere('j.valid = 1')
             ->andWhere('s.team = :team')
             ->setParameter('submitId', $submitId)
+            ->setParameter('contest', $contest)
             ->setParameter('team', $team)
             ->getQuery()
             ->getOneOrNullResult();
@@ -321,8 +323,8 @@ class SubmissionController extends BaseController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route(path: '/submission/{submitId<\d+>}/download', name: 'team_submission_download')]
-    public function downloadAction(int $submitId): Response
+    #[Route(path: '/submission/{submitId}/download', name: 'team_submission_download')]
+    public function downloadAction(string $submitId): Response
     {
         $allowDownload = (bool)$this->config->get('allow_team_submission_download');
         if (!$allowDownload) {
@@ -331,14 +333,20 @@ class SubmissionController extends BaseController
 
         $user = $this->authService->getUser();
         $team = $user->getTeam();
+        $contest = $this->dj->getCurrentContest($team->getTeamid());
+        if (!$contest) {
+            throw new NotFoundHttpException('No active contest');
+        }
         /** @var Submission|null $submission */
         $submission = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->join('s.files', 'f')
             ->select('s, f')
-            ->andWhere('s.submitid = :submitId')
+            ->andWhere('s.externalid = :submitId')
+            ->andWhere('s.contest = :contest')
             ->andWhere('s.team = :team')
             ->setParameter('submitId', $submitId)
+            ->setParameter('contest', $contest)
             ->setParameter('team', $team)
             ->getQuery()
             ->getOneOrNullResult();

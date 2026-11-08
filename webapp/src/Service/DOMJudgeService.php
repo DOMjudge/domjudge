@@ -338,7 +338,7 @@ class DOMJudgeService implements ResetInterface
     }
 
     /**
-     * @return list<array{submitid: int, judgingid: int, cid: int, result: string, probname: string, submittime: float, score: string|null}>
+     * @return list<array{submitid: int, externalid: string, judgingid: int, cid: int, result: string, probname: string, submittime: float, score: string|null}>
      */
     public function getJudgingNotifications(): array
     {
@@ -353,7 +353,7 @@ class DOMJudgeService implements ResetInterface
         }
 
         $queryBuilder = $this->em->createQueryBuilder()
-            ->select('s.submitid', 'j.judgingid', 'IDENTITY(s.contest) AS cid', 'j.result', 'j.score', 'p.name AS probname', 's.submittime')
+            ->select('s.submitid', 's.externalid', 'j.judgingid', 'IDENTITY(s.contest) AS cid', 'j.result', 'j.score', 'p.name AS probname', 's.submittime')
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
             ->join('s.contest_problem', 'cp')
