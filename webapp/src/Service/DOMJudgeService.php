@@ -1113,7 +1113,7 @@ class DOMJudgeService implements ResetInterface
      * @return array{'problems': ContestProblem[], 'samples': string[], 'showLimits': bool,
      *               'defaultMemoryLimit': int, 'timeFactorDiffers': bool,
      *               'stats': array{'numBuckets': int, 'maxBucketSizeCorrect': int,
-     *                              'maxBucketSizeCorrect': int, 'maxBucketSizeIncorrect': int,
+     *                              'maxBucketSizeCorrect': int, 'maxBucketSizeIncorrect': int, 'freezeBucket': ?int,
      *                              'problems': array<array{'correct': array<array{'start': DateTime, 'end': DateTime, 'count': int}>,
      *                                                      'incorrect': array<array{'start': DateTime, 'end': DateTime, 'count': int}>}>}}
      * @throws NonUniqueResultException

@@ -303,7 +303,8 @@ class PublicControllerTest extends BaseTestCase
         bool $removeUnfreezeTime,
         int $expectedGreenBoxes,
         int $expectedRedBoxes,
-        int $expectedBlueBoxes
+        int $expectedBlueBoxes,
+        ?string $freezeTime = null
     ): void {
         $this->loadFixture(SampleSubmissionsInBucketsFixture::class);
         /** @var EntityManagerInterface $em */
@@ -311,6 +312,9 @@ class PublicControllerTest extends BaseTestCase
         $demoContest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
         if ($removeFreezeTime) {
             $demoContest->setFreezetimeString(null);
+        }
+        if ($freezeTime !== null) {
+            $demoContest->setFreezetimeString($freezeTime);
         }
         if ($removeUnfreezeTime) {
             $demoContest->setUnfreezetimeString(null);
@@ -340,6 +344,12 @@ class PublicControllerTest extends BaseTestCase
         self::assertCount($expectedGreenBoxes, $correctBoxes);
         self::assertCount($expectedRedBoxes, $incorrectBoxes);
         self::assertCount($expectedBlueBoxes, $frozenBoxes);
+        // Whenever there is a freeze, it starts in bin 16 (4:00-4:15), so the last four bins
+        // of each problem are frozen in both rows, also the ones without submissions.
+        self::assertCount(
+            $expectedBlueBoxes > 0 ? 8 * $demoContest->getProblems()->count() : 0,
+            $this->client->getCrawler()->filter('.problem-stats-item[class*="frozen-"]')
+        );
     }
 
     public static function provideTestProblemStatistics(): Generator
@@ -347,6 +357,8 @@ class PublicControllerTest extends BaseTestCase
         yield [false, false, 1, 1, 6]; // Keep both times, we expect one green, one red and six blue boxes (2 around the freeze and 4 at the end)
         yield [true, true, 3, 3, 0]; // Remove both times, we expect three green and three red boxes
         yield [false, true, 1, 1, 6]; // Remove the unfreeze time but not the freeze time, we expect one green, one red and six blue boxes
+        // Freeze exactly at the start of bin 16, so bin 15 (3:45-4:00) ends at the freeze and should not be frozen.
+        yield [false, false, 1, 1, 6, '2022-01-01 04:00:00 Europe/Amsterdam'];
     }
 
     /**
