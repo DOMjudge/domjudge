@@ -4,6 +4,8 @@ namespace App\Tests\Unit\Controller\API;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\AddMoreDemoUsersFixture;
+use App\DataFixtures\Test\DemoTeamOnlyNonScoringCategoryFixture;
+use App\DataFixtures\Test\DemoTeamTwoScoringCategoriesFixture;
 use App\DataFixtures\Test\EnableKotlinFixture;
 use App\DataFixtures\Test\RemoveTeamFromAdminUserFixture;
 use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
@@ -563,5 +565,40 @@ class SubmissionControllerTest extends BaseTestCase
         $zipContent = file_get_contents($tempFilename);
         unlink($tempFilename);
         return base64_encode($zipContent);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function listSubmissionTeamsAsDemo(): array
+    {
+        $contestId = $this->getDemoContestId();
+        $submissions = $this->verifyApiJsonResponse('GET', "/contests/$contestId/submissions", 200, 'demo');
+        return array_column($submissions, 'team_id');
+    }
+
+    public function testTeamSeesOwnSubmissions(): void
+    {
+        static::assertSame(['exteam'], array_values(array_filter(
+            $this->listSubmissionTeamsAsDemo(), fn(string $team) => $team === 'exteam'
+        )));
+    }
+
+    /**
+     * A team in a category that is not scoring is not on the scoreboard, but it can still
+     * submit and must see its own submissions.
+     */
+    public function testTeamInOnlyNonScoringCategorySeesOwnSubmissions(): void
+    {
+        $this->loadFixture(DemoTeamOnlyNonScoringCategoryFixture::class);
+        static::assertContains('exteam', $this->listSubmissionTeamsAsDemo());
+    }
+
+    public function testTeamInTwoScoringCategoriesListsSubmissionOnce(): void
+    {
+        $this->loadFixture(DemoTeamTwoScoringCategoriesFixture::class);
+        static::assertSame(['exteam'], array_values(array_filter(
+            $this->listSubmissionTeamsAsDemo(), fn(string $team) => $team === 'exteam'
+        )));
     }
 }

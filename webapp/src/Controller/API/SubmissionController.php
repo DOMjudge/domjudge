@@ -473,8 +473,9 @@ class SubmissionController extends AbstractRestController
 
         if (!$this->authService->checkRole('api_reader') &&
             !$this->authService->checkRole('judgehost')) {
+            // Left join, so that a team that is in no scoring category still sees its own submissions.
             $queryBuilder
-                ->join('t.categories', 'cat', Join::WITH, 'BIT_AND(cat.types, :scoring) = :scoring')
+                ->leftJoin('t.categories', 'cat', Join::WITH, 'BIT_AND(cat.types, :scoring) = :scoring')
                 ->setParameter('scoring', TeamCategory::TYPE_SCORING);
             if ($this->authService->checkRole('team')) {
                 $queryBuilder
