@@ -127,15 +127,21 @@ function initJudgehostTimeline(dataUrl) {
                 .on("mouseover", function(d) {
                     tooltip.transition().duration(200).style("opacity", .9);
                     const duration = ((d.endtime - d.startTime) / 1000).toFixed(3);
-                    tooltip.html(
-                        "<b>Contest:</b> " + d.contest_shortname + "<br/>" +
-                        "<b>Problem:</b> " + d.problem_name + "<br/>" +
-                        "<b>Submission:</b> s" + d.submitid + " (j" + d.jobid + ")<br/>" +
-                        "<b>Result:</b> " + (d.runresult || 'judging') + "<br/>" +
-                        "<b>Duration:</b> " + duration + "s"
-                    )
-                    .style("left", (d3.event.pageX + 10) + "px")
-                    .style("top", (d3.event.pageY - 28) + "px");
+                    // Build the tooltip from DOM nodes so names are never parsed as HTML.
+                    tooltip.html('');
+                    [
+                        ['Contest', d.contest_shortname],
+                        ['Problem', d.problem_name],
+                        ['Submission', 's' + d.submitid + ' (j' + d.jobid + ')'],
+                        ['Result', d.runresult || 'judging'],
+                        ['Duration', duration + 's'],
+                    ].forEach(function(row) {
+                        const line = tooltip.append('div');
+                        line.append('b').text(row[0] + ': ');
+                        line.append('span').text(row[1]);
+                    });
+                    tooltip.style("left", (d3.event.pageX + 10) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
                 })
                 .on("mousemove", function() {
                     tooltip.style("left", (d3.event.pageX + 10) + "px")
