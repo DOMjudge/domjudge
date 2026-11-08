@@ -4,6 +4,9 @@ endif
 
 include $(TOPDIR)/Makefile.global
 
+# Ensure OBJEXT is defined if/when the global file missed it
+OBJEXT ?= .o
+
 OBJECTS = $(addsuffix $(OBJEXT),lib.error lib.misc)
 
 build: $(OBJECTS)
