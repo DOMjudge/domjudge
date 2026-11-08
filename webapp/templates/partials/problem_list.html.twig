@@ -90,33 +90,36 @@
                                                         {% endif %}
                                                         {% set stat = stats.problems[probid][index][bucket] %}
                                                         {% set frozen = stats.freezeBucket is not null and bucket >= stats.freezeBucket %}
-                                                        {% set count = stat.count %}
-                                                        {% if maxBucketSize == 0 %}
-                                                            {% set level = 0 %}
-                                                        {% else %}
-                                                            {% set level = (count / maxBucketSize * 9) | round(0, 'ceil') %}
+                                                        {# Frozen bins have one total for both rows, so show it once, spanning both. #}
+                                                        {% if correct or not frozen %}
+                                                            {% set count = stat.count %}
+                                                            {% if maxBucketSize == 0 %}
+                                                                {% set level = 0 %}
+                                                            {% else %}
+                                                                {% set level = (count / maxBucketSize * 9) | round(0, 'ceil') %}
+                                                            {% endif %}
+                                                            {% if count == 1 %}
+                                                                {% set submissionText = 'submission' %}
+                                                            {% else %}
+                                                                {% set submissionText = 'submissions' %}
+                                                            {% endif %}
+                                                            {% if frozen %}
+                                                                {% set maxBucketSize = max(1, stats.maxBucketSizeCorrect, stats.maxBucketSizeIncorrect) %}
+                                                                {% set level = (count / maxBucketSize * 9) | round(0, 'ceil') %}
+                                                                {% set itemClass = 'problem-stats-frozen frozen-' ~ level %}
+                                                                {% set label = count ~ ' ' ~ submissionText ~ ' in freeze' %}
+                                                            {% else %}
+                                                                {% set itemClass = index ~ '-' ~ level %}
+                                                                {% set label = count ~ ' ' ~ index ~ ' ' ~ submissionText %}
+                                                            {% endif %}
+                                                            <div
+                                                                class="problem-stats-item {{ itemClass }}"
+                                                                data-bs-toggle="tooltip"
+                                                                data-bs-placement="top"
+                                                                data-bs-html="true"
+                                                                title="Between {{ stat.start.timestamp | printtime(null, contest, false) }} and {{ stat.end.timestamp | printtime(null, contest, false) }}:<br/>{{ label }}">
+                                                            </div>
                                                         {% endif %}
-                                                        {% if count == 1 %}
-                                                            {% set submissionText = 'submission' %}
-                                                        {% else %}
-                                                            {% set submissionText = 'submissions' %}
-                                                        {% endif %}
-                                                        {% if frozen %}
-                                                            {% set maxBucketSize = max(1, stats.maxBucketSizeCorrect, stats.maxBucketSizeIncorrect) %}
-                                                            {% set level = (count / maxBucketSize * 9) | round(0, 'ceil') %}
-                                                            {% set itemClass = 'frozen' ~ '-' ~ level %}
-                                                            {% set label = count ~ ' ' ~ submissionText ~ ' in freeze' %}
-                                                        {% else %}
-                                                            {% set itemClass = index ~ '-' ~ level %}
-                                                            {% set label = count ~ ' ' ~ index ~ ' ' ~ submissionText %}
-                                                        {% endif %}
-                                                        <div
-                                                            class="problem-stats-item {{ itemClass }}"
-                                                            data-bs-toggle="tooltip"
-                                                            data-bs-placement="top"
-                                                            data-bs-html="true"
-                                                            title="Between {{ stat.start.timestamp | printtime(null, contest, false) }} and {{ stat.end.timestamp | printtime(null, contest, false) }}:<br/>{{ label }}">
-                                                        </div>
                                                     {% endfor %}
                                                 {% endfor %}
                                                 {% if teamStats is defined %}

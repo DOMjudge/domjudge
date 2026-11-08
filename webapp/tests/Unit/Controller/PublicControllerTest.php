@@ -339,18 +339,18 @@ class PublicControllerTest extends BaseTestCase
         $this->verifyPageResponse('GET', '/public/problems', 200);
 
         $boxes            = $this->client->getCrawler()->filter('.problem-stats-item');
-        $correctClasses   = array_map(fn(int $n) => 'problem-stats-item correct-' . $n, range(1, 9));
-        $incorrectClasses = array_map(fn(int $n) => 'problem-stats-item incorrect-' . $n, range(1, 9));
-        $frozenClasses    = array_map(fn(int $n) => 'problem-stats-item frozen-' . $n, range(1, 9));
+        $correctClasses   = array_map(fn(int $n) => 'correct-' . $n, range(1, 9));
+        $incorrectClasses = array_map(fn(int $n) => 'incorrect-' . $n, range(1, 9));
+        $frozenClasses    = array_map(fn(int $n) => 'frozen-' . $n, range(1, 9));
         $correctBoxes     = $incorrectBoxes = $frozenBoxes = [];
         /** @var \DOMElement $box */
         foreach ($boxes as $box) {
-            $class = $box->getAttribute('class');
-            if (in_array($class, $correctClasses)) {
+            $classes = explode(' ', $box->getAttribute('class'));
+            if (array_intersect($classes, $correctClasses)) {
                 $correctBoxes[] = $box;
-            } elseif (in_array($class, $incorrectClasses)) {
+            } elseif (array_intersect($classes, $incorrectClasses)) {
                 $incorrectBoxes[] = $box;
-            } elseif (in_array($class, $frozenClasses)) {
+            } elseif (array_intersect($classes, $frozenClasses)) {
                 $frozenBoxes[] = $box;
             }
         }
@@ -360,20 +360,21 @@ class PublicControllerTest extends BaseTestCase
         self::assertCount($expectedRedBoxes, $incorrectBoxes);
         self::assertCount($expectedBlueBoxes, $frozenBoxes);
         // Whenever there is a freeze, it starts in bin 16 (4:00-4:15), so the last four bins
-        // of each problem are frozen in both rows, also the ones without submissions.
+        // of each problem are frozen, also the ones without submissions.
         self::assertCount(
-            $expectedBlueBoxes > 0 ? 8 * $demoContest->getProblems()->count() : 0,
+            $expectedBlueBoxes > 0 ? 4 * $demoContest->getProblems()->count() : 0,
             $this->client->getCrawler()->filter('.problem-stats-item[class*="frozen-"]')
         );
     }
 
     public static function provideTestProblemStatistics(): Generator
     {
-        yield [false, false, 1, 1, 6]; // Keep both times, we expect one green, one red and six blue boxes (2 around the freeze and 4 at the end)
+        // Frozen bins are a single box spanning both rows.
+        yield [false, false, 1, 1, 3]; // Keep both times, we expect one green, one red and three blue boxes (1 around the freeze and 2 at the end)
         yield [true, true, 3, 3, 0]; // Remove both times, we expect three green and three red boxes
-        yield [false, true, 1, 1, 6]; // Remove the unfreeze time but not the freeze time, we expect one green, one red and six blue boxes
+        yield [false, true, 1, 1, 3]; // Remove the unfreeze time but not the freeze time, we expect one green, one red and three blue boxes
         // Freeze exactly at the start of bin 16, so bin 15 (3:45-4:00) ends at the freeze and should not be frozen.
-        yield [false, false, 1, 1, 6, '2022-01-01 04:00:00 Europe/Amsterdam'];
+        yield [false, false, 1, 1, 3, '2022-01-01 04:00:00 Europe/Amsterdam'];
         // A correct submission after the contest end is too late and should not be shown.
         yield [true, true, 2, 3, 0, null, true];
         // An ignored submission should not be shown either.
