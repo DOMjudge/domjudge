@@ -17,6 +17,7 @@ use App\Utils\Utils;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
+use Symfony\Component\DomCrawler\Crawler;
 
 class PublicControllerTest extends BaseTestCase
 {
@@ -365,6 +366,15 @@ class PublicControllerTest extends BaseTestCase
             $expectedBlueBoxes > 0 ? 4 * $demoContest->getProblems()->count() : 0,
             $this->client->getCrawler()->filter('.problem-stats-item[class*="frozen-"]')
         );
+        // The freeze marker on the time axis is only shown while there are frozen bins,
+        // under the first frozen bin. That is bin 16 (4:00-4:15), the first column of the axis being bin 0.
+        $freezeMarkers = $this->client->getCrawler()->filter('.problem-stats-freeze')->each(
+            fn(Crawler $marker) => $marker->attr('style')
+        );
+        self::assertSame($expectedBlueBoxes > 0, count($freezeMarkers) > 0);
+        foreach ($freezeMarkers as $style) {
+            self::assertSame('grid-column: 17', $style);
+        }
     }
 
     public static function provideTestProblemStatistics(): Generator

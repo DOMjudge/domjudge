@@ -159,8 +159,18 @@
                                                 {% endif %}
                                                 <span></span>
                                                 <div class="problem-stats-axis">
-                                                    <span>{{ stats.problems[probid].correct[0].start.timestamp | printtime(null, contest, false) }}</span>
-                                                    <span>{{ stats.problems[probid].correct[stats.numBuckets - 1].end.timestamp | printtime(null, contest, false) }}</span>
+                                                    <span class="problem-stats-axis-start">{{ stats.problems[probid].correct[0].start.timestamp | printtime(null, contest, false) }}</span>
+                                                    <span class="problem-stats-axis-end">{{ stats.problems[probid].correct[stats.numBuckets - 1].end.timestamp | printtime(null, contest, false) }}</span>
+                                                    {% if stats.freezeBucket is not null %}
+                                                        <span
+                                                            class="problem-stats-freeze"
+                                                            style="grid-column: {{ stats.freezeBucket + 1 }}"
+                                                            data-bs-toggle="tooltip"
+                                                            data-bs-placement="top"
+                                                            title="Scoreboard frozen since {{ contest.freezetime | printtime(null, contest, false) }}">
+                                                            <i class="fas fa-snowflake"></i>
+                                                        </span>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                         {% endif %}

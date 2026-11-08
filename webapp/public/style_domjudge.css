@@ -755,8 +755,9 @@ tr.ignore td, td.ignore, span.ignore {
 /* One row per kind of submission, with a label in front and one cell per time bin.
    The cells shrink on narrow cards, so the grid never gets wider than the card. */
 .problem-stats {
+    --problem-stats-columns: repeat(var(--problem-stats-bins, 20), minmax(4px, 10px));
     display: grid;
-    grid-template-columns: max-content repeat(var(--problem-stats-bins, 20), minmax(4px, 10px));
+    grid-template-columns: max-content var(--problem-stats-columns);
     gap: 3px;
     justify-content: center;
     align-items: center;
@@ -803,13 +804,34 @@ tr.ignore td, td.ignore, span.ignore {
     color: var(--bs-primary);
 }
 
+/* The axis shares the bin column template and gap, so the freeze marker lines up with the first frozen bin. */
 .problem-stats-axis {
     grid-column: 2 / -1;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: var(--problem-stats-columns);
+    column-gap: inherit;
     font-size: .65rem;
     line-height: 1;
     color: var(--bs-secondary-color);
+}
+
+.problem-stats-axis > * {
+    grid-row: 1;
+}
+
+.problem-stats-axis-start {
+    grid-column: 1 / -1;
+    justify-self: start;
+}
+
+.problem-stats-axis-end {
+    grid-column: 1 / -1;
+    justify-self: end;
+}
+
+.problem-stats-freeze {
+    justify-self: center;
+    color: #0366d6;
 }
 
 .problem-stats-item.correct-0 {

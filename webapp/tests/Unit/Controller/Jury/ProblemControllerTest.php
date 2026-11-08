@@ -408,5 +408,6 @@ class ProblemControllerTest extends JuryControllerTestCase
                 ? $matches[1] : null
         );
         self::assertSame(['correct' => 3, 'incorrect' => 3], array_count_values(array_filter($levels)));
+        self::assertCount(0, $crawler->filter('.problem-stats-freeze'));
     }
 }
