@@ -143,8 +143,8 @@ void resize_pipe(int fd) {
 
 // Write all the data into the file descriptor. It is assumed that the file
 // descriptor is *not* NONBLOCK. This function blocks until all the data is
-// written.
-void write_all(fd_t fd, const char *data, ssize_t size) {
+// written. Returns whether all the data was written.
+bool write_all(fd_t fd, const char *data, ssize_t size) {
   ssize_t index = 0;
   while (index < size) {
     ssize_t nwrite = write(fd, data + index, size - index);
@@ -152,10 +152,11 @@ void write_all(fd_t fd, const char *data, ssize_t size) {
     // usually don't).
     if (nwrite < 0) {
       // This may fail, for example if the solution closes stdin.
-      break;
+      return false;
     }
     index += nwrite;
   }
+  return true;
 }
 
 // This struct contains all the metadata and runtime information of a process to
@@ -278,6 +279,7 @@ struct process_t {
       logmsg(LOG_DEBUG, "closing fd: {} (proxy -> process) of {}",
              proxy_to_process, pid);
       close(proxy_to_process);
+      proxy_to_process = -1;
     }
   }
 
@@ -288,6 +290,7 @@ struct process_t {
       logmsg(LOG_DEBUG, "closing fd: {} (process -> proxy) of {}",
              process_to_proxy, pid);
       close(process_to_proxy);
+      process_to_proxy = -1;
     }
   }
 
@@ -832,7 +835,16 @@ struct state_t {
         error(errno, "failed to read from pipe of #{}", from.index);
       }
       // We've read nread bytes, write them to the other process' pipe.
-      write_all(to.proxy_to_process, buffer, nread);
+      if (to.proxy_to_process != -1 &&
+          !write_all(to.proxy_to_process, buffer, nread)) {
+        // The other process closed its stdin or exited.
+        to.close_input_fd();
+      }
+      // The other process cannot receive the data anymore, so drop it. We
+      // still read it, otherwise the process blocks on a full pipe.
+      if (to.proxy_to_process == -1) {
+        continue;
+      }
       // Write them also to the output file.
       output_file.write(buffer, nread, from);
 
@@ -906,8 +918,10 @@ struct state_t {
             continue;
           }
           auto &to = processes[1 - j];
-          // Do not write to an exited process.
-          if (to.exited) {
+          // Keep reading from the first process when the second one exited,
+          // so that it does not block on a full pipe and can still report
+          // its result. pump_proxy_pipe() does not forward the data then.
+          if (to.exited && j != 0) {
             break;
           }
           pump_proxy_pipe(from, to, output_file);
