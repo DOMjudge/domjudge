@@ -1,10 +1,14 @@
 // default_validator from kattis problemtools package
 // licensed under MIT license
 //
-// modified: float comparison
+// modified:
+// - removed undefined behaviour from cctype functions
+// - float comparison
+// - use more c++
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -13,17 +17,17 @@
 #include <cstdarg>
 #include <cctype>
 
-const int EXIT_AC = 42;
-const int EXIT_WA = 43;
+constexpr int EXIT_AC = 42;
+constexpr int EXIT_WA = 43;
 
 std::ifstream judgein, judgeans;
-FILE *judgemessage = NULL;
-FILE *diffpos = NULL;
+FILE *judgemessage = nullptr;
+FILE *diffpos = nullptr;
 int judgeans_pos, stdin_pos;
 int judgeans_line, stdin_line;
 
 /* The floating point type we use internally: */
-typedef long double flt;
+using flt = long double;
 
 void wrong_answer(const char *err, ...) {
 	va_list pvar;
@@ -48,12 +52,34 @@ void judge_error(const char *err, ...) {
 	assert(!"Judge Error");
 }
 
-bool isfloat(const char *s, flt &val) {
-	char trash[20];
-	flt v;
-	if (sscanf(s, "%Lf%10s", &v, trash) != 1) return false;
-	val = v;
-	return true;
+bool is_sign(char c) {return c == '+' || c == '-';}
+bool is_digit(char c) {return c >= '0' && c <= '9';}
+bool is_exp(char c) {return c == 'e' || c == 'E';}
+bool is_float(const char *s, flt &val) {
+	std::ptrdiff_t i = 0;
+	if (is_sign(s[i])) i++;
+	bool digits = is_digit(s[i]);
+	while (is_digit(s[i])) i++;
+	if (s[i] == '.') {
+		i++;
+		digits |= is_digit(s[i]);
+		while (is_digit(s[i])) i++;
+	}
+	if (!digits) return false;
+	if (is_exp(s[i])) {
+		i++;
+		if (is_sign(s[i])) i++;
+		if (!is_digit(s[i])) return false;
+		while (is_digit(s[i])) i++;
+	}
+	if (s[i] != '\0') return false;
+
+	errno = 0;
+	char* end = nullptr;
+	flt v = std::strtold(s, &end);
+    if (end != s + i || errno != 0) return false;
+    val = v;
+    return true;
 }
 
 template <typename Stream>
@@ -74,57 +100,43 @@ FILE *openfeedback(const char *feedbackdir, const char *feedback, const char *wh
 }
 
 // The behavior of std::tolower on (signed) char is undefined.
-char tolower_char(char c)
-{
+char tolower_char(char c) {
     return static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
 }
 
-bool equal_case_insensitive(std::string a, std::string b)
-{
+bool equal_case_insensitive(std::string a, std::string b) {
 	for (char &c : a) c = tolower_char(c);
 	for (char &c : b) c = tolower_char(c);
-
 	return a==b;
 }
 
-/* Test two floating-point numbers for equality, accounting for +/-INF, NaN, and precision.
+/* Test two floating-point numbers for equality, accounting for precision.
  * Float `jval` is considered the reference value for relative error.
  */
 void compare_float(const std::string &judge, const std::string &team, flt jval, flt tval, flt float_abs_tol, flt float_rel_tol, const std::string &extra_msg) {
-	/* Finite values are compared with some tolerance */
-	if (std::isfinite(tval) && std::isfinite(jval)) {
-		flt absdiff = fabsl(tval-jval);
-		flt reldiff = fabsl((tval-jval)/jval);
-		if (float_abs_tol >= 0 && float_rel_tol >= 0) {
-			if (absdiff > float_abs_tol && reldiff > float_rel_tol) {
-				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Absolute difference: %Lg (tolerance: %Lg)\n Relative difference: %Lg (tolerance: %Lg)%s",
-				             judge.c_str(), team.c_str(),
-				             absdiff, float_abs_tol,
-				             reldiff, float_rel_tol,
-				             extra_msg.c_str());
-			}
-		} else if (float_abs_tol >= 0) {
-			if (absdiff > float_abs_tol) {
-				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Absolute difference: %Lg (tolerance: %Lg)%s",
-				             judge.c_str(), team.c_str(), absdiff, float_abs_tol, extra_msg.c_str());
-			}
-		} else if (float_rel_tol >= 0) {
-			if (reldiff > float_rel_tol) {
-				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Relative difference: %Lg (tolerance: %Lg)%s",
-				             judge.c_str(), team.c_str(), reldiff, float_rel_tol, extra_msg.c_str());
-			}
+	assert(std::isfinite(jval));
+	assert(std::isfinite(tval));
+
+	flt absdiff = fabsl(tval-jval);
+	flt reldiff = fabsl((tval-jval)/jval);
+	if (float_abs_tol >= 0 && float_rel_tol >= 0) {
+		if (absdiff > float_abs_tol && reldiff > float_rel_tol) {
+			wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Absolute difference: %Lg (tolerance: %Lg)\n Relative difference: %Lg (tolerance: %Lg)%s",
+			             judge.c_str(), team.c_str(),
+			             absdiff, float_abs_tol,
+			             reldiff, float_rel_tol,
+			             extra_msg.c_str());
 		}
-	/* NaN is equal to NaN */
-	} else if (std::isnan(jval) && std::isnan(tval)) {
-		return;
-	/* Infinite values are equal if their sign matches */
-	} else if (std::isinf(jval) && std::isinf(tval)) {
-		if (std::signbit(jval) != std::signbit(tval)) {
-			wrong_answer("Expected float %s, got: %s%s", judge.c_str(), team.c_str(), extra_msg.c_str());
+	} else if (float_abs_tol >= 0) {
+		if (absdiff > float_abs_tol) {
+			wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Absolute difference: %Lg (tolerance: %Lg)%s",
+			             judge.c_str(), team.c_str(), absdiff, float_abs_tol, extra_msg.c_str());
 		}
-	/* Values in different classes are always different. */
-	} else {
-		wrong_answer("Expected float %s, got: %s%s", judge.c_str(), team.c_str(), extra_msg.c_str());
+	} else if (float_rel_tol >= 0) {
+		if (reldiff > float_rel_tol) {
+			wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Relative difference: %Lg (tolerance: %Lg)%s",
+			             judge.c_str(), team.c_str(), reldiff, float_rel_tol, extra_msg.c_str());
+		}
 	}
 }
 
@@ -151,15 +163,15 @@ int main(int argc, char **argv) {
 		} else if (!strcmp(argv[a], "space_change_sensitive")) {
 			space_change_sensitive = true;
 		} else if (!strcmp(argv[a], "float_absolute_tolerance")) {
-			if (a+1 == argc || !isfloat(argv[a+1], float_abs_tol))
+			if (a+1 == argc || !is_float(argv[a+1], float_abs_tol))
 				judge_error(USAGE, argv[0]);
 			++a;
 		} else if (!strcmp(argv[a], "float_relative_tolerance")) {
-			if (a+1 == argc || !isfloat(argv[a+1], float_rel_tol))
+			if (a+1 == argc || !is_float(argv[a+1], float_rel_tol))
 				judge_error(USAGE, argv[0]);
 			++a;
 		} else if (!strcmp(argv[a], "float_tolerance")) {
-			if (a+1 == argc || !isfloat(argv[a+1], float_rel_tol))
+			if (a+1 == argc || !is_float(argv[a+1], float_rel_tol))
 				judge_error(USAGE, argv[0]);
 			float_abs_tol = float_rel_tol;
 			++a;
@@ -226,8 +238,8 @@ int main(int argc, char **argv) {
 		}
 
 		flt jval, tval;
-		if (use_floats && isfloat(judge.c_str(), jval)) {
-			if (!isfloat(team.c_str(), tval)) {
+		if (use_floats && is_float(judge.c_str(), jval)) {
+			if (!is_float(team.c_str(), tval)) {
 				wrong_answer("Expected float, got: %s%s", team.c_str(), extra_msg.c_str());
 			}
 			compare_float(judge, team, jval, tval, float_abs_tol, float_rel_tol, extra_msg);
