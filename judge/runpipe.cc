@@ -186,6 +186,8 @@ struct process_t {
   pid_t pid = -1;
 
   bool exited = false;
+  // Whether the proxy listens for data from this process.
+  bool watched = true;
   // Information about the exited process. Meaningful only if exited == true.
   int exitInfo = -1;
 
@@ -796,6 +798,19 @@ struct state_t {
     return true;
   }
 
+  // Stop listening for the data coming from the process, without closing the
+  // pipe. Closing it would make the writes of the process fail.
+  void stop_watching(process_t &proc) {
+    if (proc.process_to_proxy == -1 || !proc.watched) {
+      return;
+    }
+    logmsg(LOG_DEBUG, "no longer reading from #{}", proc.index);
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, proc.process_to_proxy, nullptr)) {
+      error(errno, "failed to remove fd {} from epoll", proc.process_to_proxy);
+    }
+    proc.watched = false;
+  }
+
   // Check if every process has exited.
   bool has_everyone_exited() {
     return all_of(processes.begin(), processes.end(),
@@ -810,6 +825,14 @@ struct state_t {
     const size_t BUF_SIZE = 1024 * 1024;
     char buffer[BUF_SIZE];
     while (true) {
+      // The second process (the submission) is not trusted. When its output
+      // cannot be delivered anymore, stop reading it instead of dropping it,
+      // otherwise it can keep us busy for as long as it runs. It then blocks
+      // on a full pipe, as when the first process does not read its stdin.
+      if (to.proxy_to_process == -1 && from.index != 0) {
+        stop_watching(from);
+        return;
+      }
       // Read from the process to the proxy until EOF or the read would
       // block. Do not fill the buffer completely since output_file_t needs to
       // write an extra \n at its end.
@@ -927,14 +950,7 @@ struct state_t {
           if (fd != from.process_to_proxy) {
             continue;
           }
-          auto &to = processes[1 - j];
-          // Keep reading from the first process when the second one exited,
-          // so that it does not block on a full pipe and can still report
-          // its result. pump_proxy_pipe() does not forward the data then.
-          if (to.exited && j != 0) {
-            break;
-          }
-          pump_proxy_pipe(from, to, output_file);
+          pump_proxy_pipe(from, processes[1 - j], output_file);
         }
       }
     }
