@@ -1091,4 +1091,24 @@ part.";
         $stringDouble = static fn($item) => strval($item) . strval($item);
         self::assertEquals($expectedOutput, Utils::reindex($input, $stringDouble));
     }
+
+    /**
+     * Test that UTF-8 source code is shown as is, without a BOM, and that other encodings are converted.
+     */
+    #[DataProvider('provideReencodeUtf8')]
+    public function testReencodeUtf8(string $source, string $expected): void
+    {
+        self::assertSame($expected, Utils::reencodeUtf8($source));
+    }
+
+    public static function provideReencodeUtf8(): Generator
+    {
+        $code = "#include <iostream>\nint main() { return 0; }\n";
+        yield 'ASCII' => [$code, $code];
+        yield 'ASCII with BOM' => ["\xEF\xBB\xBF" . $code, $code];
+        yield 'UTF-8' => ["// año\n" . $code, "// año\n" . $code];
+        yield 'UTF-8 with BOM' => ["\xEF\xBB\xBF// año\n" . $code, "// año\n" . $code];
+        yield 'UTF-8 with BOM and symbols' => ["\xEF\xBB\xBF" . $code . "// ° —\n", $code . "// ° —\n"];
+        yield 'Windows-1252' => ["// Espa\xF1a: a\xF1o\n" . $code, "// España: año\n" . $code];
+    }
 }

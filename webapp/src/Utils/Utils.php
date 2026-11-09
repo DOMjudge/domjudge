@@ -1065,6 +1065,12 @@ class Utils
     }
 
     public static function reencodeUtf8(string $source): string {
+        // Valid UTF-8 needs no detection: mb_detect_encoding() picks a single-byte encoding
+        // (e.g. Windows-1251) for some UTF-8 files that start with a BOM, which then shows up as
+        // mojibake. Drop the BOM, so it does not end up in a resubmitted (edited) file either.
+        if (mb_check_encoding($source, 'UTF-8')) {
+            return str_starts_with($source, "\xEF\xBB\xBF") ? substr($source, 3) : $source;
+        }
         $detectOrder = array_unique(array_merge(mb_detect_order(), mb_list_encodings()));
         $encoding = mb_detect_encoding($source, $detectOrder, strict: true);
         if ($encoding !== false) {
