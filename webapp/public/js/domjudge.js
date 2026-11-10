@@ -859,6 +859,8 @@ function initializeAjaxModals()
     });
 }
 
+var scoreheaderObserver = null;
+
 function pinScoreheader()
 {
     var $scoreHeader = $('.scoreheader');
@@ -869,11 +871,12 @@ function pinScoreheader()
     if (!static_scoreboard) {
         var $sticky = $scoreHeader.closest('thead').add($scoreHeader.find('th'));
         $sticky.css('top', $('.fixed-top').css('height'));
-        if ('ResizeObserver' in window) {
-            var resizeObserver = new ResizeObserver(() => {
-                $sticky.css('top', $('.fixed-top').css('height'));
-            });
-            resizeObserver.observe($('.fixed-top')[0]);
+        if ('ResizeObserver' in window && scoreheaderObserver === null) {
+            var fixedTop = $('.fixed-top')[0];
+            if (fixedTop) {
+                scoreheaderObserver = new ResizeObserver(pinScoreheader);
+                scoreheaderObserver.observe(fixedTop);
+            }
         }
     }
 }
