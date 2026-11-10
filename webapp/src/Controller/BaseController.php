@@ -38,6 +38,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
@@ -54,6 +55,13 @@ abstract class BaseController extends AbstractController
         protected readonly DOMJudgeService $dj,
         protected readonly KernelInterface $kernel,
     ) {}
+
+    public static function getSubscribedServices(): array
+    {
+        return array_merge(parent::getSubscribedServices(), [
+            'profiler' => '?' . Profiler::class,
+        ]);
+    }
 
     /**
      * Check whether the referrer in the request is of the current application.
@@ -751,6 +759,11 @@ abstract class BaseController extends AbstractController
      */
     protected function streamResponse(RequestStack $requestStack, callable $callback): StreamedResponse
     {
+        // Disable the profiler toolbar to avoid OOMs on long-running streamed responses.
+        if ($this->container->has('profiler')) {
+            $this->container->get('profiler')->disable();
+        }
+
         // Keep the current request, since streamed response removes it from the request stack and
         // we need it for sessions. See https://github.com/symfony/symfony/issues/46743.
         $mainRequest = $requestStack->getMainRequest();
