@@ -24,8 +24,17 @@ readonly class RefreshCacheCommand
     public function __invoke(SymfonyStyle $style): int
     {
         $contests = $this->em->getRepository(Contest::class)->findAll();
+        if (!$contests) {
+            $style->info('No contests found.');
+            return Command::SUCCESS;
+        }
         foreach ($contests as $contest) {
-            $this->scoreboardService->refreshCache($contest);
+            $style->writeln("Refreshing cache for contest {$contest->getName()} ({$contest->getExternalid()})...");
+            $progressBar = $style->createProgressBar(100);
+            $progressBar->start();
+            $this->scoreboardService->refreshCache($contest, $progressBar->setProgress(...));
+            $progressBar->finish();
+            $style->newLine(2);
             $style->success("Refreshed cache for contest {$contest->getName()}.");
         }
         return Command::SUCCESS;
