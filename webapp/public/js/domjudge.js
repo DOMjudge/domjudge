@@ -554,6 +554,7 @@ function processAjaxResponse(jqXHR, data) {
 }
 
 var refreshHandler = null;
+var refreshRequest = null;
 var refreshEnabled = false;
 var refreshScrollListenerAdded = false;
 function enableRefresh($url, $after, usingAjax) {
@@ -563,13 +564,21 @@ function enableRefresh($url, $after, usingAjax) {
     var refresh = function () {
         if (usingAjax) {
             $('.loading-indicator').addClass('ajax-loader');
-            $.ajax({
+            var jqXHR = $.ajax({
                 url: $url,
                 cache: false
-            }).done(function(data, status, jqXHR) {
+            });
+            refreshRequest = jqXHR;
+            jqXHR.done(function(data, status, jqXHR) {
                 processAjaxResponse(jqXHR, data);
-                $('.loading-indicator').removeClass('ajax-loader');
-                refreshHandler = setTimeout(refresh, $after * 1000);
+                if (refreshEnabled) {
+                    refreshHandler = setTimeout(refresh, $after * 1000);
+                }
+            }).always(function() {
+                if (refreshRequest === jqXHR) {
+                    $('.loading-indicator').removeClass('ajax-loader');
+                    refreshRequest = null;
+                }
             });
         } else {
             window.location = $url;
@@ -601,12 +610,15 @@ function disableRefresh(usingAjax) {
     if (!refreshEnabled) {
         return;
     }
-    if (usingAjax) {
-        clearInterval(refreshHandler);
-    } else {
-        clearTimeout(refreshHandler);
-    }
     refreshEnabled = false;
+    clearTimeout(refreshHandler);
+    refreshHandler = null;
+    if (refreshRequest) {
+        var jqXHR = refreshRequest;
+        refreshRequest = null;
+        jqXHR.abort();
+    }
+    $('.loading-indicator').removeClass('ajax-loader');
     setCookie('domjudge_refresh', 0);
 }
 
