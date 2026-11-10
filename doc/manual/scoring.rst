@@ -24,7 +24,7 @@ Key points:
   granularity instead.
 - If two teams have the same score, they are sorted by the time of their last accepted submission.
 
-.. _CCS specification: https://ccs-specs.icpc.io/draft/ccs_system_requirements#scoring
+.. _CCS specification: https://ccs-specs.icpc.io/draft/ccs#scoring
 
 Partial scoring (IOI-style)
 ---------------------------
