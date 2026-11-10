@@ -152,4 +152,25 @@ class ScoreboardServiceTest extends KernelTestCase
         $teamB = ScoreboardService::getICPCScoreKey(8, 666, 420);
         self::assertTrue($teamA < $teamB);
     }
+
+    public function testRuntimeScoreKeyEqualTeams(): void
+    {
+        $teamA = ScoreboardService::getRuntimeScoreKey(7, 1337);
+        $teamB = ScoreboardService::getRuntimeScoreKey(7, 1337);
+        self::assertEquals($teamA, $teamB);
+    }
+
+    public function testRuntimeScoreKeyLowerRuntimeWins(): void
+    {
+        $teamA = ScoreboardService::getRuntimeScoreKey(7, 1337);
+        $teamB = ScoreboardService::getRuntimeScoreKey(7, 1336);
+        self::assertTrue($teamA < $teamB);
+    }
+
+    public function testRuntimeScoreKeySolvedMoreWins(): void
+    {
+        $teamA = ScoreboardService::getRuntimeScoreKey(7, 1);
+        $teamB = ScoreboardService::getRuntimeScoreKey(8, 9999);
+        self::assertTrue($teamA < $teamB);
+    }
 }
