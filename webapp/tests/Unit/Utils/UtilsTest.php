@@ -1091,4 +1091,44 @@ part.";
         $stringDouble = static fn($item) => strval($item) . strval($item);
         self::assertEquals($expectedOutput, Utils::reindex($input, $stringDouble));
     }
+
+    public function testObFlushIfPossible(): void
+    {
+        $flushed = '';
+        ob_start(static function (string $chunk) use (&$flushed): string {
+            $flushed .= $chunk;
+            return '';
+        });
+        try {
+            echo 'streamed-chunk';
+            self::assertTrue(Utils::ob_flush_if_possible());
+            self::assertSame('streamed-chunk', $flushed);
+        } finally {
+            ob_end_clean();
+        }
+
+        ob_start(flags: PHP_OUTPUT_HANDLER_REMOVABLE);
+        try {
+            echo 'buffered-chunk';
+            self::assertFalse(Utils::ob_flush_if_possible());
+            self::assertSame('buffered-chunk', ob_get_contents());
+        } finally {
+            ob_get_clean();
+        }
+    }
+
+    public function testObFlushIfPossibleWithoutActiveBuffer(): void
+    {
+        $autoload = dirname(__DIR__, 3) . '/vendor/autoload.php';
+        $code = sprintf(
+            'require %s; while (ob_get_level() > 0) { ob_end_clean(); } '
+            . 'set_error_handler(static function (int $severity, string $message): never { throw new ErrorException($message, 0, $severity); }); '
+            . 'var_export(\App\Utils\Utils::ob_flush_if_possible());',
+            var_export($autoload, true)
+        );
+        $cmd = sprintf('%s -r %s 2>&1', escapeshellarg(PHP_BINARY), escapeshellarg($code));
+        exec($cmd, $output, $exitCode);
+        self::assertSame(0, $exitCode, implode("\n", $output));
+        self::assertSame('false', implode("\n", $output));
+    }
 }

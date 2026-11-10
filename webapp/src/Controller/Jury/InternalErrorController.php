@@ -165,7 +165,7 @@ class InternalErrorController extends BaseController
             $profiler?->disable();
             $progressReporter = function (int $progress, string $log, ?string $message = null): void {
                 echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => $message]);
-                ob_flush();
+                Utils::ob_flush_if_possible();
                 flush();
             };
             return $this->streamResponse($this->requestStack, function () use ($progressReporter, $internalError): void {

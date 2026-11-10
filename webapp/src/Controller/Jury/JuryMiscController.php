@@ -228,7 +228,7 @@ class JuryMiscController extends BaseController
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             $progressReporter = function (int $progress, string $log, ?string $message = null): void {
                 echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => $message]);
-                ob_flush();
+                Utils::ob_flush_if_possible();
                 flush();
             };
             return $this->streamResponse($this->requestStack, function () use ($contests, $progressReporter, $scoreboardService): void {
