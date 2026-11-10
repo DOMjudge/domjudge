@@ -747,7 +747,7 @@ abstract class BaseController extends AbstractController
     /**
      * Stream a response with the given callback.
      *
-     * The callback can use ob_flush(); flush(); to flush its output to the browser.
+     * The callback can use Utils::ob_flush_if_possible(); flush(); to flush its output to the browser.
      */
     protected function streamResponse(RequestStack $requestStack, callable $callback): StreamedResponse
     {
