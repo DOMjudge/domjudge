@@ -10,7 +10,7 @@ fi
 rm -rf $CHROOT
 
 COMMANDARGS=""
-if [ -n "${ARCH+x}" ]; then
+if [ -n "$ARCH" ]; then
     COMMANDARGS="-a $ARCH $COMMANDARGS"
 fi
 
@@ -27,7 +27,7 @@ fi
 }
 
 @test "Test chroot fails if unsupported architecture given" {
-    if [ -n "${ARCH+x}" ]; then
+    if [ -n "$ARCH" ]; then
         skip "Already an Arch set in the commands."
     fi
     for unsupported_arch in 'dom04' 'arm' '64' 'namd64' 'amd64v2'; do
@@ -42,7 +42,7 @@ fi
     run ./dj_make_chroot $COMMANDARGS
     assert_partial "Done building chroot in $CHROOT"
     assert_success
-    if [ -n "${ARCH+x}" ]; then
+    if [ -n "$ARCH" ]; then
         run ./dj_run_chroot "dpkg --print-architecture"
         assert_partial "$ARCH"
         assert_success
