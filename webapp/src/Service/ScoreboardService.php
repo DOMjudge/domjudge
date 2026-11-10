@@ -25,6 +25,7 @@ use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -139,7 +140,7 @@ class ScoreboardService
             ->setParameter('contest', $contest)
             ->setParameter('team', $team)
             ->getQuery()
-            ->getOneOrNullResult();
+            ->getOneOrNullResult(Query::HYDRATE_SINGLE_SCALAR);
 
         if ($sortKey === null) {
             // '.' sorts before any digit, so this team will be ranked last (which may be actually rank 1 if no team
@@ -155,6 +156,7 @@ class ScoreboardService
             ->andWhere('r.sortKey'.$variant.' > :sortKey')
             ->andWhere('r.contest = :contest')
             ->andWhere('tc.sortorder = :sortorder')
+            ->andWhere('t.enabled = 1')
             ->setParameter('scoring', TeamCategory::TYPE_SCORING)
             ->setParameter('sortKey', $sortKey)
             ->setParameter('contest', $contest)

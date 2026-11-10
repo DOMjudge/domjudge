@@ -443,6 +443,39 @@ class ScoringScoreboardIntegrationTest extends KernelTestCase
         static::assertEquals('30.000000000', $publicScores[$this->teams[0]->getTeamid()]->score);
     }
 
+    public function testScoringFreezeSubmissionDoesNotSplitZeroScoreRanks(): void
+    {
+        $this->contest->setFreezetimeString('+1:00:00');
+        $this->em->flush();
+        $lang = $this->em->getRepository(Language::class)->findByExternalId('c');
+
+        // Team 2 (alphabetically last) scores 60 points during the freeze.
+        $this->createScoringSubmission($lang, $this->problems[0], $this->teams[2], 70*60, [
+            'problem_0_tc_0' => ['correct', '10'],
+            'problem_0_tc_1' => ['correct', '20'],
+            'problem_0_tc_2' => ['correct', '30'],
+        ]);
+        $this->ss->calculateScoreRow($this->contest, $this->teams[2], $this->problems[0]);
+
+        $testTeamIds = array_map(static fn(Team $t) => $t->getTeamid(), $this->teams);
+
+        // Public scoreboard: teams 0 and 1 have no rankcache row while team 2 has a 0-score
+        // public rankcache row; all three must tie at rank 1 in alphabetical order.
+        $publicScoreboard = $this->ss->getScoreboard($this->contest, false);
+        static::assertSame(
+            $testTeamIds,
+            array_values(array_intersect(array_keys($publicScoreboard->getScores()), $testTeamIds))
+        );
+        static::assertScoringScoresMatch([
+            ['team' => $this->teams[0], 'rank' => 1, 'score' => '0.000000000'],
+            ['team' => $this->teams[1], 'rank' => 1, 'score' => '0.000000000'],
+            ['team' => $this->teams[2], 'rank' => 1, 'score' => '0.000000000'],
+        ], $publicScoreboard);
+        foreach ($this->teams as $t) {
+            static::assertSame(1, $this->ss->calculateTeamRank($this->contest, $t, null, false));
+        }
+    }
+
     protected function assertScoringScoresMatch(array $expected_scores, Scoreboard $scoreboard): void
     {
         $scores = $scoreboard->getScores();

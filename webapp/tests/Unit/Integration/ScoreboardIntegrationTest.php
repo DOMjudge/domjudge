@@ -741,6 +741,133 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
     }
 
+    /**
+     * Solving a first problem during the freeze creates a rankcache row whose
+     * public sort key represents 0 solved problems. That must not make the team
+     * jump ahead of (or break ties with) other 0-solve teams without a rankcache
+     * row on the public scoreboard.
+     */
+    public function testFreezeSolveDoesNotLeakViaPublicRankOrOrder(): void
+    {
+        $this->contest->setFreezetimeString('+1:00:00');
+        $this->em->flush();
+
+        $lang = $this->em->getRepository(Language::class)->findByExternalId('cpp');
+
+        // Team 0 submits a wrong answer during the freeze (no rankcache row created).
+        $this->createSubmission($lang, $this->problems[0], $this->teams[0], 65*60, 'wrong-answer');
+        $this->ss->calculateScoreRow($this->contest, $this->teams[0], $this->problems[0]);
+
+        // Team 2 (alphabetically last) solves problem 0 during the freeze (creates a rankcache row).
+        $this->createSubmission($lang, $this->problems[0], $this->teams[2], 70*60, 'correct');
+        $this->ss->calculateScoreRow($this->contest, $this->teams[2], $this->problems[0]);
+
+        $testTeamIds = array_map(static fn(Team $t) => $t->getTeamid(), $this->teams);
+
+        // Public scoreboard: all three teams must tie at rank 1 in alphabetical order (0, 1, 2).
+        $publicScoreboard = $this->ss->getScoreboard($this->contest, false);
+        static::assertSame(
+            $testTeamIds,
+            array_values(array_intersect(array_keys($publicScoreboard->getScores()), $testTeamIds))
+        );
+        static::assertScoresMatch([
+            ['team' => $this->teams[0], 'rank' => 1, 'solved' => 0, 'time' => 0],
+            ['team' => $this->teams[1], 'rank' => 1, 'solved' => 0, 'time' => 0],
+            ['team' => $this->teams[2], 'rank' => 1, 'solved' => 0, 'time' => 0],
+        ], $publicScoreboard);
+        foreach ($this->teams as $t) {
+            static::assertSame(1, $this->ss->calculateTeamRank($this->contest, $t, null, false));
+        }
+
+        // Jury scoreboard: team 2 is rank 1, while teams 0 and 1 tie at rank 2.
+        $juryScoreboard = $this->ss->getScoreboard($this->contest, true);
+        static::assertSame(
+            [
+                $this->teams[2]->getTeamid(),
+                $this->teams[0]->getTeamid(),
+                $this->teams[1]->getTeamid(),
+            ],
+            array_values(array_intersect(array_keys($juryScoreboard->getScores()), $testTeamIds))
+        );
+        static::assertScoresMatch([
+            ['team' => $this->teams[2], 'rank' => 1, 'solved' => 1, 'time' => 70],
+            ['team' => $this->teams[0], 'rank' => 2, 'solved' => 0, 'time' => 0],
+            ['team' => $this->teams[1], 'rank' => 2, 'solved' => 0, 'time' => 0],
+        ], $juryScoreboard);
+        static::assertSame(1, $this->ss->calculateTeamRank($this->contest, $this->teams[2], null, true));
+        static::assertSame(2, $this->ss->calculateTeamRank($this->contest, $this->teams[0], null, true));
+        static::assertSame(2, $this->ss->calculateTeamRank($this->contest, $this->teams[1], null, true));
+    }
+
+    /**
+     * A newly added 0-solve team without a rankcache row must tie with 0-solve
+     * teams that already received rankcache rows from an earlier cache refresh.
+     */
+    public function testNewZeroSolveTeamTiesWithCachedZeroSolveTeams(): void
+    {
+        $this->recalcScoreCaches();
+
+        $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['sortorder' => 0]);
+        $newTeam = (new Team())
+            ->setName(self::CONTEST_NAME . ' team -aaa')
+            ->addCategory($category);
+        $this->em->persist($newTeam);
+        $this->em->flush();
+        $this->teams[] = $newTeam;
+
+        $expectedOrder = [
+            $newTeam->getTeamid(),
+            $this->teams[0]->getTeamid(),
+            $this->teams[1]->getTeamid(),
+            $this->teams[2]->getTeamid(),
+        ];
+
+        foreach ([false, true] as $jury) {
+            $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
+            static::assertSame(
+                $expectedOrder,
+                array_values(array_intersect(array_keys($scoreboard->getScores()), $expectedOrder))
+            );
+            foreach ($this->teams as $t) {
+                static::assertSame(1, $scoreboard->getScores()[$t->getTeamid()]->rank);
+                static::assertSame(1, $this->ss->calculateTeamRank($this->contest, $t, null, $jury));
+            }
+        }
+    }
+
+    /**
+     * With runtime_as_score_tiebreaker enabled, teams without a rankcache row
+     * must still tie on the public scoreboard with teams that solved during freeze.
+     */
+    public function testFreezeSolveDoesNotLeakWithRuntimeTiebreaker(): void
+    {
+        $this->contest->setRuntimeAsScoreTiebreaker(true);
+        $this->contest->setFreezetimeString('+1:00:00');
+        $this->em->flush();
+
+        $lang = $this->em->getRepository(Language::class)->findByExternalId('cpp');
+
+        // Team 2 (alphabetically last) solves problem 0 during the freeze (creates a rankcache row).
+        $this->createSubmissionWithRuntime($lang, $this->problems[0], $this->teams[2], 70*60, 1.0);
+        $this->ss->calculateScoreRow($this->contest, $this->teams[2], $this->problems[0]);
+
+        $testTeamIds = array_map(static fn(Team $t) => $t->getTeamid(), $this->teams);
+
+        $publicScoreboard = $this->ss->getScoreboard($this->contest, false);
+        static::assertSame(
+            $testTeamIds,
+            array_values(array_intersect(array_keys($publicScoreboard->getScores()), $testTeamIds))
+        );
+        static::assertScoresMatch([
+            ['team' => $this->teams[0], 'rank' => 1, 'solved' => 0, 'time' => 0],
+            ['team' => $this->teams[1], 'rank' => 1, 'solved' => 0, 'time' => 0],
+            ['team' => $this->teams[2], 'rank' => 1, 'solved' => 0, 'time' => 0],
+        ], $publicScoreboard);
+        foreach ($this->teams as $t) {
+            static::assertSame(1, $this->ss->calculateTeamRank($this->contest, $t, null, false));
+        }
+    }
+
     protected function assertScoresMatch(array $expected_scores, Scoreboard $scoreboard): void
     {
         $scores = $scoreboard->getScores();
