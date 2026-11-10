@@ -4,8 +4,11 @@
 
 if [ -n "$1" ] && [ "$1" != "default" ]; then
     export ARCH_OPTION="-a $1"
+    # chroot.bats passes this on to dj_make_chroot and checks the result
+    export ARCH="$1"
 else
     export ARCH_OPTION=""
+    unset ARCH
 fi
 
 function finish() {
