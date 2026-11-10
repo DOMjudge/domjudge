@@ -467,8 +467,11 @@ bare-install|install)
 upgrade)
 	read_dbpasswords
 
+	migrations_before=""
 	# Check if we need to upgrade the Doctrine migrations table
-	if ! echo "SHOW CREATE TABLE \`doctrine_migration_versions\`" | mysql "$DBNAME" >/dev/null 2>&1; then
+	if echo "SHOW CREATE TABLE \`doctrine_migration_versions\`" | mysql "$DBNAME" >/dev/null 2>&1; then
+		migrations_before=$(echo "SELECT version FROM \`doctrine_migration_versions\` ORDER BY version;" | mysql "$DBNAME")
+	else
 		symfony_console doctrine:migrations:sync-metadata-storage -n
 		# shellcheck disable=SC2016,SC2028
 		echo 'INSERT INTO `doctrine_migration_versions`
@@ -479,7 +482,12 @@ upgrade)
 	fi
 
 	symfony_console doctrine:migrations:migrate -n
-	symfony_console domjudge:refresh-cache
+	migrations_after=$(echo "SELECT version FROM \`doctrine_migration_versions\` ORDER BY version;" | mysql "$DBNAME")
+	if [ "$migrations_before" != "$migrations_after" ]; then
+		symfony_console domjudge:refresh-cache
+	else
+		verbose "No database migrations executed; skipping scoreboard cache refresh."
+	fi
 	symfony_console domjudge:load-default-data
 	symfony_console domjudge:upgrade-events
 	verbose "DOMjudge database upgrade completed."
