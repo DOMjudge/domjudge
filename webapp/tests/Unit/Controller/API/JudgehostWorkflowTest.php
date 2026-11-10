@@ -153,10 +153,10 @@ class JudgehostWorkflowTest extends BaseTestCase
      *
      * @return array<int, array<string, mixed>> the claimed judge tasks
      */
-    private function claimWorkForOneSubmission(): array
+    private function claimWorkForOneSubmission(string $problem = 'hello'): array
     {
         $this->registerJudgehost();
-        $this->addSubmission();
+        $this->addSubmission(problem: $problem);
 
         $tasks = $this->fetchWork();
         self::assertNotEmpty($tasks, 'expected fetch-work to hand out judge tasks');
@@ -547,14 +547,30 @@ class JudgehostWorkflowTest extends BaseTestCase
         self::assertNotNull($rejudging->getEndtime(), 'the rejudging must be finished');
     }
 
+    public function testIntermediateRunDoesNotApplyRejudging(): void
+    {
+        [$originalJudgingId, , $rejudgingId] = $this->rejudgeOneCorrectSubmission('boolfind');
+
+        $rejudgeTasks = $this->fetchWork();
+        self::assertGreaterThan(1, count($rejudgeTasks));
+
+        $firstTaskId = (int)$rejudgeTasks[0]['judgetaskid'];
+        $this->reportRun($firstTaskId, 'correct');
+
+        $em = $this->freshEm();
+        self::assertFalse($this->judgingForTask($firstTaskId)->getValid());
+        self::assertTrue($em->getRepository(Judging::class)->find($originalJudgingId)->getValid());
+        self::assertNull($em->getRepository(Rejudging::class)->find($rejudgingId)->getEndtime());
+    }
+
     /**
      * Judge a submission, then start an auto-applying rejudging of it.
      *
      * @return array{int, int, int} original judging id, submission id, rejudging id
      */
-    private function rejudgeOneCorrectSubmission(): array
+    private function rejudgeOneCorrectSubmission(string $problem = 'hello'): array
     {
-        $originalTasks = $this->claimWorkForOneSubmission();
+        $originalTasks = $this->claimWorkForOneSubmission($problem);
         foreach ($originalTasks as $task) {
             $this->reportRun((int)$task['judgetaskid'], 'correct');
         }

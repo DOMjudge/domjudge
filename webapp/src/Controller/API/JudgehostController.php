@@ -452,7 +452,9 @@ class JudgehostController extends AbstractFOSRestController
                 $this->dj->auditlog('judging', (string)$judgingId, 'judged',
                                     'compiler-error', $judgehost->getHostname(), $contestExternalid);
 
-                $this->maybeUpdateActiveJudging($judging);
+                if ($claimed) {
+                    $this->maybeUpdateActiveJudging($judging);
+                }
                 if (!$this->config->get('verification_required') &&
                     $judging->getValid()) {
                     $this->eventLogService->log('judging', $judgingId,
@@ -1082,10 +1084,8 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $judging = $judgingRun->getJudging();
-        // The run result has a single writer, so a plain flush is safe for it;
-        // maybeUpdateActiveJudging() handles its own atomicity.
+        // The run result has a single writer, so a plain flush is safe for it.
         $this->em->flush();
-        $this->maybeUpdateActiveJudging($judging);
 
         if ($judging->getValid()) {
             $this->eventLogService->log('judging_run', $judgingRun->getRunid(),
@@ -1207,9 +1207,9 @@ class JudgehostController extends AbstractFOSRestController
                         $judging->setMaxRuntimeForVerdict($maxRunTime);
                     }
                 }
-                $this->maybeUpdateActiveJudging($judging);
             }
             $this->em->flush();
+            $applied = $sendJudgingEvent && $this->maybeUpdateActiveJudging($judging);
 
             // Only update if the current result is different from what we had before.
             // This should only happen when the old result was NULL.
@@ -1269,6 +1269,18 @@ class JudgehostController extends AbstractFOSRestController
                 }
 
                 $this->dj->auditlog('judging', (string)$judging->getJudgingid(), 'judged', $result, $hostname);
+            } elseif ($applied) {
+                // Under full evaluation an earlier failing run already recorded the verdict while
+                // the rejudging was still invalid; recalculate now that it has become valid.
+                $submission = $judging->getSubmission();
+                $contest = $submission->getContest();
+                $team = $submission->getTeam();
+                $problem = $submission->getProblem();
+                $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+
+                if (!$this->config->get('verification_required') && $judging->getValid()) {
+                    $this->balloonService->updateBalloons($contest, $submission, $judging);
+                }
             }
 
             // Send an event for an endtime (and max runtime update).
@@ -1288,16 +1300,17 @@ class JudgehostController extends AbstractFOSRestController
      * happens unless the judging belongs to a rejudging, so the normal judging path pays for
      * neither the transaction nor the locks.
      */
-    private function maybeUpdateActiveJudging(Judging $judging): void
+    private function maybeUpdateActiveJudging(Judging $judging): bool
     {
         if ($judging->getRejudging() === null) {
-            return;
+            return false;
         }
 
         $rejudgingId = $judging->getRejudging()->getRejudgingid();
         $submissionId = $judging->getSubmissionId();
         $judgingId = $judging->getJudgingid();
 
+        $applied = false;
         /** @var Rejudging|null $repeatRejudging */
         $repeatRejudging = null;
 
@@ -1305,6 +1318,7 @@ class JudgehostController extends AbstractFOSRestController
             $rejudgingId,
             $submissionId,
             $judgingId,
+            &$applied,
             &$repeatRejudging
         ): void {
             // Lock parent before child. The judgings are only written, never read, so they
@@ -1314,7 +1328,10 @@ class JudgehostController extends AbstractFOSRestController
             /** @var Submission $submission */
             $submission = $this->em->find(Submission::class, $submissionId, LockMode::PESSIMISTIC_WRITE);
 
-            if ($rejudging->getAutoApply()) {
+            if ($rejudging->getAutoApply() &&
+                $rejudging->getValid() &&
+                $submission->getRejudging()?->getRejudgingid() === $rejudgingId) {
+                $applied = true;
                 $submission->setRejudging(null);
 
                 // Direct queries, as in RejudgingService::finishRejudging(): a row that is never
@@ -1381,7 +1398,7 @@ class JudgehostController extends AbstractFOSRestController
         $this->em->refresh($judging);
 
         if ($repeatRejudging === null) {
-            return;
+            return $applied;
         }
 
         // Outside the transaction: createRejudging() commits once per submission on purpose,
@@ -1402,6 +1419,8 @@ class JudgehostController extends AbstractFOSRestController
         // TODO: Pick up priority from previous judgings?
         $this->rejudgingService->createRejudging($repeatRejudging->getReason(), JudgeTask::PRIORITY_DEFAULT, $judgings,
             false, $repeatRejudging->getRepeat(), 0, $repeatRejudging->getRepeatedRejudging(), $skipped);
+
+        return $applied;
     }
 
     /**
