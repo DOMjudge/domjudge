@@ -555,6 +555,7 @@ function processAjaxResponse(jqXHR, data) {
 
 var refreshHandler = null;
 var refreshEnabled = false;
+var refreshScrollListenerAdded = false;
 function enableRefresh($url, $after, usingAjax) {
     if (refreshEnabled) {
         return;
@@ -584,13 +585,16 @@ function enableRefresh($url, $after, usingAjax) {
         localStorage.setItem('lastUrl', window.location.href);
         localStorage.setItem('scrollTop', 42);
     }
-    var scrollTimeout;
-    document.addEventListener('scroll', function() {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(function() {
-            localStorage.setItem('scrollTop', $(window).scrollTop());
-        }, 100)
-    });
+    if (!refreshScrollListenerAdded) {
+        var scrollTimeout;
+        document.addEventListener('scroll', function() {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(function() {
+                localStorage.setItem('scrollTop', $(window).scrollTop());
+            }, 100);
+        });
+        refreshScrollListenerAdded = true;
+    }
 }
 
 function disableRefresh(usingAjax) {
