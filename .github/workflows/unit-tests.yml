@@ -62,7 +62,7 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: ${{ !cancelled() }}
         with:
-          comment_mode: changes in failures
+          comment_mode: 'off'
           check_name: unit-tests-${{ matrix.PHPVERSION }}-${{ matrix.TEST }}.xml
           files: unit-tests-${{ matrix.PHPVERSION }}-${{ matrix.TEST }}*.xml
       - name: Get SQL logs
