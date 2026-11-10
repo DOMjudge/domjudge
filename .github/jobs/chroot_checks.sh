@@ -11,6 +11,11 @@ else
     unset ARCH
 fi
 
+# GitHub runners are hosted on Azure, which has a fast local Ubuntu mirror
+# http://azure.archive.ubuntu.com/ubuntu/, but seems flaky. The NL
+# mirror actually performs better (while testing now):
+export DEBMIRROR="${DEBMIRROR:-http://nl.archive.ubuntu.com/ubuntu/}"
+
 function finish() {
     echo -e "\\n\\n=======================================================\\n"
     echo "Storing artifacts..."
