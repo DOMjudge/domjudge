@@ -651,6 +651,75 @@ class ScoreboardIntegrationTest extends KernelTestCase
         return $this->testcases[$probId];
     }
 
+    /**
+     * With verification required, a faster correct submission that has not been
+     * verified yet must not reduce the team's recorded runtime until verified.
+     */
+    public function testUnverifiedRuntimeImprovementIsHidden(): void
+    {
+        $this->setConfig('verification_required', true);
+        $lang = $this->em->getRepository(Language::class)->findByExternalId('cpp');
+        $team = $this->teams[0];
+        $problem = $this->problems[0];
+
+        $content = (new TestcaseContent())->setInput('in')->setOutput('out');
+        $this->em->persist($content);
+        $testcase = (new Testcase())
+            ->setContent($content)
+            ->setProblem($problem)
+            ->setRank(1)
+            ->setDescription('tc')
+            ->setMd5sumInput(md5('in'))
+            ->setMd5sumOutput(md5('out'));
+        $this->em->persist($testcase);
+        $problem->addTestcase($testcase);
+        $this->em->flush();
+
+        $addRun = function (Submission $submission, float $runtime) use ($testcase): Judging {
+            /** @var Judging $judging */
+            $judging = $submission->getJudgings()->first();
+            $run = (new JudgingRun())
+                ->setJudging($judging)
+                ->setTestcase($testcase)
+                ->setRunresult('correct')
+                ->setRuntime($runtime)
+                ->setEndtime($submission->getSubmittime() + 10);
+            $this->em->persist($run);
+            $judging->addRun($run);
+            $this->em->flush();
+            return $judging;
+        };
+
+        // First submission: verified AC in 3.0s.
+        $sub1 = $this->createSubmission($lang, $problem, $team, 10*60, 'correct', true);
+        $addRun($sub1, 3.0);
+
+        // Second submission: unverified AC in 1.0s.
+        $sub2 = $this->createSubmission($lang, $problem, $team, 20*60, 'correct', false);
+        $judging2 = $addRun($sub2, 1.0);
+
+        $this->ss->calculateScoreRow($this->contest, $team, $problem);
+
+        foreach ([false, true] as $jury) {
+            $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
+            static::assertSame(3000, $scoreboard->getScores()[$team->getTeamid()]->totalRuntime);
+        }
+
+        // Once verified, recalculating the score row updates both scorecache and rankcache runtime to 1000ms.
+        $judging2->setVerified(true)->setJuryMember('verifier');
+        $this->em->flush();
+        $this->ss->calculateScoreRow($this->contest, $team, $problem);
+
+        foreach ($this->em->getRepository(RankCache::class)->findBy(['contest' => $this->contest]) as $rankCache) {
+            $this->em->refresh($rankCache);
+        }
+
+        foreach ([false, true] as $jury) {
+            $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
+            static::assertSame(1000, $scoreboard->getScores()[$team->getTeamid()]->totalRuntime);
+        }
+    }
+
     protected function assertScoresMatch(array $expected_scores, Scoreboard $scoreboard): void
     {
         $scores = $scoreboard->getScores();

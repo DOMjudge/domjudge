@@ -285,6 +285,26 @@ class ScoreboardService
             $result        = $submission['result'];
             $isAfterFreeze = $freezeTime !== null && (float)$submission['submittime'] >= $freezeTime;
 
+            // A submission without a (verified) judging result is still pending on both
+            // the public and jury scoreboards and must not contribute to score, runtime,
+            // submission counts, or solve status yet.
+            if (empty($result) ||
+                (!$useExternalJudgements && $verificationRequired && !$submission['verified'])) {
+                if ($problem->isScoringProblem() || !$correctPubl) {
+                    // For the jury: only consider it pending if we don't have a
+                    // correct one yet. This is needed because during the freeze
+                    // we consider submissions after the correct one for the
+                    // public to not leak any info.
+                    if (!$correctJury) {
+                        $pendingJury++;
+                    }
+                    $pendingPubl++;
+                    $mayBlockFirstToSolve = true;
+                }
+                // Don't do any more counting for this submission.
+                continue;
+            }
+
             if ($problem->isScoringProblem()) {
                 $score = $submission['score'];
                 if ($score !== null) {
@@ -320,22 +340,6 @@ class ScoreboardService
             }
 
             // STEP 2:
-            // Check if this submission has a publicly visible judging result:
-            if (empty($result) ||
-                (!$useExternalJudgements && $verificationRequired && !$submission['verified'])) {
-                // For the jury: only consider it pending if we don't have a
-                // correct one yet. This is needed because during the freeze
-                // we consider submissions after the correct one for the
-                // public to not leak any info.
-                if (!$correctJury) {
-                    $pendingJury++;
-                }
-                $pendingPubl++;
-                $mayBlockFirstToSolve = true;
-                // Don't do any more counting for this submission.
-                continue;
-            }
-
             // We need to count the submission always, except when we don't want
             // to count compiler penalties and the judging is a compiler error.
             $countSubmission = $compilePenalty || $result != Judging::RESULT_COMPILER_ERROR;
