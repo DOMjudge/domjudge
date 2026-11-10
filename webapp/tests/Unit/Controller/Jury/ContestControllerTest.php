@@ -8,8 +8,11 @@ use App\Entity\Contest;
 use App\Entity\ContestProblemsetContent;
 use App\Entity\JudgeTask;
 use App\Entity\QueueTask;
+use App\Entity\Team;
+use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\DomCrawler\Field\ChoiceFormField;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ContestControllerTest extends JuryControllerTestCase
@@ -798,5 +801,55 @@ class ContestControllerTest extends JuryControllerTestCase
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         self::assertSelectorNotExists('body:contains("Demo contest")');
         self::assertNull($em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']));
+    }
+
+    public function testChangingRuntimeTiebreakerRefreshesRankCache(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        /** @var ScoreboardService $scoreboardService */
+        $scoreboardService = static::getContainer()->get(ScoreboardService::class);
+
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        self::assertNotNull($contest);
+        $contest->setIsLocked(false);
+        $em->flush();
+
+        $scoreboardService->refreshCache($contest);
+
+        $team = $em->getRepository(Team::class)->findOneBy(['name' => 'Example teamname']);
+        self::assertNotNull($team);
+        $cid = $contest->getCid();
+        $contestId = $contest->getExternalid();
+        $teamId = $team->getTeamid();
+        $em->clear();
+
+        $fetchSortKey = static fn(): string => (string)$em->getConnection()->fetchOne(
+            'SELECT sort_key_restricted FROM rankcache WHERE cid = :cid AND teamid = :teamid',
+            ['cid' => $cid, 'teamid' => $teamId]
+        );
+
+        // Initially runtime tiebreaker is disabled: 3-element ICPC sort key.
+        $initialSortKey = $fetchSortKey();
+        self::assertSame(ScoreboardService::getICPCScoreKey(0, 0, 0), $initialSortKey);
+
+        // 1. Enable runtime tiebreaker via the contest detail toggle action.
+        $this->client->request('POST', "/jury/contests/$contestId/toggle/tiebreaker", ['value' => '1']);
+        $this->checkStatusAndFollowRedirect();
+        self::assertSame(ScoreboardService::getRuntimeScoreKey(0, 0), $fetchSortKey());
+
+        // 2. Disable runtime tiebreaker via the contest edit form.
+        $this->verifyPageResponse('GET', "/jury/contests/$contestId/edit", 200);
+        $form = $this->getCurrentCrawler()->selectButton('Save')->form();
+        $tiebreakerField = $form['contest[runtimeAsScoreTiebreaker]'];
+        self::assertInstanceOf(ChoiceFormField::class, $tiebreakerField);
+        $tiebreakerField->untick();
+        $this->client->submit($form);
+        $this->checkStatusAndFollowRedirect();
+        self::assertSame($initialSortKey, $fetchSortKey());
     }
 }

@@ -6,12 +6,16 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judgehost;
 use App\Entity\Judging;
+use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Problem;
+use App\Entity\RankCache;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
+use App\Entity\Testcase;
+use App\Entity\TestcaseContent;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
@@ -57,6 +61,13 @@ class ScoreboardIntegrationTest extends KernelTestCase
      * @var Team[]
      */
     private ?array $teams = null;
+
+    /**
+     * Testcases created on demand, indexed by problem ID.
+     *
+     * @var Testcase[]
+     */
+    private array $testcases = [];
 
     protected function setUp(): void
     {
@@ -510,6 +521,136 @@ class ScoreboardIntegrationTest extends KernelTestCase
         static::assertEquals(0, $score->totalTime, 'Solve time should be capped to 0');
     }
 
+    /**
+     * Test that with the runtime tiebreaker enabled, teams are ranked by total runtime
+     * instead of by penalty time.
+     * Regression test for https://github.com/DOMjudge/domjudge/issues/3680
+     */
+    public function testRuntimeAsScoreTiebreaker(): void
+    {
+        $this->contest->setRuntimeAsScoreTiebreaker(true);
+        $this->createRuntimeSubmissions();
+        $this->recalcScoreCaches();
+
+        // Teams 1 and 2 are slower to solve than team 0, but their solution is faster,
+        // so they should be ranked above team 0. They have an equal runtime, so they tie.
+        $expected_scores = [
+            [ 'team' => $this->teams[0], 'rank' => 3, 'solved' => 1, 'time' => 10, 'runtime' => 3000 ],
+            [ 'team' => $this->teams[1], 'rank' => 1, 'solved' => 1, 'time' => 50, 'runtime' => 1000 ],
+            [ 'team' => $this->teams[2], 'rank' => 1, 'solved' => 1, 'time' => 80, 'runtime' => 1000 ],
+        ];
+
+        foreach ([ false, true ] as $jury) {
+            $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
+            static::assertScoresMatch($expected_scores, $scoreboard);
+            static::assertEquals(3, $this->ss->calculateTeamRank($this->contest, $this->teams[0], null, $jury));
+            static::assertEquals(1, $this->ss->calculateTeamRank($this->contest, $this->teams[1], null, $jury));
+            static::assertEquals(1, $this->ss->calculateTeamRank($this->contest, $this->teams[2], null, $jury));
+        }
+    }
+
+    /**
+     * Test that toggling the runtime tiebreaker rebuilds the sort keys of all teams,
+     * not just of the teams that get a new submission afterwards.
+     */
+    public function testRuntimeTiebreakerToggleRefreshesRankCache(): void
+    {
+        $this->createRuntimeSubmissions();
+        $this->recalcScoreCaches();
+
+        // Without the tiebreaker, the team solving first ranks first.
+        $expected_scores = [
+            [ 'team' => $this->teams[0], 'rank' => 1, 'solved' => 1, 'time' => 10, 'runtime' => 3000 ],
+            [ 'team' => $this->teams[1], 'rank' => 2, 'solved' => 1, 'time' => 50, 'runtime' => 1000 ],
+            [ 'team' => $this->teams[2], 'rank' => 3, 'solved' => 1, 'time' => 80, 'runtime' => 1000 ],
+        ];
+        static::assertScoresMatch($expected_scores, $this->ss->getScoreboard($this->contest, true));
+
+        // Enable the tiebreaker and only refresh the rank cache, as the contest edit/toggle does.
+        $this->contest->setRuntimeAsScoreTiebreaker(true);
+        $this->em->flush();
+        $this->ss->refreshRankCache($this->contest);
+
+        // updateRankCache writes with a raw query, so the rank cache entities that the scoreboard
+        // above loaded are stale in this entity manager. A next request would not see them at all.
+        foreach ($this->em->getRepository(RankCache::class)->findBy(['contest' => $this->contest]) as $rankCache) {
+            $this->em->refresh($rankCache);
+        }
+
+        $expected_scores = [
+            [ 'team' => $this->teams[0], 'rank' => 3, 'solved' => 1, 'time' => 10, 'runtime' => 3000 ],
+            [ 'team' => $this->teams[1], 'rank' => 1, 'solved' => 1, 'time' => 50, 'runtime' => 1000 ],
+            [ 'team' => $this->teams[2], 'rank' => 1, 'solved' => 1, 'time' => 80, 'runtime' => 1000 ],
+        ];
+        static::assertScoresMatch($expected_scores, $this->ss->getScoreboard($this->contest, true));
+    }
+
+    /**
+     * Let all teams solve the first problem: team 0 solves it early but slowly, teams 1 and 2
+     * solve it late but equally fast. Penalty time and runtime thus order the teams differently.
+     */
+    protected function createRuntimeSubmissions(): void
+    {
+        $lang = $this->em->getRepository(Language::class)->findByExternalId('cpp');
+
+        $this->createSubmissionWithRuntime($lang, $this->problems[0], $this->teams[0], 10*60, 3.0);
+        $this->createSubmissionWithRuntime($lang, $this->problems[0], $this->teams[1], 50*60, 1.0);
+        $this->createSubmissionWithRuntime($lang, $this->problems[0], $this->teams[2], 80*60, 1.0);
+    }
+
+    protected function createSubmissionWithRuntime(
+        Language $language,
+        Problem $problem,
+        Team $team,
+        float $contest_time_seconds,
+        float $runtime_seconds
+    ): Submission {
+        $submission = $this->createSubmission($language, $problem, $team, $contest_time_seconds, 'correct');
+
+        $judging = $submission->getJudgings()->first();
+        $run = new JudgingRun();
+        $run
+            ->setJudging($judging)
+            ->setTestcase($this->getTestcase($problem))
+            ->setRunresult('correct')
+            ->setRuntime($runtime_seconds)
+            ->setEndtime($submission->getSubmittime() + 10);
+        $this->em->persist($run);
+        $judging->addRun($run);
+
+        $this->em->flush();
+
+        return $submission;
+    }
+
+    protected function getTestcase(Problem $problem): Testcase
+    {
+        $probId = $problem->getProbid();
+        if (!isset($this->testcases[$probId])) {
+            $content = new TestcaseContent();
+            $content
+                ->setInput('input')
+                ->setOutput('output');
+            $this->em->persist($content);
+
+            $testcase = new Testcase();
+            $testcase
+                ->setContent($content)
+                ->setProblem($problem)
+                ->setRank(1)
+                ->setDescription('runtime testcase')
+                ->setMd5sumInput(md5('input'))
+                ->setMd5sumOutput(md5('output'));
+            $this->em->persist($testcase);
+            $problem->addTestcase($testcase);
+
+            $this->em->flush();
+            $this->testcases[$probId] = $testcase;
+        }
+
+        return $this->testcases[$probId];
+    }
+
     protected function assertScoresMatch(array $expected_scores, Scoreboard $scoreboard): void
     {
         $scores = $scoreboard->getScores();
@@ -524,6 +665,9 @@ class ScoreboardIntegrationTest extends KernelTestCase
             static::assertEquals($row['rank'], $score->rank, "Rank for '$name'");
             static::assertEquals($row['solved'], $score->numPoints, "# solved for '$name'");
             static::assertEquals($row['time'], $score->totalTime, "Total time for '$name'");
+            if (isset($row['runtime'])) {
+                static::assertEquals($row['runtime'], $score->totalRuntime, "Total runtime for '$name'");
+            }
         }
     }
 

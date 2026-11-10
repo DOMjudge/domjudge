@@ -684,11 +684,18 @@ class ScoreboardService
 
         foreach ($variants as $variant => $isRestricted) {
             if ($contest->getScoreboardType() === ScoreboardType::PASS_FAIL) {
-                $scoreKey[$variant] = self::getICPCScoreKey(
-                    $numPoints[$variant],
-                    $totalTime[$variant],
-                    $timeOfLastCorrect[$variant]
-                );
+                if ($contest->getRuntimeAsScoreTiebreaker()) {
+                    $scoreKey[$variant] = self::getRuntimeScoreKey(
+                        $numPoints[$variant],
+                        $totalRuntime[$variant]
+                    );
+                } else {
+                    $scoreKey[$variant] = self::getICPCScoreKey(
+                        $numPoints[$variant],
+                        $totalTime[$variant],
+                        $timeOfLastCorrect[$variant]
+                    );
+                }
             } else {
                 // TODO: Any tie breakers?
                 $scoreKey[$variant] = self::getScoringScoreKey(
@@ -776,6 +783,17 @@ class ScoreboardService
         return implode(',', $scoreKeyArray);
     }
 
+    public static function getRuntimeScoreKey(int $numSolved, int $totalRuntime): string
+    {
+        // When runtime is the tiebreaker, it takes the place of the penalty time: that is also
+        // the only tiebreaker shown on the scoreboard, so teams with an equal runtime tie.
+        $scoreKeyArray = [
+            self::convertToScoreKeyElement($numSolved),
+            self::convertToScoreKeyElement($totalRuntime, Order::Ascending),
+        ];
+        return implode(',', $scoreKeyArray);
+    }
+
     public static function getScoringScoreKey(string $score): string
     {
         // For scoring problems, we only use the score as the key (for now).
@@ -784,6 +802,34 @@ class ScoreboardService
             self::convertToScoreKeyElement($score, Order::Descending),
         ];
         return implode(',', $scoreKeyArray);
+    }
+
+    /**
+     * Recalculate the rankCache of a contest, leaving the scoreCache alone.
+     *
+     * This is needed when a contest setting changes that only affects the sort key,
+     * since the rank cache is otherwise only updated for teams whose score changes,
+     * which would leave sort keys of different generations to be compared to each other.
+     */
+    public function refreshRankCache(Contest $contest): void
+    {
+        Utils::extendMaxExecutionTime(300);
+
+        $this->dj->auditlog('contest', $contest->getExternalid(), 'refresh rank cache');
+
+        /** @var Team[] $teams */
+        $teams = $this->em->createQueryBuilder()
+            ->from(Team::class, 't')
+            ->innerJoin(RankCache::class, 'r', Join::WITH, 'r.team = t AND r.contest = :contest')
+            ->select('t')
+            ->setParameter('contest', $contest)
+            ->orderBy('t.teamid')
+            ->getQuery()
+            ->getResult();
+
+        foreach ($teams as $team) {
+            $this->updateRankCache($contest, $team);
+        }
     }
 
     /**
