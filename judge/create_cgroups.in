@@ -40,6 +40,16 @@ if [ "$fs_type" = "cgroup2" ]; then
     if ! echo "+cpuset" >> /sys/fs/cgroup/cgroup.subtree_control; then
         cgroup_error_and_usage "Error: Cannot add +cpuset to cgroup.subtree_control; check kernel params."
     fi
+    # Create our parent cgroup and enable the controllers for its children.
+    # A controller cannot be disabled in a cgroup while a child still has it
+    # enabled, so this keeps systemd from removing cpuset from the root
+    # cgroup again before the first runguard invocation.
+    if ! mkdir -p /sys/fs/cgroup/domjudge; then
+        cgroup_error_and_usage "Error: Cannot create cgroup /sys/fs/cgroup/domjudge."
+    fi
+    if ! echo "+memory +cpuset" >> /sys/fs/cgroup/domjudge/cgroup.subtree_control; then
+        cgroup_error_and_usage "Error: Cannot add +memory +cpuset to domjudge/cgroup.subtree_control."
+    fi
     if grep -q ":/$" /proc/self/cgroup; then
         cgroup_error_and_usage "Error: Cgroups not configured properly, missing cgroup hierarchy prefix under /proc/self/cgroup. If running in a container, make sure to set cgroupns=host."
     fi
