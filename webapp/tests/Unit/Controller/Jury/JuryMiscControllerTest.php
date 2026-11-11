@@ -60,6 +60,29 @@ class JuryMiscControllerTest extends BaseTestCase
         self::assertSelectorExists('html:contains("DOMjudge Jury interface")');
     }
 
+    public function testRefreshCacheStreamEmitsIncrementalNdjson(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        $this->client->xmlHttpRequest('POST', '/jury/refresh-cache');
+        self::assertResponseIsSuccessful();
+
+        $content = $this->client->getInternalResponse()->getContent();
+        self::assertStringEndsWith("\n", $content);
+        $lines = explode("\n", rtrim($content, "\n"));
+        $logs = '';
+        foreach ($lines as $line) {
+            $item = json_decode($line, true, 512, JSON_THROW_ON_ERROR);
+            $logs .= $item['log'];
+        }
+        self::assertSame('domjudge, exteam', $logs);
+        $last = json_decode($lines[array_key_last($lines)], true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame(100, $last['progress']);
+        self::assertStringStartsWith('Scoreboard cache refresh completed in ', (string)$last['message']);
+    }
+
     #[DataProvider('provideContestStageForBalloon')]
     public function testBalloonScoreboard(array $fixtures, bool $public, string $contestStage): void
     {

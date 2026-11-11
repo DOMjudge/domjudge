@@ -227,14 +227,19 @@ class JuryMiscController extends BaseController
 
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             $progressReporter = function (int $progress, string $log, ?string $message = null): void {
-                echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => $message]);
+                echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => $message]) . "\n";
                 Utils::ob_flush_if_possible();
                 flush();
             };
             return $this->streamResponse($this->requestStack, function () use ($contests, $progressReporter, $scoreboardService): void {
                 $timeStart = microtime(true);
 
+                $first = true;
                 foreach ($contests as $contest) {
+                    if (!$first) {
+                        $progressReporter(0, '; ');
+                    }
+                    $first = false;
                     $scoreboardService->refreshCache($contest, $progressReporter);
                 }
 
