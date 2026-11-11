@@ -92,7 +92,6 @@ class RejudgingService
             $this->em->flush();
         }
 
-        $log = '';
         $singleJudging = (count($judgings) == 1);
         $index = 0;
         $first = true;
@@ -185,11 +184,8 @@ class RejudgingService
 
             $this->em->getConnection()->commit();
 
-            if (!$first) {
-                $log .= ', ';
-            }
+            $log = ($first ? '' : ', ') . sprintf('s%d', $judging->getSubmissionId());
             $first = false;
-            $log .= sprintf('s%d', $judging->getSubmissionId());
             if ($progressReporter !== null) {
                 $progress = (int)round($index / count($judgings) * 100);
                 $progressReporter($progress, $log);
@@ -287,7 +283,6 @@ class RejudgingService
         // it up drastically.
         $firstItem = true;
         $index     = 0;
-        $log       = '';
 
         $scoreboardRowsToUpdate = [];
         foreach ($submissions as $submission) {
@@ -376,8 +371,7 @@ class RejudgingService
             }
 
             if ($progressReporter) {
-                $log         .= $firstItem ? '' : ', ';
-                $log         .= 's' . $submission['submitid'];
+                $log         = ($firstItem ? '' : ', ') . 's' . $submission['submitid'];
                 $firstItem   = false;
                 $maxProgress = ($action === self::ACTION_APPLY ? static::APPLY_PROGRESS_WITH_SCOREBOARD_UPDATE : 100);
                 $progress    = (int)round($index / count($submissions) * $maxProgress);
@@ -387,8 +381,7 @@ class RejudgingService
 
         if (!empty($scoreboardRowsToUpdate)) {
             if ($progressReporter) {
-                $log .= ', updating scoreboard cache';
-                $progressReporter(static::APPLY_PROGRESS_WITH_SCOREBOARD_UPDATE, $log);
+                $progressReporter(static::APPLY_PROGRESS_WITH_SCOREBOARD_UPDATE, ', updating scoreboard cache');
             }
 
             // Now update the scoreboard
@@ -421,7 +414,7 @@ class RejudgingService
         }
 
         if ($progressReporter !== null) {
-            $progressReporter(100, $log);
+            $progressReporter(100, '');
         }
 
         // Update the rejudging itself.

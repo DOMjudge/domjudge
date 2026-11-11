@@ -187,8 +187,10 @@ class RejudgingControllerTest extends BaseTestCase
         $em->flush();
 
         $output = $this->createRejudging('executable', 'c');
-        self::assertMatchesRegularExpression('#"redirect":"/jury/rejudgings/\d+"#', $output);
-        preg_match('#"redirect":"/jury/rejudgings/(\d+)"#', $output, $matches);
+        $lines = explode("\n", rtrim($output, "\n"));
+        self::assertGreaterThanOrEqual(2, count($lines));
+        $lastChunk = json_decode($lines[array_key_last($lines)], true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame(1, preg_match('#^/jury/rejudgings/(\d+)$#', $lastChunk['redirect'] ?? '', $matches));
 
         $rejudgingId = $this->getRejudgingOfSubmission($submitId);
         self::assertEquals($matches[1], $rejudgingId);

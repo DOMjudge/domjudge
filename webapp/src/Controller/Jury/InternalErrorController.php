@@ -164,7 +164,7 @@ class InternalErrorController extends BaseController
         if ($request->isXmlHttpRequest()) {
             $profiler?->disable();
             $progressReporter = function (int $progress, string $log, ?string $message = null): void {
-                echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => $message]);
+                echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => $message]) . "\n";
                 Utils::ob_flush_if_possible();
                 flush();
             };

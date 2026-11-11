@@ -493,7 +493,7 @@ class RejudgingController extends BaseController
 
         if ($request->isXmlHttpRequest()) {
             $progressReporter = function (int $progress, string $log, ?string $message = null): void {
-                echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => htmlspecialchars($message ?? '')]);
+                echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => htmlspecialchars($message ?? '')]) . "\n";
                 Utils::ob_flush_if_possible();
                 flush();
             };
@@ -581,7 +581,7 @@ class RejudgingController extends BaseController
         }
         if ($isCreateRejudgingAjax) {
             $progressReporter = function (int $progress, string $log, ?string $redirect = null): void {
-                echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'redirect' => $redirect]);
+                echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'redirect' => $redirect]) . "\n";
                 Utils::ob_flush_if_possible();
                 flush();
             };
@@ -773,7 +773,7 @@ class RejudgingController extends BaseController
         }
 
         $progressReporter = function (int $progress, string $log, ?string $redirect = null): void {
-            echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'redirect' => $redirect]);
+            echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'redirect' => $redirect]) . "\n";
             Utils::ob_flush_if_possible();
             flush();
         };

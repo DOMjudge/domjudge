@@ -873,16 +873,9 @@ class ScoreboardService
             return;
         }
 
-        $first = true;
-        $log = '';
-
         // for each team, fetch the status of each problem.
         foreach ($teams as $index => $team) {
-            if (!$first) {
-                $log .= ', ';
-            }
-            $first = false;
-            $log .= $team->getExternalid();
+            $log = ($index === 0 ? '' : ', ') . $team->getExternalid();
             $progress = (int)round($index / count($teams) * 100);
             $progressReporter($progress, $log);
 
