@@ -521,6 +521,27 @@ class ScoreboardIntegrationTest extends KernelTestCase
         static::assertEquals(0, $score->totalTime, 'Solve time should be capped to 0');
     }
 
+    public function testRefreshCacheStoresOnlyActiveRows(): void
+    {
+        $connection = $this->em->getConnection();
+        $cid = $this->contest->getCid();
+
+        $this->recalcScoreCaches();
+        static::assertSame(0, (int)$connection->fetchOne('SELECT COUNT(*) FROM scorecache WHERE cid = :cid', ['cid' => $cid]));
+        static::assertSame(0, (int)$connection->fetchOne('SELECT COUNT(*) FROM rankcache WHERE cid = :cid', ['cid' => $cid]));
+
+        $this->createDefaultSubmissions();
+        $this->recalcScoreCaches();
+
+        // Only the 4 (team, problem) pairs with valid submissions get scorecache rows,
+        // and only team 1 (the sole team with a solve) gets a rankcache row.
+        static::assertSame(4, (int)$connection->fetchOne('SELECT COUNT(*) FROM scorecache WHERE cid = :cid', ['cid' => $cid]));
+        static::assertSame(
+            [$this->teams[1]->getTeamid()],
+            array_map('intval', $connection->fetchFirstColumn('SELECT teamid FROM rankcache WHERE cid = :cid', ['cid' => $cid]))
+        );
+    }
+
     /**
      * Test that with the runtime tiebreaker enabled, teams are ranked by total runtime
      * instead of by penalty time.

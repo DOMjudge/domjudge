@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use App\DataFixtures\Test\SampleSubmissionsFixture;
 use App\DataFixtures\Test\SampleSubmissionsMultipleTriesFixture;
 use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectFixture;
 use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectSameLanguageFixture;
@@ -62,6 +63,7 @@ class JuryMiscControllerTest extends BaseTestCase
 
     public function testRefreshCacheStreamEmitsIncrementalNdjson(): void
     {
+        $this->loadFixtures([SampleSubmissionsFixture::class]);
         $this->roles = ['admin'];
         $this->logOut();
         $this->logIn();

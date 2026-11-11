@@ -21,7 +21,6 @@ use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\SingleTeamScoreboard;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Order;
-use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -454,41 +453,48 @@ class ScoreboardService
         $wasCorrect = $previous !== false && (bool)$previous['was_correct'];
         $hadBlockedFirstToSolve = $wasCorrect || ($previous !== false && $previous['pending_restricted'] > 0);
 
-        // Use a direct upsert query to drastically speed this up. We do not use REPLACE, as that
-        // deletes and reinserts the row, which also writes rows that did not change.
-        $params = [
-            'cid' => $contest->getCid(),
-            'teamid' => $team->getTeamid(),
-            'probid' => $problem->getProbid(),
-            'submissionsRestricted' => $submissionsJury,
-            'pendingRestricted' => $pendingJury,
-            'solvetimeRestricted' => (int)$timeJury,
-            'runtimeRestricted' => $runtimeJury === PHP_INT_MAX ? 0 : $runtimeJury,
-            'isCorrectRestricted' => (int)$correctJury,
-            'scoreRestricted' => $pointsJury,
-            'submissionsPublic' => $submissionsPubl,
-            'pendingPublic' => $pendingPubl,
-            'solvetimePublic' => (int)$timePubl,
-            'runtimePublic' => $runtimePubl === PHP_INT_MAX ? 0 : $runtimePubl,
-            'isCorrectPublic' => (int)$correctPubl,
-            'scorePublic' => $pointsPubl,
-            'isFirstToSolve' => (int)$firstToSolve,
-        ];
-        $scoreCacheColumns = [
-            'submissions_restricted', 'pending_restricted', 'solvetime_restricted', 'runtime_restricted',
-            'is_correct_restricted', 'score_restricted', 'submissions_public', 'pending_public',
-            'solvetime_public', 'runtime_public', 'is_correct_public', 'score_public', 'is_first_to_solve',
-        ];
-        $this->em->getConnection()->executeQuery('INSERT INTO scorecache
-            (cid, teamid, probid,
-             submissions_restricted, pending_restricted, solvetime_restricted, runtime_restricted, is_correct_restricted, score_restricted,
-             submissions_public, pending_public, solvetime_public, runtime_public, is_correct_public, score_public, is_first_to_solve)
-            VALUES (:cid, :teamid, :probid, :submissionsRestricted, :pendingRestricted, :solvetimeRestricted, :runtimeRestricted, :isCorrectRestricted, :scoreRestricted,
-            :submissionsPublic, :pendingPublic, :solvetimePublic, :runtimePublic, :isCorrectPublic, :scorePublic, :isFirstToSolve)
-            ON DUPLICATE KEY UPDATE ' . implode(', ', array_map(
-                static fn(string $column) => "$column = VALUES($column)",
-                $scoreCacheColumns
-            )), $params);
+        if (empty($submissions)) {
+            $this->em->getConnection()->executeStatement(
+                'DELETE FROM scorecache WHERE cid = :cid AND teamid = :teamid AND probid = :probid',
+                ['cid' => $contest->getCid(), 'teamid' => $team->getTeamid(), 'probid' => $problem->getProbid()]
+            );
+        } else {
+            // Use a direct upsert query to drastically speed this up. We do not use REPLACE, as that
+            // deletes and reinserts the row, which also writes rows that did not change.
+            $params = [
+                'cid' => $contest->getCid(),
+                'teamid' => $team->getTeamid(),
+                'probid' => $problem->getProbid(),
+                'submissionsRestricted' => $submissionsJury,
+                'pendingRestricted' => $pendingJury,
+                'solvetimeRestricted' => (int)$timeJury,
+                'runtimeRestricted' => $runtimeJury === PHP_INT_MAX ? 0 : $runtimeJury,
+                'isCorrectRestricted' => (int)$correctJury,
+                'scoreRestricted' => $pointsJury,
+                'submissionsPublic' => $submissionsPubl,
+                'pendingPublic' => $pendingPubl,
+                'solvetimePublic' => (int)$timePubl,
+                'runtimePublic' => $runtimePubl === PHP_INT_MAX ? 0 : $runtimePubl,
+                'isCorrectPublic' => (int)$correctPubl,
+                'scorePublic' => $pointsPubl,
+                'isFirstToSolve' => (int)$firstToSolve,
+            ];
+            $scoreCacheColumns = [
+                'submissions_restricted', 'pending_restricted', 'solvetime_restricted', 'runtime_restricted',
+                'is_correct_restricted', 'score_restricted', 'submissions_public', 'pending_public',
+                'solvetime_public', 'runtime_public', 'is_correct_public', 'score_public', 'is_first_to_solve',
+            ];
+            $this->em->getConnection()->executeQuery('INSERT INTO scorecache
+                (cid, teamid, probid,
+                 submissions_restricted, pending_restricted, solvetime_restricted, runtime_restricted, is_correct_restricted, score_restricted,
+                 submissions_public, pending_public, solvetime_public, runtime_public, is_correct_public, score_public, is_first_to_solve)
+                VALUES (:cid, :teamid, :probid, :submissionsRestricted, :pendingRestricted, :solvetimeRestricted, :runtimeRestricted, :isCorrectRestricted, :scoreRestricted,
+                :submissionsPublic, :pendingPublic, :solvetimePublic, :runtimePublic, :isCorrectPublic, :scorePublic, :isFirstToSolve)
+                ON DUPLICATE KEY UPDATE ' . implode(', ', array_map(
+                    static fn(string $column) => "$column = VALUES($column)",
+                    $scoreCacheColumns
+                )), $params);
+        }
 
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                                                     ['lock' => $lockString]) != 1) {
@@ -598,12 +604,14 @@ class ScoreboardService
 
         // Initialize our data
         $variants  = ['public' => false, 'restricted' => true];
+        $numCorrect = [];
         $numPoints = [];
         $totalTime = [];
         $totalRuntime = [];
         $timeOfLastCorrect = [];
         $score = [];
         foreach ($variants as $variant => $isRestricted) {
+            $numCorrect[$variant] = 0;
             $numPoints[$variant] = 0;
             $totalTime[$variant] = $team->getPenalty();
             $totalRuntime[$variant] = 0;
@@ -651,6 +659,7 @@ class ScoreboardService
 
                 // For pass-fail contests (and correct submissions in scoring contests), add points/time
                 if ($isCorrect) {
+                    $numCorrect[$variant]++;
                     $penalty = Utils::calcPenaltyTime($isCorrect,
                                                       (int)$scoreCacheCell['submissions_' . $suffix],
                                                       $penaltyTime, $scoreIsInSeconds);
@@ -673,7 +682,9 @@ class ScoreboardService
 
         foreach ($variants as $variant => $isRestricted) {
             if ($contest->getScoreboardType() === ScoreboardType::PASS_FAIL) {
-                if ($contest->getRuntimeAsScoreTiebreaker()) {
+                if ($numCorrect[$variant] === 0) {
+                    $scoreKey[$variant] = '.';
+                } elseif ($contest->getRuntimeAsScoreTiebreaker()) {
                     $scoreKey[$variant] = self::getRuntimeScoreKey(
                         $numPoints[$variant],
                         $totalRuntime[$variant]
@@ -687,41 +698,48 @@ class ScoreboardService
                 }
             } else {
                 // TODO: Any tie breakers?
-                $scoreKey[$variant] = self::getScoringScoreKey(
-                    $score[$variant],
-                );
+                $scoreKey[$variant] = bccomp($score[$variant], '0', self::SCALE) === 0
+                    ? '.'
+                    : self::getScoringScoreKey($score[$variant]);
             }
         }
 
-        // Use a direct upsert query to drastically speed this up.
-        $params = [
-            'cid' => $contest->getCid(),
-            'teamid' => $team->getTeamid(),
-            'pointsRestricted' => $numPoints['restricted'],
-            'totalTimeRestricted' => $totalTime['restricted'],
-            'totalRuntimeRestricted' => $totalRuntime['restricted'],
-            'pointsPublic' => $numPoints['public'],
-            'totalTimePublic' => $totalTime['public'],
-            'totalRuntimePublic' => $totalRuntime['public'],
-            'sortKeyRestricted' => $scoreKey['restricted'],
-            'sortKeyPublic' => $scoreKey['public'],
-            'scoreRestricted' => $score['restricted'],
-            'scorePublic' => $score['public'],
-        ];
-        $rankCacheColumns = [
-            'points_restricted', 'totaltime_restricted', 'totalruntime_restricted', 'score_restricted',
-            'points_public', 'totaltime_public', 'totalruntime_public', 'sort_key_restricted',
-            'sort_key_public', 'score_public',
-        ];
-        $this->em->getConnection()->executeQuery('INSERT INTO rankcache (cid, teamid,
-            points_restricted, totaltime_restricted, totalruntime_restricted, score_restricted,
-            points_public, totaltime_public, totalruntime_public, sort_key_restricted, sort_key_public, score_public)
-            VALUES (:cid, :teamid, :pointsRestricted, :totalTimeRestricted, :totalRuntimeRestricted, :scoreRestricted,
-            :pointsPublic, :totalTimePublic, :totalRuntimePublic, :sortKeyRestricted, :sortKeyPublic, :scorePublic)
-            ON DUPLICATE KEY UPDATE ' . implode(', ', array_map(
-                static fn(string $column) => "$column = VALUES($column)",
-                $rankCacheColumns
-            )), $params);
+        if ($scoreKey['restricted'] === '.' && $scoreKey['public'] === '.') {
+            $this->em->getConnection()->executeStatement(
+                'DELETE FROM rankcache WHERE cid = :cid AND teamid = :teamid',
+                ['cid' => $contest->getCid(), 'teamid' => $team->getTeamid()]
+            );
+        } else {
+            // Use a direct upsert query to drastically speed this up.
+            $params = [
+                'cid' => $contest->getCid(),
+                'teamid' => $team->getTeamid(),
+                'pointsRestricted' => $numPoints['restricted'],
+                'totalTimeRestricted' => $totalTime['restricted'],
+                'totalRuntimeRestricted' => $totalRuntime['restricted'],
+                'pointsPublic' => $numPoints['public'],
+                'totalTimePublic' => $totalTime['public'],
+                'totalRuntimePublic' => $totalRuntime['public'],
+                'sortKeyRestricted' => $scoreKey['restricted'],
+                'sortKeyPublic' => $scoreKey['public'],
+                'scoreRestricted' => $score['restricted'],
+                'scorePublic' => $score['public'],
+            ];
+            $rankCacheColumns = [
+                'points_restricted', 'totaltime_restricted', 'totalruntime_restricted', 'score_restricted',
+                'points_public', 'totaltime_public', 'totalruntime_public', 'sort_key_restricted',
+                'sort_key_public', 'score_public',
+            ];
+            $this->em->getConnection()->executeQuery('INSERT INTO rankcache (cid, teamid,
+                points_restricted, totaltime_restricted, totalruntime_restricted, score_restricted,
+                points_public, totaltime_public, totalruntime_public, sort_key_restricted, sort_key_public, score_public)
+                VALUES (:cid, :teamid, :pointsRestricted, :totalTimeRestricted, :totalRuntimeRestricted, :scoreRestricted,
+                :pointsPublic, :totalTimePublic, :totalRuntimePublic, :sortKeyRestricted, :sortKeyPublic, :scorePublic)
+                ON DUPLICATE KEY UPDATE ' . implode(', ', array_map(
+                    static fn(string $column) => "$column = VALUES($column)",
+                    $rankCacheColumns
+                )), $params);
+        }
 
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                                                     ['lock' => $lockString]) != 1) {
@@ -873,14 +891,45 @@ class ScoreboardService
             return;
         }
 
-        // for each team, fetch the status of each problem.
+        $connection = $this->em->getConnection();
+        $connection->executeStatement('DELETE FROM scorecache WHERE cid = :cid', ['cid' => $contest->getCid()]);
+        $connection->executeStatement('DELETE FROM rankcache WHERE cid = :cid', ['cid' => $contest->getCid()]);
+
+        $problemsById = [];
+        foreach ($problems as $problem) {
+            $problemsById[$problem->getProbid()] = $problem;
+        }
+
+        $submittedProblemsByTeam = [];
+        $rows = $connection->fetchAllAssociative(
+            'SELECT DISTINCT s.teamid, s.probid
+             FROM submission s
+             INNER JOIN contest c USING (cid)
+             WHERE s.cid = :cid AND s.valid = 1 AND s.submittime < c.endtime',
+            ['cid' => $contest->getCid()]
+        );
+        foreach ($rows as $row) {
+            $probId = (int)$row['probid'];
+            if (isset($problemsById[$probId])) {
+                $submittedProblemsByTeam[(int)$row['teamid']][] = $problemsById[$probId];
+            }
+        }
+
+        $first = true;
+
+        // Only recalculate teams and problems that have valid in-time submissions.
         foreach ($teams as $index => $team) {
-            $log = ($index === 0 ? '' : ', ') . $team->getExternalid();
+            $teamProblems = $submittedProblemsByTeam[$team->getTeamid()] ?? [];
+            if (!$teamProblems) {
+                continue;
+            }
+
+            $log = ($first ? '' : ', ') . $team->getExternalid();
+            $first = false;
             $progress = (int)round($index / count($teams) * 100);
             $progressReporter($progress, $log);
 
-            // for each problem fetch the result
-            foreach ($problems as $problem) {
+            foreach ($teamProblems as $problem) {
                 $this->calculateScoreRow(
                     $contest, $team, $problem,
                     updateRankCache: false,
@@ -890,33 +939,6 @@ class ScoreboardService
 
             $this->updateRankCache($contest, $team);
         }
-
-        // Drop all teams and problems that do not exist in the contest.
-        $problemIds = array_map(fn(Problem $problem) => $problem->getProbid(), $problems);
-        $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $teams);
-
-        $params = [
-            'cid' => $contest->getCid(),
-            'problemIds' => $problemIds,
-        ];
-        $types  = [
-            'problemIds' => ArrayParameterType::INTEGER,
-            'teamIds' => ArrayParameterType::INTEGER,
-        ];
-        $this->em->getConnection()->executeQuery(
-            'DELETE FROM scorecache WHERE cid = :cid AND probid NOT IN (:problemIds)',
-            $params, $types);
-
-        $params = [
-            'cid' => $contest->getCid(),
-            'teamIds' => $teamIds,
-        ];
-        $this->em->getConnection()->executeQuery(
-            'DELETE FROM scorecache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
-            $params, $types);
-        $this->em->getConnection()->executeQuery(
-            'DELETE FROM rankcache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
-            $params, $types);
 
         $progressReporter(100, '');
     }
@@ -1241,8 +1263,9 @@ class ScoreboardService
         }
 
         $ret = $queryBuilder
+            ->addSelect("COALESCE(r.sortKey" . ($restricted ? 'Restricted' : 'Public') . ", '.') AS HIDDEN sortKey")
             ->addOrderBy('tc.sortorder')
-            ->addOrderBy('r.sortKey' . ($restricted ? 'Restricted' : 'Public'), 'DESC')
+            ->addOrderBy('sortKey', 'DESC')
             ->addOrderBy('effectivename')
             ->getQuery()->getResult();
         return $ret;
