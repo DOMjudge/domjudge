@@ -301,7 +301,8 @@ class JudgehostController extends AbstractFOSRestController
         if (!$judgingRun) {
             throw new BadRequestHttpException("Unknown judging run for judgetaskid $judgetaskid.");
         }
-        $query = $this->em->createQueryBuilder()
+        /** @var Judging|null $judging */
+        $judging = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
             ->join('s.contest', 'c')
@@ -311,10 +312,8 @@ class JudgehostController extends AbstractFOSRestController
             ->andWhere('j.judgingid = :judgingid')
             ->setParameter('judgingid', $judgingRun->getJudgingId())
             ->setMaxResults(1)
-            ->getQuery();
-
-        /** @var Judging|null $judging */
-        $judging = $query->getOneOrNullResult();
+            ->getQuery()
+            ->getOneOrNullResult();
         if (!$judging) {
             throw new BadRequestHttpException("We don't know this judging with judgetaskid ID $judgetaskid.");
         }
@@ -334,7 +333,7 @@ class JudgehostController extends AbstractFOSRestController
                 $entryPoint = '';
             }
             if ($entryPoint) {
-                $this->em->wrapInTransaction(function () use ($query, $entryPoint, &$judging): void {
+                $this->em->wrapInTransaction(function () use ($entryPoint, $judging): void {
                     $submission = $judging->getSubmission();
                     if ($submission->getEntryPoint() === $entryPoint) {
                         return;
@@ -345,17 +344,8 @@ class JudgehostController extends AbstractFOSRestController
                     $contestId    = $submission->getContest()->getCid();
                     $this->eventLogService->log('submission', $submissionId,
                                                 EventLogService::ACTION_UPDATE, $contestId);
-
-                    // As EventLogService::log() will clear the entity manager, so the judging has
-                    // now become detached. We will have to reload it.
-                    /** @var Judging $judging */
-                    $judging = $query->getOneOrNullResult();
                 });
             }
-
-            // Reload judgehost just in case it got cleared above.
-            /** @var Judgehost $judgehost */
-            $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
 
             $output_compile = base64_decode($request->request->get('output_compile'));
             if ($request->request->getBoolean('compile_success')) {
@@ -427,11 +417,6 @@ class JudgehostController extends AbstractFOSRestController
                     if ($judging->getValid()) {
                         $this->eventLogService->log('judging', $judging->getJudgingid(),
                             EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
-
-                        // As EventLogService::log() will clear the entity manager, the judging
-                        // has now become detached. We will have to reload it.
-                        /** @var Judging $judging */
-                        $judging = $query->getOneOrNullResult();
                     }
                 } elseif ($judging->getResult() !== Judging::RESULT_COMPILER_ERROR) {
                     // The new result contradicts a former one, that's not good.
@@ -682,7 +667,6 @@ class JudgehostController extends AbstractFOSRestController
 
         $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime, $startTime, $endTime,
             $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta, $score, $pass, $passes);
-        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
 
@@ -1091,12 +1075,6 @@ class JudgehostController extends AbstractFOSRestController
             $this->eventLogService->log('judging_run', $judgingRun->getRunid(),
                                         EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
         }
-
-        // Reload the judging, as EventLogService::log will clear the entity manager.
-        // For the judging, also load in the submission and some of its relations.
-        /** @var JudgingRun $judgingRun */
-        $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
-        $judging = $judgingRun->getJudging();
 
         // Result of this judging_run has been stored. now check whether
         // we're done or if more testcases need to be judged.

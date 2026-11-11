@@ -475,8 +475,6 @@ class ClarificationController extends BaseController
         $clarId = $clarification->getClarId();
         $this->dj->auditlog('clarification', $clarification->getExternalid(), 'added', null, null, $contest->getExternalid());
         $this->eventLog->log('clarification', $clarId, 'create', $contest->getCid());
-        // Reload clarification to make sure we have a fresh one after calling the event log service.
-        $clarification = $this->em->getRepository(Clarification::class)->find($clarId);
 
         if ($clarification->getRecipient()) {
             $clarification->getRecipient()->addUnreadClarification($clarification);

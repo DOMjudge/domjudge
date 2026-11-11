@@ -3,8 +3,15 @@
 namespace App\Controller\API;
 
 use App\Entity\BaseApiEntity;
-use App\Utils\CcsApiVersion;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping\ToManyAssociationMapping;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\PersistentCollection;
+use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\Expr\From;
+use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\Query\Expr\Select;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,29 +30,38 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
  */
 abstract class AbstractRestController extends AbstractApiController
 {
-    /**
-     * Get all objects for this endpoint.
-     * @throws NonUniqueResultException
-     */
-    protected function performListAction(Request $request): Response
+    public const ATTR_REFRESH_ENTITIES = '_domjudge_refresh_entities';
+
+    protected function shouldRefresh(Request $request): bool
     {
-        return $this->renderData($request, $this->listActionHelper($request));
+        return $request->attributes->getBoolean(self::ATTR_REFRESH_ENTITIES);
     }
 
     /**
-     * Get a single object for this endpoint.
+     * Get the objects for this endpoint and request.
+     *
+     * @internal Bypasses HTTP firewall and controller #[IsGranted] attributes; intended for internal/event-log callers.
+     * @return mixed[]
      * @throws NonUniqueResultException
      */
-    protected function performSingleAction(Request $request, string $id): Response
+    public function getEndpointObjects(Request $request, bool $refresh = false): array
     {
-        // Make sure we clear the entity manager class, for when this method is called multiple times
-        // by internal requests.
-        $this->em->clear();
+        return $this->listActionHelper($request, $refresh);
+    }
 
-        $object = $this->getQueryBuilder($request)
+    /**
+     * Get a single object for this endpoint and ID.
+     *
+     * @internal Bypasses HTTP firewall and controller #[IsGranted] attributes; intended for internal/event-log callers.
+     * @throws NonUniqueResultException
+     */
+    public function getSingleEndpointObject(Request $request, string $id, bool $refresh = false): mixed
+    {
+        $queryBuilder = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter('id', $id)
-            ->getQuery()
+            ->setParameter('id', $id);
+
+        $object = $this->buildQuery($queryBuilder, $refresh)
             ->getOneOrNullResult();
 
         if ($object === null) {
@@ -56,6 +72,52 @@ abstract class AbstractRestController extends AbstractApiController
             $object = $this->transformObject($object);
         }
 
+        return $object;
+    }
+
+    protected function isStrict(Request $request): bool
+    {
+        return $request->query->getBoolean('strict');
+    }
+
+    /**
+     * Get the serialized endpoint data as an array directly without HTTP sub-requests.
+     *
+     * @internal Bypasses HTTP firewall and controller #[IsGranted] attributes; intended for EventLogService.
+     * @return mixed[]
+     * @throws NonUniqueResultException
+     */
+    public function getEndpointData(Request $request): array
+    {
+        $objects = $this->getEndpointObjects($request, refresh: true);
+        return $this->apiResourceSerializer->toArray($objects, $this->isStrict($request));
+    }
+
+    /**
+     * Get the serialized single endpoint data as an array directly without HTTP sub-requests.
+     *
+     * @internal Bypasses HTTP firewall and controller #[IsGranted] attributes; intended for EventLogService.
+     * @return mixed[]
+     * @throws NonUniqueResultException
+     */
+    public function getSingleEndpointData(Request $request, string $id): array
+    {
+        $object = $this->getSingleEndpointObject($request, $id, refresh: true);
+        return $this->apiResourceSerializer->toArray($object, $this->isStrict($request));
+    }
+
+    protected function performListAction(Request $request): Response
+    {
+        return $this->renderData($request, $this->getEndpointObjects($request, $this->shouldRefresh($request)));
+    }
+
+    /**
+     * Get a single object for this endpoint.
+     * @throws NonUniqueResultException
+     */
+    protected function performSingleAction(Request $request, string $id): Response
+    {
+        $object = $this->getSingleEndpointObject($request, $id, $this->shouldRefresh($request));
         return $this->renderData($request, $object);
     }
 
@@ -76,18 +138,7 @@ abstract class AbstractRestController extends AbstractApiController
         $view->getContext()->setAttribute('authorized_user_service', $this->authService);
         $view->getContext()->setAttribute('config_service', $this->config);
 
-        /** @var CcsApiVersion $ccsApiVersion */
-        $ccsApiVersion = $this->config->get('ccs_api_version');
-        $groups = [static::GROUP_DEFAULT, $ccsApiVersion->value];
-        if (!$request->query->has('strict') || !$request->query->getBoolean('strict')) {
-            $groups[] = static::GROUP_NONSTRICT;
-        }
-        if ($this->authService->checkRole('api_reader')) {
-            $groups[] = static::GROUP_RESTRICTED;
-        }
-        if (in_array(static::GROUP_NONSTRICT, $groups) && in_array(static::GROUP_RESTRICTED, $groups)) {
-            $groups[] = static::GROUP_RESTRICTED_NONSTRICT;
-        }
+        $groups = $this->apiResourceSerializer->getSerializationGroups($this->isStrict($request));
         $view->getContext()->setGroups($groups);
 
         $response = $this->handleView($view);
@@ -214,14 +265,119 @@ abstract class AbstractRestController extends AbstractApiController
     abstract protected function getIdField(): string;
 
     /**
+     * Build a Doctrine Query from the given QueryBuilder, optionally enabling Query::HINT_REFRESH
+     * and resetting any fetch-joined collections on already-managed entities so collections that
+     * became empty in the database do not retain stale elements in Doctrine's ObjectHydrator.
+     *
+     * @return Query<mixed, mixed>
+     */
+    protected function buildQuery(QueryBuilder $queryBuilder, bool $refresh): Query
+    {
+        if ($refresh) {
+            $this->resetFetchJoinedCollections($queryBuilder);
+            return $queryBuilder->getQuery()->setHint(Query::HINT_REFRESH, true);
+        }
+
+        return $queryBuilder->getQuery();
+    }
+
+    /**
+     * Doctrine's ObjectHydrator skips resetting fetch-joined PersistentCollections during
+     * UnitOfWork::createEntity() and fails to clear an already-initialized collection when the
+     * joined table now returns 0 rows. Reset clean fetch-joined collections to uninitialized
+     * prior to hydration so both empty and non-empty database states hydrate accurately.
+     */
+    protected function resetFetchJoinedCollections(QueryBuilder $queryBuilder): void
+    {
+        $selectedAliases = [];
+        /** @var Select $selectPart */
+        foreach ($queryBuilder->getDQLPart('select') as $selectPart) {
+            foreach ($selectPart->getParts() as $part) {
+                foreach (explode(',', (string)$part) as $token) {
+                    $token = trim($token);
+                    if (preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $token)) {
+                        $selectedAliases[$token] = true;
+                    }
+                }
+            }
+        }
+
+        if (empty($selectedAliases)) {
+            return;
+        }
+
+        /** @var array<string, class-string> $aliasToClass */
+        $aliasToClass = [];
+        /** @var From $fromPart */
+        foreach ($queryBuilder->getDQLPart('from') as $fromPart) {
+            /** @var class-string $fromClass */
+            $fromClass = $fromPart->getFrom();
+            $aliasToClass[$fromPart->getAlias()] = $fromClass;
+        }
+
+        $uow = $this->em->getUnitOfWork();
+        $identityMap = $uow->getIdentityMap();
+
+        /** @var Join[] $joins */
+        foreach ($queryBuilder->getDQLPart('join') as $joins) {
+            foreach ($joins as $join) {
+                $joinExpr = $join->getJoin();
+                if (!str_contains($joinExpr, '.')) {
+                    if (class_exists($joinExpr)) {
+                        $aliasToClass[$join->getAlias()] = $joinExpr;
+                    }
+                    continue;
+                }
+
+                [$parentAlias, $field] = explode('.', $joinExpr, 2);
+                if (!isset($aliasToClass[$parentAlias])) {
+                    continue;
+                }
+
+                $parentMeta = $this->em->getClassMetadata($aliasToClass[$parentAlias]);
+                if (!$parentMeta->hasAssociation($field)) {
+                    continue;
+                }
+
+                $assoc = $parentMeta->getAssociationMapping($field);
+                $aliasToClass[$join->getAlias()] = $assoc->targetEntity;
+
+                if (!isset($selectedAliases[$join->getAlias()]) || !$assoc instanceof ToManyAssociationMapping) {
+                    continue;
+                }
+
+                foreach ($identityMap[$parentMeta->rootEntityName] ?? [] as $entity) {
+                    if (!$entity instanceof $parentMeta->name || $uow->isUninitializedObject($entity)) {
+                        continue;
+                    }
+
+                    $collection = $parentMeta->propertyAccessors[$field]->getValue($entity);
+                    if ($collection instanceof PersistentCollection && !$collection->isDirty()) {
+                        $collection->setInitialized(false);
+                        $collection->unwrap()->clear();
+                    } elseif ($collection instanceof Collection && !($collection instanceof PersistentCollection)) {
+                        /** @var ArrayCollection<int|string, object> $emptyCollection */
+                        $emptyCollection = new ArrayCollection();
+                        $pColl = new PersistentCollection(
+                            $this->em,
+                            $this->em->getClassMetadata($assoc->targetEntity),
+                            $emptyCollection
+                        );
+                        $pColl->setOwner($entity, $assoc);
+                        $pColl->setInitialized(false);
+                        $parentMeta->propertyAccessors[$field]->setValue($entity, $pColl);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * @return array<U>
      * @throws NonUniqueResultException
      */
-    protected function listActionHelper(Request $request): array
+    protected function listActionHelper(Request $request, bool $refresh = false): array
     {
-        // Make sure we clear the entity manager class, for when this method is called multiple times
-        // by internal requests.
-        $this->em->clear();
         $queryBuilder = $this->getQueryBuilder($request);
 
         if ($request->query->has('ids')) {
@@ -233,8 +389,7 @@ abstract class AbstractRestController extends AbstractApiController
         }
 
         /** @var array<T> $objects */
-        $objects = $queryBuilder
-            ->getQuery()
+        $objects = $this->buildQuery($queryBuilder, $refresh)
             ->getResult();
 
         if (isset($ids) && count($objects) !== count($ids)) {

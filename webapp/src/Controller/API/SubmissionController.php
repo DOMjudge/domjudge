@@ -446,7 +446,10 @@ class SubmissionController extends AbstractRestController
             ->from(Submission::class, 's')
             ->join('s.contest', 'c')
             ->join('s.team', 't')
-            ->select('s')
+            ->join('s.problem', 'p')
+            ->join('s.language', 'l')
+            ->leftJoin('s.user', 'u')
+            ->select('s, c, t, p, l, u')
             ->andWhere('s.valid = 1')
             ->andWhere('t.enabled = 1')
             ->orderBy('s.submitid');

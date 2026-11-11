@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Controller\API\AbstractRestController;
 use App\DataTransferObject\ContestStatus;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\AssetEntityInterface;
@@ -84,6 +85,11 @@ class DOMJudgeService implements ResetInterface
         $this->assetFilesCache = [];
         $this->defaultCompareExecutable = null;
         $this->defaultRunExecutable = null;
+    }
+
+    public function clearAssetFilesCache(): void
+    {
+        $this->assetFilesCache = [];
     }
 
     final public const EVAL_DEFAULT = 0;
@@ -543,8 +549,11 @@ class DOMJudgeService implements ResetInterface
                 )
             );
         }
-        $callable();
-        $this->tokenStorage->setToken($currentToken);
+        try {
+            $callable();
+        } finally {
+            $this->tokenStorage->setToken($currentToken);
+        }
     }
 
     /**
@@ -680,7 +689,7 @@ class DOMJudgeService implements ResetInterface
     /**
      * Perform an internal API request to the given URL with the given data.
      *
-     * @param array<string, string[]> $queryOrPostData
+     * @param array<string, mixed> $queryOrPostData
      * @param UploadedFile[] $files
      *
      * @return mixed|null
@@ -688,6 +697,7 @@ class DOMJudgeService implements ResetInterface
     public function internalApiRequest(string $url, string $method = Request::METHOD_GET, array $queryOrPostData = [], array $files = [], bool $throw = false)
     {
         $request  = Request::create('/api' . $url, $method, $queryOrPostData, [], $files);
+        $request->attributes->set(AbstractRestController::ATTR_REFRESH_ENTITIES, true);
         if ($this->requestStack->getCurrentRequest() && $this->requestStack->getCurrentRequest()->hasSession()) {
             $request->setSession($this->requestStack->getSession());
         } else {

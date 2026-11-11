@@ -72,7 +72,7 @@ readonly class ContestVisitor implements EventSubscriberInterface
         $id = $contest->getExternalid();
 
         // Banner
-        if ($banner = $this->dj->assetPath($id, 'contest', true)) {
+        if (($banner = $this->dj->assetPath($id, 'contest', true)) && file_exists($banner)) {
             $imageSize = Utils::getImageSize($banner);
             $parts = explode('.', $banner);
             $extension = $parts[count($parts) - 1];

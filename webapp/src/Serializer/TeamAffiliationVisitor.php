@@ -75,12 +75,12 @@ readonly class TeamAffiliationVisitor implements EventSubscriberInterface
         }
 
         // Affiliation logo
-        if ($affiliationLogo = $this->dj->assetPath((string)$id, 'affiliation', true)) {
+        if (($affiliationLogo = $this->dj->assetPath((string)$id, 'affiliation', true)) && file_exists($affiliationLogo)) {
             $imageSize = Utils::getImageSize($affiliationLogo);
             $parts = explode('.', $affiliationLogo);
             $extension = $parts[count($parts) - 1];
 
-            if ($cid = $this->requestStack->getCurrentRequest()->attributes->get('cid')) {
+            if ($cid = $this->requestStack->getCurrentRequest()?->attributes->get('cid')) {
                 $route = $this->dj->apiRelativeUrl(
                     'v4_organization_logo',
                     [

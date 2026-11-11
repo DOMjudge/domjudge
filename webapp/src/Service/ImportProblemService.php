@@ -743,6 +743,11 @@ readonly class ImportProblemService
             return null;
         }
 
+        // Testcases and attachments above were updated via their owning side without updating
+        // Problem's inverse collections; refresh Problem so getTestcases()/getAttachments()
+        // reflect the persisted database state even when $contest is null or disabled.
+        $this->em->refresh($problem);
+
         $cid = $contest?->getCid();
         $probid = $problem->getProbid();
         $this->eventLogService->log('problem', $problem->getProbid(), $problemIsNew ? 'create' : 'update', $cid);
@@ -756,13 +761,6 @@ readonly class ImportProblemService
             $subs_with_unknown_lang = [];
             $too_large_subs = [];
             $successful_subs = [];
-
-            // As EventLogService::log() will clear the entity manager, the problem and the contest became detached. We
-            // need to reload them.
-            // We seem to need to explicitly clear the EntityManager, otherwise we will receive inconsistent data.
-            $this->em->clear();
-            $problem = $this->em->getRepository(Problem::class)->find($probid);
-            $contest = $this->em->getRepository(Contest::class)->find($cid);
 
             // First find all submittable languages:
             $allowedLanguages = $this->dj->getAllowedLanguagesForContest($contest);
@@ -901,15 +899,8 @@ readonly class ImportProblemService
                     $entry_point = $this->submissionsYamlOrJson('entrypoint', $submissionMeta['entrypoint'],
                         $submission_details[$path]['entry_point'] ?? null, $path, $messages) ?? '__auto__';
                     if ($totalSize <= $this->config->get('sourcesize_limit') * 1024) {
-                        $contest        = $this->em->getRepository(Contest::class)->find($contest->getCid());
-                        $team           = $this->em->getRepository(Team::class)->find($jury_team_id);
-                        $contestProblem = $this->em->getRepository(ContestProblem::class)->find(
-                            [
-                                'problem' => $problem,
-                                'contest' => $contest,
-                            ]
-                        );
-                        $submission     = $this->submissionService->submitSolution(
+                        $team       = $this->em->getRepository(Team::class)->find($jury_team_id);
+                        $submission = $this->submissionService->submitSolution(
                             $team, $jury_user, $contestProblem, $contest, $languageToUse, $filesToSubmit, SubmissionSource::PROBLEM_IMPORT, null,
                             null, $entry_point, null, null, $submissionMessage,
                             deferPostProcessing: true
@@ -968,15 +959,8 @@ readonly class ImportProblemService
         // do get added above.
         if ($contestProblem) {
             $this->em->flush();
-            // We need to reload the problem after the call(s) to the eventLogService.
-            $problem = $this->em->getRepository(Problem::class)->find($problem->getProbid());
             $testcases = $problem->getTestcases()->toArray();
             if (count(array_filter($testcases, fn($t) => !$t->getDeleted())) == 0) {
-                // We need to reload the contest problem after the call(s) to the eventLogService.
-                $contestProblem = $this->em->getRepository(ContestProblem::class)->findOneBy([
-                    'contest' => $contest,
-                    'problem' => $problem,
-                ]);
                 $messages['danger'][] = 'No testcases present, disabling submitting for this problem';
                 $contestProblem->setAllowSubmit(false);
             }

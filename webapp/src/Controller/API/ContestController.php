@@ -741,7 +741,7 @@ class ContestController extends AbstractRestController
         $response = new StreamedResponse();
         $response->headers->set('X-Accel-Buffering', 'no');
         $response->headers->set('Content-Type', 'application/x-ndjson');
-        $response->setCallback(function () use ($format, $contentVersion, $cid, $contest, $request, $since_id, $types, $strict, $stream, $metadataFactory, $kernel): void {
+        $response->setCallback(function () use ($format, $contentVersion, $contest, $since_id, $types, $strict, $stream, $metadataFactory, $kernel): void {
             $lastUpdate = 0;
             $lastIdSent = max(0, $since_id);
             $lastIdExists = $since_id !== -1; // Don't try to look for event_id=0
@@ -807,10 +807,15 @@ class ContestController extends AbstractRestController
                 $skippedProperties['problems'][] = 'externalid';
             }
 
-            // Initialize all static events.
+            // Initialize all static events, then release hydrated static entities before entering
+            // the potentially multi-hour event stream loop.
             $this->eventLogService->initStaticEvents($contest);
-            // Reload the contest as the above method will clear the entity manager.
-            $contest = $this->getContestWithId($request, $cid);
+            if ($stream) {
+                $contestId = $contest->getCid();
+                $this->em->clear();
+                /** @var Contest $contest */
+                $contest = $this->em->find(Contest::class, $contestId);
+            }
 
             $missingEventRetries = 0;
             while (true) {
