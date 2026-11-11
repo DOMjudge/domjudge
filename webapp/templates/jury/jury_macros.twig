@@ -289,6 +289,14 @@
             var $message = $('#progress-bar-message');
             var decoder = new TextDecoder();
             var buffer = '';
+            var done = false;
+
+            var fail = function(message) {
+                $progress
+                    .removeClass('progress-bar-animated progress-bar-striped bg-success')
+                    .addClass('bg-danger');
+                $message.empty().append($('<div class="alert alert-danger mb-0"></div>').text(message));
+            };
 
             var handleLine = function(line) {
                 if (!line.trim()) { return false; }
@@ -308,11 +316,11 @@
                 if (data.message) {
                     $progress.removeClass('progress-bar-animated progress-bar-striped');
                     $message.html(data.message);
-                    return true;
+                    return (done = true);
                 }
                 if (data.redirect) {
                     window.location.replace(data.redirect);
-                    return true;
+                    return (done = true);
                 }
                 return false;
             };
@@ -325,7 +333,12 @@
                     for (var i = 0; i < lines.length; i++) {
                         if (handleLine(lines[i])) { return; }
                     }
-                    if (result.done) { return; }
+                    if (result.done) {
+                        if (!done) {
+                            fail('Request ended unexpectedly before completion.');
+                        }
+                        return;
+                    }
                     return consume(reader);
                 });
             };
@@ -338,7 +351,13 @@
                 },
                 {% if data %}body: '{{ data | raw }}',{% endif %}
             }).then(function(response) {
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
                 return consume(response.body.getReader());
+            }).catch(function(error) {
+                console.error(error);
+                fail('Request failed: ' + error.message);
             });
         });
     </script>
