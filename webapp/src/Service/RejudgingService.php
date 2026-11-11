@@ -95,6 +95,8 @@ class RejudgingService
         $singleJudging = (count($judgings) == 1);
         $index = 0;
         $first = true;
+        $pendingLog = '';
+        $lastProgress = -1;
         // We can be handed more than one judging of the same submission, for
         // example when a submission ended up with several valid judgings. Only
         // rejudge each submission once by tracking them as seen.
@@ -184,11 +186,15 @@ class RejudgingService
 
             $this->em->getConnection()->commit();
 
-            $log = ($first ? '' : ', ') . sprintf('s%d', $judging->getSubmissionId());
-            $first = false;
             if ($progressReporter !== null) {
+                $pendingLog .= ($first ? '' : ', ') . sprintf('s%d', $judging->getSubmissionId());
+                $first = false;
                 $progress = (int)round($index / count($judgings) * 100);
-                $progressReporter($progress, $log);
+                if ($progress !== $lastProgress) {
+                    $progressReporter($progress, $pendingLog);
+                    $pendingLog = '';
+                    $lastProgress = $progress;
+                }
             }
 
             // In dev mode, Doctrine's DebugDataHolder accumulates all SQL queries
@@ -196,6 +202,10 @@ class RejudgingService
             if ($index % 100 === 0) {
                 $debugDataHolder?->reset();
             }
+        }
+
+        if ($progressReporter !== null && $pendingLog !== '') {
+            $progressReporter($lastProgress, $pendingLog);
         }
 
         if (count($skipped) == count($judgings)) {
@@ -281,8 +291,10 @@ class RejudgingService
 
         // This loop uses direct queries instead of Doctrine classes to speed
         // it up drastically.
-        $firstItem = true;
-        $index     = 0;
+        $firstItem    = true;
+        $index        = 0;
+        $pendingLog   = '';
+        $lastProgress = -1;
 
         $scoreboardRowsToUpdate = [];
         foreach ($submissions as $submission) {
@@ -371,12 +383,20 @@ class RejudgingService
             }
 
             if ($progressReporter) {
-                $log         = ($firstItem ? '' : ', ') . 's' . $submission['submitid'];
+                $pendingLog .= ($firstItem ? '' : ', ') . 's' . $submission['submitid'];
                 $firstItem   = false;
                 $maxProgress = ($action === self::ACTION_APPLY ? static::APPLY_PROGRESS_WITH_SCOREBOARD_UPDATE : 100);
                 $progress    = (int)round($index / count($submissions) * $maxProgress);
-                $progressReporter($progress, $log);
+                if ($progress !== $lastProgress) {
+                    $progressReporter($progress, $pendingLog);
+                    $pendingLog = '';
+                    $lastProgress = $progress;
+                }
             }
+        }
+
+        if ($progressReporter && $pendingLog !== '') {
+            $progressReporter($lastProgress, $pendingLog);
         }
 
         if (!empty($scoreboardRowsToUpdate)) {
