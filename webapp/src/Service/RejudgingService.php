@@ -521,8 +521,8 @@ class RejudgingService
             // Sort by ID DESC (latest first)
             usort($groupRows, fn($a, $b) => $b['rejudgingid'] <=> $a['rejudgingid']);
 
-            // Find original (null repeat_rejudgingid) or fallback to oldest
-            $original = current(array_filter($groupRows, fn($r) => $r['repeat_rejudgingid'] === null))
+            // Find original (matching groupId) or fallback to oldest
+            $original = current(array_filter($groupRows, fn($r) => $r['rejudgingid'] === $groupId))
                         ?: $groupRows[array_key_last($groupRows)];
 
             $header = $groupRows[0];
