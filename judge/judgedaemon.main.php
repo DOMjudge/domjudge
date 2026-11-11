@@ -155,7 +155,7 @@ readonly class VerdictInput
  * @phpstan-type JudgingRun array{runresult: string, start_time: string, end_time: string, runtime: string,
  *      output_run: string, output_error: string, output_system: string, metadata: string, output_diff: string,
  *      hostname: string, testcasedir: string, compare_metadata: string,
- *      team_message?: string, score?: string
+ *      team_message?: string, score?: string, pass?: string, passes?: string
  * }
  * @phpstan-type RunConfig array{time_limit: float, memory_limit: int, output_limit: int,
  *      process_limit: int, entry_point: ?string, pass_limit: int, hash: string, overshoot: int
@@ -2507,6 +2507,7 @@ class JudgeDaemon
         $passes = [];
 
         for ($passCnt = 1; $passCnt <= $passLimit; $passCnt++) {
+            $passStartTime = microtime(true);
             $nextPass = false;
             if ($passLimit > 1) {
                 logmsg(LOG_INFO, "    🔄 Running pass $passCnt...");
@@ -2606,17 +2607,12 @@ class JudgeDaemon
             ];
 
             if ($passLimit > 1) {
-                $new_judging_run['pass'] = $passCnt;
-
-                $passData = ['pass' => $passCnt] + array_intersect_key($new_judging_run, array_flip([
-                    'runresult', 'start_time', 'end_time', 'runtime', 'output_run',
-                    'output_error', 'output_system', 'metadata', 'output_diff', 'compare_metadata',
-                ]));
-                // Every pass but the first runs on the input the validator generated.
-                if ($passCnt > 1) {
-                    $passData['input'] = $this->restEncodeFile($input, $output_storage_limit);
-                }
-                $passes[] = $passData;
+                $passes[] = $this->buildPassData(
+                    $passCnt,
+                    $passStartTime,
+                    $new_judging_run,
+                    $passCnt > 1 ? $this->restEncodeFile($input, $output_storage_limit) : null
+                );
             }
 
             if (file_exists($passdir . '/feedback/teammessage.txt')) {
@@ -2707,7 +2703,7 @@ class JudgeDaemon
         }
 
         if ($passLimit > 1) {
-            $new_judging_run['passes'] = json_encode($passes, JSON_THROW_ON_ERROR);
+            $new_judging_run = $this->finalizeMultipassRun($new_judging_run, $passes);
         }
 
         $ret = true;
@@ -2729,6 +2725,52 @@ class JudgeDaemon
 
         // done!
         return $ret;
+    }
+
+    /**
+     * @param JudgingRun $judgingRun
+     * @return array<string, int|string>
+     */
+    private function buildPassData(
+        int $passCnt,
+        float $passStartTime,
+        array $judgingRun,
+        ?string $encodedInput = null
+    ): array {
+        $passData = [
+            'pass' => $passCnt,
+            'start_time' => urlencode((string)$passStartTime),
+        ] + array_intersect_key($judgingRun, array_flip([
+            'runresult', 'end_time', 'runtime', 'output_run',
+            'output_error', 'output_system', 'metadata', 'output_diff', 'compare_metadata',
+        ]));
+        // Every pass but the first runs on the input the validator generated.
+        if ($passCnt > 1 && $encodedInput !== null) {
+            $passData['input'] = $encodedInput;
+        }
+        return $passData;
+    }
+
+    /**
+     * @param JudgingRun $judgingRun
+     * @param list<array<string, int|string>> $passes
+     * @return JudgingRun
+     */
+    private function finalizeMultipassRun(array $judgingRun, array $passes): array
+    {
+        $maxRuntime = null;
+        foreach ($passes as $pass) {
+            $passRuntime = (string)$pass['runtime'];
+            if ($passRuntime !== '' && ($maxRuntime === null || (float)$passRuntime > (float)$maxRuntime)) {
+                $maxRuntime = $passRuntime;
+            }
+        }
+        if ($passes !== []) {
+            $judgingRun['pass'] = (string)$passes[array_key_last($passes)]['pass'];
+        }
+        $judgingRun['runtime'] = $maxRuntime ?? '';
+        $judgingRun['passes'] = json_encode($passes, JSON_THROW_ON_ERROR);
+        return $judgingRun;
     }
 
     /**
