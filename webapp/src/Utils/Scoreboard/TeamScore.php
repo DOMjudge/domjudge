@@ -12,7 +12,7 @@ class TeamScore
     public int $rank = 0;
     public int $totalTime;
     public int $totalRuntime = 0;
-    public string|float|null $score = "0";
+    public string|float|null $score = '0.000000000';
 
     public function __construct(public Team $team, public ?RankCache $rankCache, bool $restricted)
     {

@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\UnjudgedSubmissionFixture;
 use App\DataFixtures\Test\PreviousSubmissionTestcaseRunsFixture;
+use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectFixture;
 use App\Entity\Contest;
 use App\Entity\ContestProblemsetContent;
 use App\Entity\JudgeTask;
@@ -808,6 +809,7 @@ class ContestControllerTest extends JuryControllerTestCase
         $this->roles = ['admin'];
         $this->logOut();
         $this->logIn();
+        $this->loadFixture(SampleSubmissionsThreeTriesCorrectFixture::class);
 
         /** @var EntityManagerInterface $em */
         $em = static::getContainer()->get(EntityManagerInterface::class);
@@ -835,12 +837,12 @@ class ContestControllerTest extends JuryControllerTestCase
 
         // Initially runtime tiebreaker is disabled: 3-element ICPC sort key.
         $initialSortKey = $fetchSortKey();
-        self::assertSame(ScoreboardService::getICPCScoreKey(0, 0, 0), $initialSortKey);
+        self::assertSame(ScoreboardService::getICPCScoreKey(1, 40, 0), $initialSortKey);
 
         // 1. Enable runtime tiebreaker via the contest detail toggle action.
         $this->client->request('POST', "/jury/contests/$contestId/toggle/tiebreaker", ['value' => '1']);
         $this->checkStatusAndFollowRedirect();
-        self::assertSame(ScoreboardService::getRuntimeScoreKey(0, 0), $fetchSortKey());
+        self::assertSame(ScoreboardService::getRuntimeScoreKey(1, 0), $fetchSortKey());
 
         // 2. Disable runtime tiebreaker via the contest edit form.
         $this->verifyPageResponse('GET', "/jury/contests/$contestId/edit", 200);
