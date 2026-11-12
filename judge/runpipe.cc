@@ -186,8 +186,9 @@ struct process_t {
   pid_t pid = -1;
 
   bool exited = false;
-  // Whether the proxy listens for data from this process.
-  bool watched = true;
+  // Whether the proxy listens for data from this process, i.e. whether
+  // process_to_proxy is registered in the epoll.
+  bool watched = false;
   // Information about the exited process. Meaningful only if exited == true.
   int exitInfo = -1;
 
@@ -297,6 +298,8 @@ struct process_t {
              process_to_proxy, pid);
       close(process_to_proxy);
       process_to_proxy = -1;
+      // There is nothing left to listen for.
+      watched = false;
     }
   }
 
@@ -738,6 +741,7 @@ struct state_t {
     if (has_proxy()) {
       for (auto &proc : processes) {
         add_fd(proc.process_to_proxy);
+        proc.watched = true;
       }
     }
   }
@@ -801,7 +805,7 @@ struct state_t {
   // Stop listening for the data coming from the process, without closing the
   // pipe. Closing it would make the writes of the process fail.
   void stop_watching(process_t &proc) {
-    if (proc.process_to_proxy == -1 || !proc.watched) {
+    if (!proc.watched) {
       return;
     }
     logmsg(LOG_DEBUG, "no longer reading from #{}", proc.index);
