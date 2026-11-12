@@ -331,17 +331,24 @@ class Problem extends BaseApiEntity implements
         return $this;
     }
 
-    public function getTypesAsString(): string
+    /**
+     * @return list<string>
+     */
+    public function getTypeNames(): array
     {
-        $typeConstants = $this->getTypes();
         $typeStrings = [];
-        foreach ($typeConstants as $type) {
+        foreach ($this->getTypes() as $type) {
             if (!isset($this->typesToString[$type])) {
                 throw new Exception("Unknown problem type: '$type'");
             }
             $typeStrings[] = $this->typesToString[$type];
         }
-        return implode(', ', $typeStrings);
+        return $typeStrings;
+    }
+
+    public function getTypesAsString(): string
+    {
+        return implode(', ', $this->getTypeNames());
     }
 
     /**
