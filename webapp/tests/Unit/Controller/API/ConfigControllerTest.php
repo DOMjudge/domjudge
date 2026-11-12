@@ -163,7 +163,13 @@ class ConfigControllerTest extends BaseTestCase
      */
     public function testConfigCheckerWorksForAdmin(): void
     {
-        // In the test setup, the config check returns some errors so expected result is 260.
+        // Force an error independent of the PHP settings: the PHP settings check
+        // reports an error when max_file_uploads <= sourcefiles_limit.
+        $sourcefilesLimit = (string)max(1, (int)ini_get('max_file_uploads'));
+        $this->withChangedConfiguration('sourcefiles_limit', $sourcefilesLimit,
+            static fn(array $errors) => static::assertEmpty($errors));
+
+        // The config check returns at least one error, so the expected result is 260.
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint .'/check', 260, 'admin');
 
         $sections = ['System', 'Configuration', 'Contests', 'Problems and languages', 'Teams', 'External identifiers'];
@@ -178,6 +184,9 @@ class ConfigControllerTest extends BaseTestCase
         static::assertArrayHasKey('php_version', $response['System']);
         static::assertArrayHasKey('result', $response['System']['php_version']);
         static::assertEquals('O', $response['System']['php_version']['result']);
+
+        static::assertArrayHasKey('php_settings', $response['System']);
+        static::assertEquals('E', $response['System']['php_settings']['result']);
 
         static::assertArrayHasKey('languages', $response['Problems and languages']);
         static::assertArrayHasKey('caption', $response['Problems and languages']['languages']);
