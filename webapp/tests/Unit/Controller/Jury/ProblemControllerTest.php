@@ -403,10 +403,9 @@ class ProblemControllerTest extends JuryControllerTestCase
         $crawler = $this->client->request('GET', '/jury/problems/problemset');
         self::assertResponseIsSuccessful();
 
-        $levels = $crawler->filter('.problem-stats-item')->each(
-            fn(Crawler $box) => preg_match('/\b(correct|incorrect|frozen)-[1-9]\b/', $box->attr('class'), $matches)
-                ? $matches[1] : null
-        );
-        self::assertSame(['correct' => 3, 'incorrect' => 3], array_count_values(array_filter($levels)));
+        self::assertCount(3, $crawler->filter('.problem-stats-bar.bar-correct'));
+        self::assertCount(3, $crawler->filter('.problem-stats-bar.bar-incorrect'));
+        self::assertCount(0, $crawler->filter('.problem-stats-bar.bar-frozen'));
+        self::assertCount(0, $crawler->filter('.problem-stats-freeze'));
     }
 }
