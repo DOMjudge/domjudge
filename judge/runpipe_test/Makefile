@@ -8,7 +8,7 @@ RUNPIPES = runpipe
 
 TESTCASES_JUDGE = $(TESTCASES:=/judge)
 TESTCASES_SOLUTION = $(TESTCASES:=/solution)
-TESTCASES_OUTPUTS = $(TESTCASES:=/output.txt) $(TESTCASES:=/stderr.txt)
+TESTCASES_OUTPUTS = $(TESTCASES:=/output.txt) $(TESTCASES:=/stderr.txt) $(TESTCASES:=/meta.txt)
 
 TESTCASES_TARGETS = $(TESTCASES:%=testcase/%)
 
