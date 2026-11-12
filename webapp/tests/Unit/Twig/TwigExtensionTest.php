@@ -20,8 +20,13 @@ class TwigExtensionTest extends TestCase
 
     protected function setUp(): void
     {
+        // printMetadata() parses through DOMJudgeService, so use the real parser.
+        $realDj = (new \ReflectionClass(DOMJudgeService::class))->newInstanceWithoutConstructor();
+        $dj = $this->createMock(DOMJudgeService::class);
+        $dj->method('parseMetadata')->willReturnCallback($realDj->parseMetadata(...));
+
         $this->twigExtension = new TwigExtension(
-            $this->createMock(DOMJudgeService::class),
+            $dj,
             $this->createMock(ConfigurationService::class),
             $this->createMock(Environment::class),
             $this->createMock(EntityManagerInterface::class),
