@@ -21,6 +21,7 @@ use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
 use App\Entity\QueueTask;
 use App\Entity\Rejudging;
+use App\Entity\ScoreCache;
 use App\Entity\Submission;
 use App\Entity\SubmissionSource;
 use App\Entity\Team;
@@ -1119,10 +1120,10 @@ class DOMJudgeService implements ResetInterface
     /**
      * @return array{'problems': ContestProblem[], 'samples': string[], 'showLimits': bool,
      *               'defaultMemoryLimit': int, 'timeFactorDiffers': bool,
-     *               'stats': array{'numBuckets': int, 'maxBucketSizeCorrect': int,
-     *                              'maxBucketSizeCorrect': int, 'maxBucketSizeIncorrect': int, 'freezeBucket': ?int,
+     *               'stats'?: array{'numBuckets': int, 'start': float, 'end': float, 'freezeBucket': ?int,
      *                              'problems': array<array{'correct': array<array{'start': DateTime, 'end': DateTime, 'count': int}>,
-     *                                                      'incorrect': array<array{'start': DateTime, 'end': DateTime, 'count': int}>}>}}
+     *                                                      'incorrect': array<array{'start': DateTime, 'end': DateTime, 'count': int}>}>},
+     *               'teamProblemStatus'?: array<int, 'solved'|'pending'|'attempted'>}
      * @throws NonUniqueResultException
      */
     public function getTwigDataForProblemsAction(
@@ -1146,6 +1147,7 @@ class DOMJudgeService implements ResetInterface
                     ->getSingleScalarResult() > 0;
         }
 
+        $team = $teamId ? $this->em->getRepository(Team::class)->find($teamId) : null;
         $problems = [];
         $samples = [];
         $clars = [];
@@ -1208,7 +1210,7 @@ class DOMJudgeService implements ResetInterface
             'defaultMemoryLimit' => $defaultMemoryLimit,
             'timeFactorDiffers' => $timeFactorDiffers,
             'clarifications' => $clars,
-            'team' => $teamId ? $this->em->getRepository(Team::class)->find($teamId) : null,
+            'team' => $team,
         ];
 
         if ($contest && $this->config->get('show_public_stats')) {
@@ -1223,7 +1225,45 @@ class DOMJudgeService implements ResetInterface
             );
         }
 
+        if ($contest && $team && !empty($problems)) {
+            $data['teamProblemStatus'] = $this->getTeamProblemStatus($contest, $team);
+        }
+
         return $data;
+    }
+
+    /**
+     * The status of each problem for a team, as shown on the team's own
+     * scoreboard row, i.e. including its own verdicts during the freeze.
+     *
+     * @return array<int, 'solved'|'pending'|'attempted'> Indexed by problem ID;
+     *         problems the team did not submit to are left out.
+     */
+    private function getTeamProblemStatus(Contest $contest, Team $team): array
+    {
+        /** @var ScoreCache[] $scoreCaches */
+        $scoreCaches = $this->em->createQueryBuilder()
+            ->from(ScoreCache::class, 's')
+            ->select('s')
+            ->andWhere('s.contest = :contest')
+            ->andWhere('s.team = :team')
+            ->setParameter('contest', $contest)
+            ->setParameter('team', $team)
+            ->getQuery()
+            ->getResult();
+
+        $status = [];
+        foreach ($scoreCaches as $scoreCache) {
+            $probid = $scoreCache->getProblem()->getProbid();
+            if ($scoreCache->getIsCorrectRestricted()) {
+                $status[$probid] = 'solved';
+            } elseif ($scoreCache->getPendingRestricted() > 0) {
+                $status[$probid] = 'pending';
+            } elseif ($scoreCache->getSubmissionsRestricted() > 0) {
+                $status[$probid] = 'attempted';
+            }
+        }
+        return $status;
     }
 
     public function createImmutableExecutable(ZipArchive $zip): ImmutableExecutable
