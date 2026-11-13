@@ -1,3 +1,8 @@
+# CI disabled on this branch: never create a pipeline.
+workflow:
+  rules:
+    - when: never
+
 include:
   - '/gitlab/ci/unit.yml'
   - '/gitlab/ci/integration.yml'
