@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 8.3.3DEV
-----------------
+Version 8.3.3 - 13 November 2026
+--------------------------------
  - Security fixes:
    - Return 404 when no access to submission data
    - Hide postfreeze balloons in totals column
