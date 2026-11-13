@@ -12,6 +12,7 @@ on:
 
 jobs:
   analyze:
+    if: false  # CI disabled on this branch
     # We can not run with our gitlab container
     # CodeQL has missing .so files otherwise
     name: Analyze

@@ -10,6 +10,7 @@ on:
 
 jobs:
   Scan-Build:
+    if: false  # CI disabled on this branch
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4

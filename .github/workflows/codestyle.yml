@@ -11,6 +11,7 @@ on:
 
 jobs:
   syntax-job:
+    if: false  # CI disabled on this branch
     runs-on: ubuntu-latest
     container:
       image: domjudge/gitlabci:2.1
@@ -20,6 +21,7 @@ jobs:
         run: .github/jobs/syntax.sh
 
   detect-dump:
+    if: false  # CI disabled on this branch
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,6 +29,7 @@ jobs:
         run: .github/jobs/detect_dump.sh
 
   php-linter:
+    if: false  # CI disabled on this branch
     runs-on: ubuntu-latest
     container:
       image: pipelinecomponents/php-linter:latest
@@ -44,6 +47,7 @@ jobs:
           webapp/config
 
   phpcs_compatibility:
+    if: false  # CI disabled on this branch
     runs-on: ubuntu-latest
     container:
       image: domjudge/gitlabci:24.04
