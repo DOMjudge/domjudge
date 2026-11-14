@@ -685,27 +685,15 @@ class ScoreboardService
         }
 
         foreach ($variants as $variant => $isRestricted) {
-            if ($contest->getScoreboardType() === ScoreboardType::PASS_FAIL) {
-                if ($numCorrect[$variant] === 0) {
-                    $scoreKey[$variant] = '.';
-                } elseif ($contest->getRuntimeAsScoreTiebreaker()) {
-                    $scoreKey[$variant] = self::getRuntimeScoreKey(
-                        $numPoints[$variant],
-                        $totalRuntime[$variant]
-                    );
-                } else {
-                    $scoreKey[$variant] = self::getICPCScoreKey(
-                        $numPoints[$variant],
-                        $totalTime[$variant],
-                        $timeOfLastCorrect[$variant]
-                    );
-                }
-            } else {
-                // TODO: Any tie breakers?
-                $scoreKey[$variant] = bccomp($score[$variant], '0', self::SCALE) === 0
-                    ? '.'
-                    : self::getScoringScoreKey($score[$variant]);
-            }
+            $scoreKey[$variant] = self::getScoreKey(
+                $contest,
+                $numPoints[$variant],
+                $totalTime[$variant],
+                $timeOfLastCorrect[$variant],
+                $totalRuntime[$variant],
+                $score[$variant],
+                $numCorrect[$variant],
+            );
         }
 
         if ($scoreKey['restricted'] === '.' && $scoreKey['public'] === '.') {
@@ -813,6 +801,37 @@ class ScoreboardService
             self::convertToScoreKeyElement($score, Order::Descending),
         ];
         return implode(',', $scoreKeyArray);
+    }
+
+    /**
+     * Dispatch to the appropriate score key builder for the contest's scoring mode.
+     */
+    public static function getScoreKey(
+        Contest $contest,
+        int $numPoints = 0,
+        int $totalTime = 0,
+        int $timeOfLastSolved = 0,
+        int $totalRuntime = 0,
+        string $score = RankCache::DEFAULT_SCORE,
+        ?int $numCorrect = null,
+    ): string {
+        if ($contest->getScoreboardType() === ScoreboardType::PASS_FAIL) {
+            if (($numCorrect ?? $numPoints) === 0) {
+                return '.';
+            }
+            if ($contest->getRuntimeAsScoreTiebreaker()) {
+                return self::getRuntimeScoreKey($numPoints, $totalRuntime);
+            }
+
+            return self::getICPCScoreKey($numPoints, $totalTime, $timeOfLastSolved);
+        }
+
+        // TODO: Any tie breakers?
+        if (bccomp($score, '0', self::SCALE) === 0) {
+            return '.';
+        }
+
+        return self::getScoringScoreKey($score);
     }
 
     /**
