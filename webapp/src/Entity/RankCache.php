@@ -24,6 +24,7 @@ use Doctrine\ORM\Mapping as ORM;
 class RankCache
 {
     public const SORT_KEY_INDEX_SIZE = 768;
+    public const DEFAULT_SCORE = '0.000000000';
 
     #[ORM\Column(options: [
         'comment' => 'Total correctness points (restricted audience)',
@@ -87,7 +88,7 @@ class RankCache
         scale: 9,
         options: [
             'comment' => 'Optional score for this run, e.g. for partial scoring',
-            'default' => '0.000000000',
+            'default' => self::DEFAULT_SCORE,
         ]
     )]
     private string|float $scorePublic = 0;
@@ -98,7 +99,7 @@ class RankCache
         scale: 9,
         options: [
             'comment' => 'Optional score for this run, e.g. for partial scoring (for restricted audience)',
-            'default' => '0.000000000',
+            'default' => self::DEFAULT_SCORE,
         ]
     )]
     private string|float $scoreRestricted = 0;
