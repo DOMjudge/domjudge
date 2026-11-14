@@ -6,14 +6,19 @@ DOMjudge
 [![Coverity Scan Status](https://img.shields.io/coverity/scan/671.svg)](https://scan.coverity.com/projects/domjudge)
 [![CodeQL alerts](https://github.com/DOMjudge/domjudge/actions/workflows/codeql-analysis.yml/badge.svg?branch=main&event=push)](https://github.com/DOMjudge/domjudge/actions/workflows/codeql-analysis.yml)
 
-This is the Programming Contest Jury System "DOMjudge" version 9.0.2DEV
+This is the Programming Contest Jury System "DOMjudge" version 9.0.2
 
 DOMjudge is a system for running a programming contest, like the
 ICPC regional and world championship programming contests.
 
 Installation
 ------------
-We provide [stable releases](https://www.domjudge.org/download) and [daily snapshots](https://www.domjudge.org/snapshot/) of the latest code. Bootstrapping from git is an advanced use case and mostly needed for development. Installing DOMjudge is almost never done via a `git clone`, except for development use cases or testing the latest code. 
+
+We provide [stable releases](https://www.domjudge.org/download) and
+[daily snapshots](https://www.domjudge.org/snapshot/) of the latest
+code. Bootstrapping from git is an advanced use case and mostly needed
+for development. Installing DOMjudge is almost never done via a `git
+clone`, except for development use cases or testing the latest code.
 
 Documentation
 -------------
