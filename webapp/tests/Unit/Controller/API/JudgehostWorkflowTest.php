@@ -313,6 +313,26 @@ class JudgehostWorkflowTest extends BaseTestCase
         self::assertNull($judging->getResult(), 'a successful compile must not decide the verdict');
     }
 
+    public function testUpdateJudgingUpdatesJudgehostPolltime(): void
+    {
+        $tasks = $this->claimWorkForOneSubmission();
+        $judgeTaskId = (int)$tasks[0]['judgetaskid'];
+
+        $this->em()->getConnection()->executeStatement(
+            'UPDATE judgehost SET polltime = 1.0 WHERE hostname = :hostname',
+            ['hostname' => self::HOSTNAME]
+        );
+
+        $this->updateJudging($judgeTaskId, [
+            'compile_success' => 1,
+            'output_compile' => base64_encode('compiling went fine'),
+            'compile_metadata' => base64_encode('meta'),
+        ]);
+
+        $judgehost = $this->freshEm()->getRepository(Judgehost::class)->findOneBy(['hostname' => self::HOSTNAME]);
+        self::assertGreaterThan(1.0, (float)$judgehost->getPolltime());
+    }
+
     public function testUpdateJudgingWithCompileErrorSetsTheVerdict(): void
     {
         $tasks = $this->claimWorkForOneSubmission();
