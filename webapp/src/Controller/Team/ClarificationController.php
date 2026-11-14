@@ -58,6 +58,10 @@ class ClarificationController extends BaseController
         if (!$contest) {
             throw new NotFoundHttpException('No active contest');
         }
+        // Problems are not public before the contest starts.
+        if (!$contest->getFreezeData()->started()) {
+            throw new NotFoundHttpException(sprintf('Problem %s not found or not available', $probId));
+        }
 
         $problem = $this->em->getRepository(Problem::class)->findByExternalId($probId);
         if ($problem === null) {
@@ -66,7 +70,7 @@ class ClarificationController extends BaseController
         $contestProblem = $problem->getContestProblems();
         $foundProblemInContest = false;
         foreach ($contestProblem as $cp) {
-            if ($cp->getContest()->getCid() === $contest->getCid()) {
+            if ($cp->getContest()->getCid() === $contest->getCid() && $cp->getAllowSubmit()) {
                 $foundProblemInContest = true;
                 break;
             }
