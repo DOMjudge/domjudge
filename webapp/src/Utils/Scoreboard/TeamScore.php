@@ -37,7 +37,7 @@ class TeamScore
     {
         if ($this->rankCache === null) {
             // Sorts teams without a rank last.
-            return '.';
+            return RankCache::EMPTY_SORT_KEY;
         }
         return $restricted ? $this->rankCache->getSortKeyRestricted() : $this->rankCache->getSortKeyPublic();
     }
