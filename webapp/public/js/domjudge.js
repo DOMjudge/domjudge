@@ -546,6 +546,15 @@ function processAjaxResponse(jqXHR, data) {
         if ($refreshTarget.data('ajax-refresh-before')) {
             window[$refreshTarget.data('ajax-refresh-before')]();
         }
+        // DataTables keeps a global reference to every table it initialized,
+        // so destroy them before replacing them.
+        if ($.fn.DataTable) {
+            $refreshTarget.find('table').each(function() {
+                if ($.fn.DataTable.isDataTable(this)) {
+                    $(this).DataTable().destroy(true);
+                }
+            });
+        }
         $refreshTarget.html($data);
         if ($refreshTarget.data('ajax-refresh-after')) {
             window[$refreshTarget.data('ajax-refresh-after')]();
