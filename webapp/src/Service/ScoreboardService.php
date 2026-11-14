@@ -620,7 +620,7 @@ class ScoreboardService
             $totalTime[$variant] = $team->getPenalty();
             $totalRuntime[$variant] = 0;
             $timeOfLastCorrect[$variant] = 0;
-            $score[$variant] = "0";
+            $score[$variant] = RankCache::DEFAULT_SCORE;
         }
 
         $penaltyTime      = $contest->getPenaltyTime();
