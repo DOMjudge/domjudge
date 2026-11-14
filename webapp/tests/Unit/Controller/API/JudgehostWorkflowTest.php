@@ -229,14 +229,36 @@ class JudgehostWorkflowTest extends BaseTestCase
     }
 
     /**
-     * A judgedaemon registers again when it restarts. Anything it had claimed and not
-     * finished is handed back so another judgehost can pick it up.
+     * A judgedaemon registers again when it restarts. Anything it had claimed for a
+     * still-pending judging (result IS NULL) is handed back so it can be judged again.
      */
-    public function testRegisterGivesBackUnfinishedWork(): void
+    public function testRegisterGivesBackPendingWork(): void
     {
-        // A problem with several test cases, so that reporting one failing run decides the
-        // verdict under lazy evaluation while leaving the other runs unfinished. Only a
-        // judging that already has a verdict is handed back on registration.
+        $tasks = $this->claimWorkForOneSubmission();
+        $judgeTaskId = (int)$tasks[0]['judgetaskid'];
+        $judging = $this->judgingForTask($judgeTaskId);
+        self::assertNull($judging->getResult());
+
+        $unfinished = $this->registerJudgehost();
+        self::assertSame([
+            [
+                'jobid' => $judging->getJudgingid(),
+                'submitid' => $judging->getSubmission()->getExternalid(),
+            ],
+        ], $unfinished, 'a pending judging with claimed runs must be handed back on registration');
+
+        $em = $this->freshEm();
+        $judgeTask = $em->getRepository(JudgeTask::class)->find($judgeTaskId);
+        self::assertNull($judgeTask->getJudgehost(), 'the claim must be released');
+        self::assertNull($judgeTask->getStarttime(), 'the start time must be cleared with it');
+    }
+
+    /**
+     * Remaining runs in a batch after lazy evaluation already decided a non-compiler-error
+     * verdict are also released on registration.
+     */
+    public function testRegisterGivesBackUnfinishedWorkAfterLazyVerdict(): void
+    {
         $this->registerJudgehost();
         $this->addSubmission(problem: 'boolfind');
 
@@ -253,6 +275,24 @@ class JudgehostWorkflowTest extends BaseTestCase
         $judgeTask = $em->getRepository(JudgeTask::class)->find($judgeTaskId);
         self::assertNull($judgeTask->getJudgehost(), 'the claim must be released');
         self::assertNull($judgeTask->getStarttime(), 'the start time must be cleared with it');
+    }
+
+    public function testRegisterDoesNotGiveBackCompilerErrorJudging(): void
+    {
+        $tasks = $this->claimWorkForOneSubmission();
+        $judgeTaskId = (int)$tasks[0]['judgetaskid'];
+
+        $this->updateJudging($judgeTaskId, [
+            'compile_success' => 0,
+            'output_compile' => base64_encode('syntax error'),
+            'compile_metadata' => base64_encode('meta'),
+        ]);
+
+        $unfinished = $this->registerJudgehost();
+        self::assertSame([], $unfinished, 'a compiler-error judging must keep its judgehost association');
+
+        $judgeTask = $this->freshEm()->getRepository(JudgeTask::class)->find($judgeTaskId);
+        self::assertNotNull($judgeTask->getJudgehost(), 'the judgehost that compiled must be preserved');
     }
 
     public function testFetchWorkClaimsTheTasksAndStartsTheJudging(): void
