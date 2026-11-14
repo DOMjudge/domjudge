@@ -477,6 +477,9 @@ class JudgehostController extends AbstractFOSRestController
             throw new BadRequestHttpException('Inconsistent data, no compilation data provided.');
         }
 
+        // EventLogService::log() clears the entity manager, which detaches $judgehost.
+        /** @var Judgehost $judgehost */
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
     }
