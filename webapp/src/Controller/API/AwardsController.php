@@ -9,8 +9,6 @@ use App\Service\AwardService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
-use App\Service\ScoreboardService;
-use App\Utils\Scoreboard\Scoreboard;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -35,7 +33,6 @@ class AwardsController extends AbstractApiController
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        protected readonly ScoreboardService $scoreboardService,
         protected readonly AwardService $awards
     ) {
         parent::__construct($authService, $em, $dj, $config, $eventLogService);
@@ -59,8 +56,8 @@ class AwardsController extends AbstractApiController
     )]
     public function listAction(Request $request): array
     {
-        [$contest, $scoreboard] = $this->getContestAndScoreboard($request);
-        return $this->awards->getAwards($contest, $scoreboard);
+        [$contest, $jury] = $this->getContestAndJury($request);
+        return $this->awards->getAwards($contest, $jury);
     }
 
     /**
@@ -77,8 +74,8 @@ class AwardsController extends AbstractApiController
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Award
     {
-        [$contest, $scoreboard] = $this->getContestAndScoreboard($request);
-        $award = $this->awards->getAward($contest, $scoreboard, $id);
+        [$contest, $jury] = $this->getContestAndJury($request);
+        $award = $this->awards->getAward($contest, $jury, $id);
 
         if ($award === null) {
             throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
@@ -88,9 +85,9 @@ class AwardsController extends AbstractApiController
     }
 
     /**
-     * @return array{Contest, Scoreboard}
+     * @return array{Contest, bool}
      */
-    protected function getContestAndScoreboard(Request $request): array
+    protected function getContestAndJury(Request $request): array
     {
         $public = !$this->authService->checkRole('api_reader');
         if ($this->authService->checkRole('api_reader') && $request->query->has('public')) {
@@ -103,8 +100,7 @@ class AwardsController extends AbstractApiController
         if (!$accessAllowed) {
             throw new AccessDeniedHttpException();
         }
-        $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, null, true);
 
-        return [$contest, $scoreboard];
+        return [$contest, !$public];
     }
 }

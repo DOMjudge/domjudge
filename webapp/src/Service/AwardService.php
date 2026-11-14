@@ -10,10 +10,18 @@ use Twig\Attribute\AsTwigFilter;
 
 class AwardService
 {
-    /** @var array<int, Award[]> */
+    /** @var array<string, Award[]> */
     protected array $awardCache = [];
 
-    protected function loadAwards(Contest $contest, Scoreboard $scoreboard): void
+    public function __construct(protected readonly ScoreboardService $scoreboardService) {}
+
+    /**
+     * Awards are always determined on the full scoreboard (all visible teams, no
+     * filters), so that they do not depend on what the caller wants to display.
+     *
+     * @return Award[]
+     */
+    protected function loadAwards(Contest $contest, Scoreboard $scoreboard): array
     {
         $group_winners = $problem_winners = $problem_shortname = [];
         $groups = [];
@@ -110,28 +118,26 @@ class AwardService
             );
         }
 
-        $this->awardCache[$contest->getCid()] = $results;
+        return $results;
     }
 
     /**
      * @return Award[]
      */
-    public function getAwards(Contest $contest, Scoreboard $scoreboard): array
+    public function getAwards(Contest $contest, bool $jury): array
     {
-        if (!isset($this->awardCache[$contest->getCid()])) {
-            $this->loadAwards($contest, $scoreboard);
+        $key = $contest->getCid() . ($jury ? ':jury' : ':public');
+        if (!isset($this->awardCache[$key])) {
+            $scoreboard = $this->scoreboardService->getScoreboard($contest, $jury, null, true);
+            $this->awardCache[$key] = $scoreboard === null ? [] : $this->loadAwards($contest, $scoreboard);
         }
 
-        return $this->awardCache[$contest->getCid()];
+        return $this->awardCache[$key];
     }
 
-    public function getAward(Contest $contest, Scoreboard $scoreboard, string $requestedType): ?Award
+    public function getAward(Contest $contest, bool $jury, string $requestedType): ?Award
     {
-        if (!isset($this->awardCache[$contest->getCid()])) {
-            $this->loadAwards($contest, $scoreboard);
-        }
-
-        foreach ($this->awardCache[$contest->getCid()] as $award) {
+        foreach ($this->getAwards($contest, $jury) as $award) {
             if ($award->id == $requestedType) {
                 return $award;
             }
@@ -144,10 +150,11 @@ class AwardService
     public function medalType(Team $team, Contest $contest, Scoreboard $scoreboard): ?string
     {
         $teamid = $team->getExternalid();
-        if (!isset($this->awardCache[$contest->getCid()])) {
-            $this->loadAwards($contest, $scoreboard);
+        $key = $contest->getCid() . ':medalType';
+        if (!isset($this->awardCache[$key])) {
+            $this->awardCache[$key] = $this->loadAwards($contest, $scoreboard);
         }
-        $awards = $this->awardCache[$contest->getCid()];
+        $awards = $this->awardCache[$key];
         $awardsById = [];
         foreach ($awards as $award) {
             $awardsById[$award->id] = $award;
