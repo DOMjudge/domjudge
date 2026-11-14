@@ -25,6 +25,8 @@ class RankCache
 {
     public const SORT_KEY_INDEX_SIZE = 768;
     public const DEFAULT_SCORE = '0.000000000';
+    /** Sentinel sort key for zero-score / missing rankcache rows (sorts before any digit). */
+    public const EMPTY_SORT_KEY = '.';
 
     #[ORM\Column(options: [
         'comment' => 'Total correctness points (restricted audience)',

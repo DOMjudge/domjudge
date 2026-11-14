@@ -143,9 +143,7 @@ class ScoreboardService
             ->getOneOrNullResult(Query::HYDRATE_SINGLE_SCALAR);
 
         if ($sortKey === null) {
-            // '.' sorts before any digit, so this team will be ranked last (which may be actually rank 1 if no team
-            // solved anything yet).
-            $sortKey = ".";
+            $sortKey = RankCache::EMPTY_SORT_KEY;
         }
 
         $better = $this->em->createQueryBuilder()
@@ -698,7 +696,7 @@ class ScoreboardService
             );
         }
 
-        if ($scoreKey['restricted'] === '.' && $scoreKey['public'] === '.') {
+        if ($scoreKey['restricted'] === RankCache::EMPTY_SORT_KEY && $scoreKey['public'] === RankCache::EMPTY_SORT_KEY) {
             $this->em->getConnection()->executeStatement(
                 'DELETE FROM rankcache WHERE cid = :cid AND teamid = :teamid',
                 ['cid' => $contest->getCid(), 'teamid' => $team->getTeamid()]
@@ -819,7 +817,7 @@ class ScoreboardService
     ): string {
         if ($contest->getScoreboardType() === ScoreboardType::PASS_FAIL) {
             if (($numCorrect ?? $numPoints) === 0) {
-                return '.';
+                return RankCache::EMPTY_SORT_KEY;
             }
             if ($contest->getRuntimeAsScoreTiebreaker()) {
                 return self::getRuntimeScoreKey($numPoints, $totalRuntime);
@@ -830,7 +828,7 @@ class ScoreboardService
 
         // TODO: Any tie breakers?
         if (bccomp($score, '0', self::SCALE) === 0) {
-            return '.';
+            return RankCache::EMPTY_SORT_KEY;
         }
 
         return self::getScoringScoreKey($score);
@@ -1288,7 +1286,11 @@ class ScoreboardService
         }
 
         $ret = $queryBuilder
-            ->addSelect("COALESCE(r.sortKey" . ($restricted ? 'Restricted' : 'Public') . ", '.') AS HIDDEN sortKey")
+            ->addSelect(sprintf(
+                'COALESCE(r.sortKey%s, :emptySortKey) AS HIDDEN sortKey',
+                $restricted ? 'Restricted' : 'Public'
+            ))
+            ->setParameter('emptySortKey', RankCache::EMPTY_SORT_KEY)
             ->addOrderBy('tc.sortorder')
             ->addOrderBy('sortKey', 'DESC')
             ->addOrderBy('effectivename')
