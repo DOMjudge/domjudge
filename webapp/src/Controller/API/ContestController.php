@@ -812,21 +812,20 @@ class ContestController extends AbstractRestController
             // Reload the contest as the above method will clear the entity manager.
             $contest = $this->getContestWithId($request, $cid);
 
-            $missingEventRetries = 0;
             while (true) {
                 // Add missing state events that should have happened already.
                 $this->eventLogService->addMissingStateEvents($contest);
 
-                // We fetch *all* events from the last seen to check that
-                // we don't skip events that are committed out of order.
-                // This includes the last seen event itself, just to check
-                // that the database is consistent and, for example, has
-                // not been reloaded while this process is (long) running.
+                // Event IDs are global, so IDs belonging to other contests
+                // create gaps in this contest's stream. Filter by contest in
+                // SQL and do not treat those gaps as missing events.
                 $q = $this->em->createQueryBuilder()
                     ->from(Event::class, 'e')
                     ->select('e')
                     ->andWhere('e.eventid >= :lastIdSent')
+                    ->andWhere('e.contest = :contest')
                     ->setParameter('lastIdSent', $lastIdSent)
+                    ->setParameter('contest', $contest)
                     ->orderBy('e.eventid', 'ASC')
                     ->getQuery();
 
@@ -842,52 +841,10 @@ class ContestController extends AbstractRestController
                     unset($events[0]);
                 }
 
-                // Look for any missing sequential events and wait for them to
-                // be committed if so.
-                $missingEvents = false;
-                $expectedId = $lastIdSent + 1;
-                $lastFoundId = null;
-                foreach ($events as $event) {
-                    if ($event->getEventid() !== $expectedId) {
-                        $missingEvents = true;
-                        $lastFoundId = $event->getEventid();
-                        break;
-                    }
-                    $expectedId++;
-                }
-                if ($missingEvents) {
-                    if ($missingEventRetries == 0) {
-                        $this->logger->info(
-                            'Detected missing events %d ... %d, waiting for these to appear',
-                            [$expectedId, $lastFoundId-1]
-                        );
-                    }
-                    if (++$missingEventRetries < 10) {
-                        usleep(100 * 1000);
-                        continue;
-                    }
-
-                    // We've decided to permanently ignore these non-existing
-                    // events for this connection. The wait for any
-                    // non-committed events was long enough.
-                    //
-                    // There might be multiple non-existing events. Log the
-                    // first consecutive gap of non-existing events. A consecutive
-                    // gap is guaranteed since the events are ordered.
-                    $this->logger->warning(
-                        'Waited too long for missing events %d ... %d, skipping',
-                        [$expectedId, $lastFoundId-1]
-                    );
-                }
-                $missingEventRetries = 0;
-
                 $numEventsSent = 0;
                 foreach ($events as $event) {
-                    // Filter out unwanted events
-                    if ($event->getContest()->getCid() !== $contest->getCid()) {
-                        continue;
-                    }
-                    // Not filtered in the query, since the gap detection above needs all event IDs.
+                    // The contest is filtered in SQL; versions are filtered
+                    // here because the version column is a backed enum.
                     if ($event->getVersion() !== $contentVersion) {
                         continue;
                     }
@@ -957,13 +914,6 @@ class ContestController extends AbstractRestController
                     $lastIdSent = $event->getEventid();
                     $lastIdExists = true;
                     $numEventsSent++;
-
-                    if ($missingEvents && $event->getEventid() >= $lastFoundId) {
-                        // The first event after the first gap has been emitted. Stop
-                        // emitting events and restart the gap detection logic to find
-                        // any potential gaps after this last emitted event.
-                        break;
-                    }
                 }
 
                 if ($numEventsSent == 0) {
