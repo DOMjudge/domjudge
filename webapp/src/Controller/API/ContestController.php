@@ -817,30 +817,24 @@ class ContestController extends AbstractRestController
                 // Add missing state events that should have happened already.
                 $this->eventLogService->addMissingStateEvents($contest);
 
-                // We fetch *all* events from the last seen to check that
+                // Check that the last seen event still exists so we fail if,
+                // for example, the database was reloaded while streaming.
+                if ($lastIdExists && !$this->eventExists($lastIdSent)) {
+                    throw new HttpException(500, sprintf('Cannot find event %d in database anymore', $lastIdSent));
+                }
+
+                // We fetch *all* events after the last seen to check that
                 // we don't skip events that are committed out of order.
-                // This includes the last seen event itself, just to check
-                // that the database is consistent and, for example, has
-                // not been reloaded while this process is (long) running.
                 $q = $this->em->createQueryBuilder()
                     ->from(Event::class, 'e')
                     ->select('e')
-                    ->andWhere('e.eventid >= :lastIdSent')
+                    ->andWhere('e.eventid > :lastIdSent')
                     ->setParameter('lastIdSent', $lastIdSent)
                     ->orderBy('e.eventid', 'ASC')
                     ->getQuery();
 
                 /** @var Event[] $events */
                 $events = $q->getResult();
-
-                if ($lastIdExists) {
-                    if (count($events) == 0 || $events[0]->getEventid() !== $lastIdSent) {
-                        throw new HttpException(500, sprintf('Cannot find event %d in database anymore', $lastIdSent));
-                    }
-                    // Remove the previously last sent event. We just fetched
-                    // it to make sure it's there.
-                    unset($events[0]);
-                }
 
                 // Look for any missing sequential events and wait for them to
                 // be committed if so.
@@ -1090,5 +1084,13 @@ class ContestController extends AbstractRestController
             throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
         }
         return $contest;
+    }
+
+    private function eventExists(int $eventId): bool
+    {
+        return (bool)$this->em->getConnection()->fetchOne(
+            'SELECT 1 FROM event WHERE eventid = :eventId',
+            ['eventId' => $eventId]
+        );
     }
 }
