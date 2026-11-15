@@ -344,4 +344,71 @@ class ContestControllerTest extends BaseTestCase
 
         self::assertSame([(string)($baseId + 2), (string)($baseId + 3)], $tokens);
     }
+
+    public function testEventFeedWaitsOnceAcrossOldGaps(): void
+    {
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $demoContest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+
+        $otherContest = (new Contest())
+            ->setExternalid('other-gaps')
+            ->setName('Other contest with gaps')
+            ->setShortname('other-gaps')
+            ->setStarttimeString('2021-07-17 16:09:00 Europe/Amsterdam')
+            ->setEndtimeString('2021-07-17 16:11:00 Europe/Amsterdam');
+        $em->persist($otherContest);
+        $em->flush();
+
+        $connection = $em->getConnection();
+        $baseId = (int)$connection->fetchOne('SELECT COALESCE(MAX(eventid), 0) FROM event');
+        $now = sprintf('%.3f', Utils::now());
+        $version = CcsApiVersion::Format_2026_01->getContentVersion()->value;
+
+        $anchorId = $baseId + 1;
+        $connection->insert('event', [
+            'eventid' => $anchorId,
+            'eventtime' => $now,
+            'cid' => $demoContest->getCid(),
+            'endpointtype' => 'clarifications',
+            'endpointid' => 'anchor',
+            'action' => 'create',
+            'content' => json_encode(['id' => 'anchor'], JSON_THROW_ON_ERROR),
+            'version' => $version,
+        ]);
+
+        // Create 20 separate missing-ID gaps across both contests; waiting 1s per gap
+        // would take ~20s, whereas waiting once up to MAX(eventid) takes ~1s.
+        $expectedDemoTokens = [];
+        $nextId = $anchorId + 2; // Leave a gap right after $anchorId as well.
+        for ($i = 1; $i <= 20; $i++) {
+            $isDemo = ($i % 2 === 0);
+            $connection->insert('event', [
+                'eventid' => $nextId,
+                'eventtime' => $now,
+                'cid' => $isDemo ? $demoContest->getCid() : $otherContest->getCid(),
+                'endpointtype' => 'clarifications',
+                'endpointid' => 'multi-gap-' . $i,
+                'action' => 'create',
+                'content' => json_encode(['id' => 'multi-gap-' . $i], JSON_THROW_ON_ERROR),
+                'version' => $version,
+            ]);
+            if ($isDemo) {
+                $expectedDemoTokens[] = (string)$nextId;
+            }
+            $nextId += 3; // Leave a 2-ID gap before the next event.
+        }
+
+        $url = '/contests/' . $this->getDemoContestId() . '/event-feed?stream=false&types=clarifications&since_token=' . $anchorId;
+        $start = microtime(true);
+        $feed = $this->verifyApiResponse('GET', $url, 200, 'admin', attachment: true);
+        $elapsed = microtime(true) - $start;
+
+        $tokens = array_map(
+            static fn(string $line) => json_decode($line, true, 512, JSON_THROW_ON_ERROR)['token'],
+            array_values(array_filter(explode("\n", $feed)))
+        );
+
+        self::assertSame($expectedDemoTokens, $tokens);
+        self::assertLessThan(5.0, $elapsed);
+    }
 }

@@ -65,6 +65,7 @@ use TypeError;
 class ContestController extends AbstractRestController
 {
     private const EVENT_FEED_BATCH_SIZE = 500;
+    private const EVENT_FEED_GAP_WAIT_SECONDS = 1.0;
 
     public function __construct(
         AuthorizedUserService $authService,
@@ -887,6 +888,8 @@ class ContestController extends AbstractRestController
                 return true;
             };
 
+            $waitedUpToId = 0;
+            $waitUntil = 0.0;
             while (true) {
                 // Add missing state events that should have happened already.
                 $this->eventLogService->addMissingStateEvents($contest);
@@ -919,8 +922,8 @@ class ContestController extends AbstractRestController
                     }
 
                     $eventIdx = 0;
-                    if ($gaps !== []) {
-                        ['start' => $gapStart, 'end' => $gapEnd] = $gaps[0];
+                    $recheckBatch = false;
+                    foreach ($gaps as ['start' => $gapStart, 'end' => $gapEnd]) {
                         while ($eventIdx < $numBatchEvents && $events[$eventIdx]->getEventid() < $gapStart) {
                             if ($emitEvent($events[$eventIdx])) {
                                 $numEventsSent++;
@@ -929,11 +932,31 @@ class ContestController extends AbstractRestController
                         }
                         $cursorId = $gapStart - 1;
 
-                        if (!$this->waitForMissingEvents($gapStart, $gapEnd)) {
-                            $cursorId = $gapEnd;
+                        if ($gapStart > $waitedUpToId) {
+                            // Every event ID below MAX(eventid) was already allocated by AUTO_INCREMENT
+                            // when MAX(eventid) became visible, so waiting once covers all of them.
+                            $waitedUpToId = (int)$this->em->getConnection()->fetchOne('SELECT COALESCE(MAX(eventid), 0) FROM event');
+                            $waitUntil = microtime(true) + self::EVENT_FEED_GAP_WAIT_SECONDS;
                         }
-                        // Re-fetch after waiting: either missing events in the gap committed,
-                        // or later gaps may have committed while we waited.
+
+                        if (microtime(true) < $waitUntil) {
+                            if (!$this->waitForMissingEvents($gapStart, $gapEnd, $waitUntil)) {
+                                $cursorId = $gapEnd;
+                            }
+                            // Re-fetch after waiting: either missing events in the gap committed,
+                            // or later gaps may have committed while we waited.
+                            $recheckBatch = true;
+                            break;
+                        }
+
+                        $this->logger->debug(
+                            'Skipping missing events %d ... %d (already waited up to %d)',
+                            [$gapStart, $gapEnd, $waitedUpToId]
+                        );
+                        $cursorId = $gapEnd;
+                    }
+
+                    if ($recheckBatch) {
                         continue;
                     }
 
@@ -1201,11 +1224,11 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Wait up to ~1 second for missing sequential event IDs to be committed.
+     * Wait until $deadline for missing sequential event IDs to be committed.
      *
      * @return bool True if at least one event in the gap appeared while waiting.
      */
-    private function waitForMissingEvents(int $gapStart, int $gapEnd): bool
+    private function waitForMissingEvents(int $gapStart, int $gapEnd, float $deadline): bool
     {
         $this->logger->info(
             'Detected missing events %d ... %d, waiting for these to appear',
@@ -1214,7 +1237,7 @@ class ContestController extends AbstractRestController
 
         $expectedCount = $gapEnd - $gapStart + 1;
         $presentCount = 0;
-        for ($retry = 0; $retry < 10; $retry++) {
+        do {
             usleep(100 * 1000);
             $presentCount = (int)$this->em->getConnection()->fetchOne(
                 'SELECT COUNT(*) FROM event WHERE eventid BETWEEN :gapStart AND :gapEnd',
@@ -1223,7 +1246,7 @@ class ContestController extends AbstractRestController
             if ($presentCount === $expectedCount) {
                 return true;
             }
-        }
+        } while (microtime(true) < $deadline);
 
         if ($presentCount > 0) {
             return true;
