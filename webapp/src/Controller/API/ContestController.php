@@ -64,6 +64,8 @@ use TypeError;
 #[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
 class ContestController extends AbstractRestController
 {
+    private const EVENT_FEED_BATCH_SIZE = 500;
+
     public function __construct(
         AuthorizedUserService $authService,
         EntityManagerInterface $em,
@@ -897,21 +899,21 @@ class ContestController extends AbstractRestController
 
                 $numEventsSent = 0;
                 while (true) {
-                    $events = $this->fetchMatchingEvents($contest, $contentVersion, $cursorId, $typeFilter);
+                    $events = $this->fetchEventFeedBatch($contest, $contentVersion, $cursorId, $typeFilter);
                     if ($events === []) {
                         break;
                     }
 
-                    $numEvents = count($events);
-                    $maxEventId = $events[$numEvents - 1]->getEventid();
+                    $numBatchEvents = count($events);
+                    $batchMaxId = $events[$numBatchEvents - 1]->getEventid();
                     $gaps = [];
-                    if ($maxEventId - $cursorId !== $numEvents) {
-                        // Check global event IDs up to $maxEventId so we do not skip events of
+                    if ($batchMaxId - $cursorId !== $numBatchEvents) {
+                        // Check global event IDs up to $batchMaxId so we do not skip events of
                         // this contest that are still being committed in an earlier transaction.
-                        $gaps = $this->findMissingEventRanges($cursorId, $maxEventId);
-                        if ($this->countMatchingEvents($contest, $contentVersion, $cursorId, $maxEventId, $typeFilter) !== $numEvents) {
-                            // A matching event in ($cursorId, $maxEventId] committed after the
-                            // query ran; re-fetch so it is not skipped when advancing.
+                        $gaps = $this->findMissingEventRanges($cursorId, $batchMaxId);
+                        if ($this->countMatchingEvents($contest, $contentVersion, $cursorId, $batchMaxId, $typeFilter) !== $numBatchEvents) {
+                            // A matching event in ($cursorId, $batchMaxId] committed after the
+                            // batch was read; re-fetch so it is not skipped when advancing.
                             continue;
                         }
                     }
@@ -919,7 +921,7 @@ class ContestController extends AbstractRestController
                     $eventIdx = 0;
                     if ($gaps !== []) {
                         ['start' => $gapStart, 'end' => $gapEnd] = $gaps[0];
-                        while ($eventIdx < $numEvents && $events[$eventIdx]->getEventid() < $gapStart) {
+                        while ($eventIdx < $numBatchEvents && $events[$eventIdx]->getEventid() < $gapStart) {
                             if ($emitEvent($events[$eventIdx])) {
                                 $numEventsSent++;
                             }
@@ -935,14 +937,13 @@ class ContestController extends AbstractRestController
                         continue;
                     }
 
-                    while ($eventIdx < $numEvents) {
+                    while ($eventIdx < $numBatchEvents) {
                         if ($emitEvent($events[$eventIdx])) {
                             $numEventsSent++;
                         }
                         $eventIdx++;
                     }
-                    $cursorId = $maxEventId;
-                    break;
+                    $cursorId = $batchMaxId;
                 }
 
                 if ($numEventsSent == 0) {
@@ -1109,7 +1110,7 @@ class ContestController extends AbstractRestController
      * @param string[]|false $typeFilter
      * @return list<Event>
      */
-    private function fetchMatchingEvents(
+    private function fetchEventFeedBatch(
         Contest $contest,
         CcsApiVersion $contentVersion,
         int $afterEventId,
@@ -1119,6 +1120,7 @@ class ContestController extends AbstractRestController
         $events = $this->createEventFeedQueryBuilder($contest, $contentVersion, $afterEventId, $typeFilter)
             ->select('e')
             ->orderBy('e.eventid', 'ASC')
+            ->setMaxResults(self::EVENT_FEED_BATCH_SIZE)
             ->getQuery()
             ->getResult();
         return $events;
