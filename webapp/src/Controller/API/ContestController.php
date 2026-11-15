@@ -1116,14 +1116,26 @@ class ContestController extends AbstractRestController
         int $afterEventId,
         array|false $typeFilter,
     ): array {
-        /** @var list<Event> $events */
-        $events = $this->createEventFeedQueryBuilder($contest, $contentVersion, $afterEventId, $typeFilter)
+        /** @var list<array{eventid: int, eventtime: string|float, endpointtype: string, endpointid: string, action: string, content: array<string, mixed>}> $rows */
+        $rows = $this->createEventFeedQueryBuilder($contest, $contentVersion, $afterEventId, $typeFilter)
             ->select('e')
             ->orderBy('e.eventid', 'ASC')
             ->setMaxResults(self::EVENT_FEED_BATCH_SIZE)
             ->getQuery()
-            ->getResult();
-        return $events;
+            ->getArrayResult();
+
+        return array_map(
+            static fn(array $row): Event => (new Event())
+                ->setEventid($row['eventid'])
+                ->setEventtime($row['eventtime'])
+                ->setEndpointtype($row['endpointtype'])
+                ->setEndpointid($row['endpointid'])
+                ->setAction($row['action'])
+                ->setContent($row['content'])
+                ->setVersion($contentVersion)
+                ->setContest($contest),
+            $rows
+        );
     }
 
     /**
