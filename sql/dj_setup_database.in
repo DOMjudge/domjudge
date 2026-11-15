@@ -252,12 +252,25 @@ create_db_users()
 	# can be changed in the database and their configuration settings
 	# in etc/domserver-config.php updated after installation.
 	echo "CREATE DATABASE IF NOT EXISTS \`$DBNAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-
-	echo "CREATE USER IF NOT EXISTS '$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD';"
-	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER'@'%';"
-
-	echo "FLUSH PRIVILEGES;"
 	) | mysql
+
+	create_user="CREATE USER IF NOT EXISTS '$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD';"
+	grant="GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER'@'%';"
+	if ! ( echo "$create_user"; echo "$grant" ) | mysql 2>/dev/null; then
+		# The database administrator may not be allowed to create users or to
+		# grant privileges. That is fine if the user already has access to the
+		# database.
+		if ! DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD mysql "$DBNAME" -e 'SELECT 1;' >/dev/null 2>&1; then
+			echo "Error: cannot give database user '$domjudge_DBUSER' access to database '$DBNAME'."
+			echo "Run the following as a database user that is allowed to create users and"
+			echo "grant privileges, and then run this script again:"
+			echo "  CREATE USER IF NOT EXISTS '$domjudge_DBUSER'@'%' IDENTIFIED BY '<the password in $PASSWDFILE>';"
+			echo "  $grant"
+			echo "If the user also exists as '$domjudge_DBUSER'@'localhost', grant it the same there."
+			return 1
+		fi
+		verbose "Not allowed to create users or grant privileges, but '$domjudge_DBUSER' already has access to '$DBNAME'."
+	fi
 
 	# The user may already have existed, e.g. shared with the main checkout
 	# of a git worktree (see etc/gendbpasswords). Then the password above
