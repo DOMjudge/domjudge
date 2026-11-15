@@ -142,7 +142,7 @@ class ContestControllerTest extends BaseTestCase
         yield ['2026-01', true];
     }
 
-    public function testEventFeedFiltersOtherContest(): void
+    public function testEventFeedFiltersOtherContestAcrossBatches(): void
     {
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $demoContest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
@@ -161,11 +161,11 @@ class ContestControllerTest extends BaseTestCase
         $now = sprintf('%.3f', Utils::now());
         $version = CcsApiVersion::Format_2026_01->getContentVersion()->value;
 
-        // Insert interleaved events for both contests with explicit contiguous IDs so
-        // rolled-back AUTO_INCREMENT drift does not create an unrelated gap.
+        // Insert more than EVENT_FEED_BATCH_SIZE (500) events for each contest, interleaved,
+        // with explicit contiguous IDs so rolled-back AUTO_INCREMENT drift does not create a gap.
         $demoIds = [];
         $otherIds = [];
-        for ($i = 1; $i <= 20; $i++) {
+        for ($i = 1; $i <= 550; $i++) {
             $otherEventId = ++$nextId;
             $connection->insert('event', [
                 'eventid' => $otherEventId,
@@ -208,14 +208,14 @@ class ContestControllerTest extends BaseTestCase
         self::assertSame($demoIds, array_values(array_intersect($demoIds, $tokens)));
         self::assertSame([], array_values(array_intersect($otherIds, $tokens)));
 
-        // Resuming from a demo token mid-way returns only the remaining demo events.
-        $sinceToken = $demoIds[9];
+        // Resuming from a demo token mid-way across batches returns only the remaining demo events.
+        $sinceToken = $demoIds[299];
         $tailFeed = $this->verifyApiResponse('GET', $url . '&since_token=' . $sinceToken, 200, 'admin', attachment: true);
         $tailTokens = array_map(
             static fn(string $line) => json_decode($line, true, 512, JSON_THROW_ON_ERROR)['token'],
             array_values(array_filter(explode("\n", $tailFeed)))
         );
-        self::assertSame(array_slice($demoIds, 10), $tailTokens);
+        self::assertSame(array_slice($demoIds, 300), $tailTokens);
 
         // Using a token belonging to the other contest is rejected with 400.
         $this->verifyApiResponse('GET', $url . '&since_token=' . $otherIds[0], 400, 'admin');
@@ -306,7 +306,7 @@ class ContestControllerTest extends BaseTestCase
         self::assertFalse($polledAgain);
     }
 
-    public function testEventFeedEmitsEventCommittedBetweenQueryAndGapCheck(): void
+    public function testEventFeedEmitsEventCommittedBetweenBatchAndGapCheck(): void
     {
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $demoContest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
@@ -329,7 +329,7 @@ class ContestControllerTest extends BaseTestCase
         $connection->insert('event', $row($baseId + 1));
         $connection->insert('event', $row($baseId + 3));
 
-        // An earlier transaction holding $baseId + 2 commits right after the event query.
+        // An earlier transaction holding $baseId + 2 commits right after the batch query.
         StatementHookMiddleware::once(
             'SELECT COUNT(*) FROM event WHERE eventid > ',
             static fn() => $connection->insert('event', $row($baseId + 2))
