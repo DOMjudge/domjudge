@@ -812,6 +812,78 @@ class ContestController extends AbstractRestController
             // Reload the contest as the above method will clear the entity manager.
             $contest = $this->getContestWithId($request, $cid);
 
+            $emitEvent = function (Event $event) use (
+                $format,
+                $strict,
+                $skippedProperties,
+                &$lastState,
+                &$lastUpdate,
+                &$lastIdSent,
+                &$lastIdExists,
+            ): bool {
+                $data = $event->getContent();
+
+                // Do not send out the same state event twice
+                if ($event->getEndpointtype() === 'state') {
+                    if ($data === $lastState) {
+                        return false;
+                    }
+
+                    $lastState = $data;
+                }
+
+                if ($strict) {
+                    $toSkip = $skippedProperties[$event->getEndpointtype()] ?? [];
+                    foreach ($toSkip as $property) {
+                        unset($data[$property]);
+                    }
+                }
+
+                switch ($format) {
+                    case CcsApiVersion::Format_2020_03:
+                        $result = [
+                            'id' => (string)$event->getEventid(),
+                            'type' => $event->getEndpointtype(),
+                            'op' => $event->getAction(),
+                            'data' => $data,
+                        ];
+                        break;
+                    case CcsApiVersion::Format_2023_06:
+                    case CcsApiVersion::Format_2026_01:
+                        if ($event->getAction() === EventLogService::ACTION_DELETE) {
+                            $data = null;
+                        }
+                        $id   = $event->getEndpointid() ?: null;
+                        $type = $event->getEndpointtype();
+                        if ($type === 'contests') {
+                            // Special case: the type for a contest is singular and the ID must not be set
+                            $id   = null;
+                            $type = 'contest';
+                        }
+                        $result = [
+                            'token' => (string)$event->getEventid(),
+                            'id'    => $id,
+                            'type'  => $type,
+                            'data'  => $data,
+                        ];
+                        break;
+                    default:
+                        throw new BadMethodCallException(sprintf('Invalid event feed format %s', $format->value));
+                }
+
+                if (!$strict) {
+                    $result['time'] = Utils::absTime($event->getEventtime());
+                }
+
+                echo Utils::jsonEncode($result) . "\n";
+                Utils::ob_flush_if_possible();
+                flush();
+                $lastUpdate = Utils::now();
+                $lastIdSent = $event->getEventid();
+                $lastIdExists = true;
+                return true;
+            };
+
             $missingEventRetries = 0;
             while (true) {
                 // Add missing state events that should have happened already.
@@ -890,66 +962,9 @@ class ContestController extends AbstractRestController
                         continue;
                     }
 
-                    $data = $event->getContent();
-
-                    // Do not send out the same state event twice
-                    if ($event->getEndpointtype() === 'state') {
-                        if ($data === $lastState) {
-                            continue;
-                        }
-
-                        $lastState = $data;
+                    if (!$emitEvent($event)) {
+                        continue;
                     }
-
-                    if ($strict) {
-                        $toSkip = $skippedProperties[$event->getEndpointtype()] ?? [];
-                        foreach ($toSkip as $property) {
-                            unset($data[$property]);
-                        }
-                    }
-
-                    switch ($format) {
-                        case CcsApiVersion::Format_2020_03:
-                            $result = [
-                                'id' => (string)$event->getEventid(),
-                                'type' => $event->getEndpointtype(),
-                                'op' => $event->getAction(),
-                                'data' => $data,
-                            ];
-                            break;
-                        case CcsApiVersion::Format_2023_06:
-                        case CcsApiVersion::Format_2026_01:
-                            if ($event->getAction() === EventLogService::ACTION_DELETE) {
-                                $data = null;
-                            }
-                            $id   = $event->getEndpointid() ?: null;
-                            $type = $event->getEndpointtype();
-                            if ($type === 'contests') {
-                                // Special case: the type for a contest is singular and the ID must not be set
-                                $id   = null;
-                                $type = 'contest';
-                            }
-                            $result = [
-                                'token' => (string)$event->getEventid(),
-                                'id'    => $id,
-                                'type'  => $type,
-                                'data'  => $data,
-                            ];
-                            break;
-                        default:
-                            throw new BadMethodCallException(sprintf('Invalid event feed format %s', $format));
-                    }
-
-                    if (!$strict) {
-                        $result['time'] = Utils::absTime($event->getEventtime());
-                    }
-
-                    echo Utils::jsonEncode($result) . "\n";
-                    Utils::ob_flush_if_possible();
-                    flush();
-                    $lastUpdate = Utils::now();
-                    $lastIdSent = $event->getEventid();
-                    $lastIdExists = true;
                     $numEventsSent++;
 
                     if ($missingEvents && $event->getEventid() >= $lastFoundId) {
