@@ -745,6 +745,7 @@ class ContestController extends AbstractRestController
             $lastUpdate = 0;
             $lastIdSent = max(0, $since_id);
             $lastIdExists = $since_id !== -1; // Don't try to look for event_id=0
+            $cursorId = $lastIdSent;
             $typeFilter = false;
             if ($types) {
                 $typeFilter = explode(',', $types);
@@ -884,7 +885,6 @@ class ContestController extends AbstractRestController
                 return true;
             };
 
-            $missingEventRetries = 0;
             while (true) {
                 // Add missing state events that should have happened already.
                 $this->eventLogService->addMissingStateEvents($contest);
@@ -895,84 +895,54 @@ class ContestController extends AbstractRestController
                     throw new HttpException(500, sprintf('Cannot find event %d in database anymore', $lastIdSent));
                 }
 
-                // We fetch *all* events after the last seen to check that
-                // we don't skip events that are committed out of order.
-                $q = $this->em->createQueryBuilder()
-                    ->from(Event::class, 'e')
-                    ->select('e')
-                    ->andWhere('e.eventid > :lastIdSent')
-                    ->setParameter('lastIdSent', $lastIdSent)
-                    ->orderBy('e.eventid', 'ASC')
-                    ->getQuery();
-
-                /** @var Event[] $events */
-                $events = $q->getResult();
-
-                // Look for any missing sequential events and wait for them to
-                // be committed if so.
-                $missingEvents = false;
-                $expectedId = $lastIdSent + 1;
-                $lastFoundId = null;
-                foreach ($events as $event) {
-                    if ($event->getEventid() !== $expectedId) {
-                        $missingEvents = true;
-                        $lastFoundId = $event->getEventid();
-                        break;
-                    }
-                    $expectedId++;
-                }
-                if ($missingEvents) {
-                    if ($missingEventRetries == 0) {
-                        $this->logger->info(
-                            'Detected missing events %d ... %d, waiting for these to appear',
-                            [$expectedId, $lastFoundId-1]
-                        );
-                    }
-                    if (++$missingEventRetries < 10) {
-                        usleep(100 * 1000);
-                        continue;
-                    }
-
-                    // We've decided to permanently ignore these non-existing
-                    // events for this connection. The wait for any
-                    // non-committed events was long enough.
-                    //
-                    // There might be multiple non-existing events. Log the
-                    // first consecutive gap of non-existing events. A consecutive
-                    // gap is guaranteed since the events are ordered.
-                    $this->logger->warning(
-                        'Waited too long for missing events %d ... %d, skipping',
-                        [$expectedId, $lastFoundId-1]
-                    );
-                }
-                $missingEventRetries = 0;
-
                 $numEventsSent = 0;
-                foreach ($events as $event) {
-                    // Filter out unwanted events
-                    if ($event->getContest()->getCid() !== $contest->getCid()) {
-                        continue;
-                    }
-                    // Not filtered in the query, since the gap detection above needs all event IDs.
-                    if ($event->getVersion() !== $contentVersion) {
-                        continue;
-                    }
-                    if ($typeFilter !== false &&
-                        !in_array($event->getEndpointtype(), $typeFilter)) {
-                        continue;
-                    }
-
-                    if (!$emitEvent($event)) {
-                        continue;
-                    }
-                    $numEventsSent++;
-
-                    if ($missingEvents && $event->getEventid() >= $lastFoundId) {
-                        // The first event after the first gap has been emitted. Stop
-                        // emitting events and restart the gap detection logic to find
-                        // any potential gaps after this last emitted event.
+                while (true) {
+                    $events = $this->fetchMatchingEvents($contest, $contentVersion, $cursorId, $typeFilter);
+                    if ($events === []) {
                         break;
                     }
+
+                    $numEvents = count($events);
+                    $maxEventId = $events[$numEvents - 1]->getEventid();
+                    $gaps = [];
+                    if ($maxEventId - $cursorId !== $numEvents) {
+                        // Check global event IDs up to $maxEventId so we do not skip events of
+                        // this contest that are still being committed in an earlier transaction.
+                        $gaps = $this->findMissingEventRanges($cursorId, $maxEventId);
+                        if ($this->countMatchingEvents($contest, $contentVersion, $cursorId, $maxEventId, $typeFilter) !== $numEvents) {
+                            // A matching event in ($cursorId, $maxEventId] committed after the
+                            // query ran; re-fetch so it is not skipped when advancing.
+                            continue;
+                        }
+                    }
+
+                    $eventIdx = 0;
+                    if ($gaps !== []) {
+                        ['start' => $gapStart, 'end' => $gapEnd] = $gaps[0];
+                        while ($eventIdx < $numEvents && $events[$eventIdx]->getEventid() < $gapStart) {
+                            if ($emitEvent($events[$eventIdx])) {
+                                $numEventsSent++;
+                            }
+                            $eventIdx++;
+                        }
+                        $cursorId = $gapStart - 1;
+
+                        if (!$this->waitForMissingEvents($gapStart, $gapEnd)) {
+                            $cursorId = $gapEnd;
+                        }
+                        // Re-fetch after waiting: either missing events in the gap committed,
+                        // or later gaps may have committed while we waited.
+                        continue;
+                    }
+
+                    while ($eventIdx < $numEvents) {
+                        if ($emitEvent($events[$eventIdx])) {
+                            $numEventsSent++;
+                        }
+                        $eventIdx++;
+                    }
+                    $cursorId = $maxEventId;
+                    break;
                 }
 
                 if ($numEventsSent == 0) {
@@ -1107,5 +1077,150 @@ class ContestController extends AbstractRestController
             'SELECT 1 FROM event WHERE eventid = :eventId',
             ['eventId' => $eventId]
         );
+    }
+
+    /**
+     * @param string[]|false $typeFilter
+     */
+    private function createEventFeedQueryBuilder(
+        Contest $contest,
+        CcsApiVersion $contentVersion,
+        int $afterEventId,
+        array|false $typeFilter,
+    ): QueryBuilder {
+        $qb = $this->em->createQueryBuilder()
+            ->from(Event::class, 'e')
+            ->andWhere('e.contest = :contest')
+            ->andWhere('e.version = :version')
+            ->andWhere('e.eventid > :afterEventId')
+            ->setParameter('contest', $contest)
+            ->setParameter('version', $contentVersion)
+            ->setParameter('afterEventId', $afterEventId);
+
+        if ($typeFilter !== false) {
+            $qb->andWhere('e.endpointtype IN (:types)')
+                ->setParameter('types', $typeFilter);
+        }
+
+        return $qb;
+    }
+
+    /**
+     * @param string[]|false $typeFilter
+     * @return list<Event>
+     */
+    private function fetchMatchingEvents(
+        Contest $contest,
+        CcsApiVersion $contentVersion,
+        int $afterEventId,
+        array|false $typeFilter,
+    ): array {
+        /** @var list<Event> $events */
+        $events = $this->createEventFeedQueryBuilder($contest, $contentVersion, $afterEventId, $typeFilter)
+            ->select('e')
+            ->orderBy('e.eventid', 'ASC')
+            ->getQuery()
+            ->getResult();
+        return $events;
+    }
+
+    /**
+     * @param string[]|false $typeFilter
+     */
+    private function countMatchingEvents(
+        Contest $contest,
+        CcsApiVersion $contentVersion,
+        int $afterEventId,
+        int $upToEventId,
+        array|false $typeFilter,
+    ): int {
+        return (int)$this->createEventFeedQueryBuilder($contest, $contentVersion, $afterEventId, $typeFilter)
+            ->select('COUNT(e.eventid)')
+            ->andWhere('e.eventid <= :upToEventId')
+            ->setParameter('upToEventId', $upToEventId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Find missing global event ID ranges strictly between $fromExclusive and $toInclusive.
+     *
+     * @return list<array{start: int, end: int}>
+     */
+    private function findMissingEventRanges(int $fromExclusive, int $toInclusive): array
+    {
+        if ($toInclusive <= $fromExclusive + 1) {
+            return [];
+        }
+
+        $presentCount = (int)$this->em->getConnection()->fetchOne(
+            'SELECT COUNT(*) FROM event WHERE eventid > :fromId AND eventid < :toId',
+            ['fromId' => $fromExclusive, 'toId' => $toInclusive]
+        );
+        if ($presentCount === $toInclusive - $fromExclusive - 1) {
+            return [];
+        }
+
+        $rows = $this->em->getConnection()->fetchAllAssociative(
+            <<<'SQL'
+            SELECT prev_id + 1 AS gap_start, next_id - 1 AS gap_end
+            FROM (
+                SELECT
+                    COALESCE(LAG(eventid) OVER (ORDER BY eventid), :fromId) AS prev_id,
+                    eventid AS next_id
+                FROM event
+                WHERE eventid > :fromId AND eventid <= :toId
+            ) gaps
+            WHERE next_id > prev_id + 1
+            ORDER BY gap_start ASC
+            SQL,
+            ['fromId' => $fromExclusive, 'toId' => $toInclusive]
+        );
+
+        return array_map(
+            static fn(array $row): array => [
+                'start' => (int)$row['gap_start'],
+                'end' => (int)$row['gap_end'],
+            ],
+            $rows
+        );
+    }
+
+    /**
+     * Wait up to ~1 second for missing sequential event IDs to be committed.
+     *
+     * @return bool True if at least one event in the gap appeared while waiting.
+     */
+    private function waitForMissingEvents(int $gapStart, int $gapEnd): bool
+    {
+        $this->logger->info(
+            'Detected missing events %d ... %d, waiting for these to appear',
+            [$gapStart, $gapEnd]
+        );
+
+        $expectedCount = $gapEnd - $gapStart + 1;
+        $presentCount = 0;
+        for ($retry = 0; $retry < 10; $retry++) {
+            usleep(100 * 1000);
+            $presentCount = (int)$this->em->getConnection()->fetchOne(
+                'SELECT COUNT(*) FROM event WHERE eventid BETWEEN :gapStart AND :gapEnd',
+                ['gapStart' => $gapStart, 'gapEnd' => $gapEnd]
+            );
+            if ($presentCount === $expectedCount) {
+                return true;
+            }
+        }
+
+        if ($presentCount > 0) {
+            return true;
+        }
+
+        // We've decided to permanently ignore these non-existing events for this
+        // connection. The wait for any non-committed events was long enough.
+        $this->logger->warning(
+            'Waited too long for missing events %d ... %d, skipping',
+            [$gapStart, $gapEnd]
+        );
+        return false;
     }
 }
