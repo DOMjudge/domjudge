@@ -7,10 +7,6 @@
 /aclocal.m4
 /bin
 /output
-/cov-int
-/domjudge-scan.tar.xz
-/coverity-scan.tar.xz
-/cov-submit-data*.sh
 __pycache__
 *.o
 .idea
