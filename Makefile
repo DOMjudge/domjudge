@@ -89,7 +89,7 @@ config:
 	$(MAKE) -C etc config
 
 # Special rule to build any compile/run/compare scripts. This is
-# useful for testing, e.g. when submitting a Coverity scan.
+# useful for testing and used in CI.
 build-scripts:
 	$(MAKE) -C sql build-scripts
 
@@ -468,26 +468,6 @@ inplace-uninstall-l:
 	rm -rf $(judgehost_libjudgedir)
 	rm -rf $(judgehost_bindir)
 
-# Rules to configure and build for a Coverity scan.
-coverity-conf:
-	$(MAKE) inplace-conf
-
-coverity-build: paths.mk
-	$(MAKE) build build-scripts
-# Secondly, delete all upstream PHP libraries to not analyze those:
-	-rm -rf webapp/vendor/*
-	@VERSION=` grep '^VERSION ='   paths.mk | sed 's/^VERSION = *//'` ; \
-	PUBLISHED=`grep '^PUBLISHED =' paths.mk | sed 's/^PUBLISHED = *//'` ; \
-	if [ "$$PUBLISHED" = release ]; then DESC="release" ; \
-	elif [ -n "$$PUBLISHED" ];      then DESC="snapshot $$PUBLISHED" ; \
-	elif [ ! -d .git ];             then DESC="unknown source on `date`" ; fi ; \
-	echo "VERSION=$$VERSION" > cov-submit-data-version.sh ; \
-	if [ -n "$$DESC" ]; then echo "DESC=$$DESC" >> cov-submit-data-version.sh ; fi
-
-clean-l:
-# Remove Coverity scan data:
-	-rm -rf cov-int domjudge-scan.t* coverity-scan.tar.xz cov-submit-data-version.sh
-
 distclean-l: clean-autoconf
 	-rm -f paths.mk
 
@@ -501,5 +481,5 @@ clean-autoconf:
 .PHONY: $(addsuffix -create-dirs,domserver judgehost docs) check-root \
         $(addprefix inplace-,conf conf-common install uninstall) \
         $(addprefix maintainer-,conf install) clean-autoconf config distdocs \
-        $(addprefix dependencies-,dev dist) dependencies coverity-conf coverity-build \
+        $(addprefix dependencies-,dev dist) dependencies \
         ci-conf-phpstan ci-phpstan
