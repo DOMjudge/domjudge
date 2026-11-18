@@ -313,7 +313,7 @@ inplace-install-l:
 	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/domserver-static.php"
 	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/verdicts.php"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp"
-	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rX   $(CURDIR)/webapp"
 	@echo "        setfacl    -m d:u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc"
 	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc"
 	@echo "        setfacl    -m d:u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual"
@@ -321,23 +321,23 @@ inplace-install-l:
 	@echo "        setfacl    -m d:u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual/build"
 	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual/build"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/doc/manual/build/html"
-	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/doc/manual/build/html"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rX   $(CURDIR)/doc/manual/build/html"
 	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/doc/manual/build/domjudge-team-manual.pdf"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
-	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwX  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries"
-	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwX  $(CURDIR)/webapp/public/images/countries"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/teams"
-	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/teams"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwX  $(CURDIR)/webapp/public/images/teams"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/banners"
-	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/banners"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwX  $(CURDIR)/webapp/public/images/banners"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/affiliations"
-	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/affiliations"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwX  $(CURDIR)/webapp/public/images/affiliations"
 	@echo "        setfacl -R -m d:m::rwx                    $(CURDIR)/webapp/var"
-	@echo "        setfacl -R -m   m::rwx                    $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m   m::rwX                    $(CURDIR)/webapp/var"
 	@echo "        # Also make sure you keep access"
 	@echo "        setfacl -R -m d:u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
-	@echo "        setfacl -R -m   u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m   u:$(DOMJUDGE_USER):rwX  $(CURDIR)/webapp/var"
 	@echo "        And manually make sure the webserver has traversal access to: $(CURDIR)"
 	@echo "    - Configure webserver"
 	@echo "        Nginx + PHP-FPM:"
@@ -359,7 +359,7 @@ inplace-postinstall-permissions:
 	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/domserver-static.php
 	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/verdicts.php
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp
-	setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rX   $(CURDIR)/webapp
 	setfacl    -m d:u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc
 	setfacl    -m   u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc
 	setfacl    -m d:u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual
@@ -368,23 +368,23 @@ ifneq ($(DOC_BUILD_ENABLED),no)
 	setfacl    -m d:u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual/build
 	setfacl    -m   u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual/build
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/doc/manual/build/html
-	setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/doc/manual/build/html
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rX   $(CURDIR)/doc/manual/build/html
 	setfacl -R -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/doc/manual/build/domjudge-team-manual.pdf
 endif
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
-	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwX  $(CURDIR)/webapp/var
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries
-	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwX  $(CURDIR)/webapp/public/images/countries
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/teams
-	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/teams
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwX  $(CURDIR)/webapp/public/images/teams
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/banners
-	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/banners
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwX  $(CURDIR)/webapp/public/images/banners
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/affiliations
-	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/affiliations
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwX  $(CURDIR)/webapp/public/images/affiliations
 	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
-	setfacl -R -m   u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
+	setfacl -R -m   u:$(DOMJUDGE_USER):rwX    $(CURDIR)/webapp/var
 	setfacl -R -m d:m::rwx                    $(CURDIR)/webapp/var
-	setfacl -R -m   m::rwx                    $(CURDIR)/webapp/var
+	setfacl -R -m   m::rwX                    $(CURDIR)/webapp/var
 	if command -v sestatus >/dev/null 2>&1; then \
 		chcon -R -t httpd_sys_content_t $(CURDIR)/webapp; \
 		chcon -R -t httpd_config_t $(CURDIR)/etc; \
