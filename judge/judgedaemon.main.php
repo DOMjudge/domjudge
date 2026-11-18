@@ -2271,7 +2271,9 @@ class JudgeDaemon
                         'chown',
                         '-R',
                         posix_getpwuid(posix_geteuid())['name'] . ":",
-                        "$realWorkdir/feedback"
+                        // Use original $passdir that's not rewritten by realpath()
+                        // so it matches the sudoers file if it contains symlinks.
+                        "$passdir/feedback"
                     ]
                 )
             );
