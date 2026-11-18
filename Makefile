@@ -333,8 +333,6 @@ inplace-install-l:
 	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwX  $(CURDIR)/webapp/public/images/banners"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/affiliations"
 	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwX  $(CURDIR)/webapp/public/images/affiliations"
-	@echo "        setfacl -R -m d:m::rwx                    $(CURDIR)/webapp/var"
-	@echo "        setfacl -R -m   m::rwX                    $(CURDIR)/webapp/var"
 	@echo "        # Also make sure you keep access"
 	@echo "        setfacl -R -m d:u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m   u:$(DOMJUDGE_USER):rwX  $(CURDIR)/webapp/var"
@@ -383,8 +381,6 @@ endif
 	setfacl -R -m   u:$(WEBSERVER_GROUP):rwX  $(CURDIR)/webapp/public/images/affiliations
 	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
 	setfacl -R -m   u:$(DOMJUDGE_USER):rwX    $(CURDIR)/webapp/var
-	setfacl -R -m d:m::rwx                    $(CURDIR)/webapp/var
-	setfacl -R -m   m::rwX                    $(CURDIR)/webapp/var
 	if command -v sestatus >/dev/null 2>&1; then \
 		chcon -R -t httpd_sys_content_t $(CURDIR)/webapp; \
 		chcon -R -t httpd_config_t $(CURDIR)/etc; \
