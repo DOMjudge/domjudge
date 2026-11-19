@@ -143,19 +143,24 @@ void resize_pipe(int fd) {
 
 // Write all the data into the file descriptor. It is assumed that the file
 // descriptor is *not* NONBLOCK. This function blocks until all the data is
-// written.
-void write_all(fd_t fd, const char *data, ssize_t size) {
+// written. Returns the number of bytes written, which is less than size if
+// writing failed.
+ssize_t write_all(fd_t fd, const char *data, ssize_t size) {
   ssize_t index = 0;
   while (index < size) {
     ssize_t nwrite = write(fd, data + index, size - index);
     // Note that this pipe is not NONBLOCK, so here we may block (but
     // usually don't).
     if (nwrite < 0) {
+      if (errno == EINTR) {
+        continue;
+      }
       // This may fail, for example if the solution closes stdin.
       break;
     }
     index += nwrite;
   }
+  return index;
 }
 
 // This struct contains all the metadata and runtime information of a process to
@@ -181,6 +186,9 @@ struct process_t {
   pid_t pid = -1;
 
   bool exited = false;
+  // Whether the proxy listens for data from this process, i.e. whether
+  // process_to_proxy is registered in the epoll.
+  bool watched = false;
   // Information about the exited process. Meaningful only if exited == true.
   int exitInfo = -1;
 
@@ -278,6 +286,7 @@ struct process_t {
       logmsg(LOG_DEBUG, "closing fd: {} (proxy -> process) of {}",
              proxy_to_process, pid);
       close(proxy_to_process);
+      proxy_to_process = -1;
     }
   }
 
@@ -288,6 +297,9 @@ struct process_t {
       logmsg(LOG_DEBUG, "closing fd: {} (process -> proxy) of {}",
              process_to_proxy, pid);
       close(process_to_proxy);
+      process_to_proxy = -1;
+      // There is nothing left to listen for.
+      watched = false;
     }
   }
 
@@ -729,6 +741,7 @@ struct state_t {
     if (has_proxy()) {
       for (auto &proc : processes) {
         add_fd(proc.process_to_proxy);
+        proc.watched = true;
       }
     }
   }
@@ -789,6 +802,19 @@ struct state_t {
     return true;
   }
 
+  // Stop listening for the data coming from the process, without closing the
+  // pipe. Closing it would make the writes of the process fail.
+  void stop_watching(process_t &proc) {
+    if (!proc.watched) {
+      return;
+    }
+    logmsg(LOG_DEBUG, "no longer reading from #{}", proc.index);
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, proc.process_to_proxy, nullptr)) {
+      error(errno, "failed to remove fd {} from epoll", proc.process_to_proxy);
+    }
+    proc.watched = false;
+  }
+
   // Check if every process has exited.
   bool has_everyone_exited() {
     return all_of(processes.begin(), processes.end(),
@@ -803,21 +829,32 @@ struct state_t {
     const size_t BUF_SIZE = 1024 * 1024;
     char buffer[BUF_SIZE];
     while (true) {
+      // The second process (the submission) is not trusted. When its output
+      // cannot be delivered anymore, stop reading it instead of dropping it,
+      // otherwise it can keep us busy for as long as it runs. It then blocks
+      // on a full pipe, as when the first process does not read its stdin.
+      if (to.proxy_to_process == -1 && from.index != 0) {
+        stop_watching(from);
+        return;
+      }
       // Read from the process to the proxy until EOF or the read would
       // block. Do not fill the buffer completely since output_file_t needs to
       // write an extra \n at its end.
       ssize_t nread = read(from.process_to_proxy, buffer, BUF_SIZE - 1);
       if (nread == 0) {
-        auto duration = chrono::steady_clock::now() - output_file.start;
-        auto time = duration.count() / 1000 / 1000; // ns -> ms
-        int time_sec = time / 1000;
-        int time_millis = time % 1000;
-        char direction = from.index == 0 ? ']' : '[';
-        char eofbuf[128];
-        snprintf(eofbuf, sizeof(eofbuf), "[%3d.%03ds/%ld]%c", time_sec, time_millis, 0L, direction);
-        write_all(output_file.output_file, eofbuf, strlen(eofbuf));
+        // Only record the EOF if it is passed on to the other process.
+        if (to.proxy_to_process != -1) {
+          auto duration = chrono::steady_clock::now() - output_file.start;
+          auto time = duration.count() / 1000 / 1000; // ns -> ms
+          int time_sec = time / 1000;
+          int time_millis = time % 1000;
+          char direction = from.index == 0 ? ']' : '[';
+          char eofbuf[128];
+          snprintf(eofbuf, sizeof(eofbuf), "[%3d.%03ds/%ld]%c", time_sec, time_millis, 0L, direction);
+          write_all(output_file.output_file, eofbuf, strlen(eofbuf));
 
-        warning(0, "EOF from process #{}", from.index);
+          warning(0, "EOF from process #{}", from.index);
+        }
         // The process closed stdout, we need to close the pipe's file
         // descriptors as well.
         to.close_input_fd();
@@ -831,12 +868,24 @@ struct state_t {
         }
         error(errno, "failed to read from pipe of #{}", from.index);
       }
+      // The other process cannot receive the data anymore, so drop it. We
+      // still read it, otherwise the process blocks on a full pipe.
+      if (to.proxy_to_process == -1) {
+        continue;
+      }
       // We've read nread bytes, write them to the other process' pipe.
-      write_all(to.proxy_to_process, buffer, nread);
-      // Write them also to the output file.
-      output_file.write(buffer, nread, from);
+      ssize_t nwritten = write_all(to.proxy_to_process, buffer, nread);
+      if (nwritten < nread) {
+        // The other process closed its stdin or exited.
+        to.close_input_fd();
+      }
+      if (nwritten == 0) {
+        continue;
+      }
+      // Write what was delivered also to the output file.
+      output_file.write(buffer, nwritten, from);
 
-      total_bytes_transferred += nread;
+      total_bytes_transferred += nwritten;
     }
     error(0, "unexpected exit from pump loop");
   };
@@ -905,12 +954,7 @@ struct state_t {
           if (fd != from.process_to_proxy) {
             continue;
           }
-          auto &to = processes[1 - j];
-          // Do not write to an exited process.
-          if (to.exited) {
-            break;
-          }
-          pump_proxy_pipe(from, to, output_file);
+          pump_proxy_pipe(from, processes[1 - j], output_file);
         }
       }
     }
