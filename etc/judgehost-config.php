@@ -11,6 +11,14 @@ define('SYSLOG', LOG_LOCAL0);
 // be set to this directory
 define('CREATE_WRITABLE_TEMP_DIR', getenv('DOMJUDGE_CREATE_WRITABLE_TEMP_DIR') ? true : false);
 
+// A judgedaemon bound to a CPU core with -n may by default use memory of
+// all NUMA nodes, where the kernel allocates on the node local to that core
+// first. Set this to a list of NUMA nodes (e.g. "1" or "0-1") to restrict it
+// to the memory of those nodes only. To set it per judgedaemon, use e.g.
+// `systemctl edit domjudge-judgedaemon@17` with the line
+// `Environment=DOMJUDGE_CPUSET_MEMS=1` under `[Service]`.
+define('CPUSET_MEMS', (string)getenv('DOMJUDGE_CPUSET_MEMS'));
+
 // These define HTTP request backoff related constants.
 // If any transient network error occurs on the nth trial,
 // the judgehost retries the HTTP request after pow(factor, trial - 1) + rand(0, jitter) sec.

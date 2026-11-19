@@ -295,6 +295,17 @@ class JudgeDaemon
             }
         }
 
+        if (CPUSET_MEMS !== '') {
+            if (!isset($this->daemonid)) {
+                echo "CPUSET_MEMS requires binding to a CPU with -n.\n";
+                exit(1);
+            }
+            if (!preg_match('/^\d+(-\d+)?(,\d+(-\d+)?)*$/', CPUSET_MEMS)) {
+                echo "Invalid value for CPUSET_MEMS, must be a list of NUMA nodes.\n";
+                exit(1);
+            }
+        }
+
         define('LOGFILE', LOGDIR . '/judge.' . $this->myhost . '.log');
         // We can only load this here after defining the LOGFILE.
         require(LIBDIR . '/lib.error.php');
@@ -336,6 +347,7 @@ class JudgeDaemon
         putenv('DJ_LOGDIR=' . LOGDIR);
         putenv('RUNUSER=' . $this->runuser);
         putenv('RUNGROUP=' . $this->rungroup);
+        putenv('CPUSET_MEMS=' . CPUSET_MEMS);
 
         global $EXITCODES;
         $this->EXITCODES = $EXITCODES;
@@ -2147,6 +2159,9 @@ class JudgeDaemon
 
             $gainroot = ['sudo', '-n'];
             $cpuset = is_null($this->daemonid) ? [] : ['-P', $this->daemonid];
+            if (CPUSET_MEMS !== '') {
+                $cpuset[] = '--cpuset-mems=' . CPUSET_MEMS;
+            }
 
             $runguard_args = [BINDIR . "/runguard"];
             if (CREATE_WRITABLE_TEMP_DIR) {
