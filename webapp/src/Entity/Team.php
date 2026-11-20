@@ -13,6 +13,7 @@ use JMS\Serializer\Annotation as Serializer;
 use OpenApi\Attributes as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use App\Utils\Utils;
 use App\Validator\Constraints as AppAssert;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -613,6 +614,10 @@ class Team extends BaseApiEntity implements
 
     public function canViewClarification(Clarification $clarification): bool
     {
+        // Clarifications can be dated in the future through the API or by shadowing.
+        if ((float)$clarification->getSubmittime() > Utils::now()) {
+            return false;
+        }
         return (($clarification->getSender() && $clarification->getSender()->getTeamid() === $this->getTeamid()) ||
             ($clarification->getRecipient() && $clarification->getRecipient()->getTeamid() === $this->getTeamid()) ||
             ($clarification->getSender() === null && $clarification->getRecipient() === null));
