@@ -180,9 +180,9 @@ class JudgehostController extends AbstractFOSRestController
             ->andWhere('j.judgingid = jt.jobid')
             ->andWhere('jr.runresult IS NULL')
             ->andWhere('j.valid = 1 OR j.rejudging IS NOT NULL')
-            ->andWhere('j.result != :compiler_error')
+            ->andWhere('j.result IS NULL OR j.result != :compiler_error')
             ->setParameter('hostname', $hostname)
-            ->setParameter('compiler_error', 'compiler-error')
+            ->setParameter('compiler_error', Judging::RESULT_COMPILER_ERROR)
             ->getQuery()
             ->getResult();
 
