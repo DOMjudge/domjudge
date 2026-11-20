@@ -10,14 +10,13 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Utils\Utils;
-use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 
 class StatisticsService
 {
-    final public const NUM_GROUPED_BINS = 20;
+    final public const NUM_GROUPED_BINS = 60;
 
     final public const FILTERS = [
         'visiblecat' => 'Teams from visible categories',
@@ -390,8 +389,7 @@ class StatisticsService
 
     /**
      * @param Problem[] $problems
-     * @return array{'numBuckets': int, 'maxBucketSizeCorrect': int, 'maxBucketSizeCorrect': int, 'maxBucketSizeIncorrect': int,
-     *               'freezeBucket': ?int,
+     * @return array{'numBuckets': int, 'start': float, 'end': float, 'freezeBucket': ?int,
      *               'problems': array<array{'correct': array<array{'start': DateTime, 'end': DateTime, 'count': int}>,
      *                                       'incorrect': array<array{'start': DateTime, 'end': DateTime, 'count': int}>}>}
      */
@@ -404,21 +402,20 @@ class StatisticsService
         $stats = [
             'problems' => [],
             'numBuckets' => static::NUM_GROUPED_BINS,
+            'start' => $contest->getStarttime(false),
+            'end' => $contest->getEndtime(),
         ];
 
         [$binStarts, $binEnds] = $this->getGroupedBinBoundaries($contest);
 
-        // Determine which bin the freeze starts in. Bins before this have
-        // separate correct/incorrect counts; bins from this index onward
-        // get the same total for both (shown as "frozen" by the template).
+        // Determine which bin the freeze starts in: the one containing the
+        // freeze time. Bins before this have separate correct/incorrect counts;
+        // bins from this index onward get the same total for both (shown as
+        // "frozen" by the template).
         $freezeBin = static::NUM_GROUPED_BINS; // default: no freeze
-        if (!$showVerdictsInFreeze && $contest->getFreezetime() !== null) {
-            for ($bin = 0; $bin < static::NUM_GROUPED_BINS; $bin++) {
-                if ($binEnds[$bin]->getTimestamp() > $contest->getFreezetime()) {
-                    $freezeBin = $bin;
-                    break;
-                }
-            }
+        if (!$showVerdictsInFreeze && $contest->getFreezetime() !== null
+            && $contest->getFreezetime() < $contest->getEndtime()) {
+            $freezeBin = $this->getGroupedBin($contest, $contest->getFreezetime());
         }
 
         // Fetch all judging counts in a single query, grouped by problem
@@ -468,8 +465,6 @@ class StatisticsService
         }
 
         // Build the output structure expected by the template.
-        $maxBucketSizeCorrect = 0;
-        $maxBucketSizeIncorrect = 0;
         foreach ($problems as $problem) {
             $probid = $problem->getProbid();
             for ($bin = 0; $bin < static::NUM_GROUPED_BINS; $bin++) {
@@ -492,14 +487,9 @@ class StatisticsService
                     'end' => $binEnds[$bin],
                     'count' => $incorrectCount,
                 ];
-
-                $maxBucketSizeCorrect = max($maxBucketSizeCorrect, $correctCount);
-                $maxBucketSizeIncorrect = max($maxBucketSizeIncorrect, $incorrectCount);
             }
         }
 
-        $stats['maxBucketSizeCorrect'] = $maxBucketSizeCorrect;
-        $stats['maxBucketSizeIncorrect'] = $maxBucketSizeIncorrect;
         // The first frozen bin, so the template does not need to repeat the freeze logic.
         $stats['freezeBucket'] = $freezeBin < static::NUM_GROUPED_BINS ? $freezeBin : null;
 
@@ -511,27 +501,33 @@ class StatisticsService
      */
     private function getGroupedBinBoundaries(Contest $contest): array
     {
-        $contestStart = $contest->getStarttime(false);
-        $binDuration = $this->getGroupedBinDuration($contest);
         $binStarts = [];
         $binEnds = [];
         for ($bin = 0; $bin < static::NUM_GROUPED_BINS; $bin++) {
-            $binStarts[$bin] = new DateTime(Utils::absTime($contestStart + $bin * $binDuration));
-            $binEnds[$bin] = (clone $binStarts[$bin])->add(new DateInterval(sprintf('PT%dS', $binDuration)));
+            $binStarts[$bin] = new DateTime(Utils::absTime($this->getGroupedBinStart($contest, $bin)));
+            $binEnds[$bin] = new DateTime(Utils::absTime($this->getGroupedBinStart($contest, $bin + 1)));
         }
         return [$binStarts, $binEnds];
     }
 
-    private function getGroupedBinDuration(Contest $contest): float
+    /**
+     * The bins split the contest exactly into equal parts, without rounding the
+     * bin duration, so that they do not drift for long contests and do not become
+     * empty for short ones.
+     */
+    private function getGroupedBinStart(Contest $contest, int $bin): float
     {
-        $duration = $contest->getEndtime() - $contest->getStarttime(false);
-        return round($duration / static::NUM_GROUPED_BINS, 0);
+        $start = $contest->getStarttime(false);
+        $duration = $contest->getEndtime() - $start;
+        return $start + $bin * $duration / static::NUM_GROUPED_BINS;
     }
 
-    private function getGroupedBin(Contest $contest, float $submittime): int
+    private function getGroupedBin(Contest $contest, float $time): int
     {
-        $bin = (int)floor(($submittime - $contest->getStarttime(false)) / $this->getGroupedBinDuration($contest));
-        return min($bin, static::NUM_GROUPED_BINS - 1);
+        $start = $contest->getStarttime(false);
+        $duration = $contest->getEndtime() - $start;
+        $bin = (int)floor(($time - $start) * static::NUM_GROUPED_BINS / $duration);
+        return max(0, min($bin, static::NUM_GROUPED_BINS - 1));
     }
 
     /**

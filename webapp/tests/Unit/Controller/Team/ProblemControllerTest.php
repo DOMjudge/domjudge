@@ -4,9 +4,13 @@ namespace App\Tests\Unit\Controller\Team;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\DemoAboutToStartContestFixture;
+use App\DataFixtures\Test\SampleSubmissionsInBucketsFixture;
+use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Entity\Testcase;
+use App\Service\ScoreboardService;
 use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
@@ -66,34 +70,30 @@ class ProblemControllerTest extends BaseTestCase
                 static::assertSelectorTextContains('.nav-item .nav-link.active',
                     'Problemset');
 
-                // Get the card bodies and verify we have exactly five of them.
-                $cardBodies = $crawler->filter('.card-body');
-                static::assertSame(5, $cardBodies->count());
+                // Get the problem rows and verify we have exactly five of them.
+                $rows = $crawler->filter('table.problem-list tbody tr');
+                static::assertSame(5, $rows->count());
 
                 for ($i = 0; $i < 5; $i++) {
-                    $timelimit = '5 seconds';
-                    if ($i === 4) {
-                        $timelimit = '1 second';
-                    }
-                    $card = $cardBodies->eq($i);
+                    $timelimit = $i === 4 ? '1s' : '5s';
+                    $row = $rows->eq($i);
                     static::assertSame($letters[$i],
-                        $card->filter('.card-title')->text(null, true));
+                        $row->filter('.problem-badge')->text(null, true));
                     static::assertSame($descriptions[$i],
-                        $card->filter('h3.card-subtitle')->text(null, true));
+                        $row->filter('.problem-name')->text(null, true));
 
                     if ($withLimits) {
                         static::assertSame(
-                            'Limits: ' . $timelimit . ' / 2 GB',
-                            $card->filter('h4.card-subtitle')->text(null, true)
+                            $timelimit . ' / 2 GB',
+                            $row->filter('.problem-limits')->text(null, true)
                         );
                     } else {
-                        // The problem type is displayed on the page, so we expect one heading.
-                        static::assertSame(1,
-                            $card->filter('h4.card-subtitle')->count());
+                        static::assertSame(0,
+                            $row->filter('.problem-limits')->count());
                     }
 
                     // Download the problem text and make sure it is correct.
-                    $problemStatementLink = $card->selectLink('statement');
+                    $problemStatementLink = $row->selectLink('statement');
                     $this->client->click($problemStatementLink->link());
 
                     static::assertSame($problemStatements[$i], $this->client->getInternalResponse()->getContent());
@@ -105,6 +105,56 @@ class ProblemControllerTest extends BaseTestCase
     {
         yield [false];
         yield [true];
+    }
+
+    /**
+     * Test that the problem list shows the team's own status per problem, like on
+     * the team's own scoreboard row, independent of the public statistics.
+     */
+    #[DataProvider('problemStatusProvider')]
+    public function testProblemStatus(
+        bool $verificationRequired,
+        bool $showPublicStats,
+        bool $invalidateCorrectSubmissions,
+        string $expectedStatus
+    ): void {
+        // The fixture adds correct and incorrect submissions of our own team to the
+        // first problem, also during the freeze. It does not update the scoreboard
+        // cache, so we refresh it after changing the configuration.
+        $this->loadFixture(SampleSubmissionsInBucketsFixture::class);
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        if ($invalidateCorrectSubmissions) {
+            foreach ($em->getRepository(Judging::class)->findBy(['result' => Judging::RESULT_CORRECT]) as $judging) {
+                $judging->getSubmission()->setValid(false);
+            }
+            $em->flush();
+        }
+
+        $this->withChangedConfiguration('show_public_stats', $showPublicStats,
+            fn() => $this->withChangedConfiguration('verification_required', $verificationRequired,
+                function () use ($contest, $showPublicStats, $expectedStatus): void {
+                    self::getContainer()->get(ScoreboardService::class)->refreshCache($contest);
+
+                    $crawler = $this->client->request('GET', '/team/problems');
+                    self::assertResponseIsSuccessful();
+
+                    $rows = $crawler->filter('table.problem-list tbody tr');
+                    self::assertCount(1, $rows->eq(0)->filter('.problem-status-' . $expectedStatus));
+                    // We did not submit to any of the other problems.
+                    self::assertCount($rows->count() - 1, $crawler->filter('.problem-status-none'));
+                    self::assertCount(0, $rows->eq(0)->filter('.problem-status-none'));
+                    self::assertSame($showPublicStats, $crawler->filter('.problem-stats')->count() > 0);
+                }));
+    }
+
+    public static function problemStatusProvider(): Generator
+    {
+        yield 'verdicts visible' => [false, true, false, 'solved'];
+        yield 'verdicts not verified yet' => [true, true, false, 'pending'];
+        yield 'only incorrect submissions' => [false, true, true, 'attempted'];
+        yield 'without public statistics' => [false, false, false, 'solved'];
     }
 
     /**
@@ -130,18 +180,16 @@ class ProblemControllerTest extends BaseTestCase
 
         $crawler = $this->client->request('GET', '/team/problems');
 
-        // Get the card bodies.
-        $cardBodies = $crawler->filter('.card-body');
+        // Get the problem rows.
+        $rows = $crawler->filter('table.problem-list tbody tr');
 
-        // The first and last card should not have any samples.
-        self::assertSame(0,
-            $cardBodies->eq(0)->filter('.list-group .list-group-item')->count());
-        self::assertSame(0,
-            $cardBodies->eq(2)->filter('.list-group .list-group-item')->count());
+        // Enabling samples does not add attachments to the problems.
+        self::assertCount(0, $rows->eq(0)->filter('.btn-outline-secondary'));
+        self::assertCount(0, $rows->eq(1)->filter('.btn-outline-secondary'));
 
         // Check the link to download all samples.
-        $link = $cardBodies->eq(1)->filter('a')->eq(2);
-        self::assertSame('samples', $link->text(null, true));
+        $link = $rows->eq(1)->selectLink('samples');
+        self::assertCount(1, $link);
         self::assertSame(sprintf('/team/%s/samples.zip',
             $problem->getExternalid()),
             $link->attr('href'));
@@ -178,16 +226,11 @@ class ProblemControllerTest extends BaseTestCase
 
         $crawler = $this->client->request('GET', '/team/problems');
 
-        // Get the card bodies.
-        $cardBodies = $crawler->filter('.card-body');
+        // Get the problem rows.
+        $rows = $crawler->filter('table.problem-list tbody tr');
 
-        // The last card should not have any samples.
-        self::assertSame(0,
-            $cardBodies->eq(2)->filter('.list-group .list-group-item')->count());
-
-        // Check the link to download all samples.
-        $link = $cardBodies->eq(2)->filter('a')->eq(1);
-        self::assertNotSame('samples', $link->text(null, true));
+        // There should be no link to download the samples.
+        self::assertCount(0, $rows->eq(2)->selectLink('samples'));
 
         // Download the sample and make sure the contents are correct.
         $this->client->request('GET', '/team/' . $problem->getProbid() . '/samples.zip');

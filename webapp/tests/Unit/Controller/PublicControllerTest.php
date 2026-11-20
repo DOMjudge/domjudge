@@ -17,6 +17,7 @@ use App\Utils\Utils;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
+use Symfony\Component\DomCrawler\Crawler;
 
 class PublicControllerTest extends BaseTestCase
 {
@@ -305,6 +306,7 @@ class PublicControllerTest extends BaseTestCase
         int $expectedGreenBoxes,
         int $expectedRedBoxes,
         int $expectedBlueBoxes,
+        ?int $expectedFreezeColumn,
         ?string $freezeTime = null,
         bool $submitCorrectAfterEnd = false,
         bool $ignoreCorrectSubmission = false
@@ -338,45 +340,39 @@ class PublicControllerTest extends BaseTestCase
         // Get the problems page
         $this->verifyPageResponse('GET', '/public/problems', 200);
 
-        $boxes            = $this->client->getCrawler()->filter('.problem-stats-item');
-        $correctClasses   = array_map(fn(int $n) => 'problem-stats-item correct-' . $n, range(1, 9));
-        $incorrectClasses = array_map(fn(int $n) => 'problem-stats-item incorrect-' . $n, range(1, 9));
-        $frozenClasses    = array_map(fn(int $n) => 'problem-stats-item frozen-' . $n, range(1, 9));
-        $correctBoxes     = $incorrectBoxes = $frozenBoxes = [];
-        /** @var \DOMElement $box */
-        foreach ($boxes as $box) {
-            $class = $box->getAttribute('class');
-            if (in_array($class, $correctClasses)) {
-                $correctBoxes[] = $box;
-            } elseif (in_array($class, $incorrectClasses)) {
-                $incorrectBoxes[] = $box;
-            } elseif (in_array($class, $frozenClasses)) {
-                $frozenBoxes[] = $box;
-            }
-        }
-
-        self::assertCount($expectedGreenBoxes, $correctBoxes);
-        self::assertCount($expectedRedBoxes, $incorrectBoxes);
-        self::assertCount($expectedBlueBoxes, $frozenBoxes);
-        // Whenever there is a freeze, it starts in bin 16 (4:00-4:15), so the last four bins
-        // of each problem are frozen in both rows, also the ones without submissions.
-        self::assertCount(
-            $expectedBlueBoxes > 0 ? 8 * $demoContest->getProblems()->count() : 0,
-            $this->client->getCrawler()->filter('.problem-stats-item[class*="frozen-"]')
+        self::assertCount($expectedGreenBoxes, $this->client->getCrawler()->filter('.problem-stats-bar.bar-correct'));
+        self::assertCount($expectedRedBoxes, $this->client->getCrawler()->filter('.problem-stats-bar.bar-incorrect'));
+        self::assertCount($expectedBlueBoxes, $this->client->getCrawler()->filter('.problem-stats-bar.bar-frozen'));
+        // The freeze marker on the time axis is only shown while there are frozen bins,
+        // above the first frozen bin. The first column of the axis is bin 0.
+        $freezeMarkers = $this->client->getCrawler()->filter('.problem-stats-freeze')->each(
+            fn(Crawler $marker) => $marker->attr('style')
         );
+        if ($expectedFreezeColumn === null) {
+            self::assertEmpty($freezeMarkers);
+        } else {
+            self::assertSame(['grid-column: ' . $expectedFreezeColumn], $freezeMarkers);
+        }
     }
 
     public static function provideTestProblemStatistics(): Generator
     {
-        yield [false, false, 1, 1, 6]; // Keep both times, we expect one green, one red and six blue boxes (2 around the freeze and 4 at the end)
-        yield [true, true, 3, 3, 0]; // Remove both times, we expect three green and three red boxes
-        yield [false, true, 1, 1, 6]; // Remove the unfreeze time but not the freeze time, we expect one green, one red and six blue boxes
-        // Freeze exactly at the start of bin 16, so bin 15 (3:45-4:00) ends at the freeze and should not be frozen.
-        yield [false, false, 1, 1, 6, '2022-01-01 04:00:00 Europe/Amsterdam'];
+        // There are 60 bins of 5 minutes. The fixture has submissions at 2:00 (correct), 3:00 (incorrect),
+        // 4:03 (correct and incorrect, in bin 48), 4:40 (correct) and 4:50 (incorrect). A frozen bin has a
+        // single blue bar for all its submissions.
+        // Keep both times: the freeze at 4:05 starts bin 49, so the bin of the submissions at 4:03
+        // ends at the freeze and is not frozen. We expect two green, two red and two blue bars.
+        yield [false, false, 2, 2, 2, 50];
+        // Remove both times, we expect three green and three red bars.
+        yield [true, true, 3, 3, 0, null];
+        // Remove the unfreeze time but not the freeze time, as when keeping both times.
+        yield [false, true, 2, 2, 2, 50];
+        // Freeze at 4:00, the start of bin 48, so the submissions at 4:03 are frozen as well.
+        yield [false, false, 1, 1, 3, 49, '2022-01-01 04:00:00 Europe/Amsterdam'];
         // A correct submission after the contest end is too late and should not be shown.
-        yield [true, true, 2, 3, 0, null, true];
+        yield [true, true, 2, 3, 0, null, null, true];
         // An ignored submission should not be shown either.
-        yield [true, true, 2, 3, 0, null, false, true];
+        yield [true, true, 2, 3, 0, null, null, false, true];
     }
 
     /**
