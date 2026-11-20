@@ -407,9 +407,28 @@ table.table-full-clickable-cell tr .table-button-head-right-right{
 }
 
 /* Timeline styles */
+#judgehost-timeline-details > summary {
+    cursor: pointer;
+    user-select: none;
+}
+
+#judgehost-timeline-details:not([open]) > summary {
+    border-bottom: 0;
+}
+
 #judgehost-timeline {
+    position: relative;
     height: 400px;
     width: 100%;
+    contain: layout style paint;
+}
+
+#judgehost-timeline .timeline-status {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
 }
 
 #judgehost-timeline svg {

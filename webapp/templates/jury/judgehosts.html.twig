@@ -6,8 +6,8 @@
 {% block extrahead %}
     {{ parent() }}
     {{ macros.table_extrahead() }}
-    <script src="{{ asset('js/d3.min.js') }}"></script>
-    <script src="{{ asset('js/judgehost-timeline.js') }}"></script>
+    <script defer src="{{ asset('js/d3.min.js') }}"></script>
+    <script defer src="{{ asset('js/judgehost-timeline.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -48,20 +48,23 @@
         </div>
     {%- endif %}
 
-    <div class="card mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
+    <details class="card mb-3" id="judgehost-timeline-details">
+        <summary class="card-header">
             Judgehost Activity (last 24h)
-            <div class="form-check form-switch mb-0">
-                <input class="form-check-input" type="checkbox" id="toggle-disabled-jh">
-                <label class="form-check-label" for="toggle-disabled-jh">Show disabled</label>
-            </div>
-        </div>
+        </summary>
         <div class="card-body">
+            <div class="d-flex justify-content-end align-items-center mb-2">
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="toggle-disabled-jh">
+                    <label class="form-check-label" for="toggle-disabled-jh">Show disabled</label>
+                </div>
+            </div>
             <div id="judgehost-timeline">
+                <div class="timeline-status text-muted small"></div>
                 <svg></svg>
             </div>
         </div>
-    </div>
+    </details>
 
 {% endblock %}
 
@@ -69,7 +72,18 @@
     {{ parent() }}
     <script>
         $(function() {
-            initJudgehostTimeline('{{ path('jury_judgehost_timeline_data') }}');
+            const details = document.getElementById('judgehost-timeline-details');
+            let timelineLoaded = false;
+            const loadTimeline = function() {
+                if (details && details.open && !timelineLoaded) {
+                    timelineLoaded = true;
+                    initJudgehostTimeline('{{ path('jury_judgehost_timeline_data') }}');
+                }
+            };
+            if (details) {
+                details.addEventListener('toggle', loadTimeline);
+                loadTimeline();
+            }
         });
     </script>
 {% endblock %}
