@@ -18,6 +18,10 @@ translate () {
     args="$*"
     if [ "$distro_id" = "ID=fedora" ]; then
         args=${args/libcgroup-dev/libcgroup-devel}
+        args=${args/php-mysql/php-mysqlnd}
+    else
+        args=${args/glibc-static/}
+        args=${args/libstdc++-static/}
     fi
     echo "$args"
 }
