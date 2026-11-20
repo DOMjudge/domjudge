@@ -44,7 +44,7 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        PHPVERSION: ["8.2", "8.5"]
+        PHPVERSION: ["8.2", "8.6"]
     steps:
       - uses: actions/checkout@v4
       - name: Setup PHP
