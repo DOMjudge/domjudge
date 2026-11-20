@@ -1,10 +1,13 @@
 function initJudgehostTimeline(dataUrl) {
     const margin = {top: 20, right: 30, bottom: 40, left: 150};
     const $container = $('#judgehost-timeline');
+    const $status = $container.find('.timeline-status');
     const fullWidth = $container.width();
     const fullHeight = $container.height();
     const width = fullWidth - margin.left - margin.right;
     const height = fullHeight - margin.top - margin.bottom;
+
+    $status.text('Loading timeline...');
 
     const svg = d3.select("#judgehost-timeline svg")
         .attr("width", fullWidth)
@@ -36,8 +39,11 @@ function initJudgehostTimeline(dataUrl) {
     d3.json(dataUrl, function(error, json) {
         if (error) {
             console.error("Error loading timeline data:", error);
+            $status.text('Failed to load timeline data.');
             return;
         }
+
+        $status.text('');
 
         const allData = json.data;
         const now = json.now * 1000;
@@ -156,6 +162,6 @@ function initJudgehostTimeline(dataUrl) {
         }
 
         render();
-        $('#toggle-disabled-jh').on('change', render);
+        $('#toggle-disabled-jh').off('change.timeline').on('change.timeline', render);
     });
 }
