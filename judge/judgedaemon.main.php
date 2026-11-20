@@ -1658,7 +1658,8 @@ class JudgeDaemon
 
                     $this->runCommandSafe([LIBJUDGEDIR . "/version_check.sh", $vcscript, $workdir], $retval);
 
-                    $versions[$type] = trim(file_get_contents($version_output_file));
+                    $versionOutput = is_readable($version_output_file) ? file_get_contents($version_output_file) : false;
+                    $versions[$type] = $versionOutput !== false ? trim($versionOutput) : '';
                     if ($retval !== 0) {
                         $versions[$type] =
                             "Getting $type version failed with exit code $retval\n"
