@@ -74,7 +74,8 @@ shift $((OPTIND-1))
 [ "$1" = "--" ] && shift
 
 if [ -n "$CPUSET" ]; then
-	CPUSET_OPT="-P $CPUSET"
+	# CPUSET_MEMS (from the environment) optionally restricts NUMA memory nodes.
+	CPUSET_OPT="-P $CPUSET${CPUSET_MEMS:+ --cpuset-mems=$CPUSET_MEMS}"
 	LOGFILE="$DJ_LOGDIR/judge.$(hostname | cut -d . -f 1)-$CPUSET.log"
 else
 	LOGFILE="$DJ_LOGDIR/judge.$(hostname | cut -d . -f 1).log"
