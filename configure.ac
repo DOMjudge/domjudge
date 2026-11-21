@@ -36,15 +36,15 @@ AC_SUBST(DOMJUDGE_VERSION, $PACKAGE_VERSION)
 AC_DEFINE_UNQUOTED(DOMJUDGE_VERSION, "$PACKAGE_VERSION",
 [DOMjudge version number (alias for PACKAGE_VERSION)])
 
-AC_SUBST(DOMSERVER_BUILD_ENABLED,yes)
+AC_SUBST(DOMSERVER_BUILD_ENABLED,no)
 AC_ARG_ENABLE([domserver-build],AS_HELP_STRING([--enable-domserver-build],
-[configure and build the domserver (default: yes).]),
-[if test "x$enableval" = xno ; then AC_SUBST(DOMSERVER_BUILD_ENABLED,no) fi])
+[configure and build the domserver (default: no).]),
+[if test "x$enableval" = xyes ; then AC_SUBST(DOMSERVER_BUILD_ENABLED,yes) fi])
 
-AC_SUBST(JUDGEHOST_BUILD_ENABLED,yes)
+AC_SUBST(JUDGEHOST_BUILD_ENABLED,no)
 AC_ARG_ENABLE([judgehost-build],AS_HELP_STRING([--enable-judgehost-build],
-[configure and build the judgehost (default: yes).]),
-[if test "x$enableval" = xno ; then AC_SUBST(JUDGEHOST_BUILD_ENABLED,no) fi])
+[configure and build the judgehost (default: no).]),
+[if test "x$enableval" = xyes ; then AC_SUBST(JUDGEHOST_BUILD_ENABLED,yes) fi])
 
 if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 	# The judgedaemon only uses C++ code
@@ -504,6 +504,12 @@ AS_IF([test x"$BASH_CHECK" != x"yes"], [AC_MSG_WARN([Bash is needed for running 
 fi
 if test "x$DOMSERVER_BUILD_ENABLED" = xyes; then
 AS_IF([test x"$BASH_CHECK" != x"yes"], [AC_MSG_WARN([Bash is missing. Bash is needed for database setup.])])
+fi
+if test "x$JUDGEHOST_BUILD_ENABLED" = xno && test "x$DOMSERVER_BUILD_ENABLED" = xno ; then
+   echo "Warning: neither --enable-domserver-build nor --enable-judgehost-build provided."
+   echo "You probably want to rerun with either one (or both). This behaviour has changed"
+   echo "in DOMjudge 10.0."
+   echo ""
 fi
 fi # !QUIET
 # }}}

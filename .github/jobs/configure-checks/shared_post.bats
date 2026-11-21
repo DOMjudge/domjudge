@@ -15,7 +15,7 @@ source .github/jobs/configure-checks/functions.sh
         userdel ${www_group} || true
         groupdel ${www_group} || true
     done
-    run ./configure --with-domjudge-user=$u
+    run ./configure --with-domjudge-user=$u --enable-domserver-build=yes
     assert_line "checking webserver-group... configure: error: webserver group could not be detected, use --with-webserver-group=GROUP"
 }
 
@@ -24,7 +24,7 @@ source .github/jobs/configure-checks/functions.sh
    run su root -c "./configure"
    discourage_root="checking domjudge-user... configure: error: installing/running as root is STRONGLY DISCOURAGED, use --with-domjudge-user=root to override."
    assert_line "$discourage_root"
-   run su root -c "./configure --with-domjudge-user=root"
+   run su root -c "./configure --with-domjudge-user=root --enable-domserver-build --enable-judgehost-build=yes"
    refute_line "$discourage_root"
 }
 
@@ -32,13 +32,13 @@ source .github/jobs/configure-checks/functions.sh
    setup
    run ./configure --with-domjudge-user=$u
    assert_line "checking domjudge-user... $u"
-   run su $u -c "./configure"
+   run su $u -c "./configure -enable-domserver-build=yes --enable-domserver-build --enable-judgehost-build=yes"
    assert_line "checking domjudge-user... $u (default: current user)"
 }
 
 @test "/opt configured" {
    setup
-   run run_configure
+   run run_configure "--enable-domserver-build --enable-judgehost-build"
    assert_line " * prefix..............: /opt/domjudge"
    assert_line " * documentation.......: /opt/domjudge/doc"
    assert_line " * domserver...........: /opt/domjudge/domserver"
@@ -65,7 +65,7 @@ source .github/jobs/configure-checks/functions.sh
 
 @test "Prefix configured" {
    setup
-   run run_configure --prefix=/tmp
+   run run_configure "--prefix=/tmp --enable-domserver-build --enable-judgehost-build"
    refute_line " * prefix..............: /opt/domjudge"
    refute_line " * documentation.......: /opt/domjudge/doc"
    refute_line " * domserver...........: /opt/domjudge/domserver"
@@ -87,7 +87,7 @@ source .github/jobs/configure-checks/functions.sh
 
 @test "Check FHS" {
    setup
-   run run_configure --enable-fhs
+   run run_configure "--enable-fhs --enable-domserver-build=yes --enable-judgehost-build=yes"
    refute_line " * prefix..............: /opt/domjudge"
    refute_line " * documentation.......: /opt/domjudge/doc"
    refute_line " * domserver...........: /opt/domjudge/domserver"
@@ -122,7 +122,7 @@ source .github/jobs/configure-checks/functions.sh
 
 @test "Alternative dirs together with FHS" {
    setup
-   run run_configure --enable-fhs --with-domserver_webappdir=/run/webapp --with-domserver_tmpdir=/tmp/domserver --with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot/domjudge
+   run run_configure "--enable-fhs --with-domserver_webappdir=/run/webapp --with-domserver_tmpdir=/tmp/domserver --with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot/domjudge --enable-domserver-build --enable-judgehost-build"
    assert_line " * prefix..............: /usr/local"
    assert_line " * documentation.......: /usr/local/share/doc/domjudge"
    assert_line " * domserver...........: "
@@ -154,7 +154,7 @@ source .github/jobs/configure-checks/functions.sh
 
 @test "Alternative dirs together with defaults" {
    setup
-   run run_configure "--with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot --with-domserver_logdir=/log"
+   run run_configure "--with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot --with-domserver_logdir=/log --enable-domserver-build --enable-judgehost-build"
    assert_line " * prefix..............: /opt/domjudge"
    assert_line " * documentation.......: /opt/domjudge/doc"
    assert_line " * domserver...........: /opt/domjudge/domserver"
@@ -171,7 +171,7 @@ source .github/jobs/configure-checks/functions.sh
 
 @test "Default URL not set, docs mention" {
   setup
-  run run_configure
+  run run_configure "--enable-domserver-build=yes --enable-judgehost-build"
   assert_line "checking baseurl... https://example.com/domjudge/"
   assert_line "Warning: base URL is unconfigured; generating team documentation will"
   assert_line "not work out of the box!"
@@ -189,21 +189,21 @@ source .github/jobs/configure-checks/functions.sh
 @test "URL path prefix is derived from the base URL" {
   setup
   # Without a base URL the historic default is kept.
-  run run_configure
+  run run_configure "--enable-domserver-build=yes --enable-judgehost-build=yes"
   assert_line "checking URL path prefix... /domjudge/"
-  run run_configure "--with-baseurl=https://contest.example.org/dj/"
+  run run_configure "--with-baseurl=https://contest.example.org/dj/ --enable-domserver-build --enable-judgehost-build"
   assert_line "checking URL path prefix... /dj/"
   # A base URL without a path serves DOMjudge from the root.
-  run run_configure "--with-baseurl=https://contest.example.org/"
+  run run_configure "--with-baseurl=https://contest.example.org/ --enable-domserver-build --enable-judgehost-build"
   assert_line "checking URL path prefix... /"
   # An unparseable base URL is rejected.
-  run run_configure "--with-baseurl=not-a-url"
+  run run_configure "--with-baseurl=not-a-url --enable-domserver-build --enable-judgehost-build"
   assert_line "checking URL path prefix... configure: error: could not parse base URL 'not-a-url'; expected e.g. 'https://example.org/domjudge/'."
 }
 
 @test "Webserver config follows the URL path prefix" {
   setup
-  run run_configure "--with-baseurl=http://localhost/domjudge/"
+  run run_configure "--with-baseurl=http://localhost/domjudge/ --enable-domserver-build --enable-judgehost-build"
   run make -C etc config
   assert_success
   run grep -q "^Alias /domjudge " etc/apache.conf
@@ -220,7 +220,7 @@ source .github/jobs/configure-checks/functions.sh
 
   # Served from the root: Apache takes over the document root, and nginx
   # needs an explicit empty string since 'set' requires two arguments.
-  run run_configure "--with-baseurl=http://localhost/"
+  run run_configure "--with-baseurl=http://localhost/ --enable-domserver-build --enable-judgehost-build"
   run make -C etc config
   assert_success
   run grep -q "^DocumentRoot " etc/apache.conf
@@ -245,36 +245,36 @@ source .github/jobs/configure-checks/functions.sh
 
 @test "Instance name is sanitized" {
   setup
-  run run_configure
+  run run_configure "--enable-domserver-build --enable-judgehost-build"
   assert_line "checking instance name... domjudge"
   assert_line " * instance name.......: domjudge"
   # Uppercase and characters outside [a-z0-9-] are folded to dashes.
-  run run_configure "--with-instance-name=wt-Foo.Bar"
+  run run_configure "--with-instance-name=wt-Foo.Bar --enable-domserver-build --enable-judgehost-build"
   assert_line "checking instance name... wt-foo-bar"
   # Truncated to 24 characters, without leaving a trailing dash.
-  run run_configure "--with-instance-name=a-very-long-worktree-name-that-exceeds-limits"
+  run run_configure "--with-instance-name=a-very-long-worktree-name-that-exceeds-limits --enable-domserver-build --enable-judgehost-build"
   assert_line "checking instance name... a-very-long-worktree-nam"
   # A name with nothing usable in it is an error rather than a silent
   # fallback to the default instance.
-  run run_configure "--with-instance-name=___"
+  run run_configure "--with-instance-name=___ --enable-domserver-build --enable-judgehost-build"
   assert_line "checking instance name... configure: error: instance name '___' contains no usable characters; pass a valid --with-instance-name=NAME."
   # Autoconf turns a valueless option into 'yes'/'no'; neither names an
   # instance, so they must not become one.
-  run run_configure "--with-instance-name"
+  run run_configure "--with-instance-name --enable-domserver-build --enable-judgehost-build"
   assert_line "checking instance name... configure: error: --with-instance-name requires a value, e.g. --with-instance-name=contest2."
-  run run_configure "--without-instance-name"
+  run run_configure "--without-instance-name --enable-domserver-build --enable-judgehost-build"
   assert_line "checking instance name... configure: error: --with-instance-name requires a value, e.g. --with-instance-name=contest2."
-  run run_configure "--with-instance-name="
+  run run_configure "--with-instance-name= --enable-domserver-build --enable-judgehost-build"
   assert_line "checking instance name... configure: error: --with-instance-name requires a non-empty value, e.g. --with-instance-name=contest2."
   # A later occurrence wins, so the makefiles can pass a derived default
   # that the user overrides through CONFIGURE_FLAGS.
-  run run_configure "--with-instance-name=first --with-instance-name=second"
+  run run_configure "--with-instance-name=first --with-instance-name=second --enable-domserver-build --enable-judgehost-build"
   assert_line "checking instance name... second"
 }
 
 @test "Named instance gets its own webserver identifiers" {
   setup
-  run run_configure "--with-instance-name=wt-foo --with-baseurl=http://wt-foo.localhost/"
+  run run_configure "--with-instance-name=wt-foo --with-baseurl=http://wt-foo.localhost/ --enable-domserver-build --enable-judgehost-build"
   assert_line "checking webserver host... wt-foo.localhost:80"
   run make -C etc config
   assert_success
@@ -303,9 +303,9 @@ source .github/jobs/configure-checks/functions.sh
   # An explicit port in the base URL is used, but an 'https' scheme must
   # not silently become 'listen 443': the generated server block speaks
   # plain HTTP, so it would answer TLS handshakes with cleartext.
-  run run_configure "--with-instance-name=wt-foo --with-baseurl=http://wt-foo.localhost:8080/"
+  run run_configure "--with-instance-name=wt-foo --with-baseurl=http://wt-foo.localhost:8080/ --enable-domserver-build --enable-judgehost-build"
   assert_line "checking webserver host... wt-foo.localhost:8080"
-  run run_configure "--with-instance-name=wt-foo --with-baseurl=https://wt-foo.example.org/"
+  run run_configure "--with-instance-name=wt-foo --with-baseurl=https://wt-foo.example.org/ --enable-domserver-build --enable-judgehost-build"
   assert_line "checking webserver host... wt-foo.example.org:80"
   run make -C etc config
   assert_success
@@ -317,7 +317,7 @@ source .github/jobs/configure-checks/functions.sh
 
   # Apache only listens on port 80 by default, so other ports need a
   # Listen, guarded so that instances can share the port.
-  run run_configure "--with-instance-name=wt-foo --with-baseurl=http://wt-foo.localhost:8080/"
+  run run_configure "--with-instance-name=wt-foo --with-baseurl=http://wt-foo.localhost:8080/ --enable-domserver-build --enable-judgehost-build"
   run make -C etc config
   assert_success
   run grep -q "^<VirtualHost \*:8080>" etc/apache.conf
@@ -334,7 +334,7 @@ source .github/jobs/configure-checks/functions.sh
 
 @test "Default instance keeps the historic webserver identifiers" {
   setup
-  run run_configure "--with-baseurl=http://localhost/domjudge/"
+  run run_configure "--with-baseurl=http://localhost/domjudge/ --enable-domserver-build --enable-judgehost-build"
   assert_line "checking webserver host... _default_:80"
   run make -C etc config
   assert_success
@@ -356,12 +356,12 @@ source .github/jobs/configure-checks/functions.sh
 
 @test "Change users" {
   setup
-  run run_configure
+  run run_configure "--enable-domserver-build --enable-judgehost-build"
   assert_line " * default user........: domjudge-bats-user"
   assert_line " * runguard user.......: domjudge-run"
   assert_line " * runguard group......: domjudge-run"
   assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
-  run run_configure "--with-domjudge-user=other_user --with-webserver-group=other_group --with-runuser=other-domjudge-run --with-rungroup=other-run-group"
+  run run_configure "--with-domjudge-user=other_user --with-webserver-group=other_group --with-runuser=other-domjudge-run --with-rungroup=other-run-group --enable-domserver-build --enable-judgehost-build"
   refute_line " * default user........: domjudge-bats-user"
   refute_line " * runguard user.......: domjudge-run"
   refute_line " * runguard group......: domjudge-run"
@@ -376,11 +376,11 @@ source .github/jobs/configure-checks/functions.sh
 
 @test "No docs" {
   setup
-  run run_configure
+  run run_configure "--enable-domserver-build --enable-judgehost-build"
   assert_line " * documentation.......: /opt/domjudge/doc"
-  run run_configure --enable-doc-build
+  run run_configure "--enable-doc-build --enable-domserver-build --enable-judgehost-build"
   assert_line " * documentation.......: /opt/domjudge/doc"
-  run run_configure --disable-doc-build
+  run run_configure "--disable-doc-build --enable-domserver-build --enable-judgehost-build"
   assert_line " * documentation.......: /opt/domjudge/doc (disabled)"
 }
 
@@ -390,7 +390,7 @@ source .github/jobs/configure-checks/functions.sh
       skip
   fi
   setup
-  run run_configure
+  run run_configure "--enable-domserver-build --enable-judgehost-build"
   assert_line " * domserver...........: /opt/domjudge/domserver"
   assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
   assert_line " * judgehost...........: /opt/domjudge/judgehost"
@@ -407,17 +407,19 @@ source .github/jobs/configure-checks/functions.sh
       skip
   fi
   setup
-  run run_configure --disable-domserver-build
-  refute_line " * domserver...........: /opt/domjudge/domserver"
-  for group in www-data apache nginx; do
-    refute_line " * webserver group.....: $group"
+  for statement in '' '--disable-domserver-build' '--enable-domserver-build=no'; do
+    run run_configure "$statement --enable-judgehost-build"
+    refute_line " * domserver...........: /opt/domjudge/domserver"
+    for group in www-data apache nginx; do
+      refute_line " * webserver group.....: $group"
+    done
+    assert_line " * judgehost...........: /opt/domjudge/judgehost"
+    assert_line " * runguard group......: domjudge-run"
+    run make domserver
+    assert_failure 2
+    run make judgehost
+    assert_success
   done
-  assert_line " * judgehost...........: /opt/domjudge/judgehost"
-  assert_line " * runguard group......: domjudge-run"
-  run make domserver
-  assert_failure 2
-  run make judgehost
-  assert_success
 }
 
 @test "Build judgehost disabled" {
@@ -426,13 +428,15 @@ source .github/jobs/configure-checks/functions.sh
       skip
   fi
   setup
-  run run_configure --disable-judgehost-build
-  assert_line " * domserver...........: /opt/domjudge/domserver"
-  assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
-  refute_line " * judgehost...........: /opt/domjudge/judgehost"
-  refute_line " * runguard group......: domjudge-run"
-  run make domserver
-  assert_success
-  run make judgehost
-  assert_failure 2
+  for statement in '' '--disable-judgehost-build' '--enable-judgehost-build=no'; do
+    run run_configure "$statement --enable-domserver-build"
+    assert_line " * domserver...........: /opt/domjudge/domserver"
+    assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
+    refute_line " * judgehost...........: /opt/domjudge/judgehost"
+    refute_line " * runguard group......: domjudge-run"
+    run make domserver
+    assert_success
+    run make judgehost
+    assert_failure 2
+  done
 }
