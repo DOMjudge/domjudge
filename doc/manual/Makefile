@@ -6,7 +6,14 @@ REC_TARGETS = inplace-install inplace-uninstall
 
 include $(TOPDIR)/Makefile.global
 
-ifneq ($(QUIET),)
+ifeq ($(QUIET),0)
+# Ignore option for 0
+QUIET_REDIRECT =
+else ifeq ($(QUIET),)
+# Ignore option for unset
+QUIET_REDIRECT =
+else
+# Set all other QUIET values as true
 export LATEXMKOPTS=-quiet
 QUIET_REDIRECT = >/dev/null 2>&1
 endif
@@ -61,10 +68,10 @@ conf_ref.rst: gen_conf_ref.py
 	./gen_conf_ref.py
 
 html: conf_ref.rst
-	sphinx-build -M $@ . build $(subst 1,-Q,$(QUIET))
+	sphinx-build -M $@ . build $(QUIET_FLAG_CAPITAL)
 
 team:
-	sphinx-build -b latex . build/team $(subst 1,-Q,$(QUIET))
+	sphinx-build -b latex . build/team $(QUIET_FLAG_CAPITAL)
 	$(MAKE) -C build/team domjudge-team-manual.pdf $(QUIET_REDIRECT)
 	cp build/team/domjudge-team-manual.pdf build
 

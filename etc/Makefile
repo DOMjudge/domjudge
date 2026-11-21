@@ -32,7 +32,7 @@ judgehost: restapi.secret
 # judgehost credentials belong to this installation only.
 $(SECRETS):
 	DOMJUDGE_INSTANCE='$(INSTANCE)' DOMJUDGE_RESTAPIURL='$(RESTAPIURL)' \
-		./gen_all_secrets $(subst 1,-q,$(QUIET))
+		./gen_all_secrets $(QUIET_FLAG)
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
