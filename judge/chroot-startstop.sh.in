@@ -81,6 +81,27 @@ case "$1" in
 			rm -rf "$TMPDIR"
 			exit 2
 		fi
+		# Check that wildcard sudoers rules used by start/stop are accepted
+		# (e.g. sudo-rs rejects wildcards in command arguments at parse time).
+		for cmd in \
+			"mount --bind $CHROOTORIGINAL/etc etc" \
+			"mount -o remount,ro,bind @judgehost_judgedir@/test/etc" \
+			"umount $TMPDIR/proc" \
+			"umount @judgehost_judgedir@/test/etc" \
+			"umount -f -vvv @judgehost_judgedir@/test/etc"
+		do
+			# shellcheck disable=SC2086
+			if ! sudo -n -l $cmd < /dev/null > /dev/null 2>&1; then
+				>&2 cat <<-EOF
+					sudoers mount/umount rules are not usable (failed on: sudo -n -l $cmd).
+					If you are using sudo-rs, it rejects wildcards in command arguments in /etc/sudoers.d/domjudge.
+					As a workaround, install classic sudo (e.g. package 'sudo-ws') and switch to it:
+					  update-alternatives --set sudo /usr/bin/sudo.ws
+				EOF
+				rm -rf "$TMPDIR"
+				exit 2
+			fi
+		done
 		rm -rf "$TMPDIR"
 		;;
 	start)
