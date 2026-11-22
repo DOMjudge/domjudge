@@ -6,7 +6,12 @@ source .github/jobs/configure-checks/functions.sh
 
 @test "Check for missing webserver group" {
     if [ "$distro_id" != "ID=fedora" ]; then
-        # Debian/Ubuntu start with a www-data group
+        # Debian/Ubuntu start with a www-data group,
+        # So this is always detected even when there is no
+        # webserver installed.
+        #
+        # Removing the group would make the default installation inconsistent
+        # so extending the loop here doesn't really help us for the next tests
         skip
     fi
     repo-install gcc g++
