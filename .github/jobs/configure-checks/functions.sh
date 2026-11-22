@@ -18,6 +18,8 @@ translate () {
     args="$*"
     if [ "$distro_id" = "ID=fedora" ]; then
         args=${args/libcgroup-dev/libcgroup-devel}
+    else
+        args=${args/httpd/apache2}
     fi
     echo "$args"
 }
