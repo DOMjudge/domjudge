@@ -455,11 +455,6 @@ to use the API, or simply::
 
 to use the CLI. In this case you must run it from the DOMserver.
 
-Importing from ICPC CMS API
----------------------------
-
-This feature does not work anymore.
-
 Importing DOMjudge configuration
 --------------------------------
 
