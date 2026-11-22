@@ -11,7 +11,6 @@ use App\Entity\TeamCategory;
 use App\Form\Type\ContestExportType;
 use App\Form\Type\ContestImportType;
 use App\Form\Type\ExportResultsType;
-use App\Form\Type\ICPCCmsType;
 use App\Form\Type\JsonImportType;
 use App\Form\Type\ProblemsImportType;
 use App\Form\Type\ProblemUploadType;
@@ -20,7 +19,6 @@ use App\Service\ClarificationService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
-use App\Service\ICPCCmsService;
 use App\Service\ImportExportService;
 use App\Service\ImportProblemService;
 use App\Service\ScoreboardService;
@@ -30,7 +28,6 @@ use Collator;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\Form\SubmitButton;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,11 +38,6 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Twig\Environment;
 
 #[Route(path: '/jury/import-export')]
@@ -53,7 +45,6 @@ use Twig\Environment;
 class ImportExportController extends BaseController
 {
     public function __construct(
-        protected readonly ICPCCmsService $icpcCmsService,
         protected readonly ImportExportService $importExportService,
         EntityManagerInterface $em,
         protected readonly ScoreboardService $scoreboardService,
@@ -70,13 +61,6 @@ class ImportExportController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
-    /**
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
-     */
     #[Route(path: '', name: 'jury_import_export')]
     #[IsGranted('ROLE_ADMIN')]
     public function indexAction(Request $request): Response
@@ -109,31 +93,6 @@ class ImportExportController extends BaseController
                 $this->addFlash('success', sprintf('%d items imported', $count));
             } else {
                 $this->addFlash('danger', $message);
-            }
-            return $this->redirectToRoute('jury_import_export');
-        }
-
-        $icpcCmsForm = $this->createForm(ICPCCmsType::class);
-
-        $icpcCmsForm->handleRequest($request);
-
-        if ($icpcCmsForm->isSubmitted() && $icpcCmsForm->isValid()) {
-            $contestId   = $icpcCmsForm->get('contest_id')->getData();
-            $accessToken = $icpcCmsForm->get('access_token')->getData();
-            /** @var SubmitButton $fetchTeams */
-            $fetchTeams = $icpcCmsForm->get('fetch_teams');
-            if ($fetchTeams->isClicked()) {
-                if ($this->icpcCmsService->importTeams($accessToken, $contestId, $message)) {
-                    $this->addFlash('success', 'Teams successfully imported');
-                } else {
-                    $this->addFlash('danger', $message);
-                }
-            } else {
-                if ($this->icpcCmsService->uploadStandings($accessToken, $contestId, $message)) {
-                    $this->addFlash('success', 'Standings successfully uploaded');
-                } else {
-                    $this->addFlash('danger', $message);
-                }
             }
             return $this->redirectToRoute('jury_import_export');
         }
@@ -317,7 +276,6 @@ class ImportExportController extends BaseController
         return $this->render('jury/import_export.html.twig', [
             'tsv_form' => $tsvForm,
             'json_form' => $jsonForm,
-            'icpccms_form' => $icpcCmsForm,
             'problem_form' => $problemForm,
             'contest_export_form' => $contestExportForm,
             'contest_import_form' => $contestImportForm,
