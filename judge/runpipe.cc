@@ -502,7 +502,7 @@ struct state_t {
   void parse_commands(int argc, char **argv) {
     for (size_t i = 0; i < 2; i++) {
       process_t proc(i);
-      processes.emplace_back(move(proc));
+      processes.emplace_back(std::move(proc));
     }
 
     size_t current_process_index = 0;
@@ -533,7 +533,7 @@ struct state_t {
       }
 
       // The rest of the arguments are the arguments of the command
-      process.args.emplace_back(move(arg));
+      process.args.emplace_back(std::move(arg));
     }
 
     if (processes.back().cmd.empty()) {
