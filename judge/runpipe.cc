@@ -84,8 +84,6 @@
 #define PROGRAM "runpipe"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
-using namespace std;
-
 using fd_t = int;
 
 std::string_view progname;
