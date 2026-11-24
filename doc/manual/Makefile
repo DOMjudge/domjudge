@@ -49,6 +49,8 @@ inplace-uninstall-l:
 
 clean-l:
 	rm -rf build/doctrees build/team/.doctrees
+	# Remove lock files from failed generations
+	-rm -f build/html/.buildinfo.bak
 	-$(MAKE) -C build/team clean
 
 maintainer-clean-l:
