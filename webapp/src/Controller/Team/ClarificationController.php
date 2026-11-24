@@ -84,10 +84,9 @@ class ClarificationController extends BaseController
             externalContestId: $contest->getExternalid(),
             problem: strval($problem->getProbid()),
             onlyForRecipientTeam: true,
-            recipientTeamId: $teamId)
+            recipientTeamId: $teamId,
+            onlyFromJury: true)
             ->select('clar', 'p')
-            // Needed to filter out team clarification requests.
-            ->andWhere('clar.sender IS NULL')
             ->addOrderBy('clar.submittime', 'DESC')
             ->addOrderBy('clar.clarid', 'DESC')
             ->getQuery()

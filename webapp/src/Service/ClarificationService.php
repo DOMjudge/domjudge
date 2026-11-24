@@ -81,12 +81,14 @@ readonly class ClarificationService
     /**
      * Build a query for the clarifications the current user is allowed to see.
      *
-     * Team facing pages should pass `onlyForRecipientTeam` so that they keep
-     * showing what the team sees: jury and admin users are exempt from the
-     * visibility restriction below, and would otherwise see the clarifications
-     * addressed to every other team on their own team pages. A null
+     * Team and public facing pages should pass `onlyForRecipientTeam` so that
+     * they keep showing what the team or public sees: jury and admin users are
+     * exempt from the visibility restriction below, and would otherwise see the
+     * clarifications addressed to every other team on those pages. A null
      * `recipientTeamId` then limits the result to clarifications sent to
      * everyone.
+     *
+     * Pass `onlyFromJury` to exclude clarification requests sent by teams.
      *
      * A clarification may reference a problem that is not (or no longer) part
      * of its contest. Those are only meaningful to the jury, which renders them
@@ -99,7 +101,8 @@ readonly class ClarificationService
                                     ?string $problem = null,
                                     bool $onlyForRecipientTeam = false,
                                     ?int $recipientTeamId = null,
-                                    bool $includeProblemsOutsideContest = false
+                                    bool $includeProblemsOutsideContest = false,
+                                    bool $onlyFromJury = false
     ): QueryBuilder {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Clarification::class, 'clar')
@@ -165,9 +168,17 @@ readonly class ClarificationService
         }
 
         if ($onlyForRecipientTeam) {
-            $queryBuilder
-                ->andWhere('clar.recipient IS NULL OR clar.recipient = :recipientTeam')
-                ->setParameter('recipientTeam', $recipientTeamId);
+            if ($recipientTeamId === null) {
+                $queryBuilder->andWhere('clar.recipient IS NULL');
+            } else {
+                $queryBuilder
+                    ->andWhere('clar.recipient IS NULL OR clar.recipient = :recipientTeam')
+                    ->setParameter('recipientTeam', $recipientTeamId);
+            }
+        }
+
+        if ($onlyFromJury) {
+            $queryBuilder->andWhere('clar.sender IS NULL');
         }
 
         if (!is_null($problem)) {

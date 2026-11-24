@@ -346,10 +346,12 @@ class PublicController extends BaseController
         }
 
         /** @var Clarification[] $clarifications */
-        $clarifications = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), problem: strval($problem->getProbid()))
+        $clarifications = $this->clarificationService->getQueryBuilder(
+            externalContestId: $contest->getExternalid(),
+            problem: strval($problem->getProbid()),
+            onlyForRecipientTeam: true,
+            onlyFromJury: true)
             ->select('clar', 'p')
-            ->andWhere('clar.sender IS NULL')
-            ->andWhere('clar.recipient IS NULL')
             ->addOrderBy('clar.submittime', 'DESC')
             ->addOrderBy('clar.clarid', 'DESC')
             ->getQuery()
@@ -375,10 +377,12 @@ class PublicController extends BaseController
         $categories = $this->config->get('clar_categories');
         $contest    = $this->dj->getCurrentContest();
         /** @var Clarification|null $clarification */
-        $clarification = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), externalClarificationId: $clarId)
+        $clarification = $this->clarificationService->getQueryBuilder(
+            externalContestId: $contest->getExternalid(),
+            externalClarificationId: $clarId,
+            onlyForRecipientTeam: true,
+            onlyFromJury: true)
             ->select('clar, p, c')
-            ->andWhere('clar.sender IS NULL')
-            ->andWhere('clar.recipient IS NULL')
             ->getQuery()
             ->getOneOrNullResult();
 
