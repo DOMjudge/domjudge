@@ -2514,6 +2514,7 @@ class JudgeDaemon
         $passes = [];
 
         for ($passCnt = 1; $passCnt <= $passLimit; $passCnt++) {
+            $passStartTime = microtime(true);
             $nextPass = false;
             if ($passLimit > 1) {
                 logmsg(LOG_INFO, "    🔄 Running pass $passCnt...");
@@ -2615,6 +2616,7 @@ class JudgeDaemon
             if ($passLimit > 1) {
                 $passes[] = $this->buildPassData(
                     $passCnt,
+                    $passStartTime,
                     $new_judging_run,
                     $passCnt > 1 ? $this->restEncodeFile($input, $output_storage_limit) : null
                 );
@@ -2738,11 +2740,15 @@ class JudgeDaemon
      */
     private function buildPassData(
         int $passCnt,
+        float $passStartTime,
         array $judgingRun,
         ?string $encodedInput = null
     ): array {
-        $passData = ['pass' => $passCnt] + array_intersect_key($judgingRun, array_flip([
-            'runresult', 'start_time', 'end_time', 'runtime', 'output_run',
+        $passData = [
+            'pass' => $passCnt,
+            'start_time' => urlencode((string)$passStartTime),
+        ] + array_intersect_key($judgingRun, array_flip([
+            'runresult', 'end_time', 'runtime', 'output_run',
             'output_error', 'output_system', 'metadata', 'output_diff', 'compare_metadata',
         ]));
         // Every pass but the first runs on the input the validator generated.
@@ -2759,9 +2765,17 @@ class JudgeDaemon
      */
     private function finalizeMultipassRun(array $judgingRun, array $passes): array
     {
+        $maxRuntime = null;
+        foreach ($passes as $pass) {
+            $passRuntime = (string)$pass['runtime'];
+            if ($passRuntime !== '' && ($maxRuntime === null || (float)$passRuntime > (float)$maxRuntime)) {
+                $maxRuntime = $passRuntime;
+            }
+        }
         if ($passes !== []) {
             $judgingRun['pass'] = (string)$passes[array_key_last($passes)]['pass'];
         }
+        $judgingRun['runtime'] = $maxRuntime ?? '';
         $judgingRun['passes'] = json_encode($passes, JSON_THROW_ON_ERROR);
         return $judgingRun;
     }
