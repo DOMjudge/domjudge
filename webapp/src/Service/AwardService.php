@@ -147,24 +147,19 @@ class AwardService
     }
 
     #[AsTwigFilter('medalType')]
-    public function medalType(Team $team, Contest $contest, Scoreboard $scoreboard): ?string
+    public function medalType(Team $team, Contest $contest, bool $jury): ?string
     {
+        if (!$contest->getMedalsEnabled()) {
+            return null;
+        }
+
         $teamid = $team->getExternalid();
-        $key = $contest->getCid() . ':medalType';
-        if (!isset($this->awardCache[$key])) {
-            $this->awardCache[$key] = $this->loadAwards($contest, $scoreboard);
-        }
-        $awards = $this->awardCache[$key];
-        $awardsById = [];
-        foreach ($awards as $award) {
-            $awardsById[$award->id] = $award;
-        }
-        $medalNames = ['gold-medal', 'silver-medal', 'bronze-medal'];
-        foreach ($medalNames as $medalName) {
-            if (in_array($teamid, $awardsById[$medalName]->teamIds ?? [])) {
+        foreach (['gold-medal', 'silver-medal', 'bronze-medal'] as $medalName) {
+            if (in_array($teamid, $this->getAward($contest, $jury, $medalName)->teamIds ?? [], true)) {
                 return $medalName;
             }
         }
+
         return null;
     }
 }
