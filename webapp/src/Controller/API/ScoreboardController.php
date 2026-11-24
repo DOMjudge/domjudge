@@ -242,7 +242,7 @@ class ScoreboardController extends AbstractApiController
 
             $medal = null;
             if ($strict === false) {
-                $medal = $this->awards->medalType($teamScore->team, $contest, $scoreboard);
+                $medal = $this->awards->medalType($teamScore->team, $contest, !$public);
             }
 
             $row = new Row(

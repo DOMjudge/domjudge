@@ -277,7 +277,31 @@ class AwardServiceTest extends KernelTestCase
     {
         $awardsService = $this->getAwardService();
         $team = $this->scoreboard->getTeamsInDescendingOrder()[$teamIndex];
-        static::assertEquals($expectedMedalType, $awardsService->medalType($team, $this->contest, $this->scoreboard));
+        static::assertEquals($expectedMedalType, $awardsService->medalType($team, $this->contest, false));
+    }
+
+    public function testMedalTypeWhenMedalsDisabled(): void
+    {
+        $this->contest->setMedalsEnabled(false);
+        $scoreboardService = $this->createMock(ScoreboardService::class);
+        $scoreboardService->expects(static::never())->method('getScoreboard');
+
+        $awardsService = new AwardService($scoreboardService);
+        $team = $this->scoreboard->getTeamsInDescendingOrder()[0];
+        static::assertNull($awardsService->medalType($team, $this->contest, false));
+    }
+
+    public function testMedalTypeFetchesUnfilteredVisibleScoreboard(): void
+    {
+        $scoreboardService = $this->createMock(ScoreboardService::class);
+        $scoreboardService->expects(static::once())
+            ->method('getScoreboard')
+            ->with($this->contest, true, null, true)
+            ->willReturn($this->scoreboard);
+
+        $awardsService = new AwardService($scoreboardService);
+        $team = $this->scoreboard->getTeamsInDescendingOrder()[0];
+        static::assertEquals('gold-medal', $awardsService->medalType($team, $this->contest, true));
     }
 
     public static function provideMedalType(): \Generator

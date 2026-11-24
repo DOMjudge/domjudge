@@ -9,7 +9,13 @@ use App\DataFixtures\Test\SampleSubmissionsInBucketsFixture;
 use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectFixture;
 use App\DataFixtures\Test\SelfRegisteredUserFixture;
 use App\Entity\Contest;
+use App\Entity\ContestProblem;
+use App\Entity\Judging;
+use App\Entity\Language;
 use App\Entity\Submission;
+use App\Entity\Team;
+use App\Entity\TeamAffiliation;
+use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Service\ScoreboardService;
 use App\Tests\Unit\BaseTestCase;
@@ -77,6 +83,75 @@ class PublicControllerTest extends BaseTestCase
 
         $this->verifyPageResponse('GET', '/public', 200);
         self::assertSelectorTextContains('div.alert-danger', $msg);
+    }
+
+    public function testFilteredScoreboardMedalsUseUnfilteredScoreboard(): void
+    {
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        /** @var Contest $contest */
+        $contest = $em->getRepository(Contest::class)->findOneBy(['externalid' => 'demo']);
+        /** @var TeamCategory $participants */
+        $participants = $em->getRepository(TeamCategory::class)->findOneBy(['externalid' => 'participants']);
+        /** @var Team $firstTeam */
+        $firstTeam = $em->getRepository(Team::class)->findOneBy(['externalid' => 'exteam']);
+
+        $contest
+            ->setMedalsEnabled(true)
+            ->setGoldMedals(1)
+            ->setSilverMedals(0)
+            ->setBronzeMedals(0)
+            ->addMedalCategory($participants);
+
+        $secondAffiliation = (new TeamAffiliation())
+            ->setExternalid('secondaffil')
+            ->setShortname('SA')
+            ->setName('Second Affiliation')
+            ->setCountry('DEU');
+        $secondTeam = (new Team())
+            ->setExternalid('secondteam')
+            ->setName('Second Team')
+            ->addCategory($participants)
+            ->setAffiliation($secondAffiliation);
+        $em->persist($secondAffiliation);
+        $em->persist($secondTeam);
+
+        /** @var ContestProblem $problem */
+        $problem = $contest->getProblems()->first();
+        /** @var Language $language */
+        $language = $em->getRepository(Language::class)->findByExternalId('c');
+        $baseTime = (float)$contest->getStarttime();
+
+        foreach ([[$firstTeam, $baseTime + 60], [$secondTeam, $baseTime + 120]] as [$team, $submitTime]) {
+            $submission = (new Submission())
+                ->setContest($contest)
+                ->setTeam($team)
+                ->setContestProblem($problem)
+                ->setLanguage($language)
+                ->setSubmittime($submitTime);
+            $judging = (new Judging())
+                ->setContest($contest)
+                ->setStarttime($submitTime)
+                ->setEndtime($submitTime + 5)
+                ->setValid(true)
+                ->setSubmission($submission)
+                ->setResult('correct');
+            $submission->addJudging($judging);
+            $em->persist($submission);
+            $em->persist($judging);
+        }
+        $em->flush();
+
+        static::getContainer()->get(ScoreboardService::class)->refreshCache($contest);
+
+        // Filtering to the second team's affiliation must not award it a gold medal.
+        $this->verifyPageResponse('GET', '/public?affiliations[]=secondaffil&filter=filter', 200);
+        self::assertSelectorExists('tr[data-team-id="secondteam"]');
+        self::assertSelectorNotExists('tr[data-team-id="exteam"]');
+        self::assertSelectorNotExists('tr[data-team-id="secondteam"] .fa-medal');
+
+        // Filtering to the first team's affiliation still shows its gold medal.
+        $this->verifyPageResponse('GET', '/public?affiliations[]=utrecht&filter=filter', 200);
+        self::assertSelectorExists('tr[data-team-id="exteam"] .fa-medal.gold-medal');
     }
 
     public function testNoSelfRegister(): void

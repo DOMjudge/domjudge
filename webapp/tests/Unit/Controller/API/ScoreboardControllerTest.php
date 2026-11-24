@@ -8,7 +8,13 @@ use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\DataFixtures\Test\SampleEventsFixture;
 use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectFixture;
 use App\Entity\Contest;
+use App\Entity\ContestProblem;
+use App\Entity\Judging;
+use App\Entity\Language;
 use App\Entity\Submission;
+use App\Entity\Team;
+use App\Entity\TeamAffiliation;
+use App\Entity\TeamCategory;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
@@ -88,6 +94,79 @@ class ScoreboardControllerTest extends BaseTestCase
         self::assertSame('0:00:00', $row['score']['time']);
         self::assertCount(1, $solved);
         self::assertSame('0:00:00', $solved[0]['time']);
+    }
+
+    public function testFilteredScoreboardMedalsUseUnfilteredScoreboard(): void
+    {
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        /** @var Contest $contest */
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        /** @var TeamCategory $participants */
+        $participants = $em->getRepository(TeamCategory::class)->findOneBy(['externalid' => 'participants']);
+        /** @var Team $firstTeam */
+        $firstTeam = $em->getRepository(Team::class)->findOneBy(['externalid' => 'exteam']);
+
+        $contest
+            ->setMedalsEnabled(true)
+            ->setGoldMedals(1)
+            ->setSilverMedals(0)
+            ->setBronzeMedals(0)
+            ->addMedalCategory($participants);
+
+        $secondAffiliation = (new TeamAffiliation())
+            ->setExternalid('secondaffil')
+            ->setShortname('SA')
+            ->setName('Second Affiliation')
+            ->setCountry('DEU');
+        $secondTeam = (new Team())
+            ->setExternalid('secondteam')
+            ->setName('Second Team')
+            ->addCategory($participants)
+            ->setAffiliation($secondAffiliation);
+        $em->persist($secondAffiliation);
+        $em->persist($secondTeam);
+
+        /** @var ContestProblem $problem */
+        $problem = $contest->getProblems()->first();
+        /** @var Language $language */
+        $language = $em->getRepository(Language::class)->findByExternalId('c');
+        $baseTime = (float)$contest->getStarttime();
+
+        foreach ([[$firstTeam, $baseTime + 60], [$secondTeam, $baseTime + 120]] as [$team, $submitTime]) {
+            $submission = (new Submission())
+                ->setContest($contest)
+                ->setTeam($team)
+                ->setContestProblem($problem)
+                ->setLanguage($language)
+                ->setSubmittime($submitTime);
+            $judging = (new Judging())
+                ->setContest($contest)
+                ->setStarttime($submitTime)
+                ->setEndtime($submitTime + 5)
+                ->setValid(true)
+                ->setSubmission($submission)
+                ->setResult('correct');
+            $submission->addJudging($judging);
+            $em->persist($submission);
+            $em->persist($judging);
+        }
+        $em->flush();
+
+        static::getContainer()->get(ScoreboardService::class)->refreshCache($contest);
+
+        $contestId = $this->resolveEntityId(Contest::class, (string)$contest->getCid());
+
+        // Filtering to the second team must not award it a gold medal just because it ranks first in the filtered view.
+        $filtered = $this->verifyApiJsonResponse('GET', "/contests/$contestId/scoreboard?affiliation=secondaffil", 200, 'admin');
+        self::assertCount(1, $filtered['rows']);
+        self::assertSame('secondteam', $filtered['rows'][0]['team_id']);
+        self::assertArrayNotHasKey('medal', $filtered['rows'][0]);
+
+        // Filtering to the first team still awards it the gold medal from the full scoreboard.
+        $filteredFirst = $this->verifyApiJsonResponse('GET', "/contests/$contestId/scoreboard?affiliation=utrecht", 200, 'admin');
+        self::assertCount(1, $filteredFirst['rows']);
+        self::assertSame('exteam', $filteredFirst['rows'][0]['team_id']);
+        self::assertSame('gold-medal', $filteredFirst['rows'][0]['medal']);
     }
 
     public static function provideFilters(): Generator
