@@ -154,7 +154,7 @@ class TeamController extends BaseController
             }
             if (isset($teams_that_solved[$t->getTeamId()]) && $teams_that_solved[$t->getTeamId()] > 0) {
                 $status = "ok";
-                $statustitle = "correct submissions(s)";
+                $statustitle = "correct submission(s)";
                 $num_solved  = $teams_that_solved[$t->getTeamId()];
             }
 
