@@ -17,4 +17,7 @@ threads: threads.cc
 hello: hello.cc
 	$(CXX) $(CXXFLAGS) -static -o $@ $<
 
+clean-l:
+	-rm -f mem threads hello
+
 .PHONY: test
