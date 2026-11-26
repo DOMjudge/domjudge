@@ -1644,11 +1644,15 @@ class JudgeDaemon
             logmsg(LOG_INFO, "  📋 Verifying versions.");
             $versions = [];
             $version_output_file = $workdir . '/version_check.out';
+            $version_tmp_file = $workdir . '/version_check.tmp';
             $args = 'hostname=' . urlencode($this->myhost);
             foreach (['compiler', 'runner'] as $type) {
                 if (isset($version_verification[$type . '_version_command'])) {
                     if (file_exists($version_output_file)) {
                         unlink($version_output_file);
+                    }
+                    if (file_exists($version_tmp_file)) {
+                        unlink($version_tmp_file);
                     }
 
                     $vcscript_content = $version_verification[$type . '_version_command'];
@@ -1656,17 +1660,30 @@ class JudgeDaemon
                     file_put_contents($vcscript, $vcscript_content);
                     chmod($vcscript, 0755);
 
+                    $retval = 0;
                     $this->runCommandSafe([LIBJUDGEDIR . "/version_check.sh", $vcscript, $workdir], $retval);
+                    unlink($vcscript);
 
                     $versionOutput = is_readable($version_output_file) ? file_get_contents($version_output_file) : false;
                     $versions[$type] = $versionOutput !== false ? trim($versionOutput) : '';
                     if ($retval !== 0) {
-                        $versions[$type] =
-                            "Getting $type version failed with exit code $retval\n"
-                            . $versions[$type];
+                        if ($versions[$type] === '' && is_readable($version_tmp_file)) {
+                            $tmpOutput = file_get_contents($version_tmp_file);
+                            $versions[$type] = $tmpOutput !== false ? trim($tmpOutput) : '';
+                        }
+                        alert('error');
+                        $description = "Getting $type version failed with exit code $retval on $this->myhost";
+                        logmsg(LOG_ERR, $description);
+                        $this->disable(
+                            'judgehost',
+                            'hostname',
+                            $this->myhost,
+                            $description,
+                            $judgeTaskId,
+                            $versions[$type] !== '' ? $versions[$type] : null
+                        );
+                        return false;
                     }
-
-                    unlink($vcscript);
                 }
                 if (isset($versions[$type])) {
                     $args .= "&$type=" . urlencode(base64_encode($versions[$type]));
