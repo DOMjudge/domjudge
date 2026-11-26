@@ -589,12 +589,7 @@ class RejudgingController extends BaseController
                 $reason = $request->request->get('reason');
                 $data   = $request->request->all();
 
-                $queryBuilder = $this->em->createQueryBuilder()
-                    ->from(Judging::class, 'j')
-                    ->leftJoin('j.submission', 's')
-                    ->leftJoin('s.rejudging', 'r')
-                    ->leftJoin('s.team', 't')
-                    ->select('j', 's', 'r', 't')
+                $queryBuilder = $this->rejudgingService->createJudgingsQueryBuilder()
                     ->andWhere('j.valid = 1');
 
                 /** @var int[] $contests */
@@ -782,18 +777,14 @@ class RejudgingController extends BaseController
             // Only rejudge submissions in active contests.
             $contests = $this->dj->getCurrentContests();
 
-            $queryBuilder = $this->em->createQueryBuilder()
-                ->from(Judging::class, 'j')
-                ->leftJoin('j.submission', 's')
-                ->leftJoin('s.rejudging', 'r')
+            $queryBuilder = $this->rejudgingService->createJudgingsQueryBuilder()
                 ->leftJoin('s.contest', 'c')
                 ->leftJoin('s.language', 'l')
                 ->leftJoin('s.problem', 'p')
-                ->leftJoin('s.team', 't')
                 ->leftJoin('s.user', 'u')
                 ->leftJoin('j.runs', 'jr')
                 ->leftJoin('jr.judgetask', 'jt')
-                ->select('j', 's', 'r', 'c', 'l', 'p', 't', 'u')
+                ->addSelect('c', 'l', 'p', 'u')
                 ->distinct()
                 ->andWhere('j.contest IN (:contests)')
                 ->andWhere('j.valid = 1')
