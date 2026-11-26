@@ -586,6 +586,8 @@ class RejudgingController extends BaseController
                 flush();
             };
             return $this->streamResponse($this->requestStack, function () use ($request, $progressReporter): void {
+                set_time_limit(0);
+
                 $reason = $request->request->get('reason');
                 $data   = $request->request->all();
 
@@ -774,6 +776,8 @@ class RejudgingController extends BaseController
         };
 
         return $this->streamResponse($this->requestStack, function () use ($priority, $progressReporter, $repeat, $reason, $overshoot, $request, $autoApply, $includeAll, $id, $table, $tablemap, $executable): void {
+            set_time_limit(0);
+
             // Only rejudge submissions in active contests.
             $contests = $this->dj->getCurrentContests();
 
