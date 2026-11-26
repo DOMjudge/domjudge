@@ -4,8 +4,8 @@
 
 cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1
 
-RUNGUARD=../runguard
-RUNGUARD_OPTIONS='-u domjudge-run-0'
+RUNGUARD="$(realpath ../runguard)"
+RUNGUARD_OPTIONS="-u ${RUNUSER:-domjudge-run-0}"
 LOG1="$(mktemp)"
 LOG2="$(mktemp)"
 # shellcheck disable=SC2154

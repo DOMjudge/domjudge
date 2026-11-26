@@ -6,7 +6,7 @@ include $(TOPDIR)/Makefile.global
 export judgehost_tmpdir
 export judgehost_judgedir
 test: mem threads hello
-	./runguard_test.sh
+	RUNUSER=$(RUNUSER) ./runguard_test.sh
 
 mem: mem.cc
 	$(CXX) $(CXXFLAGS) -o $@ $<
