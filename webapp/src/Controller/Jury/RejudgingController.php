@@ -829,6 +829,7 @@ class RejudgingController extends BaseController
                     $redirect = $this->generateUrl('jury_index');
                 }
                 $progressReporter(100, '', $redirect);
+                return;
             }
 
             $skipped = [];
