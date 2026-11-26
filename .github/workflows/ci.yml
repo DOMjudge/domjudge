@@ -22,10 +22,12 @@ jobs:
     if: ${{ !cancelled() && needs.changes.outputs.autoconf != 'false' }}
     uses: ./.github/workflows/autoconf-check.yml
 
-  chroot:
-    needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.chroot != 'false' }}
-    uses: ./.github/workflows/chroot-checks.yml
+  # Disable for unrelated apt-mirror issues, this times out often by building the chroot
+  # breaking CI for unrelated changes.
+  # chroot:
+  #   needs: changes
+  #   if: ${{ !cancelled() && needs.changes.outputs.chroot != 'false' }}
+  #   uses: ./.github/workflows/chroot-checks.yml
 
   compare:
     needs: changes
@@ -78,7 +80,7 @@ jobs:
   # 'skipped', which passes; a failed detection runs everything instead.
   ci-gate:
     name: ci-gate
-    needs: [changes, autoconf, chroot, compare, database-upgrade, integration,
+    needs: [changes, autoconf, compare, database-upgrade, integration,
             judge-unit-tests, misc-tools-unit-tests, phpstan, runpipe, unit-tests,
             webstandard]
     if: always()
