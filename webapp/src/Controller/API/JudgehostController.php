@@ -1414,12 +1414,7 @@ class JudgehostController extends AbstractFOSRestController
         // and nesting it would turn those commits into savepoints.
         $skipped = [];
         /** @var Judging[] $judgings */
-        $judgings = $this->em->createQueryBuilder()
-            ->from(Judging::class, 'j')
-            ->leftJoin('j.submission', 's')
-            ->leftJoin('s.rejudging', 'r')
-            ->leftJoin('s.team', 't')
-            ->select('j', 's', 'r', 't')
+        $judgings = $this->rejudgingService->createJudgingsQueryBuilder()
             ->andWhere('j.rejudging = :rejudgingid')
             ->setParameter('rejudgingid', $rejudgingId)
             ->getQuery()
