@@ -301,7 +301,7 @@ class RejudgingController extends BaseController
         });
 
         // Helper function to add verdicts.
-        $addVerdict = function ($unknownVerdict) use ($verdicts, &$verdictTable): void {
+        $addVerdict = function ($unknownVerdict) use (&$verdicts, &$verdictTable): void {
             // Add column to existing rows.
             foreach ($verdicts as $verdict => $abbreviation) {
                 $verdictTable[$verdict][$unknownVerdict] = [];
