@@ -785,13 +785,21 @@ class RejudgingController extends BaseController
                 ->leftJoin('s.contest', 'c')
                 ->leftJoin('s.problem', 'p')
                 ->leftJoin('s.user', 'u')
-                ->leftJoin('j.runs', 'jr')
-                ->leftJoin('jr.judgetask', 'jt')
                 ->addSelect('c', 'p', 'u')
-                ->distinct()
                 ->andWhere('j.contest IN (:contests)')
                 ->andWhere('j.valid = 1')
                 ->setParameter('contests', $contests);
+
+            if ($table === 'judgehost') {
+                $queryBuilder
+                    ->innerJoin('j.runs', 'jr')
+                    ->innerJoin('jr.judgetask', 'jt')
+                    ->distinct();
+            } elseif ($table === 'rejudging') {
+                $queryBuilder
+                    ->innerJoin('s.judgings', 'j2')
+                    ->distinct();
+            }
 
             if ($executable !== null) {
                 $this->dj->restrictToJudgingsWithOutdatedExecutable($queryBuilder, $executable);
@@ -799,10 +807,6 @@ class RejudgingController extends BaseController
                 $queryBuilder
                     ->andWhere(sprintf('%s = :id', $tablemap[$table]))
                     ->setParameter('id', $id);
-            }
-
-            if ($table === 'rejudging') {
-                $queryBuilder->join('s.judgings', 'j2');
             }
 
             if ($includeAll && !$autoApply) {
