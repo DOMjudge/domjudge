@@ -47,8 +47,10 @@ class RejudgingService
             ->from(Judging::class, 'j')
             ->leftJoin('j.submission', 's')
             ->leftJoin('s.rejudging', 'r')
+            ->leftJoin('s.contest_problem', 'cp')
+            ->leftJoin('s.language', 'l')
             ->leftJoin('s.team', 't')
-            ->select('j', 's', 'r', 't');
+            ->select('j', 's', 'r', 'cp', 'l', 't');
     }
 
     /**

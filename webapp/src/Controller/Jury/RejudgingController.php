@@ -779,12 +779,11 @@ class RejudgingController extends BaseController
 
             $queryBuilder = $this->rejudgingService->createJudgingsQueryBuilder()
                 ->leftJoin('s.contest', 'c')
-                ->leftJoin('s.language', 'l')
                 ->leftJoin('s.problem', 'p')
                 ->leftJoin('s.user', 'u')
                 ->leftJoin('j.runs', 'jr')
                 ->leftJoin('jr.judgetask', 'jt')
-                ->addSelect('c', 'l', 'p', 'u')
+                ->addSelect('c', 'p', 'u')
                 ->distinct()
                 ->andWhere('j.contest IN (:contests)')
                 ->andWhere('j.valid = 1')
