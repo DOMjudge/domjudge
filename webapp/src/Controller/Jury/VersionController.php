@@ -40,11 +40,13 @@ class VersionController extends BaseController
             ->getQuery()->getResult();
 
         $data = [];
+        $hasActiveVersions = false;
         foreach ($languages as $language) {
             $compilerOutputs = [];
             $runnerOutputs = [];
 
             foreach ($language->getVersions() as $version) {
+                $hasActiveVersions = true;
                 /** @var Version $version */
                 $compilerCommand = $version->getCompilerVersionCommand();
                 $compilerVersion = $version->getCompilerVersion();
@@ -97,7 +99,40 @@ class VersionController extends BaseController
             ];
         }
 
-        return $this->render('jury/versions.html.twig', ['data' => $data]);
+        return $this->render('jury/versions.html.twig', [
+            'data' => $data,
+            'has_active_versions' => $hasActiveVersions,
+        ]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/clear-all', name: 'jury_versions_clear_all', methods: ['POST'])]
+    public function clearAllAction(): Response
+    {
+        $this->em->createQuery('UPDATE App\Entity\Version v SET v.active = false WHERE v.active = true')->execute();
+        $this->dj->auditlog('version', null, 'cleared all active versions');
+
+        return $this->redirectToRoute('jury_versions');
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{versionId<\d+>}/clear/{type<compiler|runner>}', name: 'jury_version_clear', methods: ['POST'])]
+    public function clearAction(int $versionId, string $type): Response
+    {
+        $version = $this->em->getRepository(Version::class)->find($versionId)
+            ?? throw new NotFoundHttpException(sprintf('Version with ID %s not found', $versionId));
+
+        $criteria = ['active' => true, 'language' => $version->getLanguage()] + ($type === 'compiler'
+            ? ['compilerVersionCommand' => $version->getCompilerVersionCommand(), 'compilerVersion' => $version->getCompilerVersion()]
+            : ['runnerVersionCommand' => $version->getRunnerVersionCommand(), 'runnerVersion' => $version->getRunnerVersion()]);
+
+        foreach ($this->em->getRepository(Version::class)->findBy($criteria) as $matching) {
+            $matching->setActive(false);
+        }
+        $this->em->flush();
+        $this->dj->auditlog('version', (string)$versionId, "cleared $type version");
+
+        return $this->redirectToRoute('jury_versions');
     }
 
     #[IsGranted('ROLE_ADMIN')]
