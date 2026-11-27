@@ -111,7 +111,7 @@ class MiscControllerTest extends BaseTestCase
                 ]);
 
                 static::assertSelectorTextContains('div.alert.alert-success',
-                    'File has been printed');
+                    'File has been sent to the printer.');
 
                 $text = trim($crawler->filter('pre')->text(null, false));
                 static::assertStringStartsWith('kotlin', $text);
