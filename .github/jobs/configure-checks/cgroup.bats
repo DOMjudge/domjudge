@@ -10,11 +10,11 @@ source .github/jobs/configure-checks/functions.sh
     setup_user
     repo-install gcc g++
     repo-remove libcgroup-dev
-    run run_configure
+    run run_configure "--enable-judgehost-build --enable-domserver-build"
     assert_line "$cgroup_init_find"
     assert_line "$cgroup_init_error"
     repo-install libcgroup-dev
-    run run_configure
+    run run_configure "--enable-judgehost-build --enable-domserver-build"
     refute_line "$cgroup_init_find"
     refute_line "$cgroup_init_error"
 }
