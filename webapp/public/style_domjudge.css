@@ -1066,3 +1066,10 @@ blockquote {
     color: #cb4b16; /* Solarized Orange */
     font-weight: bold;
 }
+
+/* Avoid bulleted lists for single-item values in tables */
+table td > ul:has(> li:only-child) {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
