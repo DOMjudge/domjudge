@@ -481,25 +481,31 @@ void check_remaining_procs()
 }
 
 
-time_stats output_cgroup_stats()
+/* Path of our cgroup, or of `file' in it when given. */
+std::string cgroup_path(const char *file = nullptr)
 {
 	char *mountpoint;
 	int ret = cgroup_get_subsys_mount_point("memory", &mountpoint);
 	if ( ret!=0 ) die(ret,"getting cgroup mount point");
 
-	char cgrouppath[1024], path[1024];
-	snprintf(cgrouppath, sizeof(cgrouppath), "%s/%s", mountpoint, cgroupname);
-	snprintf(path, sizeof(path), "%s/%s/memory.peak", mountpoint, cgroupname);
+	std::string path = std::format("{}/{}", mountpoint, cgroupname);
 	free(mountpoint);
+	if ( file!=nullptr ) path += std::format("/{}", file);
 
-	/* Read memory.peak ourselves: cgroup_get_cgroup() would read every file
-	   of every controller of the cgroup to hand us this one value, among
-	   them memory.stat and memory.numa_stat, for which the kernel flushes
-	   its per-cpu statistics. */
-	FILE *file = fopen(path, "r");
+	return path;
+}
+
+time_stats output_cgroup_stats()
+{
+	/* Read memory.peak and memory.events ourselves: cgroup_get_cgroup()
+	   would read every file of every controller of the cgroup to hand us
+	   these values, among them memory.stat and memory.numa_stat, for which
+	   the kernel flushes its per-cpu statistics. */
+	std::string path = cgroup_path("memory.peak");
+	FILE *file = fopen(path.c_str(), "r");
 	if ( file==nullptr ) {
 		/* Only the file is missing, not the cgroup holding it. */
-		if ( errno==ENOENT && access(cgrouppath, F_OK)==0 ) {
+		if ( errno==ENOENT && access(cgroup_path().c_str(), F_OK)==0 ) {
 			die(0,"kernel too old and does not support memory.peak");
 		}
 		die(errno,"opening cgroups file `{}'", path);
@@ -513,10 +519,32 @@ time_stats output_cgroup_stats()
 	logmsg(LOG_DEBUG, "total memory used: {} kB", max_usage/1024);
 	write_meta("memory-bytes","{}", max_usage);
 
+	/* Report OOM kills, so that hitting the memory limit can be
+	   distinguished from other SIGKILL causes. The kernel's oom_kill
+	   counter is no exact process count: with memory.oom.group it
+	   counts the OOM victim twice. */
+	path = cgroup_path("memory.events");
+	if ( (file = fopen(path.c_str(), "r"))==nullptr ) {
+		die(errno,"opening cgroups file `{}'", path);
+	}
+
+	char key[64];
+	int64_t value, oom_kills = 0;
+	while ( fscanf(file,"%63s %" SCNd64, key, &value)==2 ) {
+		if ( strcmp(key,"oom_kill")==0 ) oom_kills = value;
+	}
+	if ( ferror(file) ) die(errno,"reading from file `{}'", path);
+	if ( fclose(file)!=0 ) die(errno,"closing file `{}'", path);
+
+	if ( oom_kills>0 ) {
+		logmsg(LOG_DEBUG, "OOM kills in cgroup: {}", oom_kills);
+		write_meta("oom-kills","{}", oom_kills);
+	}
+
 	struct cgroup_stat stat;
 	time_stats runtime = { -1, -1, -1, -1 };
 	void *handle;
-	ret = cgroup_read_stats_begin("cpu", cgroupname, &handle, &stat);
+	int ret = cgroup_read_stats_begin("cpu", cgroupname, &handle, &stat);
 	while (ret == 0) {
 		/* libcgroup hands us the value from cpu.stat verbatim,
 		   including its trailing newline. */
@@ -559,7 +587,6 @@ void cgroup_create()
 	}
 
 	int ret;
-	// TODO: do we want to set cpu.weight here as well?
 	if (memsize != RLIM_INFINITY) {
 		cgroup_add_value(uint64, "memory.max", memsize);
 		cgroup_add_value(uint64, "memory.swap.max", 0);
@@ -567,18 +594,16 @@ void cgroup_create()
 		cgroup_add_value(string, "memory.max", "max");
 		cgroup_add_value(string, "memory.swap.max", "max");
 	}
+	/* OOM kill all cgroup processes together, not just one. */
+	cgroup_add_value(string, "memory.oom.group", "1");
 
 	/* Set up cpu restrictions; we pin the task to a specific set of
-	   cpus. We also give it exclusive access to those cores, and set
-	   no limits on memory nodes */
+	   cpus. To make a cpuset exclusive, some additional outside setup
+	   is required, so for now, we will leave this commented out. */
 	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
 		if ( (cg_controller = cgroup_add_controller(cg, "cpuset"))==nullptr ) {
 			die(0,"cgroup_add_controller cpuset");
 		}
-		/* To make a cpuset exclusive, some additional setup outside of domjudge is
-		   required, so for now, we will leave this commented out. */
-		/* cgroup_add_value_int64(cg_controller, "cpuset.cpu_exclusive", 1); */
-		cgroup_add_value(string, "cpuset.mems", "0");
 		cgroup_add_value(string, "cpuset.cpus", cpuset);
 	} else {
 		logmsg(LOG_DEBUG, "cpuset undefined");
@@ -596,7 +621,21 @@ void cgroup_create()
 
 void cgroup_kill()
 {
-	/* kill any remaining tasks, and wait for them to be gone */
+	/* Kill any remaining tasks at once through cgroup.kill, which also
+	   catches tasks that fork while being killed. */
+	std::string path = cgroup_path("cgroup.kill");
+	int fd = open(path.c_str(), O_WRONLY|O_CLOEXEC);
+	if ( fd<0 ) {
+		warning(errno, "opening `{}', killing processes one by one", path);
+	} else {
+		if ( write(fd, "1", 1)!=1 ) {
+			warning(errno, "writing to `{}', killing processes one by one", path);
+		}
+		close(fd);
+	}
+
+	/* Wait for them to be gone, and kill them one by one in case
+	   cgroup.kill failed. */
 	char mem_controller[10] = "memory";
 	int size;
 	do {
