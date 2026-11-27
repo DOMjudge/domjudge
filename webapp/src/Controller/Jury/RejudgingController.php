@@ -796,6 +796,9 @@ class RejudgingController extends BaseController
                     ->innerJoin('jr.judgetask', 'jt')
                     ->distinct();
             } elseif ($table === 'rejudging') {
+                // Join s.judgings as j2 so we match submissions that were part of the given
+                // rejudging even if its judging is no longer valid (e.g. canceled or superseded),
+                // while still selecting each submission's currently valid judging j.
                 $queryBuilder
                     ->innerJoin('s.judgings', 'j2')
                     ->distinct();
