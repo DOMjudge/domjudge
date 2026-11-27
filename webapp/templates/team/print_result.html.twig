@@ -11,12 +11,14 @@
     <div class="container pt-5">
         <h1 class="text-center">Print source</h1>
 
-        <pre class="output_text m-3">
+        {% if output|trim is not empty %}
+            <pre class="output_text m-3">
 {{ output }}
 </pre>
+        {% endif %}
 
         {% if success %}
-            <div class="alert alert-success">File has been printed</div>
+            <div class="alert alert-success">File has been sent to the printer.</div>
         {% else %}
             <div class="alert alert-danger">Error while printing. Contact staff.</div>
         {% endif %}
