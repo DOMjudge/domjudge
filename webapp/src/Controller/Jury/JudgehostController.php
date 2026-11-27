@@ -62,6 +62,7 @@ class JudgehostController extends BaseController
         $table_fields = [
             'judgehostid' => ['title' => 'ID'],
             'hostname' => ['title' => 'hostname'],
+            'last_ip_address' => ['title' => 'last IP'],
             'enabled' => ['title' => 'enabled'],
             'status' => ['title' => 'status'],
             'load' => ['title' => 'load (5m/15m/1h/5h)'],
@@ -103,6 +104,13 @@ class JudgehostController extends BaseController
             }
             $judgehostdata['hostname']['default']  = '-';
             $judgehostdata['hostname']['cssclass'] = 'text-monospace small';
+
+            // render last IP address nicely
+            if ($judgehostdata['last_ip_address']['value']) {
+                $judgehostdata['last_ip_address']['value'] = Utils::printhost($judgehostdata['last_ip_address']['value'], true);
+            }
+            $judgehostdata['last_ip_address']['default']  = '-';
+            $judgehostdata['last_ip_address']['cssclass'] = 'text-monospace small';
 
             if (empty($judgehost->getPolltime())) {
                 $status = 'noconn';

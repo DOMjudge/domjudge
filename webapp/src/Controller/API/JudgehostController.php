@@ -162,6 +162,7 @@ class JudgehostController extends AbstractFOSRestController
             $judgehost->setEnabled((bool)$this->config->get('judgehost_activated_by_default'));
             $this->em->persist($judgehost);
         }
+        $judgehost->setLastIpAddress($request->getClientIp());
         $this->em->flush();
 
         // If there are any unfinished judgings in the queue in my name, they will not be finished.
@@ -481,6 +482,7 @@ class JudgehostController extends AbstractFOSRestController
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
+        $judgehost->setLastIpAddress($request->getClientIp());
         $this->em->flush();
     }
 
@@ -689,6 +691,7 @@ class JudgehostController extends AbstractFOSRestController
             $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta, $score, $pass, $passes);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
+        $judgehost->setLastIpAddress($request->getClientIp());
         $this->em->flush();
 
         return (int)$hasFinalResult;
@@ -1937,6 +1940,7 @@ class JudgehostController extends AbstractFOSRestController
 
         // Update last seen of judgehost
         $judgehost->setPolltime(Utils::now());
+        $judgehost->setLastIpAddress($request->getClientIp());
         $this->em->flush();
 
         // If this judgehost is not active, there's nothing to do.
