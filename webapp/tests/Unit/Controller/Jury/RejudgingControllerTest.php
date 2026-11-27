@@ -10,7 +10,10 @@ use App\Entity\Executable;
 use App\Entity\ExecutableFile;
 use App\Entity\ImmutableExecutable;
 use App\Entity\Judging;
+use App\Entity\JudgingRun;
 use App\Entity\Problem;
+use App\Entity\Rejudging;
+use App\Entity\Submission;
 use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Service\SubmissionService;
@@ -225,6 +228,66 @@ class RejudgingControllerTest extends BaseTestCase
         $this->verifyPageResponse('GET', '/jury/rejudgings/' . $rejudgingId, 200);
         self::assertSelectorExists('table.rejudgetable th[title="custom-verdict (new)"]:contains("custom-verdict")');
         self::assertSelectorExists('table.rejudgetable td.changed:contains("1")');
+    }
+
+    public function testRepeatedRejudgingRuntimeSpread(): void
+    {
+        $this->loadFixture(RejudgingFirstToSolveFixture::class);
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        [$sub1, $sub2] = $em->getRepository(Submission::class)->findBy([], ['submitid' => 'ASC']);
+        $testcase = $sub1->getProblem()->getTestcases()->first();
+        $now = Utils::now();
+
+        $addRun = function (Judging $judging, float $runtime, string $verdict) use ($em, $testcase, $now): void {
+            $em->persist((new JudgingRun())
+                ->setJudging($judging)
+                ->setTestcase($testcase)
+                ->setRuntime($runtime)
+                ->setRunresult($verdict)
+                ->setEndtime($now + 1));
+        };
+
+        // Outlier runtime on the original judging outside the repeated rejudging; must be ignored.
+        $addRun($sub1->getJudgings()->first(), 9.5, 'wrong-answer');
+
+        $rejudging1 = (new Rejudging())->setStarttime($now)->setReason('repeated test')->setRepeat(2);
+        $rejudging1->setRepeatedRejudging($rejudging1);
+        $rejudging2 = (new Rejudging())->setStarttime($now)->setReason('repeated test')->setRepeat(2)->setRepeatedRejudging($rejudging1);
+        $em->persist($rejudging1);
+        $em->persist($rejudging2);
+
+        foreach ([
+            [$sub1, $rejudging1, 'correct', 0.100],
+            [$sub1, $rejudging2, 'wrong-answer', 0.350],
+            [$sub2, $rejudging1, 'timelimit', 0.500],
+            [$sub2, $rejudging2, 'timelimit', 0.600],
+        ] as [$submission, $rejudging, $verdict, $runtime]) {
+            $judging = (new Judging())
+                ->setContest($submission->getContest())
+                ->setSubmission($submission)
+                ->setRejudging($rejudging)
+                ->setStarttime($now)
+                ->setEndtime($now + 1)
+                ->setValid(false)
+                ->setResult($verdict);
+            $em->persist($judging);
+            $addRun($judging, $runtime, $verdict);
+        }
+        $em->flush();
+
+        $this->verifyPageResponse('GET', '/jury/rejudgings/' . $rejudging1->getRejudgingid(), 200);
+
+        $tcRank = $testcase->getRanknumber();
+        $rows = $this->client->getCrawler()
+            ->filter('h3:contains("Runtime spread") + table tr')
+            ->each(fn($tr) => $tr->filter('td')->each(fn($td) => trim($td->text())));
+
+        self::assertSame([
+            [],
+            ['s' . $sub1->getExternalid() . '/tc' . $tcRank, '0.250s', '2', 'correct, wrong-answer'],
+            ['s' . $sub2->getExternalid() . '/tc' . $tcRank, '0.100s', '2', 'timelimit'],
+        ], $rows);
     }
 
     /**

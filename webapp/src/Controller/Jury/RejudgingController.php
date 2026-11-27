@@ -910,7 +910,6 @@ class RejudgingController extends BaseController
 
         $judging_runs_differ = [];
         $runtime_spread = [];
-        $submissions_to_result = [];
         foreach ($submissions as $submitid => $curJudgings) {
             // Check for different results:
             $results = [];
@@ -933,67 +932,40 @@ class RejudgingController extends BaseController
                 }
             }
             // If there are diffs on the judging level, then they will show up in the matrix anyway.
-            if (count($results) == 1) {
-                $submissions_to_result[$submitid] = $results[0];
-                if (count($runresults)!=1) {
-                    // Only report differences in judging runs if the final
-                    // results were the same.
-                    $judging_runs_differ[] = $submitid;
-                }
+            if (count($results) == 1 && count($runresults) != 1) {
+                // Only report differences in judging runs if the final
+                // results were the same.
+                $judging_runs_differ[] = $submitid;
             }
 
             // Check for variations in runtimes across judgings.
-            $runtimes = $this->em->createQueryBuilder()
+            $maxSpread = $this->em->createQueryBuilder()
                 ->from(JudgingRun::class, 'jr')
                 ->select('t.ranknumber', 'MAX(jr.runtime) - MIN(jr.runtime) AS spread')
-                ->leftJoin('jr.judging', 'j')
                 ->leftJoin('jr.testcase', 't')
-                ->leftJoin('j.submission', 's')
-                ->andWhere('s.externalid = :submitid')
-                ->setParameter('submitid', $submitid)
+                ->andWhere('jr.judging IN (:judgingids)')
+                ->andWhere('jr.runtime IS NOT NULL')
+                ->setParameter('judgingids', array_column($curJudgings, 'judgingid'))
                 ->groupBy('jr.testcase')
+                ->orderBy('spread', 'DESC')
+                ->addOrderBy('t.ranknumber', 'ASC')
+                ->setMaxResults(1)
                 ->getQuery()
-                ->getArrayResult();
-            $current_spread = [
-                'spread' => -1,
-                'rank' => -1
-            ];
-            foreach ($runtimes as $runtime) {
-                $spread = (float) $runtime['spread'];
-                if ($spread > $current_spread['spread']) {
-                    $current_spread['spread'] = $spread;
-                    $current_spread['rank'] = $runtime['ranknumber'];
-                    $current_spread['submitid'] = $submitid;
-                }
-            }
-            if (isset($current_spread['submitid'])) {
-                $runtime_spread[$submitid] = $current_spread;
+                ->getOneOrNullResult();
+            if ($maxSpread !== null) {
+                $runtime_spread[] = [
+                    'submitid' => $submitid,
+                    'rank' => $maxSpread['ranknumber'],
+                    'spread' => (float) $maxSpread['spread'],
+                    'count' => count($curJudgings),
+                    'verdict' => implode(', ', $results),
+                ];
             }
         }
         sort($judging_runs_differ);
         usort($runtime_spread, fn($a, $b) => $b['spread'] <=> $a['spread']);
 
         $max_list_len = 10;
-        $runtime_spread_list = [];
-        $i = 0;
-        foreach ($runtime_spread as $value) {
-            if ($i >= $max_list_len) {
-                break;
-            }
-            $i++;
-            $submitid = $value['submitid'];
-            $runtime_spread_list[] = [
-                'submitid' => $submitid,
-                'rank' => $value['rank'],
-                'spread' => $value['spread'],
-                'count' => count($submissions[$submitid]),
-                'verdict' => (
-                    !array_key_exists($submitid, $submissions_to_result)
-                        ? implode(', ', $results ?? [])
-                        : $submissions_to_result[$submitid]
-                )
-            ];
-        }
 
         $judgehost_stats = [];
         foreach ($judgehosts as $judgehost => $host_judgings) {
@@ -1025,7 +997,7 @@ class RejudgingController extends BaseController
         return [
             'judging_runs_differ' => array_slice($judging_runs_differ, 0, $max_list_len),
             'judging_runs_differ_overflow' => count($judging_runs_differ) - $max_list_len,
-            'runtime_spread' => $runtime_spread_list,
+            'runtime_spread' => array_slice($runtime_spread, 0, $max_list_len),
             'judgehost_stats' => $judgehost_stats,
             'judgings' => $judgings
         ];
