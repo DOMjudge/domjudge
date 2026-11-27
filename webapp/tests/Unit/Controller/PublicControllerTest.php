@@ -69,6 +69,69 @@ class PublicControllerTest extends BaseTestCase
         self::assertStringContainsString('data-submissions-url="public/submissions-data.json"', $content);
     }
 
+    /**
+     * Make the demo contest hidden and optionally open it to all teams.
+     */
+    private function hideDemoContest(bool $openToAllTeams): void
+    {
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        /** @var Contest $contest */
+        $contest = $em->getRepository(Contest::class)->findOneBy(['externalid' => 'demo']);
+        $contest->setPublic(false);
+        $contest->setOpenToAllTeams($openToAllTeams);
+        $contest->getTeams()->clear();
+        $contest->getTeamCategories()->clear();
+        $em->flush();
+    }
+
+    public function testStaticScoreboardHiddenContestNotLoggedIn(): void
+    {
+        $this->hideDemoContest(openToAllTeams: true);
+
+        $this->verifyPageResponse('GET', '/public?static=1', 200);
+        self::assertSelectorExists('p.nodata:contains("No active contest")');
+    }
+
+    /**
+     * @return Generator<string, array{string[], bool}>
+     */
+    public static function provideStaticScoreboardHiddenContestLoggedIn(): Generator
+    {
+        yield 'jury' => [['jury'], false];
+        yield 'team with access' => [['team'], true];
+    }
+
+    /**
+     * @param string[] $roles
+     */
+    #[DataProvider('provideStaticScoreboardHiddenContestLoggedIn')]
+    public function testStaticScoreboardHiddenContestLoggedIn(array $roles, bool $openToAllTeams): void
+    {
+        $this->hideDemoContest($openToAllTeams);
+        $this->roles = $roles;
+        $this->logIn();
+
+        $this->verifyPageResponse('GET', '/public?static=1', 200);
+        self::assertSelectorNotExists('p.nodata:contains("No active contest")');
+        self::assertSelectorExists('.scoreboard');
+        self::assertSelectorNotExists('nav.navbar');
+
+        $this->verifyPageResponse('GET', '/public?static=1&contest=demo', 200);
+        self::assertSelectorExists('.scoreboard');
+    }
+
+    public function testStaticScoreboardHiddenContestTeamWithoutAccess(): void
+    {
+        $this->hideDemoContest(openToAllTeams: false);
+        $this->roles = ['team'];
+        $this->logIn();
+
+        $this->verifyPageResponse('GET', '/public?static=1', 200);
+        self::assertSelectorExists('p.nodata:contains("No active contest")');
+
+        $this->verifyPageResponse('GET', '/public?static=1&contest=demo', 404);
+    }
+
     public function testScoreboardWarningMessage(): void
     {
         $this->verifyPageResponse('GET', '/public', 200);
