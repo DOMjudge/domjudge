@@ -277,8 +277,6 @@ if [ -e "$CHROOTDIR" ]; then
 fi
 
 mkdir -p "$CHROOTDIR"
-cd "$CHROOTDIR"
-CHROOTDIR="$PWD"
 
 if [ "$FORCEDOWNLOAD" = 0 ] && command -v debootstrap >/dev/null; then
     BOOTSTRAP_COMMAND=$(command -v debootstrap)
@@ -482,20 +480,10 @@ if [ "$HOSTUSERID" = 1 ]; then
     grep "@RUNUSER@" /etc/passwd >> "$CHROOTDIR/etc/passwd"
 fi
 
-# Remove unnecessary setuid bits
-in_chroot "chmod a-s /usr/bin/wall /usr/bin/newgrp \
-    /usr/bin/chage /usr/bin/chfn /usr/bin/chsh /usr/bin/expiry \
-    /usr/bin/gpasswd /usr/bin/passwd \
-    /bin/su /bin/mount /bin/umount /sbin/unix_chkpwd" || true
-
-# Disable root account
-sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
-
-# Create a file to test that in the judging environment no
-# access to group root readable files is available:
-echo "This file should not be readable inside the judging environment!" \
-    > "$CHROOTDIR/etc/root-permission-test.txt"
-chmod 0640 "$CHROOTDIR/etc/root-permission-test.txt"
+# Call the chroot security script
+script_dir=$(dirname "$0")
+# shellcheck source=dj_chroot_security.in
+. "$script_dir/dj_chroot_security"
 
 umount "$CHROOTDIR/dev/null"
 umount "$CHROOTDIR/dev/pts"
