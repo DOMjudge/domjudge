@@ -128,6 +128,16 @@ put this snippet in ``/etc/sudoers.d/``.
 If you change the user you start the judgedaemon as, or the installation
 paths, be sure to update the sudoers rules accordingly.
 
+.. note::
+
+   On modern Linux distributions (e.g. Ubuntu 26.04), the default ``sudo`` implementation is
+   ``sudo-rs``, which rejects wildcards in command arguments in
+   ``/etc/sudoers.d/domjudge``. If ``chroot-startstop.sh check`` reports
+   that the sudoers mount/umount rules are not usable, install classic
+   ``sudo`` (package ``sudo-ws``) and switch to it::
+
+      sudo update-alternatives --set sudo /usr/bin/sudo.ws
+
 .. _make-chroot:
 
 Creating a chroot environment

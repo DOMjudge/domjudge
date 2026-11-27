@@ -12,8 +12,8 @@
 
 {# Process medal color #}
 {% set medalColor = '' %}
-{% if showLegends %}
-    {% set medalColor = score.team | medalType(contest, scoreboard) %}
+{% if showLegends and medalsEnabled %}
+    {% set medalColor = score.team | medalType(contest, scoreboard.hasRestrictedAccess) %}
 {% endif %}
 
 {# Check whether this is us, otherwise use category colour #}

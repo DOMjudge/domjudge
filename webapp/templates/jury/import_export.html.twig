@@ -73,18 +73,6 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="tile">
-            <h3>Import teams from ICPC CMS</h3>
-                {{ form_start(icpccms_form) }}
-                {{ form_row(icpccms_form.contest_id) }}
-                {{ form_row(icpccms_form.access_token) }}
-                {{ form_widget(icpccms_form.fetch_teams) }}
-                {{ form_end(icpccms_form) }}
-            </div>
-        </div>
-    </div>
 
     <h2 id="results">Results</h2>
     <div class="row">

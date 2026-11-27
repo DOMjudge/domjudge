@@ -37,7 +37,7 @@
                                 </option>
                             {%- endfor %}
                         </select>
-                        <label for="location-filter">Filter on locations(s)</label>
+                        <label for="location-filter">Filter on location(s)</label>
                         <select id="location-filter" class="select2 form-control" multiple data-filter-field="location-str"
                                 data-ajax-url="{{ path('jury_ajax_data', {datatype: 'locations', select2: true}) }}">
                             {%- for location in filteredLocations %}

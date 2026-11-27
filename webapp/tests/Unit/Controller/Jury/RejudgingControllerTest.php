@@ -3,16 +3,19 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use App\DataFixtures\Test\RejudgingFirstToSolveFixture;
 use App\DataFixtures\Test\RejudgingStatesFixture;
 use App\Entity\Contest;
 use App\Entity\Executable;
 use App\Entity\ExecutableFile;
 use App\Entity\ImmutableExecutable;
+use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Service\SubmissionService;
 use App\Tests\Unit\BaseTestCase;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -203,6 +206,36 @@ class RejudgingControllerTest extends BaseTestCase
     {
         $this->client->request('POST', '/jury/rejudgings/create', ['table' => 'executable', 'id' => 'nonexistent']);
         self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testViewUnknownVerdict(): void
+    {
+        $this->loadFixture(RejudgingFirstToSolveFixture::class);
+        preg_match('#/jury/rejudgings/(\d+)#', $this->createRejudging('problem', 'hello'), $matches);
+        $rejudgingId = (int)$matches[1];
+
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $newJudging = $em->getRepository(Judging::class)->findOneBy(['rejudging' => $rejudgingId]);
+        $newJudging
+            ->setStarttime(Utils::now())
+            ->setEndtime(Utils::now())
+            ->setResult('custom-verdict');
+        $em->flush();
+
+        $this->verifyPageResponse('GET', '/jury/rejudgings/' . $rejudgingId, 200);
+        self::assertSelectorExists('table.rejudgetable th[title="custom-verdict (new)"]:contains("custom-verdict")');
+        self::assertSelectorExists('table.rejudgetable td.changed:contains("1")');
+    }
+
+    public function testCreateRejudgingEmptyMatch(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        // Empty match returns a single redirect response without creating an empty rejudging.
+        $decoded = json_decode(trim($this->createRejudging('problem', 'hello')), true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame(['progress' => 100, 'log' => '', 'redirect' => '/jury'], $decoded);
     }
 
     /**

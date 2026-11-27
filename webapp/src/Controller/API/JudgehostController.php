@@ -180,9 +180,9 @@ class JudgehostController extends AbstractFOSRestController
             ->andWhere('j.judgingid = jt.jobid')
             ->andWhere('jr.runresult IS NULL')
             ->andWhere('j.valid = 1 OR j.rejudging IS NOT NULL')
-            ->andWhere('j.result != :compiler_error')
+            ->andWhere('j.result IS NULL OR j.result != :compiler_error')
             ->setParameter('hostname', $hostname)
-            ->setParameter('compiler_error', 'compiler-error')
+            ->setParameter('compiler_error', Judging::RESULT_COMPILER_ERROR)
             ->getQuery()
             ->getResult();
 
@@ -477,6 +477,9 @@ class JudgehostController extends AbstractFOSRestController
             throw new BadRequestHttpException('Inconsistent data, no compilation data provided.');
         }
 
+        // EventLogService::log() clears the entity manager, which detaches $judgehost.
+        /** @var Judgehost $judgehost */
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
     }
@@ -1137,6 +1140,7 @@ class JudgehostController extends AbstractFOSRestController
                 $lazyEval = $problemLazy;
             }
 
+            $claimed = true;
             if ($oldResult === null) {
                 // Claim the verdict with a guarded update. Judgehosts reporting the last runs of
                 // a judging at the same time all compute the same verdict from the runs they
@@ -1144,8 +1148,8 @@ class JudgehostController extends AbstractFOSRestController
                 $claimed = $this->em->getConnection()->executeStatement(
                     'UPDATE judging SET result = :result WHERE judgingid = :judgingid AND result IS NULL',
                     ['result' => $result, 'judgingid' => $judging->getJudgingid()]
-                );
-                if ($claimed === 0) {
+                ) > 0;
+                if (!$claimed) {
                     // Somebody else recorded a verdict in the meantime.
                     $this->em->refresh($judging);
                     $oldResult = $judging->getResult();
@@ -1153,12 +1157,17 @@ class JudgehostController extends AbstractFOSRestController
                         // Cancelled while we worked on it: throw away our work.
                         return false;
                     }
+                    // The verdict (and score) of the judgehost that got there first stands, it also
+                    // takes care of everything that follows from the change of the verdict.
+                    $result = $oldResult;
                 }
             }
 
-            $judging->setResult($result);
-            if ($problem->isScoringProblem()) {
-                $judging->setScore($score);
+            if ($claimed) {
+                $judging->setResult($result);
+                if ($problem->isScoringProblem()) {
+                    $judging->setScore($score);
+                }
             }
 
             $hasNullResults = false;
@@ -1405,12 +1414,7 @@ class JudgehostController extends AbstractFOSRestController
         // and nesting it would turn those commits into savepoints.
         $skipped = [];
         /** @var Judging[] $judgings */
-        $judgings = $this->em->createQueryBuilder()
-            ->from(Judging::class, 'j')
-            ->leftJoin('j.submission', 's')
-            ->leftJoin('s.rejudging', 'r')
-            ->leftJoin('s.team', 't')
-            ->select('j', 's', 'r', 't')
+        $judgings = $this->rejudgingService->createJudgingsQueryBuilder()
             ->andWhere('j.rejudging = :rejudgingid')
             ->setParameter('rejudgingid', $rejudgingId)
             ->getQuery()
@@ -1613,7 +1617,13 @@ class JudgehostController extends AbstractFOSRestController
             if ($activeVersion !== null) {
                 $this->em->refresh($activeVersion, LockMode::PESSIMISTIC_WRITE);
                 if (!$activeVersion->getActive()) {
-                    $activeVersion = null;
+                    // A concurrent report replaced it while we waited for the lock: compare against
+                    // the version that is active now, instead of adding a second active one.
+                    $activeVersion = $this->em->getRepository(Version::class)
+                        ->findOneBy(['language' => $language, 'judgehost' => $judgehost, 'active' => true]);
+                    if ($activeVersion !== null) {
+                        $this->em->refresh($activeVersion, LockMode::PESSIMISTIC_WRITE);
+                    }
                 }
             }
 

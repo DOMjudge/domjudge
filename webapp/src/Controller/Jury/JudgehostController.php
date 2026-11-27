@@ -234,6 +234,7 @@ class JudgehostController extends BaseController
     }
 
     #[Route(path: '/timeline-data', name: 'jury_judgehost_timeline_data', methods: ['GET'])]
+    #[ReleaseSessionLock]
     public function timelineDataAction(): JsonResponse
     {
         $now = Utils::now();

@@ -301,7 +301,7 @@ class RejudgingController extends BaseController
         });
 
         // Helper function to add verdicts.
-        $addVerdict = function ($unknownVerdict) use ($verdicts, &$verdictTable): void {
+        $addVerdict = function ($unknownVerdict) use (&$verdicts, &$verdictTable): void {
             // Add column to existing rows.
             foreach ($verdicts as $verdict => $abbreviation) {
                 $verdictTable[$verdict][$unknownVerdict] = [];
@@ -586,15 +586,12 @@ class RejudgingController extends BaseController
                 flush();
             };
             return $this->streamResponse($this->requestStack, function () use ($request, $progressReporter): void {
+                set_time_limit(0);
+
                 $reason = $request->request->get('reason');
                 $data   = $request->request->all();
 
-                $queryBuilder = $this->em->createQueryBuilder()
-                    ->from(Judging::class, 'j')
-                    ->leftJoin('j.submission', 's')
-                    ->leftJoin('s.rejudging', 'r')
-                    ->leftJoin('s.team', 't')
-                    ->select('j', 's', 'r', 't')
+                $queryBuilder = $this->rejudgingService->createJudgingsQueryBuilder()
                     ->andWhere('j.valid = 1');
 
                 /** @var int[] $contests */
@@ -779,21 +776,18 @@ class RejudgingController extends BaseController
         };
 
         return $this->streamResponse($this->requestStack, function () use ($priority, $progressReporter, $repeat, $reason, $overshoot, $request, $autoApply, $includeAll, $id, $table, $tablemap, $executable): void {
+            set_time_limit(0);
+
             // Only rejudge submissions in active contests.
             $contests = $this->dj->getCurrentContests();
 
-            $queryBuilder = $this->em->createQueryBuilder()
-                ->from(Judging::class, 'j')
-                ->leftJoin('j.submission', 's')
-                ->leftJoin('s.rejudging', 'r')
+            $queryBuilder = $this->rejudgingService->createJudgingsQueryBuilder()
                 ->leftJoin('s.contest', 'c')
-                ->leftJoin('s.language', 'l')
                 ->leftJoin('s.problem', 'p')
-                ->leftJoin('s.team', 't')
                 ->leftJoin('s.user', 'u')
                 ->leftJoin('j.runs', 'jr')
                 ->leftJoin('jr.judgetask', 'jt')
-                ->select('j', 's', 'r', 'c', 'l', 'p', 't', 'u')
+                ->addSelect('c', 'p', 'u')
                 ->distinct()
                 ->andWhere('j.contest IN (:contests)')
                 ->andWhere('j.valid = 1')
@@ -835,6 +829,7 @@ class RejudgingController extends BaseController
                     $redirect = $this->generateUrl('jury_index');
                 }
                 $progressReporter(100, '', $redirect);
+                return;
             }
 
             $skipped = [];

@@ -69,7 +69,6 @@
 #include <array>
 #include <chrono>
 #include <csignal>
-#include <cstring>
 #include <fcntl.h>
 #include <fstream>
 #include <getopt.h>
@@ -317,7 +316,7 @@ struct output_file_t {
   // The file descriptor of the file where to write.
   fd_t output_file = -1;
 
-  chrono::time_point<chrono::steady_clock> start;
+  chrono::steady_clock::time_point start;
 
   output_file_t(const string &path) {
     // If the output file is not enable this struct only does noops.
@@ -350,6 +349,26 @@ struct output_file_t {
     }
   }
 
+  void write_header(ssize_t size, char direction, const char *suffix) const {
+    constexpr size_t HEADER_SIZE = 64;
+    char header[HEADER_SIZE];
+
+    double elapsed_secs =
+        chrono::duration<double>(chrono::steady_clock::now() - start).count();
+
+    int header_len = snprintf(header, HEADER_SIZE, "[%7.3fs/%zd]%c%s",
+                              elapsed_secs, size, direction, suffix);
+    // Check that snprintf didn't fail or truncate the header.
+    if (header_len < 0) {
+      error(errno, "failed to format header");
+    }
+    if (header_len >= static_cast<int>(HEADER_SIZE)) {
+      error(0, "header size too small: {} >= {}", header_len, HEADER_SIZE);
+    }
+
+    write_all(output_file, header, header_len);
+  }
+
   // Write all the data into the output file, including the header of this
   // message. The buffer should be at least long size+1.
   void write(char *buffer, ssize_t size, const process_t &from) {
@@ -357,28 +376,21 @@ struct output_file_t {
       return;
     }
 
-    // The runtime is converted into sec + millis manually instead of with %f
-    // because benchmarks showed that it's quite expensive.
-    auto duration = chrono::steady_clock::now() - start;
-    auto time = duration.count() / 1000 / 1000; // ns -> ms
-    int time_sec = time / 1000;
-    int time_millis = time % 1000;
-
-    const size_t HEADER_SIZE = 64;
-    char header[HEADER_SIZE];
-
     char direction = from.index == 0 ? '>' : '<';
-    int header_len =
-        snprintf(header, HEADER_SIZE, "[%3d.%03ds/%ld]%c: ", time_sec,
-                 time_millis, size, direction);
-    // Check that snprintf didn't truncate the header.
-    if (header_len >= static_cast<int>(HEADER_SIZE)) {
-      error(0, "header size too small: {} > {}", header_len, HEADER_SIZE);
-    }
+    write_header(size, direction, ": ");
 
-    write_all(output_file, header, header_len);
     buffer[size] = '\n'; // avoids another call to write_all just for the \n
     write_all(output_file, buffer, size + 1);
+  }
+
+  // Write an EOF marker for the given process into the output file.
+  void write_eof(const process_t &from) {
+    if (output_file == -1) {
+      return;
+    }
+
+    char direction = from.index == 0 ? ']' : '[';
+    write_header(0, direction, "");
   }
 };
 
@@ -431,8 +443,7 @@ struct state_t {
 
   // The instant of when the whole process started. It's used to write the total
   // runtime in the metadata file.
-  chrono::time_point<chrono::high_resolution_clock> start =
-      chrono::high_resolution_clock::now();
+  chrono::steady_clock::time_point start = chrono::steady_clock::now();
   // The total amount of bytes that are transferred between the processes. It's
   // filled only if the proxy is active.
   size_t total_bytes_transferred = 0;
@@ -808,14 +819,7 @@ struct state_t {
       // write an extra \n at its end.
       ssize_t nread = read(from.process_to_proxy, buffer, BUF_SIZE - 1);
       if (nread == 0) {
-        auto duration = chrono::steady_clock::now() - output_file.start;
-        auto time = duration.count() / 1000 / 1000; // ns -> ms
-        int time_sec = time / 1000;
-        int time_millis = time % 1000;
-        char direction = from.index == 0 ? ']' : '[';
-        char eofbuf[128];
-        snprintf(eofbuf, sizeof(eofbuf), "[%3d.%03ds/%ld]%c", time_sec, time_millis, 0L, direction);
-        write_all(output_file.output_file, eofbuf, strlen(eofbuf));
+        output_file.write_eof(from);
 
         warning(0, "EOF from process #{}", from.index);
         // The process closed stdout, we need to close the pipe's file
@@ -929,7 +933,7 @@ struct state_t {
       return;
     }
 
-    auto total_duration = chrono::high_resolution_clock::now() - start;
+    auto total_duration = chrono::steady_clock::now() - start;
 
     ofstream meta(args.meta_file);
     if (meta.fail()) {
@@ -937,7 +941,9 @@ struct state_t {
     }
     meta << "exitcode: " << main_process().exit_code() << endl;
     meta << "bytes-transferred: " << total_bytes_transferred << endl;
-    meta << "total-duration-us: " << total_duration.count() / 1000 << endl;
+    meta << "total-duration-us: "
+         << chrono::duration_cast<chrono::microseconds>(total_duration).count()
+         << endl;
     meta << "validator-exited-first: "
          << (first_process_exit_id == main_process().pid ? "true" : "false")
          << endl;

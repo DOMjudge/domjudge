@@ -56,6 +56,18 @@ class TwigExtension
         protected readonly string $projectDir,
     ) {}
 
+    private function maybeMaskDatetime(Contest $contest, float $relativeTime): string
+    {
+        if ($relativeTime < 0) {
+            return "Before contest";
+        }
+        if ($relativeTime > $contest->getContestTime($contest->getEndtime())) {
+            // The case where it would be exactly at EndTime is important to display
+            return "After contest";
+        }
+        return '';
+    }
+
     #[AsTwigFilter('base64')]
     public function base64Encode(string $string): string
     {
@@ -110,42 +122,37 @@ class TwigExtension
         if ($datetime === null) {
             $datetime = Utils::now();
         }
-        if ($contest !== null && $this->config->get('show_relative_time')) {
+        if ($contest !== null) {
             $relativeTime = $contest->getContestTime((float)$datetime);
-            if ($maskOutsideContest) {
-                if ($relativeTime < 0) {
-                    return "Before contest";
+            if ($maskOutsideContest && ($maskedDatetime = $this->maybeMaskDatetime($contest, $relativeTime)) !== '') {
+                return $maskedDatetime;
+            }
+            if ($this->config->get('show_relative_time')) {
+                $sign         = ($relativeTime < 0 ? -1 : 1);
+                $relativeTime *= $sign;
+                // We're not showing seconds, while the last minute before
+                // contest start should show as "-0:01", so if there's a
+                // nonzero amount of seconds before the contest, we have to
+                // add a minute.
+                $s            = $relativeTime % 60;
+                $relativeTime = ($relativeTime - $s) / 60;
+                if ($sign < 0 && $s > 0) {
+                    $relativeTime++;
                 }
-                if ($relativeTime > $contest->getContestTime($contest->getEndtime())) {
-                    // The case where it would be exactly at EndTime is important to display
-                    return "After contest";
+                $m            = $relativeTime % 60;
+                $relativeTime = ($relativeTime - $m) / 60;
+                $h            = $relativeTime;
+                if ($sign < 0) {
+                    return sprintf("-%d:%02d", $h, $m);
+                } else {
+                    return sprintf("%d:%02d", $h, $m);
                 }
             }
-            $sign         = ($relativeTime < 0 ? -1 : 1);
-            $relativeTime *= $sign;
-            // We're not showing seconds, while the last minute before
-            // contest start should show as "-0:01", so if there's a
-            // nonzero amount of seconds before the contest, we have to
-            // add a minute.
-            $s            = $relativeTime % 60;
-            $relativeTime = ($relativeTime - $s) / 60;
-            if ($sign < 0 && $s > 0) {
-                $relativeTime++;
-            }
-            $m            = $relativeTime % 60;
-            $relativeTime = ($relativeTime - $m) / 60;
-            $h            = $relativeTime;
-            if ($sign < 0) {
-                return sprintf("-%d:%02d", $h, $m);
-            } else {
-                return sprintf("%d:%02d", $h, $m);
-            }
-        } else {
-            if ($format === null) {
-                $format = $this->config->get('time_format');
-            }
-            return Utils::printtime($datetime, $format);
         }
+        if ($format === null) {
+            $format = $this->config->get('time_format');
+        }
+        return Utils::printtime($datetime, $format);
     }
 
     #[AsTwigFilter('printHumanTimeDiff')]
@@ -183,10 +190,10 @@ class TwigExtension
      * @param Contest|null $contest If given, print time relative to that contest start.
      */
     #[AsTwigFilter('printtimeHover', isSafe: ['html'])]
-    public function printtimeHover(string|float $datetime, ?Contest $contest = null): string
+    public function printtimeHover(string|float $datetime, ?Contest $contest = null, bool $maskOutsideContest = true): string
     {
-        return '<span title="' .
-               Utils::printtime($datetime, 'Y-m-d H:i:s (T)') . '">' .
+        $title = $maskOutsideContest ? $this->maybeMaskDatetime($contest, $contest->getContestTime((float)$datetime)) : Utils::printtime($datetime, 'Y-m-d H:i:s (T)');
+        return '<span title="' . $title . '">' .
                $this->printtime($datetime, null, $contest) .
                '</span>';
     }

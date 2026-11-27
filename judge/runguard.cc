@@ -42,7 +42,6 @@
 #include <sys/select.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <sys/times.h>
 #include <sys/resource.h>
 #include <cerrno>
 #include <fcntl.h>
@@ -168,8 +167,12 @@ struct errno_guard {
 int child_pipefd[3][2];
 int child_redirfd[3];
 
+struct time_stats {
+	double cpu, user, sys; // CPU time should always be user+sys
+	double wall;
+};
+
 struct timeval progstarttime, starttime, endtime;
-struct tms startticks, endticks;
 
 struct option const long_opts[] = {
 	{"root",       required_argument, nullptr,         'r'},
@@ -358,7 +361,7 @@ real user ID.\n");
 	exit(0);
 }
 
-void output_exit_time(int exitcode, double cpudiff)
+void output_exit_time(int exitcode, time_stats runtime)
 {
 	logmsg(LOG_DEBUG, "command exited with exitcode {}",exitcode);
 	write_meta("exitcode","{}",exitcode);
@@ -367,27 +370,20 @@ void output_exit_time(int exitcode, double cpudiff)
 		write_meta("signal", "{}", (int)received_signal);
 	}
 
-	double walldiff = (endtime.tv_sec  - starttime.tv_sec ) +
-	                  (endtime.tv_usec - starttime.tv_usec)*1E-6;
-
-	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
-	double userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
-	double sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
-
-	write_meta("wall-time","{:.3f}", walldiff);
-	write_meta("user-time","{:.3f}", userdiff);
-	write_meta("sys-time", "{:.3f}", sysdiff);
-	write_meta("cpu-time", "{:.3f}", cpudiff);
+	write_meta("wall-time","{:.3f}", runtime.wall);
+	write_meta("user-time","{:.3f}", runtime.user);
+	write_meta("sys-time", "{:.3f}", runtime.sys);
+	write_meta("cpu-time", "{:.3f}", runtime.cpu);
 
 	logmsg(LOG_DEBUG, "runtime is {:.3f} seconds real, {:.3f} user, {:.3f} sys",
-	        walldiff, userdiff, sysdiff);
+	       runtime.wall, runtime.user, runtime.sys);
 
-	if ( use_walltime && walldiff > walltimelimit[0] ) {
+	if ( use_walltime && runtime.wall > walltimelimit[0] ) {
 		walllimit_reached |= soft_timelimit;
 		warning(0, "timelimit exceeded (soft wall time)");
 	}
 
-	if ( use_cputime && cpudiff > cputimelimit[0] ) {
+	if ( use_cputime && runtime.cpu > cputimelimit[0] ) {
 		cpulimit_reached |= soft_timelimit;
 		warning(0, "timelimit exceeded (soft cpu time)");
 	}
@@ -485,7 +481,7 @@ void check_remaining_procs()
 }
 
 
-void output_cgroup_stats(double *cputime)
+time_stats output_cgroup_stats()
 {
 	char *mountpoint;
 	int ret = cgroup_get_subsys_mount_point("memory", &mountpoint);
@@ -518,6 +514,7 @@ void output_cgroup_stats(double *cputime)
 	write_meta("memory-bytes","{}", max_usage);
 
 	struct cgroup_stat stat;
+	time_stats runtime = { -1, -1, -1, -1 };
 	void *handle;
 	ret = cgroup_read_stats_begin("cpu", cgroupname, &handle, &stat);
 	while (ret == 0) {
@@ -527,14 +524,20 @@ void output_cgroup_stats(double *cputime)
 		value = value.substr(0, value.find_last_not_of("\r\n") + 1);
 
 		logmsg(LOG_DEBUG, "cpu.stat: {} = {}", stat.name, value);
-		if (strcmp(stat.name, "usage_usec") == 0) {
+		double *field = nullptr;
+		if      ( strcmp(stat.name, "usage_usec") ==0 ) field = &runtime.cpu;
+		else if ( strcmp(stat.name, "user_usec")  ==0 ) field = &runtime.user;
+		else if ( strcmp(stat.name, "system_usec")==0 ) field = &runtime.sys;
+		if ( field!=nullptr ) {
 			long long usec = strtoll(stat.value, nullptr, 10);
-			*cputime = usec / 1e6;
+			*field = usec / 1e6;
 		}
 		ret = cgroup_read_stats_next(&handle, &stat);
 	}
 	if ( ret!=ECGEOF ) die(ret,"get cgroup value cpu.stat");
 	cgroup_read_stats_end(&handle);
+
+	return runtime;
 }
 
 /* Temporary shorthand define for error handling. */
@@ -1452,10 +1455,6 @@ int main(int argc, char **argv)
 			logmsg(LOG_DEBUG, "setting hard wall-time limit to {:.3f} seconds",walltimelimit[1]);
 		}
 
-		if ( times(&startticks)==(clock_t) -1 ) {
-			die(errno,"getting start clock ticks");
-		}
-
 		/* Wait for child data or exit.
 		   Initialize status here to quelch clang++ warning about
 		   uninitialized value; it is set by the wait() call. */
@@ -1548,10 +1547,6 @@ int main(int argc, char **argv)
 			if( ret!=0 ) die(errno,"closing output fd {}", STDERR_FILENO);
 		}
 
-		if ( times(&endticks)==(clock_t) -1 ) {
-			die(errno,"getting end clock ticks");
-		}
-
 		if ( gettimeofday(&endtime,nullptr) ) die(errno,"getting time");
 
 		/* Test whether command has finished abnormally */
@@ -1593,15 +1588,16 @@ int main(int argc, char **argv)
 
 		check_remaining_procs();
 
-		double cputime = -1;
-		output_cgroup_stats(&cputime);
+		time_stats runtime = output_cgroup_stats();
+		runtime.wall = (endtime.tv_sec  - starttime.tv_sec ) +
+		               (endtime.tv_usec - starttime.tv_usec)*1E-6;
 		cgroup_kill();
 		cgroup_delete();
 
 		/* Drop root before writing to output file(s). */
 		if ( setuid(getuid())!=0 ) die(errno,"dropping root privileges");
 
-		output_exit_time(exitcode, cputime);
+		output_exit_time(exitcode, runtime);
 
 		/* Check if the output stream was truncated. */
 		if ( limit_streamsize ) {

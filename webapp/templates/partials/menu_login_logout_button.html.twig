@@ -1,15 +1,22 @@
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-    {% if can_change_password() %}
-        <a class="btn btn-info btn-sm me-2" href="{{ path('profile_change_password') }}">
-            <i class="fas fa-key"></i> Change password
-        </a>
-    {% endif %}
-    <a class="btn btn-info btn-sm me-2" href="{{ path('logout') }}"
-    {% if confirmLogout is defined %}
-        onclick="return confirmLogout();"
-    {% endif %}>
-        <i class="fas fa-sign-out-alt"></i> Logout
-    </a>
+    <ul class="navbar-nav me-2">
+        <li class="nav-item dropdown">
+            <button type="button" class="nav-link dropdown-toggle" id="navbarDropdownUser"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user"></i> {{ app.user.getUsername() }}
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                {% if can_change_password() %}
+                    <a class="dropdown-item" href="{{ path('profile_change_password') }}">
+                        <i class="fas fa-key fa-fw"></i> Change password
+                    </a>
+                {% endif %}
+                <a class="dropdown-item" href="{{ path('logout') }}"{% if confirmLogout is defined %} onclick="return confirmLogout();"{% endif %}>
+                    <i class="fas fa-sign-out-alt fa-fw"></i> Logout
+                </a>
+            </div>
+        </li>
+    </ul>
 {% else %}
     {% if allow_registration %}
         <a class="btn btn-info btn-sm justify-content-center me-2" href="{{ path('register') }}">

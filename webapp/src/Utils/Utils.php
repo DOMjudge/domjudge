@@ -788,8 +788,10 @@ class Utils
     {
         if (mime_content_type($filename) === 'image/svg+xml') {
             $svg = simplexml_load_file($filename);
-            if ($viewBox = $svg['viewBox']) {
-                $viewBoxData = explode(' ', (string)$viewBox);
+            $viewBoxData = isset($svg['viewBox'])
+                ? preg_split('/[\s,]+/', trim((string)$svg['viewBox']), -1, PREG_SPLIT_NO_EMPTY)
+                : false;
+            if ($viewBoxData !== false && count($viewBoxData) === 4) {
                 $width = (int)$viewBoxData[2];
                 $height = (int)$viewBoxData[3];
             } else {

@@ -787,6 +787,54 @@ class UtilsTest extends TestCase
         yield [__DIR__ . '/../../../public/images/DOMjudgelogo.svg', 510, 1122];
     }
 
+    /**
+     * Test getting image size for SVGs with various viewBox formats
+     */
+    #[DataProvider('provideTestGetImageSizeSvgViewBox')]
+    public function testGetImageSizeSvgViewBox(string $svgContent, int $expectedWidth, int $expectedHeight): void
+    {
+        $filename = tempnam(sys_get_temp_dir(), 'svg_test_');
+        self::assertNotFalse($filename);
+        file_put_contents($filename, $svgContent);
+        try {
+            [$width, $height, $ratio] = Utils::getImageSize($filename);
+            self::assertEquals($expectedWidth, $width);
+            self::assertEquals($expectedHeight, $height);
+            self::assertEquals($width / $height, $ratio);
+        } finally {
+            unlink($filename);
+        }
+    }
+
+    public static function provideTestGetImageSizeSvgViewBox(): Generator
+    {
+        yield 'space separated' => [
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"></svg>',
+            400,
+            300,
+        ];
+        yield 'comma and space separated' => [
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0, 0, 400,399.14230019493175"></svg>',
+            400,
+            399,
+        ];
+        yield 'comma separated without spaces' => [
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0,0,250,125"></svg>',
+            250,
+            125,
+        ];
+        yield 'leading/trailing and mixed whitespace' => [
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="  0 ,  0 , 640   480  "></svg>',
+            640,
+            480,
+        ];
+        yield 'fallback to width and height attributes' => [
+            '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"></svg>',
+            120,
+            80,
+        ];
+    }
+
     public function testSanitizeSvg(): void
     {
         // SVG source: https://svg.enshrined.co.uk/

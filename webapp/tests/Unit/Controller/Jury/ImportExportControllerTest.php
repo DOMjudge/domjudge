@@ -24,7 +24,6 @@ class ImportExportControllerTest extends BaseTestCase
         foreach ($sections as $section) {
             self::assertSelectorExists(sprintf('h2:contains("%s")', $section));
         }
-        self::assertSelectorExists('div.help-text:contains(\'Create a "Web Services Token"\')');
     }
 
     /**

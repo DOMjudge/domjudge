@@ -715,7 +715,7 @@ readonly class ImportProblemService
         }
 
         if (!empty($removedAttachments)) {
-            $messages['info'][] = sprintf("Removed %d attachments(s): {%s}",
+            $messages['info'][] = sprintf("Removed %d attachment(s): {%s}",
                 count($removedAttachments), join(',', $removedAttachments));
         }
 

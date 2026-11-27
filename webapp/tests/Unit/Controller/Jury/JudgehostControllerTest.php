@@ -19,4 +19,36 @@ class JudgehostControllerTest extends JuryControllerTestCase
     protected static array   $DOM_elements             = ['h1' => ['Judgehosts']];
     protected static string  $add                      = '';
     protected static string  $edit                     = '';
+
+    public function testTimelineIsCollapsedByDefault(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        $this->verifyPageResponse('GET', '/jury/judgehosts', 200);
+        $crawler = $this->getCurrentCrawler();
+        $details = $crawler->filter('details#judgehost-timeline-details');
+        self::assertCount(1, $details);
+        self::assertNull($details->attr('open'));
+    }
+
+    public function testTimelineDataEndpoint(): void
+    {
+        $this->roles = ['jury'];
+        $this->logOut();
+        $this->logIn();
+
+        $this->client->request('GET', '/jury/judgehosts/timeline-data');
+        $response = $this->client->getResponse();
+        self::assertSame(200, $response->getStatusCode());
+
+        $payload = json_decode((string)$response->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertArrayHasKey('now', $payload);
+        self::assertArrayHasKey('twenty_four_hours_ago', $payload);
+        self::assertArrayHasKey('judgehosts', $payload);
+        self::assertArrayHasKey('data', $payload);
+        self::assertIsArray($payload['judgehosts']);
+        self::assertIsArray($payload['data']);
+    }
 }

@@ -16,6 +16,7 @@ use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 use Ramsey\Uuid\Uuid;
 use Doctrine\Bundle\DoctrineBundle\Middleware\DebugMiddleware;
 
@@ -36,6 +37,21 @@ class RejudgingService
         protected readonly EventLogService $eventLogService,
         protected readonly BalloonService $balloonService,
     ) {}
+
+    /**
+     * Build the base query for loading judgings to pass into createRejudging().
+     */
+    public function createJudgingsQueryBuilder(): QueryBuilder
+    {
+        return $this->em->createQueryBuilder()
+            ->from(Judging::class, 'j')
+            ->leftJoin('j.submission', 's')
+            ->leftJoin('s.rejudging', 'r')
+            ->leftJoin('s.contest_problem', 'cp')
+            ->leftJoin('s.language', 'l')
+            ->leftJoin('s.team', 't')
+            ->select('j', 's', 'r', 'cp', 'l', 't');
+    }
 
     /**
      * Create a new rejudging.

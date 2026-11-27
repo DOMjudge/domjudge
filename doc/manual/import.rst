@@ -455,24 +455,6 @@ to use the API, or simply::
 
 to use the CLI. In this case you must run it from the DOMserver.
 
-Importing from ICPC CMS API
----------------------------
-
-DOMjudge also offers a direct import/refresh of teams from the ICPC CMS API from
-within the DOMjudge web interface. You need a  a team category named 'Participants'
-where they will be placed and a ICPC Web Services Token.
-
-To create a Web Services Token, log into the ICPC CMS and click "Export > Web
-Services Tokens". Make sure you add the scopes "Export", "Standings Upload",
-and "MyICPC".  Under the `Import / Export` menu, enter the token as specified.
-Use the contest abbreviation and year as Contest ID (see the URL in the ICPC
-CMS).
-
-Based on the 'ICPC ID', teams and their affiliations will be added if they do not
-exist or updated when they do. Teams will be set to 'enabled' if their ICPC CMS
-status is 'ACCEPTED', of disabled otherwise. Affiliations are not updated or
-deleted even when all teams cancel.
-
 Importing DOMjudge configuration
 --------------------------------
 
