@@ -61,11 +61,8 @@ chmod a+rwx "$WORKDIR/version_check"
 # Create files which are expected to exist: compiler output and runtime
 touch version_check.out version_check.meta
 
-# Copy compile script into chroot
-# shellcheck disable=SC2174
-if [ -e "$WORKDIR/version_check-script" ]; then
-    mv "$WORKDIR/version_check-script" "$WORKDIR/version_check-script-old"
-fi
+# Copy version check script into chroot
+rm -rf "$WORKDIR/version_check-script"
 mkdir -p "$WORKDIR/version_check-script"
 chmod 0777 "$WORKDIR/version_check-script"
 cp -a "$VERSION_CHECK_SCRIPT" "$PWD/version_check-script/"
