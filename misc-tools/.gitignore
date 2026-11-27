@@ -2,6 +2,7 @@
 /configure-domjudge
 /export-contest
 /import-contest
+/dj_chroot_security
 /dj_make_chroot
 /dj_make_chroot_docker
 /dj_run_chroot

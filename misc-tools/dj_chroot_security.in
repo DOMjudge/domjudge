@@ -1,0 +1,18 @@
+#!/bin/sh
+# @configure_input@
+#
+# Script to sets up basic chroot security by setting filesystem permissions.
+
+# Abort when a single command fails:
+set -e
+
+# Remove unnecessary setuid bits completely from the chroot.
+in_chroot "find / -type f \( -perm -4000 -o -perm -2000 \) -exec sh -c 'for f do if chmod a-s -- \"\$f\"; then printf \"Stripping setuid bit from %s\n\" \"\$f\"; fi; done' sh {} +"
+
+# Disable root account
+in_chroot 'sed -i "s/^root::/root:*:/" "/etc/shadow"'
+
+# Create a file to test that in the judging environment no
+# access to group root readable files is available:
+in_chroot 'echo "This file should not be readable inside the judging environment!" > "/etc/root-permission-test.txt"'
+in_chroot 'chmod 0640 "/etc/root-permission-test.txt"'

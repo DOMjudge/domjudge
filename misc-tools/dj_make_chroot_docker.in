@@ -164,15 +164,17 @@ cp /etc/ssl/certs/ca-certificates.crt "$CHROOTDIR/etc/ssl/certs/" || true
 cp -r /usr/share/ca-certificates/* "$CHROOTDIR/usr/share/ca-certificates" || true
 cp -r /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
 
-# Disable root account
-sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
 
-# Create a file to test that in the judging environment no
-# access to group root readable files is available:
-echo "This file should not be readable inside the judging environment!" \
-    > "$CHROOTDIR/etc/root-permission-test.txt"
-chmod 0640 "$CHROOTDIR/etc/root-permission-test.txt"
+# Needed for sourcing `dj_chroot_security`
+# shellcheck disable=SC2329
+in_chroot() {
+    chroot "$CHROOTDIR" /bin/sh -c "$@"
+}
 
+# Call the chroot security script
+script_dir=$(dirname "$0")
+# shellcheck source=dj_chroot_security.in
+. "$script_dir/dj_chroot_security"
 
 echo "Done building chroot in $CHROOTDIR"
 exit 0
