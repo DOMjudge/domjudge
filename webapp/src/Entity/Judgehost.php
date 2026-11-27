@@ -54,6 +54,11 @@ class Judgehost
     #[ORM\Column(options: ['comment' => 'Should this host be hidden in the overview?', 'default' => 0])]
     private bool $hidden = false;
 
+    #[ORM\Column(nullable: true, options: ['comment' => 'Last IP address used by judgedaemon to connect'])]
+    #[OA\Property(nullable: true)]
+    #[Serializer\SerializedName('last_ip')]
+    private ?string $last_ip_address = null;
+
     public function __construct()
     {
         $this->judgetasks = new ArrayCollection();
@@ -125,5 +130,16 @@ class Judgehost
     public function getHidden(): bool
     {
         return $this->hidden;
+    }
+
+    public function setLastIpAddress(?string $lastIpAddress): Judgehost
+    {
+        $this->last_ip_address = $lastIpAddress;
+        return $this;
+    }
+
+    public function getLastIpAddress(): ?string
+    {
+        return $this->last_ip_address;
     }
 }

@@ -24,6 +24,16 @@
                     <td>{{ judgehost.judgehostid }}</td>
                 </tr>
                 <tr>
+                    <th>Last IP</th>
+                    <td>
+                        {% if judgehost.lastIpAddress %}
+                            {{ judgehost.lastIpAddress | printHost(true) }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
                     <th>Enabled</th>
                     <td>{{ judgehost.enabled | printYesNo }}</td>
                 </tr>

@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\ExtraJudgehostFixture;
+use App\Entity\Judgehost;
 use App\Entity\JudgingRun;
 use App\Entity\Submission;
 use Doctrine\ORM\EntityManagerInterface;
@@ -75,8 +76,9 @@ class JudgehostControllerTest extends BaseTestCase
      * use the JSON helpers from the base class.
      *
      * @param array<string, string> $parameters
+     * @param array<string, string> $server
      */
-    private function postForm(string $apiUri, array $parameters): Response
+    private function postForm(string $apiUri, array $parameters, array $server = []): Response
     {
         $adminPasswordFile = sprintf(
             '%s/%s',
@@ -84,10 +86,10 @@ class JudgehostControllerTest extends BaseTestCase
             'initial_admin_password.secret'
         );
         // ROLE_ADMIN includes ROLE_JUDGEHOST through the role hierarchy.
-        $this->client->request('POST', '/api' . $apiUri, $parameters, [], [
+        $this->client->request('POST', '/api' . $apiUri, $parameters, [], array_merge([
             'PHP_AUTH_USER' => 'admin',
             'PHP_AUTH_PW' => trim(file_get_contents($adminPasswordFile)),
-        ]);
+        ], $server));
 
         return $this->client->getResponse();
     }
@@ -184,6 +186,36 @@ class JudgehostControllerTest extends BaseTestCase
 
         $this->updateJudging($judgeTaskId, 'Main');
         static::assertEquals('Main', $this->getEntryPoint($submissionId));
+    }
+
+    public function testLastIpAddressRecordedOnRegisterAndPoll(): void
+    {
+        $hostname = 'ip-test-judgehost';
+        $response = $this->postForm('/judgehosts', ['hostname' => $hostname], ['REMOTE_ADDR' => '192.0.2.10']);
+        static::assertEquals(200, $response->getStatusCode(), (string)$response->getContent());
+
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $em->clear();
+        $judgehost = $em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
+        static::assertInstanceOf(Judgehost::class, $judgehost);
+        static::assertSame('192.0.2.10', $judgehost->getLastIpAddress());
+
+        $response = $this->postForm('/judgehosts/fetch-work', ['hostname' => $hostname], ['REMOTE_ADDR' => '2001:db8::20']);
+        static::assertEquals(200, $response->getStatusCode(), (string)$response->getContent());
+
+        $em->clear();
+        $judgehost = $em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
+        static::assertInstanceOf(Judgehost::class, $judgehost);
+        static::assertSame('2001:db8::20', $judgehost->getLastIpAddress());
+
+        $apiResponse = $this->verifyApiJsonResponse('GET', '/judgehosts', 200, $this->apiUser);
+        static::assertIsArray($apiResponse);
+        $matching = array_values(array_filter(
+            $apiResponse,
+            static fn(array $row): bool => ($row['hostname'] ?? null) === $hostname
+        ));
+        static::assertCount(1, $matching);
+        static::assertSame('2001:db8::20', $matching[0]['last_ip'] ?? null);
     }
 
     /**

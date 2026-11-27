@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\ExtraJudgehostFixture;
 use App\Entity\Judgehost;
+use Doctrine\ORM\EntityManagerInterface;
 
 class JudgehostControllerTest extends JuryControllerTestCase
 {
@@ -50,5 +51,24 @@ class JudgehostControllerTest extends JuryControllerTestCase
         self::assertArrayHasKey('data', $payload);
         self::assertIsArray($payload['judgehosts']);
         self::assertIsArray($payload['data']);
+    }
+
+    public function testLastIpAddressDisplayed(): void
+    {
+        $this->roles = ['jury'];
+        $this->logOut();
+        $this->logIn();
+
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $judgehost = $em->getRepository(Judgehost::class)->findOneBy(['hostname' => 'example-judgehost1']);
+        self::assertInstanceOf(Judgehost::class, $judgehost);
+        $judgehost->setLastIpAddress('::ffff:192.0.2.42');
+        $em->flush();
+
+        $this->verifyPageResponse('GET', '/jury/judgehosts', 200);
+        self::assertSelectorTextContains('table', '::ffff:192.0.2.42');
+
+        $this->verifyPageResponse('GET', sprintf('/jury/judgehosts/%d', $judgehost->getJudgehostid()), 200);
+        self::assertSelectorTextContains('table', '::ffff:192.0.2.42');
     }
 }
