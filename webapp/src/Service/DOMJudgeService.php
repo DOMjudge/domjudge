@@ -143,7 +143,9 @@ class DOMJudgeService implements ResetInterface
      *
      * @param int|null $onlyOfTeam  Get only contests for the given team.
      * @param bool     $alsofuture  If true, also get future contests.
-     * @param bool     $onlyPublic  If true, only get public contests. Only allowed when $onlyOfTeam is not specified.
+     * @param bool     $onlyPublic  If true, only get the contests visible on the public interface: the public ones, plus
+     *                              the ones the logged-in user has access to (all for jury, its own for a team).
+     *                              Only allowed when $onlyOfTeam is not specified.
      * @param bool     $honorCookie If true, return the currently selected contest if selected by the contest cookie
      *
      * @return Contest[]
@@ -168,13 +170,17 @@ class DOMJudgeService implements ResetInterface
         $qb  = $this->em->createQueryBuilder();
         $qb->select('c')->from(Contest::class, 'c', 'c.externalid');
         if (isset($onlyOfTeam)) {
-            $qb->leftJoin('c.teams', 'ct')
-                ->leftJoin('c.team_categories', 'tc')
-                ->leftJoin('tc.teams', 'tct')
-                ->andWhere('ct.teamid = :teamid OR tct.teamid = :teamid OR c.openToAllTeams = 1')
-                ->setParameter('teamid', $onlyOfTeam);
-        } elseif ($onlyPublic) {
-            $qb->andWhere('c.public = 1');
+            $this->filterContestsAccessibleByTeam($qb, $onlyOfTeam);
+        } elseif ($onlyPublic && !$this->authService->checkRole('jury')) {
+            // Only users acting as a team get access to their team's contests, not e.g. a balloon runner linked to one.
+            $teamId = $this->authService->checkRole('team')
+                ? $this->authService->getUser()?->getTeam()?->getTeamid()
+                : null;
+            if ($teamId === null) {
+                $qb->andWhere('c.public = 1');
+            } else {
+                $this->filterContestsAccessibleByTeam($qb, $teamId, orPublic: true);
+            }
         }
         $qb->andWhere('c.enabled = 1')
             ->andWhere('c.deactivatetime IS NULL OR c.deactivatetime > :now')
@@ -186,6 +192,22 @@ class DOMJudgeService implements ResetInterface
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Limit the contests in the query (aliased 'c') to the ones the given team has access to.
+     */
+    private function filterContestsAccessibleByTeam(QueryBuilder $qb, int $teamId, bool $orPublic = false): void
+    {
+        $condition = 'ct.teamid = :teamid OR tct.teamid = :teamid OR c.openToAllTeams = 1';
+        if ($orPublic) {
+            $condition = 'c.public = 1 OR ' . $condition;
+        }
+        $qb->leftJoin('c.teams', 'ct')
+            ->leftJoin('c.team_categories', 'tc')
+            ->leftJoin('tc.teams', 'tct')
+            ->andWhere($condition)
+            ->setParameter('teamid', $teamId);
     }
 
     public function getCurrentContestCookie(): ?string

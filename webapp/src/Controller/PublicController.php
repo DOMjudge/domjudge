@@ -65,10 +65,15 @@ class PublicController extends BaseController
         $refreshUrl       = $this->generateUrl('public_index');
         $contest          = $this->dj->getCurrentContest(onlyPublic: true);
         $nonPublicContest = $this->dj->getCurrentContest(onlyPublic: false);
-        if (!$contest && $nonPublicContest && $this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1])) {
-            // This leaks a little bit of information about the existence of the non-public contest,
-            // but since self registration is enabled, it's not a big deal.
-            return $this->redirectToRoute('register');
+        if (!$contest && $nonPublicContest) {
+            $authenticated = $this->isGranted('IS_AUTHENTICATED_FULLY');
+            $selfRegistrationEnabled = $this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
+
+            if (!$authenticated && $selfRegistrationEnabled) {
+                // This leaks a little bit of information about the existence of the non-public contest,
+                // but since self registration is enabled, it's not a big deal.
+                return $this->redirectToRoute('register');
+            }
         }
 
 
@@ -137,9 +142,6 @@ class PublicController extends BaseController
                 // Automatically detect the contest that is activated the latest.
                 $activateTime = null;
                 foreach ($this->dj->getCurrentContests(onlyPublic: true) as $possibleContest) {
-                    if (!($possibleContest->getPublic() && $possibleContest->getEnabled())) {
-                        continue;
-                    }
                     if ($activateTime === null || $activateTime < $possibleContest->getActivatetime()) {
                         $activateTime = $possibleContest->getActivatetime();
                         $contest      = $possibleContest;
