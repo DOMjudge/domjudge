@@ -14,13 +14,25 @@
         <div class="alert alert-danger" role="alert">Versions do not match.</div>
     {% endif %}
     {% for key, output in outputs %}
-        <div class="card">
-            <div class="card-header">
-                {% if key == canonical_key %}
-                    <span class="badge text-bg-success">Canonical version</span>
-                {% else %}
-                    <span class="badge text-bg-danger">Not canonical</span>
-                    {{ button(path('jury_' ~ type ~ '_promote', {'versionId': output.versionid}), 'Mark as canonical', 'primary btn-sm', 'bookmark') }}
+        <div class="card mb-2">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    {% if key == canonical_key %}
+                        <span class="badge text-bg-success">Canonical version</span>
+                    {% else %}
+                        <span class="badge text-bg-danger">Not canonical</span>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            {{ button(path('jury_' ~ type ~ '_promote', {'versionId': output.versionid}), 'Mark as canonical', 'primary btn-sm', 'bookmark') }}
+                        {% endif %}
+                    {% endif %}
+                </div>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <form action="{{ path('jury_version_clear', {'versionId': output.versionid, 'type': type}) }}" method="post" class="d-inline"
+                          onsubmit="return confirm('Clear this {{ type }} version?');">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash-alt"></i>&nbsp;Clear
+                        </button>
+                    </form>
                 {% endif %}
             </div>
             <ul class="list-group list-group-flush">
@@ -46,7 +58,17 @@
 {% endmacro %}
 
 {% block content %}
-    <h1>Compiler and runner version overview</h1>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mb-0">Compiler and runner version overview</h1>
+        {% if is_granted('ROLE_ADMIN') and has_active_versions %}
+            <form action="{{ path('jury_versions_clear_all') }}" method="post" class="d-inline"
+                  onsubmit="return confirm('Clear all reported compiler and runner versions?');">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash-alt"></i>&nbsp;Clear all versions
+                </button>
+            </form>
+        {% endif %}
+    </div>
 
     {% for lang in data %}
         <div class="card mb-3">
