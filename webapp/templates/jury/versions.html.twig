@@ -8,6 +8,43 @@
     {{ macros.table_extrahead() }}
 {% endblock %}
 
+{% macro version_section(type, outputs, canonical_key) %}
+    <h2 class="h6">{{ type|capitalize }} version(s)</h2>
+    {% if outputs | length > 1 %}
+        <div class="alert alert-danger" role="alert">Versions do not match.</div>
+    {% endif %}
+    {% for key, output in outputs %}
+        <div class="card">
+            <div class="card-header">
+                {% if key == canonical_key %}
+                    <span class="badge text-bg-success">Canonical version</span>
+                {% else %}
+                    <span class="badge text-bg-danger">Not canonical</span>
+                    {{ button(path('jury_' ~ type ~ '_promote', {'versionId': output.versionid}), 'Mark as canonical', 'primary btn-sm', 'bookmark') }}
+                {% endif %}
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <div class="terminal-block">
+                        <div class="terminal-command">{{ output.command }}</div>
+                        <div class="terminal-output">{{ output.version }}</div>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    First reported by
+                    <ul>
+                        {% for host in output.hostdata %}
+                            <li>
+                                {{ host.hostname | printHost }}: {{ host.last_changed | printHumanTimeDiff }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    {% endfor %}
+{% endmacro %}
+
 {% block content %}
     <h1>Compiler and runner version overview</h1>
 
@@ -25,76 +62,10 @@
                 <div class="card-title">
                     <div class="row">
                         <div class="col-sm">
-                            <h2 class="h6">Compiler version(s)</h2>
-                            {% if lang.compiler_outputs | length > 1 %}
-                                <div class="alert alert-danger" role="alert">Versions do not match.</div>
-                            {% endif %}
-                            {% for key, output in lang.compiler_outputs %}
-                                <div class="card">
-                                    <div class="card-header">
-                                        {% if key == lang.canonical_compiler_key %}
-                                            <span class="badge text-bg-success">Canonical version</span>
-                                        {% else %}
-                                            <span class="badge text-bg-danger">Not canonical</span>
-                                            {{ button(path('jury_compiler_promote', {'versionId': output.versionid}), 'Mark as canonical', 'primary btn-sm', 'bookmark') }}
-                                        {% endif %}
-                                    </div>
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item">
-                                            <div class="terminal-block">
-                                                <div class="terminal-command">{{ output.command }}</div>
-                                                <div class="terminal-output">{{ output.version }}</div>
-                                            </div>
-                                        </li>
-                                        <li class="list-group-item">
-                                            First reported by
-                                            <ul>
-                                                {% for host in output.hostdata %}
-                                                    <li>
-                                                        {{ host.hostname | printHost }}: {{ host.last_changed | printHumanTimeDiff }}
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </div>
-                            {% endfor %}
+                            {{ _self.version_section('compiler', lang.compiler_outputs, lang.canonical_compiler_key) }}
                             {% if lang.runner_outputs | length > 0 %}
                                 <br/>
-                                <h2 class="h6">Runner version(s)</h2>
-                                {% if lang.runner_outputs | length > 1 %}
-                                    <div class="alert alert-danger" role="alert">Versions do not match.</div>
-                                {% endif %}
-                                {% for key, output in lang.runner_outputs %}
-                                    <div class="card">
-                                        <div class="card-header">
-                                            {% if key == lang.canonical_runner_key %}
-                                                <span class="badge text-bg-success">Canonical version</span>
-                                            {% else %}
-                                                <span class="badge text-bg-danger">Not canonical</span>
-                                                {{ button(path('jury_runner_promote', {'versionId': output.versionid}), 'Mark as canonical', 'primary btn-sm', 'bookmark') }}
-                                            {% endif %}
-                                        </div>
-                                        <ul class="list-group list-group-flush">
-                                            <li class="list-group-item">
-                                                <div class="terminal-block">
-                                                    <div class="terminal-command">{{ output.command }}</div>
-                                                    <div class="terminal-output">{{ output.version }}</div>
-                                                </div>
-                                            </li>
-                                            <li class="list-group-item">
-                                                First reported by
-                                                <ul>
-                                                    {% for host in output.hostdata %}
-                                                        <li>
-                                                            {{ host.hostname | printHost }}: {{ host.last_changed | printHumanTimeDiff }}
-                                                        </li>
-                                                    {% endfor %}
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                {% endfor %}
+                                {{ _self.version_section('runner', lang.runner_outputs, lang.canonical_runner_key) }}
                             {% endif %}
                         </div>
                     </div>
