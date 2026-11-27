@@ -2,6 +2,8 @@
 
 set -euxo pipefail
 
+export DEBIAN_FRONTEND=noninteractive
+
 testsuite="$1"
 export testsuite
 

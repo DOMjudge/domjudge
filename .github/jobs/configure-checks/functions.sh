@@ -18,6 +18,10 @@ translate () {
     args="$*"
     if [ "$distro_id" = "ID=fedora" ]; then
         args=${args/libcgroup-dev/libcgroup-devel}
+    else
+        args=${args/httpd/apache2}
+        args=${args/glibc-static/}
+        args=${args/libstdc++-static/}
     fi
     echo "$args"
 }
@@ -45,10 +49,11 @@ setup() {
             repo-install nginx
         fi
     fi
+    packages="libcgroup-dev composer glibc-static libstdc++-static"
     if [ "$testsuite" = clang ]; then
-       repo-install libcgroup-dev composer
+       repo-install ${packages}
     else
-       repo-install gcc g++ libcgroup-dev composer
+       repo-install gcc g++ ${packages}
     fi
 }
 

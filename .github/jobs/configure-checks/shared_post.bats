@@ -6,7 +6,12 @@ source .github/jobs/configure-checks/functions.sh
 
 @test "Check for missing webserver group" {
     if [ "$distro_id" != "ID=fedora" ]; then
-        # Debian/Ubuntu start with a www-data group
+        # Debian/Ubuntu start with a www-data group,
+        # So this is always detected even when there is no
+        # webserver installed.
+        #
+        # Removing the group would make the default installation inconsistent
+        # so extending the loop here doesn't really help us for the next tests
         skip
     fi
     repo-install gcc g++
@@ -385,10 +390,6 @@ source .github/jobs/configure-checks/functions.sh
 }
 
 @test "Build default (effective host does both domserver & judgehost)" {
-  if [ "$distro_id" = "ID=fedora" ]; then
-      # Fails as libraries are not found
-      skip
-  fi
   setup
   run run_configure
   assert_line " * domserver...........: /opt/domjudge/domserver"
@@ -402,10 +403,6 @@ source .github/jobs/configure-checks/functions.sh
 }
 
 @test "Build domserver disabled" {
-  if [ "$distro_id" = "ID=fedora" ]; then
-      # Fails as libraries are not found
-      skip
-  fi
   setup
   run run_configure --disable-domserver-build
   refute_line " * domserver...........: /opt/domjudge/domserver"
@@ -421,10 +418,6 @@ source .github/jobs/configure-checks/functions.sh
 }
 
 @test "Build judgehost disabled" {
-  if [ "$distro_id" = "ID=fedora" ]; then
-      # Fails as libraries are not found
-      skip
-  fi
   setup
   run run_configure --disable-judgehost-build
   assert_line " * domserver...........: /opt/domjudge/domserver"
