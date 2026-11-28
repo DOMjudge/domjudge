@@ -51,6 +51,9 @@ Version 10.0.0DEV
      the command line, use `webapp/bin/console domjudge:upgrade-events`.
  - Support the `brute_force` and `rejected` submission directories and
    `submissions/submissions.yaml` from problem package format 2025-09.
+ - Judgedaemons bound to a CPU core no longer restrict submissions to the
+   memory of NUMA node 0, but allocate on the node local to the core first.
+   Set `DOMJUDGE_CPUSET_MEMS` to restrict them to specific NUMA nodes.
 
 Version 9.0.0 - 5 October 2025
 ------------------------------

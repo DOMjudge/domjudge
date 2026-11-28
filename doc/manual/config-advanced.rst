@@ -371,6 +371,17 @@ to bind it to core ``X`` and user ``domjudge-run-X``. If you use
 systemd, then edit the ``domjudge-judgehost.target`` unit file and add
 more judgedaemons there.
 
+On machines with multiple NUMA nodes (check with ``lscpu | grep NUMA``),
+memory is by default allocated on the node local to the core of the
+judgedaemon first, falling back to other nodes only when that one is
+full. To restrict a judgedaemon to the memory of specific nodes, set the
+environment variable ``DOMJUDGE_CPUSET_MEMS`` to a list of nodes, see
+``etc/judgehost-config.php``. With systemd, run
+``systemctl edit domjudge-judgedaemon@X`` and add::
+
+  [Service]
+  Environment=DOMJUDGE_CPUSET_MEMS=1
+
 Although each judgedaemon process will be bound to one single CPU
 core, shared use of other resources such as disk I/O typically
 still has an effect on run times.

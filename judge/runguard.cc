@@ -118,6 +118,7 @@ FILE  *metafile;
 
 char  cgroupname[255];
 const char *cpuset;
+const char *cpuset_mems;
 
 char *runuser;
 char *rungroup;
@@ -185,6 +186,7 @@ struct option const long_opts[] = {
 	{"filesize",   required_argument, nullptr,         'f'},
 	{"nproc",      required_argument, nullptr,         'p'},
 	{"cpuset",     required_argument, nullptr,         'P'},
+	{"cpuset-mems",required_argument, nullptr,         'N'},
 	{"no-core",    no_argument,       nullptr,         'c'},
 	{"stdout",     required_argument, nullptr,         'o'},
 	{"stderr",     required_argument, nullptr,         'e'},
@@ -332,6 +334,8 @@ Run COMMAND with restrictions.\n\
 	printf("\
   -p, --nproc=N          set maximum no. processes to N\n\
   -P, --cpuset=ID        use only processor number ID (or set, e.g. \"0,2-3\")\n\
+  -N, --cpuset-mems=SET  use only memory of NUMA node(s) SET (e.g. \"1\");\n\
+                           requires --cpuset; default: all, local node first\n\
   -c, --no-core          disable core dumps\n\
   -o, --stdout=FILE      redirect COMMAND stdout output to FILE\n\
   -e, --stderr=FILE      redirect COMMAND stderr output to FILE\n\
@@ -569,8 +573,10 @@ void cgroup_create()
 	}
 
 	/* Set up cpu restrictions; we pin the task to a specific set of
-	   cpus. We also give it exclusive access to those cores, and set
-	   no limits on memory nodes */
+	   cpus. Memory nodes are left unrestricted unless requested: an
+	   empty cpuset.mems inherits all nodes of the parent, and the kernel
+	   then allocates on the node local to the pinned cpus first, only
+	   falling back to remote nodes when that one is exhausted. */
 	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
 		if ( (cg_controller = cgroup_add_controller(cg, "cpuset"))==nullptr ) {
 			die(0,"cgroup_add_controller cpuset");
@@ -578,7 +584,9 @@ void cgroup_create()
 		/* To make a cpuset exclusive, some additional setup outside of domjudge is
 		   required, so for now, we will leave this commented out. */
 		/* cgroup_add_value_int64(cg_controller, "cpuset.cpu_exclusive", 1); */
-		cgroup_add_value(string, "cpuset.mems", "0");
+		if ( cpuset_mems!=nullptr ) {
+			cgroup_add_value(string, "cpuset.mems", cpuset_mems);
+		}
 		cgroup_add_value(string, "cpuset.cpus", cpuset);
 	} else {
 		logmsg(LOG_DEBUG, "cpuset undefined");
@@ -1095,7 +1103,7 @@ int main(int argc, char **argv)
 	show_help = show_version = 0;
 	opterr = 0;
 	char *ptr;
-	while ( (opt = getopt_long(argc,argv,"+r:u:g:d:t:C:m:f:p:P:co:e:s:EV:M:vqU:",long_opts,nullptr))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:u:g:d:t:C:m:f:p:P:N:co:e:s:EV:M:vqU:",long_opts,nullptr))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -1169,6 +1177,9 @@ int main(int argc, char **argv)
 			break;
 		case 'P': /* cpuset option */
 			cpuset = optarg;
+			break;
+		case 'N': /* cpuset-mems option */
+			cpuset_mems = optarg;
 			break;
 		case 'c': /* no-core option */
 			no_coredump = true;
@@ -1294,6 +1305,21 @@ int main(int argc, char **argv)
 		for(unsigned cpu : cpus) {
 			if ( !online_cpus.count(cpu) ) {
 				die(0, "requested pinning on CPU {} which is not online", cpu);
+			}
+		}
+	}
+
+	if ( cpuset_mems!=nullptr ) {
+		if ( cpuset==nullptr || strlen(cpuset)==0 ) {
+			die(0, "option `--cpuset-mems' requires `--cpuset'");
+		}
+		std::set<unsigned> nodes = parse_cpuset(cpuset_mems);
+		std::set<unsigned> memory_nodes = read_cpuset("/sys/devices/system/node/has_memory");
+
+		if ( nodes.empty() ) die(0, "no memory nodes specified in `--cpuset-mems'");
+		for(unsigned node : nodes) {
+			if ( !memory_nodes.count(node) ) {
+				die(0, "requested memory node {} which has no memory", node);
 			}
 		}
 	}
