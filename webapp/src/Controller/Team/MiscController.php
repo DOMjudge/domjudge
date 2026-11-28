@@ -98,10 +98,9 @@ class MiscController extends BaseController
             $qb = $this->clarificationService->getQueryBuilder(
                 externalContestId: $contest->getExternalid(),
                 onlyForRecipientTeam: true,
-                recipientTeamId: $teamId)
+                recipientTeamId: $teamId,
+                onlyFromJury: true)
                 ->select('clar', 'p')
-                // Needed to filter out team clarification requests.
-                ->andWhere('clar.sender IS NULL')
                 ->addOrderBy('clar.submittime', 'DESC')
                 ->addOrderBy('clar.clarid', 'DESC');
             if ($contest->getStartTimeObject()?->getTimestamp() > time()) {

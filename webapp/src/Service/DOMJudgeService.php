@@ -1208,12 +1208,11 @@ class DOMJudgeService implements ResetInterface
                 // Only clars send to all teams or just this team.
                 // Even for jury/admin we don't want to show all clarifications to all teams.
                 onlyForRecipientTeam: true,
-                recipientTeamId: $teamId)
+                recipientTeamId: $teamId,
+                onlyFromJury: true)
                 ->select('clar')
                 // Only clars associated with a problem.
                 ->andWhere('clar.problem IS NOT NULL')
-                // Only clars send from the jury.
-                ->andWhere('clar.sender IS NULL')
                 ->orderBy('clar.submittime', 'DESC')
                 ->getQuery()
                 ->getResult();
