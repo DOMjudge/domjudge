@@ -24,9 +24,16 @@ esac
 # them from the cache in this image instead of from the network.
 case $distro_id in
     "ID=fedora")
-        dnf install --downloadonly -y gcc g++ libcgroup-devel composer httpd nginx ;;
+        dnf install --downloadonly -y gcc g++ libcgroup-devel composer httpd nginx \
+            latexmk texlive-cmap texlive-metafont texlive-tex-gyre texlive-fncychap texlive-wrapfig texlive-capt-of texlive-framed texlive-upquote \
+            texlive-needspace texlive-tabulary texlive-parskip texlive-oberdiek texlive-makeindex texlive-ellipse texlive-pict2e \
+            texlive-collection-fontsextra php php-bcmath php-cli php-curl php-fpm php-gd php-intl php-json php-mbstring php-mysqlnd glibc-static libstdc++-static \
+            php-xml php-zip python3 python3-sphinx python3-yaml ;;
     *)
-        apt-get install --download-only -y gcc g++ clang libcgroup-dev
+        apt-get install --download-only -y gcc g++ clang libcgroup-dev latexmk \
+            php php-bcmath php-cli php-curl php-fpm php-gd php-intl php-json php-mbstring \
+            php-mysql php-xml php-zip python3 python3-sphinx python3-sphinx-rtd-theme \
+            python3-yaml tex-gyre texlive-latex-extra texlive-latex-recommended
         # Not every release has composer, the checks then use curl instead.
         apt-get install --download-only -y composer || apt-get install --download-only -y curl ;;
 esac
@@ -39,3 +46,7 @@ cp submit/assert.bash .github/jobs/configure-checks/
 
 # Run the configure tests for this usecase
 mkdir /tmp/bats_logs
+
+# Mark the code directory safe for ci user & root for git operations
+mkdir -p /etc
+printf '\n[safe]\n\tdirectory = /home/runner/work/domjudge/domjudge\n' >> /etc/gitconfig

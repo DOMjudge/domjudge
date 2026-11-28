@@ -49,10 +49,12 @@ inplace-uninstall-l:
 
 clean-l:
 	rm -rf build/doctrees build/team/.doctrees
+	# Remove lock files from failed generations
+	-rm -f build/html/.buildinfo.bak
 	-$(MAKE) -C build/team clean
 
 maintainer-clean-l:
-	rm -rf build conf_ref.rst domjudge-team-manual.pdf
+	-rm -rf build conf_ref.rst domjudge-team-manual.pdf
 
 distclean-l:
 	-rm -f $(SUBST_CONFIGS) html team
